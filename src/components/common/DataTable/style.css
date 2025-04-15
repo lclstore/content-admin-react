@@ -1,0 +1,29 @@
+.data-table-wrapper {
+  background-color: var(--bg-white);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.data-table-wrapper .ant-table-thead > tr > th {
+  background-color: var(--bg-light);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-bold);
+}
+
+.data-table-wrapper .ant-table-tbody > tr:hover > td {
+  background-color: var(--bg-hover);
+}
+
+.data-table-wrapper .ant-table-row-expand-icon {
+  border-radius: var(--border-radius-sm);
+}
+
+.data-table-wrapper .ant-table-pagination {
+  margin: var(--spacing-md);
+}
+
+.data-table-wrapper .ant-table-empty .ant-table-body {
+  min-height: 200px;
+} 

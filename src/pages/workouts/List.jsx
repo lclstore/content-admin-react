@@ -15,13 +15,13 @@ import {
     CloseOutlined,
     SettingOutlined
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import { debounce } from 'lodash';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import WorkoutMediaCell from '@/components/MediaCell/MediaCell';
-import './WorkoutsList.css';
+import './List.css';
 import {
     statusOrder,
     difficultyOrder,
@@ -237,7 +237,7 @@ export default function WorkoutsList() {
             saveButtonType: 'primary',
             saveButtonLoading: false,
             saveButtonDisabled: false,
-            onSaveButtonClick: () => navigate('/workouts-editor'),
+            onSaveButtonClick: () => navigate('/workouts/editor'),
             showBackButton: false
         });
 
@@ -501,7 +501,7 @@ export default function WorkoutsList() {
             return;
         }
 
-        navigate(`/workouts-editor?id=${record.id}`);
+        navigate(`/workouts/editor?id=${record.id}`);
     };
 
     const handleVideoClick = (e, url) => {
@@ -516,7 +516,7 @@ export default function WorkoutsList() {
     };
 
     const handleEdit = (record) => {
-        navigate(`/workouts-editor?id=${record.id}`);
+        navigate(`/workouts/editor?id=${record.id}`);
     };
 
     const handleDuplicate = (record) => {
@@ -546,7 +546,7 @@ export default function WorkoutsList() {
         if (duplicatedRecord) {
             setIsDuplicateModalVisible(false);
             setTimeout(() => {
-                navigate(`/workouts-editor?id=${duplicatedRecord.id}`);
+                navigate(`/workouts/editor?id=${duplicatedRecord.id}`);
             }, 100);
         }
     };

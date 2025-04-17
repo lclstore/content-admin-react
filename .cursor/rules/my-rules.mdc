@@ -4,10 +4,8 @@ globs:
 alwaysApply: true
 ---
 
-# Your rule content
-请始终使用中文与我对话，并尽量简洁、专业地回答我的问题。
-作为一个前端高级工程师来进行思考，
+始终使用中文与我对话，并尽量简洁、专业地回答我的问题。
+作为一个前端高级工程师来进行思考。
 每次更新代码后，注意添加对应的备注信息，
-展示文本为英文的，注释使用中文注释
-- You can @ files here
-- You can use markdown but dont have to
+ 使用中文注释
+ 

@@ -1,0 +1,19 @@
+ .workouts-editor-container {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 20px;
+     width: 100%;
+     background: #fff;
+     height: 100%;
+     background-color: #f0f2f5;
+ }
+
+ .ant-spin-container {
+     width: 100%;
+ }
+
+
+
+ .workouts-editor-layout .editor-item {
+     flex: 1;
+ }

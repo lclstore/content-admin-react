@@ -27,7 +27,8 @@ export default function Header() {
         onSaveButtonClick = () => { },    // 点击处理函数
         customPageTitle, // 获取自定义标题
         showBackButton = false,         // 是否显示返回按钮
-        onBackButtonClick = () => { }     // 返回按钮点击处理函数
+        onBackButtonClick = () => { },     // 返回按钮点击处理函数
+        backButtonIcon: BackButtonIcon = ArrowLeftOutlined // 添加返回按钮图标组件
     } = useContext(HeaderContext);
 
     // 从菜单配置中获取当前路径对应的菜单项
@@ -62,7 +63,7 @@ export default function Header() {
                 {/* 根据 showBackButton 条件渲染返回按钮 */}
                 {showBackButton && (
                     <Button
-                        icon={SaveButtonIcon && <ArrowLeftOutlined />}
+                        icon={BackButtonIcon && <BackButtonIcon />}
                         onClick={onBackButtonClick}
 
                     >

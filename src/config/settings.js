@@ -80,13 +80,16 @@ const settings = {
         hoverBorderColor: '#1c8',
         activeShadow: 'none',
         paddingBlock: 8,
+        controlHeight: 40
 
       },
       Select: {
         activeBorderColor: '#1c8',
         hoverBorderColor: '#1c8',
         activeShadow: 'none',
+        activeColor: '#1c8',
         paddingBlock: 8,
+        controlHeight: 40
       },
       Form: {
         labelColor: '#243636',
@@ -95,6 +98,11 @@ const settings = {
       Modal: {
         colorIcon: '#ffffff',
         colorIconHover: '#ffffff',
+      },
+      Checkbox: {
+        colorPrimary: '#1c8',
+        colorPrimaryHover: '#11af75',
+        inactiveColor: '#c0c6c6',
       },
     }
   }

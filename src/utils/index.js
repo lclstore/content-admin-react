@@ -74,4 +74,16 @@ export function randomString(length = 8) {
   }
 
   return result;
-} 
+}
+
+// 格式化时长 (秒 -> MM:SS)
+export const formatDuration = (seconds) => {
+  if (isNaN(seconds) || seconds < 0) {
+    return '00:00';
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+  return `${formattedMinutes}:${formattedSeconds}`;
+}; 

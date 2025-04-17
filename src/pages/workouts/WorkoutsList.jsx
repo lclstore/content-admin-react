@@ -1,113 +1,447 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Table, Input, Button, Avatar, Image, Spin, Popover, Space, Tag, Badge } from 'antd'; // 引入 Tag 和 Badge
-import { SearchOutlined, PlusOutlined, FileImageOutlined, FilterOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom'; // 导入 useNavigate
+import React, { useContext, useEffect, useState, useMemo } from 'react';
+import { Table, Input, Button, Spin, Dropdown, Modal, message, Badge, Tooltip } from 'antd';
+import {
+    PlusOutlined,
+    EllipsisOutlined,
+    EditOutlined,
+    CopyOutlined,
+    DeleteOutlined,
+    CheckOutlined,
+    StopOutlined,
+    DisconnectOutlined,
+    UndoOutlined,
+    FilterOutlined,
+    SearchOutlined,
+    CloseOutlined,
+    SettingOutlined
+} from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDate } from '@/utils'; //  formatDate 工具函数可用
-import { debounce } from 'lodash'; // 引入 debounce
-
-// 模拟 Workout 数据 (更新状态以包含 Draft, Enabled, Disabled, Deprecated)
-const mockWorkouts = [
-    {
-        id: 1,
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Morning Run',
-        status: 'Enabled', // 更新状态
-        difficulty: 'Medium',
-        equipment: 'Running Shoes',
-        position: 1,
-        target: 'Cardio',
-        newStartTime: '2024-07-26 06:00:00',
-        newEndTime: '2024-07-26 07:00:00',
-    },
-    {
-        id: 2,
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting',
-        status: 'Disabled', // 更新状态
-        difficulty: 'Hard',
-        equipment: 'Dumbbells, Barbell',
-        position: 3,
-        target: 'Strength',
-        newStartTime: '2024-07-27 18:00:00',
-        newEndTime: '2024-07-27 19:30:00',
-    },
-    {
-        id: 3,
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Yoga Session',
-        status: 'Enabled', // 更新状态
-        difficulty: 'Easy',
-        equipment: 'Yoga Mat',
-        position: 2,
-        target: 'Flexibility',
-        newStartTime: '2024-07-28 08:00:00',
-        newEndTime: '2024-07-28 09:00:00',
-    },
-    {
-        id: 4,
-        image: null,
-        name: 'Cycling',
-        status: 'Draft', // 更新状态
-        difficulty: 'Medium',
-        equipment: 'Bicycle, Helmet',
-        position: 5,
-        target: 'Cardio, Endurance',
-        newStartTime: '2024-07-29 17:00:00',
-        newEndTime: '2024-07-29 18:30:00',
-    },
-    {
-        id: 5,
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'HIIT Workout',
-        status: 'Deprecated', // 更新状态
-        difficulty: 'Hard',
-        equipment: 'None',
-        position: 4,
-        target: 'Fat Loss, Fitness',
-        newStartTime: '2024-07-30 12:00:00',
-        newEndTime: '2024-07-30 12:30:00',
-    },
-];
-
-// 定义状态排序逻辑 (可以根据需要调整顺序)
-const statusOrder = { 'Enabled': 1, 'Draft': 2, 'Disabled': 3, 'Deprecated': 4 };
-// 定义难度排序逻辑 (例如: Easy < Medium < Hard)
-const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
-
+import { formatDate } from '@/utils';
+import { debounce } from 'lodash';
+import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
+import WorkoutMediaCell from '@/components/MediaCell/MediaCell';
+import './WorkoutsList.css';
+import {
+    statusOrder,
+    difficultyOrder,
+    mockWorkouts,
+    WORKOUT_LIST_VISIBLE_COLUMNS_KEY,
+    MANDATORY_COLUMN_KEYS,
+    DEFAULT_VISIBLE_COLUMN_KEYS,
+    filterSections
+} from './workoutsListData';
 
 export default function WorkoutsList() {
-    // 获取header上下文中的保存按钮状态设置函数
     const { setSaveButtonState } = useContext(HeaderContext);
-    const navigate = useNavigate(); // 获取 navigate 函数
-    // 表格数据状态
+    const navigate = useNavigate();
     const [dataSource, setDataSource] = useState(mockWorkouts);
-    // loading 状态
     const [loading, setLoading] = useState(false);
-    // 搜索输入框的值
     const [searchValue, setSearchValue] = useState('');
-    // 状态过滤器的值
-    const [selectedStatus, setSelectedStatus] = useState([]); // 改为数组，存储最终确认的状态
-    const [tempSelectedStatus, setTempSelectedStatus] = useState([]); // 改为数组，存储 Popover 中临时选择的状态
-    const [isFilterPopoverVisible, setIsFilterPopoverVisible] = useState(false); // 控制 Popover 显示
+    const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] });
+    const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
+    const [previewVideoUrl, setPreviewVideoUrl] = useState('');
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [currentRecord, setCurrentRecord] = useState(null);
+    const [actionInProgress, setActionInProgress] = useState(false);
+    const [actionClicked, setActionClicked] = useState(false);
+    const [isDuplicateModalVisible, setIsDuplicateModalVisible] = useState(false);
+    const [duplicatedRecord, setDuplicatedRecord] = useState(null);
+    const [operationHistory, setOperationHistory] = useState([]);
+    const [undoMessage, setUndoMessage] = useState(null);
+    const [canUndo, setCanUndo] = useState(false);
 
-    // 设置保存按钮状态
+    // 恢复列可见性状态
+    const [visibleColumnKeys, setVisibleColumnKeys] = useState(() => {
+        try {
+            const storedKeys = localStorage.getItem(WORKOUT_LIST_VISIBLE_COLUMNS_KEY);
+            if (storedKeys) {
+                const parsedKeys = JSON.parse(storedKeys);
+                // 确保强制列始终存在
+                return Array.from(new Set([...parsedKeys, ...MANDATORY_COLUMN_KEYS]));
+            }
+        } catch (error) {
+            console.error("从 localStorage 读取列可见性时出错:", error);
+        }
+        return [...DEFAULT_VISIBLE_COLUMN_KEYS]; // 使用默认值
+    });
+
+    // 恢复列可见性更改处理程序
+    const handleVisibilityChange = (newVisibleKeys) => {
+        // 确保强制列始终包含在内
+        const finalKeys = Array.from(new Set([...newVisibleKeys, ...MANDATORY_COLUMN_KEYS]));
+        setVisibleColumnKeys(finalKeys);
+        try {
+            localStorage.setItem(WORKOUT_LIST_VISIBLE_COLUMNS_KEY, JSON.stringify(finalKeys));
+        } catch (error) {
+            console.error("保存列可见性到 localStorage 时出错:", error);
+        }
+    };
+
+    // 先定义 actionRender
+    const actionRender = (text, record) => (
+        <div
+            className="actions-container"
+            onClick={handleActionAreaClick}
+            onMouseDown={(e) => e.stopPropagation()}
+        >
+            <Dropdown
+                menu={{ items: menuItems(record) }}
+                trigger={['click']}
+                onClick={handleActionAreaClick}
+                className="action-dropdown"
+            >
+                <Button
+                    type="text"
+                    icon={<EllipsisOutlined />}
+                    className="action-button"
+                    onClick={handleActionAreaClick}
+                />
+            </Dropdown>
+        </div>
+    );
+
+    // 再定义 columns
+    const columns = [
+        {
+            title: 'Image',
+            dataIndex: 'image',
+            key: 'image',
+            render: (text, record) => (
+                <WorkoutMediaCell
+                    record={record}
+                    onVideoClick={handleVideoClick}
+                />
+            ),
+            fixed: 'left',
+            width: 150,
+        },
+        {
+            title: 'Id',
+            dataIndex: 'id',
+            key: 'id',
+            align: 'center',
+            width: 100,
+        },
+        {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            render: (name) => (
+                <Tooltip placement="topLeft" title={name}>
+                    <span>{name}</span>
+                </Tooltip>
+            ),
+            ellipsis: { showTitle: false },
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+            showSorterTooltip: false,
+            width: 100,
+            ellipsis: true,
+        },
+        {
+            title: 'Subscription',
+            dataIndex: 'isSubscription',
+            key: 'subscription',
+            render: (isSubscription) => (
+                isSubscription
+                    ? <CheckOutlined className='success-icon' />
+                    : <CloseOutlined className='error-icon' />
+            ),
+            align: 'center',
+            width: 120,
+        },
+        {
+            title: 'Difficulty',
+            dataIndex: 'difficulty',
+            key: 'difficulty',
+            sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty],
+            showSorterTooltip: false,
+            width: 100,
+            ellipsis: true,
+        },
+        {
+            title: 'Equipment',
+            dataIndex: 'equipment',
+            key: 'equipment',
+            width: 200,
+            ellipsis: true,
+        },
+        {
+            title: 'Position',
+            dataIndex: 'position',
+            key: 'position',
+            sorter: (a, b) => a.position - b.position,
+            showSorterTooltip: false,
+            width: 100,
+        },
+        {
+            title: 'Target',
+            dataIndex: 'target',
+            key: 'target',
+            width: 200,
+            ellipsis: true,
+        },
+        {
+            title: 'New Start Time',
+            dataIndex: 'newStartTime',
+            key: 'newStartTime',
+            sorter: (a, b) => new Date(a.newStartTime) - new Date(b.newStartTime),
+            showSorterTooltip: false,
+            render: (time) => formatDate(time, 'YYYY-MM-DD HH:mm'),
+            width: 160,
+        },
+        {
+            title: 'New End Time',
+            dataIndex: 'newEndTime',
+            key: 'newEndTime',
+            sorter: (a, b) => new Date(a.newEndTime) - new Date(b.newEndTime),
+            showSorterTooltip: false,
+            render: (time) => formatDate(time, 'YYYY-MM-DD HH:mm'),
+            width: 160,
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            fixed: 'right',
+            width: 70,
+            align: 'center',
+            render: actionRender,
+        },
+    ];
+
+    // 可选列（用于列设置 Popover）
+    const optionalColumnsForSetting = useMemo(() => {
+        return columns
+            .filter(col => !MANDATORY_COLUMN_KEYS.includes(col.key || col.dataIndex))
+            .map(col => ({ key: col.key || col.dataIndex, title: col.title }));
+    }, [columns]);
+
+    // 准备列设置 Filter Section 数据
+    const columnSettingsSection = {
+        title: 'Visible Columns',
+        key: 'visibleColumns', // 使用唯一 key
+        options: optionalColumnsForSetting.map(col => col.title), // Popover 显示列标题
+        keys: optionalColumnsForSetting.map(col => col.key), // 内部使用列 key
+    };
+
     useEffect(() => {
-        setSaveButtonState({ showSaveButton: false });
-    }, [setSaveButtonState]);
+        setSaveButtonState({
+            showSaveButton: true,
+            saveButtonText: 'Add Workout',
+            saveButtonIcon: PlusOutlined,
+            saveButtonType: 'primary',
+            saveButtonLoading: false,
+            saveButtonDisabled: false,
+            onSaveButtonClick: () => navigate('/workouts-editor'),
+            showBackButton: false
+        });
 
-    // 防抖的搜索和过滤函数
-    const debouncedSearch = debounce((searchText, statuses) => {
+        return () => {
+            setSaveButtonState({
+                showSaveButton: false,
+                saveButtonText: 'SAVE CHANGES',
+                saveButtonIcon: null,
+                saveButtonLoading: false,
+                saveButtonDisabled: false,
+                onSaveButtonClick: () => { },
+                showBackButton: true
+            });
+        };
+    }, [setSaveButtonState, navigate]);
+
+    useEffect(() => {
+        const handleGlobalClick = () => {
+            setActionClicked(false);
+        };
+
+        document.addEventListener('click', handleGlobalClick);
+
+        return () => {
+            document.removeEventListener('click', handleGlobalClick);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (undoMessage) {
+            const timer = setTimeout(() => {
+                setUndoMessage(null);
+                setCanUndo(false);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [undoMessage]);
+
+    const recordOperation = (type, oldData, newData, message) => {
+        const historyItem = {
+            type,
+            timestamp: new Date().getTime(),
+            oldData,
+            newData,
+            message
+        };
+
+        setOperationHistory(prev => [historyItem, ...prev].slice(0, 10));
+        setUndoMessage(message);
+        setCanUndo(true);
+    };
+
+    const handleUndo = () => {
+        if (operationHistory.length === 0) return;
+
+        const lastOperation = operationHistory[0];
+        switch (lastOperation.type) {
+            case 'duplicate':
+                setDataSource(current =>
+                    current.filter(item => item.id !== lastOperation.newData.id)
+                );
+                message.success('成功撤销复制操作');
+                break;
+
+            case 'delete':
+                setDataSource(current => [...current, lastOperation.oldData]);
+                message.success('成功恢复已删除项目');
+                break;
+
+            case 'status':
+                setDataSource(current =>
+                    current.map(item =>
+                        item.id === lastOperation.oldData.id ? lastOperation.oldData : item
+                    )
+                );
+                message.success('成功撤销状态变更');
+                break;
+
+            default:
+                message.info('无法撤销此操作');
+                break;
+        }
+
+        setOperationHistory(prev => prev.slice(1));
+        setUndoMessage(null);
+        setCanUndo(false);
+    };
+
+    const menuItems = (record) => {
+        const items = [];
+
+        const handleMenuClick = (key, record, e) => {
+            if (e && e.domEvent) {
+                e.domEvent.stopPropagation();
+            }
+
+            console.log(`Clicked ${key} for record:`, record);
+            setCurrentRecord(record);
+
+            switch (key) {
+                case 'edit':
+                    handleEdit(record);
+                    break;
+                case 'duplicate':
+                    handleDuplicate(record);
+                    break;
+                case 'delete':
+                    setIsDeleteModalVisible(true);
+                    break;
+                case 'enable':
+                    handleStatusChange(record, 'Enabled');
+                    break;
+                case 'disable':
+                    handleStatusChange(record, 'Disabled');
+                    break;
+                case 'deprecate':
+                    handleStatusChange(record, 'Deprecated');
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        const addItem = (key, label, icon) => {
+            items.push({
+                key,
+                label,
+                icon,
+                onClick: (e) => {
+                    e.domEvent.stopPropagation();
+                    handleMenuClick(key, record, e);
+                },
+            });
+        };
+
+        const addCommonActions = () => {
+            addItem('edit', 'Edit', <EditOutlined />);
+            addItem('duplicate', 'Duplicate', <CopyOutlined />);
+        };
+
+        switch (record.status) {
+            case 'Draft':
+                addCommonActions();
+                addItem('delete', 'Delete', <DeleteOutlined />);
+                break;
+            case 'Disabled':
+                addCommonActions();
+                addItem('enable', 'Enable', <CheckOutlined />);
+                addItem('delete', 'Delete', <DeleteOutlined />);
+                break;
+            case 'Enabled':
+                addCommonActions();
+                addItem('disable', 'Disable', <StopOutlined />);
+                addItem('deprecate', 'Deprecate', <DisconnectOutlined />);
+                break;
+            case 'Subscription':
+                addCommonActions();
+                addItem('disable', 'Disable', <StopOutlined />);
+                break;
+            case 'Deprecated':
+                addItem('duplicate', 'Duplicate', <CopyOutlined />);
+                break;
+            default:
+                break;
+        }
+
+        return items;
+    };
+
+    const debouncedSearch = debounce((searchText, filters) => {
         setLoading(true);
         setTimeout(() => {
             let filteredData = mockWorkouts;
 
-            // 应用状态过滤器 (多选)
-            if (statuses && statuses.length > 0) {
+            const statuses = filters?.status || [];
+            if (statuses.length > 0) {
                 filteredData = filteredData.filter(workout => statuses.includes(workout.status));
             }
 
-            // 应用文本搜索过滤器
+            const types = filters?.type || [];
+            if (types.length > 0) {
+                filteredData = filteredData.filter(workout => types.includes(workout.type));
+            }
+
+            const difficulties = filters?.difficulty || [];
+            if (difficulties.length > 0) {
+                filteredData = filteredData.filter(workout => difficulties.includes(workout.difficulty));
+            }
+
+            const positions = filters?.position || [];
+            if (positions.length > 0) {
+                filteredData = filteredData.filter(workout => positions.includes(workout.position));
+            }
+
+            const targets = filters?.target || [];
+            if (targets.length > 0) {
+                filteredData = filteredData.filter(workout => {
+                    if (!workout.target) return false;
+                    const workoutTargets = workout.target.split(', ').map(t => t.trim());
+                    return targets.some(filterTarget => workoutTargets.includes(filterTarget));
+                });
+            }
+
             if (searchText) {
                 const lowerCaseSearch = searchText.toLowerCase();
                 filteredData = filteredData.filter(workout =>
@@ -121,240 +455,312 @@ export default function WorkoutsList() {
         }, 500);
     }, 300);
 
-    // 处理搜索框内容变化
     const handleSearchInputChange = (e) => {
         const { value } = e.target;
         setSearchValue(value);
-        debouncedSearch(value, selectedStatus); // 使用最终确认的状态数组进行搜索
+        debouncedSearch(value, selectedFilters);
     };
 
-    // 处理 Popover 可见性变化
-    const handlePopoverOpenChange = (open) => {
-        if (open) {
-            // Popover 打开时，同步当前应用的 filter
-            setTempSelectedStatus([...selectedStatus]); // 使用浅拷贝避免直接修改
-        }
-        setIsFilterPopoverVisible(open);
+    const handleFilterUpdate = (newFilters) => {
+        setSelectedFilters(newFilters);
+        debouncedSearch(searchValue, newFilters);
     };
 
-    // 处理 Popover 内按钮点击 (多选逻辑)
-    const handleTempStatusChange = (statusValue) => {
-        if (statusValue === null) { // 点击 'All'
-            setTempSelectedStatus([]);
-        } else {
-            const currentIndex = tempSelectedStatus.indexOf(statusValue);
-            const newSelected = [...tempSelectedStatus];
+    // 新增：处理列可见性 Popover 的更新
+    const handleColumnVisibilityUpdate = (newSelections) => {
+        // newSelections 格式为 { visibleColumns: ['Difficulty', 'Equipment', ...] }
+        const selectedTitles = newSelections.visibleColumns || [];
 
-            if (currentIndex === -1) {
-                newSelected.push(statusValue); // 添加状态
-            } else {
-                newSelected.splice(currentIndex, 1); // 移除状态
-            }
-            setTempSelectedStatus(newSelected);
-        }
+        // 将选中的标题映射回列的 key
+        const selectedKeys = optionalColumnsForSetting
+            .filter(col => selectedTitles.includes(col.title))
+            .map(col => col.key);
+
+        handleVisibilityChange(selectedKeys);
     };
 
-    // Popover Filter 重置
     const handleFilterReset = () => {
-        setTempSelectedStatus([]); // 清空临时选择
-        setSelectedStatus([]);     // 清空最终选择并应用
-        debouncedSearch(searchValue, []); // 触发搜索
-        setIsFilterPopoverVisible(false);
+        const resetFilters = { status: [], functionType: [], difficulty: [], position: [], target: [] };
+        setSelectedFilters(resetFilters);
+        debouncedSearch(searchValue, resetFilters);
     };
 
-    // Popover Filter 应用
-    const handleFilterApply = () => {
-        setSelectedStatus([...tempSelectedStatus]); // 更新最终状态 (浅拷贝)
-        debouncedSearch(searchValue, tempSelectedStatus);
-        setIsFilterPopoverVisible(false);
+    // 新增：处理列可见性 Popover 的重置
+    const handleColumnVisibilityReset = () => {
+        // 调用 handleVisibilityChange 并传入空数组，它会自动处理强制列
+        handleVisibilityChange([]);
     };
 
-    // 处理行点击事件
-    const handleRowClick = (record) => {
-        console.log('Row clicked:', record);
-        navigate(`/workouts-editor?id=${record.id}`); // 跳转到编辑页面并传递 ID
+    const handleRowClick = (record, event) => {
+        // 检查点击事件是否源自 Ant Design 图片预览组件
+        if (event.target.closest('.ant-image-preview-root')) {
+            return; // 如果是，则不执行任何操作
+        }
+
+        if (actionClicked) {
+            return;
+        }
+
+        navigate(`/workouts-editor?id=${record.id}`);
     };
 
-    // 表格列配置
-    const columns = [
-        {
-            title: 'Image', // 图片列
-            dataIndex: 'image',
-            key: 'image',
-            render: (image, record) => (
-                image && <Image
-                    src={image}
-                    alt={`${record.name}'s image`}
-                    className="tabImg"
-                />
-            ),
-            width: 150, // 限制图片列宽度
-        },
-        {
-            title: 'Name', // 名称列
-            dataIndex: 'name',
-            key: 'name',
-        },
-        {
-            title: 'Status', // 状态列
-            dataIndex: 'status',
-            key: 'status',
-            sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], // 使用新的排序逻辑
-            showSorterTooltip: false,
-        },
-        {
-            title: 'Difficulty', // 难度列
-            dataIndex: 'difficulty',
-            key: 'difficulty',
-            sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], // 自定义排序
-            showSorterTooltip: false,
-        },
-        {
-            title: 'Equipment', // 设备列
-            dataIndex: 'equipment',
-            key: 'equipment',
-        },
-        {
-            title: 'Position', // 位置列
-            dataIndex: 'position',
-            key: 'position',
-            sorter: (a, b) => a.position - b.position, // 数字排序
-            showSorterTooltip: false,
-        },
-        {
-            title: 'Target', // 目标列
-            dataIndex: 'target',
-            key: 'target',
-        },
-        {
-            title: 'Start Time', // 新开始时间列
-            dataIndex: 'newStartTime',
-            key: 'newStartTime',
-            sorter: (a, b) => new Date(a.newStartTime) - new Date(b.newStartTime), // 时间排序
-            showSorterTooltip: false,
-            render: (time) => formatDate(time, 'YYYY-MM-DD HH:mm'), // 格式化时间，秒可能不需要
-        },
-        {
-            title: 'End Time', // 新结束时间列
-            dataIndex: 'newEndTime',
-            key: 'newEndTime',
-            sorter: (a, b) => new Date(a.newEndTime) - new Date(b.newEndTime), // 时间排序
-            showSorterTooltip: false,
-            render: (time) => formatDate(time, 'YYYY-MM-DD HH:mm'), // 格式化时间
-        },
-        // 可以添加操作列，例如编辑、删除等
-        // {
-        //   title: 'Action',
-        //   key: 'action',
-        //   render: (_, record) => (
-        //     <Space size="middle">
-        //       <a>Edit</a>
-        //       <a>Delete</a>
-        //     </Space>
-        //   ),
-        // },
-    ];
+    const handleVideoClick = (e, url) => {
+        e.stopPropagation();
+        setPreviewVideoUrl(url);
+        setIsPreviewModalVisible(true);
+    };
 
-    // 定义状态选项
-    const statusOptions = ['Draft', 'Enabled', 'Disabled', 'Deprecated'];
+    const handlePreviewModalCancel = () => {
+        setIsPreviewModalVisible(false);
+        setPreviewVideoUrl('');
+    };
 
-    // Popover 的内容组件
-    const filterContent = (
-        <div className='filterContent' style={{ width: 280 }}>
-            <Space wrap style={{ marginBottom: 16 }}>
-                {statusOptions.map(status => (
-                    <div
-                        onClick={() => handleTempStatusChange(status)}
-                        key={status}
-                        className={`filterButtonItem ${tempSelectedStatus.includes(status) ? 'active' : ''}`}
-                    >
-                        {status}
-                    </div>
-                ))}
-            </Space>
+    const handleEdit = (record) => {
+        navigate(`/workouts-editor?id=${record.id}`);
+    };
 
-            <div style={{ textAlign: 'right', borderTop: '1px solid #f0f0f0', paddingTop: 8 }}>
-                <Space>
-                    <Button onClick={handleFilterReset}>Reset</Button>
-                    <Button type="primary" onClick={handleFilterApply}>update</Button>
-                </Space>
-            </div>
-        </div>
-    );
+    const handleDuplicate = (record) => {
+        setActionClicked(true);
+
+        setActionInProgress(true);
+        const newId = Math.max(...dataSource.map(item => item.id)) + 1;
+
+        const newRecord = {
+            ...record,
+            id: newId,
+            name: `${record.name} (Copy)`,
+            status: 'Draft',
+        };
+
+        setDataSource(current => [...current, newRecord]);
+        setDuplicatedRecord(newRecord);
+        setActionInProgress(false);
+
+        recordOperation('duplicate', record, newRecord, `已复制 "${record.name}"`);
+
+        message.success(`成功复制 "${record.name}"`);
+        setIsDuplicateModalVisible(true);
+    };
+
+    const handleGoToEdit = () => {
+        if (duplicatedRecord) {
+            setIsDuplicateModalVisible(false);
+            setTimeout(() => {
+                navigate(`/workouts-editor?id=${duplicatedRecord.id}`);
+            }, 100);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setIsDuplicateModalVisible(false);
+    };
+
+    const handleDelete = () => {
+        if (!currentRecord) return;
+
+        setActionInProgress(true);
+
+        recordOperation('delete', currentRecord, null, `已删除 "${currentRecord.name}"`);
+
+        setDataSource(current => current.filter(item => item.id !== currentRecord.id));
+
+        setActionInProgress(false);
+        setIsDeleteModalVisible(false);
+
+        message.success(`成功删除 "${currentRecord.name}"`);
+    };
+
+    const handleStatusChange = (record, newStatus) => {
+        setActionInProgress(true);
+
+        const oldRecord = { ...record };
+        const updatedRecord = { ...record, status: newStatus };
+
+        setDataSource(current =>
+            current.map(item =>
+                item.id === record.id ? updatedRecord : item
+            )
+        );
+
+        setActionInProgress(false);
+
+        const actionMap = {
+            'Enabled': 'enabled',
+            'Disabled': 'disabled',
+            'Deprecated': 'deprecated',
+            'Subscription': 'added to subscription'
+        };
+        recordOperation('status', oldRecord, updatedRecord, `已将 "${record.name}" 的状态更改为 ${newStatus}`);
+
+        message.success(`成功将 "${record.name}" ${actionMap[newStatus]}`);
+    };
+
+    const handleActionAreaClick = (e) => {
+        setActionClicked(true);
+        e.stopPropagation();
+    };
+
+    const hasActiveFilters = Object.values(selectedFilters).some(arr => arr.length > 0);
+
+    // 恢复根据可见性状态过滤列的逻辑
+    const visibleColumns = useMemo(() => {
+        return columns.filter(col => visibleColumnKeys.includes(col.key || col.dataIndex));
+    }, [columns, visibleColumnKeys]);
+
+    // 恢复计算可见列的总宽度的逻辑
+    const totalVisibleWidth = useMemo(() => {
+        return visibleColumns.reduce((acc, col) => {
+            let width = 0;
+            if (typeof col.width === 'number') {
+                width = col.width;
+            } else if (typeof col.width === 'string') {
+                const parsedWidth = parseInt(col.width, 10);
+                if (!isNaN(parsedWidth)) {
+                    width = parsedWidth;
+                }
+            }
+            // 给没有宽度的列一个默认值，以更好地估算总宽度
+            // 也可以根据实际情况调整此默认值
+            return acc + (width > 0 ? width : 150);
+        }, 0);
+    }, [visibleColumns]);
+
+    // 准备传递给列设置 Popover 的初始选中值
+    const initialVisibleColumnTitles = useMemo(() => {
+        return {
+            visibleColumns: optionalColumnsForSetting
+                .filter(col => visibleColumnKeys.includes(col.key))
+                .map(col => col.title)
+        };
+    }, [visibleColumnKeys, optionalColumnsForSetting]);
+
+    // 检查列设置是否有非默认值
+    const hasActiveColumnSettings = useMemo(() => {
+        const currentOptionalVisibleKeys = visibleColumnKeys.filter(key => !MANDATORY_COLUMN_KEYS.includes(key));
+        const defaultOptionalVisibleKeys = DEFAULT_VISIBLE_COLUMN_KEYS.filter(key => !MANDATORY_COLUMN_KEYS.includes(key));
+        // 检查当前可选列集合是否与默认可选列集合不同（忽略顺序）
+        return currentOptionalVisibleKeys.length !== defaultOptionalVisibleKeys.length ||
+            !currentOptionalVisibleKeys.every(key => defaultOptionalVisibleKeys.includes(key));
+    }, [visibleColumnKeys]);
 
     return (
         <div className="workoutsContainer">
-            {/* 添加自定义样式增大 Badge 的点 */}
-            <style>{`
-                .larger-badge-dot .ant-badge-dot {
-                    width: 10px;  /* 设置点的宽度 */
-                    height: 10px; /* 设置点的高度 */
-                    box-shadow: 0 0 0 1px #fff; /* 可选：保持 Ant Design 的白色边框 */
-                }
-            `}</style>
-            {/* 顶部搜索栏 */}
-            <div className="searchBar"> {/* 可以复用 UsersList 的样式或自定义 */}
+            <div className="searchBar">
                 <Input
-                    placeholder="Search content ID or name..." // 更新 placeholder
+                    placeholder="Search content ID or name..."
                     value={searchValue}
+                    prefix={<SearchOutlined />}
                     onChange={handleSearchInputChange}
-                    className="searchInput" // 保持类名一致性
+                    className="searchInput"
                     suffix={loading ? <Spin size="small" /> : null}
-                    allowClear // 允许清除输入
-                    style={{ marginRight: 8 }} // 添加右边距
+                    allowClear
                 />
-                {/* Filters Popover */}
-                <Popover
-                    content={filterContent}
-                    trigger="click"
-                    open={isFilterPopoverVisible}
-                    onOpenChange={handlePopoverOpenChange}
-                    placement="bottomRight" // 控制弹出位置
+                <FiltersPopover
+                    filterSections={filterSections}
+                    activeFilters={selectedFilters}
+                    onUpdate={handleFilterUpdate}
+                    onReset={handleFilterReset}
                 >
-                    {/* 将 Badge 包裹 Button，并使用 dot 属性 */}
-                    <Badge dot={selectedStatus.length > 0} offset={[-10, 5]} className="larger-badge-dot"> {/* 使用 offset 微调位置, 添加自定义类名 */}
-                        <Button>
+                    <Badge dot={hasActiveFilters} offset={[-10, 5]} className="larger-badge-dot">
+                        <Button icon={<FilterOutlined />}>
                             Filters
-                            <FilterOutlined />
                         </Button>
                     </Badge>
-                </Popover>
-                {/* 添加 Workout 按钮 */}
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => navigate('/workouts-editor')} // 添加 onClick 跳转
+                </FiltersPopover>
+                <FiltersPopover
+                    filterSections={[columnSettingsSection]}
+                    activeFilters={initialVisibleColumnTitles}
+                    onUpdate={handleColumnVisibilityUpdate}
+                    onReset={handleColumnVisibilityReset}
+                    popoverPlacement="bottomRight"
+                    applyImmediately={true}
+                    clearButtonText="Reset"
                 >
-                    Add Workout
-                </Button>
+                    <Button icon={<SettingOutlined />}>
+                        Table Settings
+                    </Button>
+                </FiltersPopover>
+                {canUndo && (
+                    <div className="undo-message">
+                        <span>{undoMessage}</span>
+                        <Button
+                            type="link"
+                            icon={<UndoOutlined />}
+                            onClick={handleUndo}
+                        >
+                            撤销
+                        </Button>
+                    </div>
+                )}
             </div>
 
-            {/* Workout 列表表格 */}
             <Table
-                columns={columns}
+                columns={visibleColumns}
                 dataSource={dataSource}
                 rowKey="id"
-                loading={loading} // 将表格的 loading 状态与组件的 loading 状态绑定
+                loading={loading}
                 onRow={(record) => ({
                     onClick: (event) => {
-                        // 可选：检查是否点击了操作按钮/链接等，如果是则阻止跳转
-                        // const targetNode = event.target;
-                        // if (targetNode.closest('.action-button-class')) {
-                        //     return;
-                        // }
-                        handleRowClick(record);
+                        handleRowClick(record, event);
                     },
-                    style: { cursor: 'pointer' }, // 添加手型光标
+                    style: { cursor: 'pointer' },
                 })}
                 pagination={{
                     total: dataSource.length,
-                    pageSize: 10, // 每页显示条数
-                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`, // 显示总数和当前范围
-                    showSizeChanger: true, // 允许用户改变每页大小
-                    pageSizeOptions: ['10', '20', '50'], // 可选的每页大小
+                    pageSize: 10,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                    showSizeChanger: true,
+                    pageSizeOptions: ['10', '20', '50'],
                 }}
-                scroll={{ x: 1200 }} // 如果列数较多，建议添加水平滚动
+                scroll={{ x: totalVisibleWidth }}
             />
+
+            <Modal
+                title="视频预览"
+                open={isPreviewModalVisible}
+                onCancel={handlePreviewModalCancel}
+                footer={null}
+                destroyOnClose
+                width={800}
+            >
+                {previewVideoUrl && (
+                    <video
+                        src={previewVideoUrl}
+                        controls
+                        autoPlay
+                        style={{ width: '100%', maxHeight: '80vh' }}
+                    >
+                        您的浏览器不支持 video 标签。
+                    </video>
+                )}
+            </Modal>
+
+            <Modal
+                title="确认删除"
+                open={isDeleteModalVisible}
+                onOk={handleDelete}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                okText="删除"
+                cancelText="取消"
+                okButtonProps={{
+                    danger: true,
+                    loading: actionInProgress
+                }}
+                cancelButtonProps={{ disabled: actionInProgress }}
+            >
+                <p>您确定要删除 "{currentRecord?.name}" 吗？此操作无法撤销。</p>
+            </Modal>
+
+            <Modal
+                title="Workout 已复制"
+                open={isDuplicateModalVisible}
+                onOk={handleGoToEdit}
+                onCancel={handleCancelEdit}
+                okText="立即编辑"
+                cancelText="留在列表"
+            >
+                <p>"{duplicatedRecord?.name}" 已成功创建。您想现在编辑它吗？</p>
+            </Modal>
         </div>
     );
 }   

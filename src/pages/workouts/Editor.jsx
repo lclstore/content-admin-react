@@ -135,8 +135,8 @@ export default function WorkoutsEditor() {
         if (currentId !== null) {
             setPageLoading(true);
             console.log('Editing workout with ID:', currentId);
-            // --- Simulate API Call --- Find workout in mock data
-            setTimeout(() => { // Simulate network delay
+            // Simulate API Call
+            setTimeout(() => {
                 const workoutToEdit = mockWorkouts.find(w => w.id === currentId);
                 if (workoutToEdit) {
                     setWorkoutData(workoutToEdit);
@@ -149,12 +149,11 @@ export default function WorkoutsEditor() {
                         position: workoutToEdit.position,
                         newStartTime: workoutToEdit.newStartTime ? dayjs(workoutToEdit.newStartTime) : null,
                         newEndTime: workoutToEdit.newEndTime ? dayjs(workoutToEdit.newEndTime) : null,
-                        // Transform image URL to fileList for Upload component
                         image: workoutToEdit.image ? [{
-                            uid: '-1', // Required unique id
-                            name: 'image.png', // File name
-                            status: 'done', // Status
-                            url: workoutToEdit.image, // The actual URL
+                            uid: '-1',
+                            name: 'image.png',
+                            status: 'done',
+                            url: workoutToEdit.image,
                         }] : [],
                     });
                     setIsFormDirty(false);
@@ -222,13 +221,11 @@ export default function WorkoutsEditor() {
 
                 console.log('Saving workout data:', dataToSave);
 
-                // --- Simulate API call ---
+                // Simulate API call
                 setTimeout(() => {
                     messageApi.success('Workout saved successfully!');
                     setSaveLoading(false);
                     setIsFormDirty(false);
-                    // Optional: Update local state or refetch list if needed
-                    // TODO: Navigate back or to the list after save
                     // navigate('/workouts');
                 }, 800);
                 // --- Replace with actual API call ---

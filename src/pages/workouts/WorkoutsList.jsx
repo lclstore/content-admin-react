@@ -21,7 +21,7 @@ import { formatDate } from '@/utils';
 import { debounce } from 'lodash';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import WorkoutMediaCell from '@/components/MediaCell/MediaCell';
-import './WorkoutsList.css';
+import './List.css';
 import {
     statusOrder,
     difficultyOrder,

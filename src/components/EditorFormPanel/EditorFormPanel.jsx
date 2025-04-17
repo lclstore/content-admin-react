@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Input, List, Button, Space, Divider, Avatar, Popover, Collapse, Select } from 'antd';
 import { DeleteOutlined, PlusOutlined, InfoOutlined, ThunderboltOutlined, TagsOutlined, ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
-import { filterSections } from '../../pages/workouts/workoutsListData';
+import { filterSections } from '../../pages/workouts/Data';
 import TagSelector from '../TagSelector/TagSelector';
 import './EditorFormPanel.css';
 

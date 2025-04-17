@@ -16,7 +16,7 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { initialWorkoutData, mockEditorStructureData, mockWorkoutsForList, equipmentOptions } from './Data';
 import ContentLibraryPanel from '@/components/ContentLibrary/ContentLibraryPanel';
 import EditorFormPanel from '@/components/EditorFormPanel/EditorFormPanel';
-import './Editor.css';
+import './WorkoutsEditor.css';
 
 const formatDuration = (seconds) => {
     if (typeof seconds !== 'number' || isNaN(seconds)) {

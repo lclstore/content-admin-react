@@ -3,7 +3,7 @@
  * 实现两种布局：登录页独立布局和其他页面共用Layout布局
  */
 import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter,Navigate } from "react-router"
 import menus from '@/config/menu';
 import settings from '@/config/settings';
 import AppLayout from '@/layout';
@@ -30,11 +30,10 @@ const generateRoutes = () => {
 
   if (loginRoute) {
     try {
-      const LazyLoginComponent = lazy(() => import(`@/pages/login/index.jsx`));
+      const LazyLoginComponent = lazy(() => import(`@/auth/login/index.jsx`));
       loginRouteConfig = {
         path: loginRoute.path,
-        element: <SuspenseWrapper component={<LazyLoginComponent />} />,
-        meta: loginRoute.meta || { title: loginRoute.title, folderName: loginRoute.folderName }
+        Component: () => <SuspenseWrapper component={<LazyLoginComponent />} />,
       };
     } catch (error) {
       console.error(`加载登录组件失败:`, error);
@@ -47,20 +46,16 @@ const generateRoutes = () => {
     .map(menu => {
       try {
         // 动态引入组件
-        const LazyComponent = lazy(() => import(`@/pages/${menu.folderName}/${menu.key}.jsx`));
-
         return {
           path: menu.path,
-          element: <SuspenseWrapper component={<LazyComponent />} />,
-          meta: menu.meta || { title: menu.title, folderName: menu.folderName },
-          hideInMenu: menu.hideInMenu
+          element: <SuspenseWrapper component={<menu.Component.default />} />,
+          hideInMenu: menu.hideInMenu,
         };
       } catch (error) {
         console.error(`加载组件 ${menu.key} 失败:`, error);
         return null;
       }
     }).filter(Boolean);
-
   // 配置Layout布局路由
   const mainRoute = {
     element: <AppLayout />,
@@ -106,9 +101,10 @@ const generateRoutes = () => {
 
 // 创建路由配置
 const routes = generateRoutes();
+console.log("挂载的路由",routes)
 
 // 创建Router实例
 const router = createBrowserRouter(routes);
-
+console.log("实例化的的路由",router)
 // 仅使用命名导出
 export { router }; 

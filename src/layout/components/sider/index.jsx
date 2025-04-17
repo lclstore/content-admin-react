@@ -6,7 +6,7 @@ export default function Sider() {
     const navigate = useNavigate()
 
     const handleCreateWorkout = () => {
-        navigate('/exercises-editor')
+        navigate('/exercises/editor')
     }
 
     return (

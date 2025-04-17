@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Input, Button, Modal } from 'antd';
 import { UserOutlined, LockOutlined, QuestionCircleOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import loginApi from '@/api/login';
-import { validateEmail } from '@/utils';
+import loginApi from '@/api/login.js';
+import { validateEmail } from '@/utils/index.js';
 
 import lionImg from '@/assets/images/lion.png';
 import loginLeftImg from '@/assets/images/login-left.svg';

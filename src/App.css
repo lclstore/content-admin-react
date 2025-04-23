@@ -135,9 +135,7 @@
 }
 
 
-.ant-table-wrapper .ant-table-tbody>tr>td.imgContainer {
-  padding: 0;
-}
+
 
 .ant-select-selector {
   box-shadow: none !important;
@@ -194,10 +192,7 @@
 }
 
 
-.ant-table-wrapper .ant-table-tbody>tr>td.ant-table-cell .tabImg {
-  height: 100%;
-  max-height: 75px;
-}
+
 
 .ant-table-wrapper .ant-table-tbody>tr>td.ant-table-cell .userAvatar {
   width: 40px;
@@ -234,28 +229,22 @@
 /* 用户信息列布局样式 (User info column layout styles) */
 .ant-table-wrapper .ant-table-tbody>tr>td:first-child>div {
   height: 100%;
-  /* 确保 flex 容器占满单元格高度 (Ensure flex container fills cell height) */
   align-items: center;
-  /* 垂直居中 (Vertically center items) */
 }
 
 .ant-table-wrapper .ant-table-tbody>tr>td:first-child .userAvatar {
   margin-right: 12px;
-  /* 头像右边距 (Avatar right margin) */
 }
 
 .ant-table-wrapper .ant-table-tbody>tr>td:first-child .userInfoText {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* 垂直居中文本 (Vertically center text) */
   line-height: normal;
-  /* 覆盖继承的 line-height (Override inherited line-height) */
 }
 
 .ant-table-wrapper .ant-table-tbody>tr>td:first-child .userInfoText span {
   line-height: 1.5;
-  /* 调整行高以适应布局 (Adjust line height for layout) */
 }
 
 /* 

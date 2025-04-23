@@ -40,8 +40,6 @@ export default function WorkoutsList() {
     const [loading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] });
-    const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
-    const [previewVideoUrl, setPreviewVideoUrl] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [currentRecord, setCurrentRecord] = useState(null);
     const [actionInProgress, setActionInProgress] = useState(false);
@@ -52,6 +50,7 @@ export default function WorkoutsList() {
     const [undoMessage, setUndoMessage] = useState(null);
     const [canUndo, setCanUndo] = useState(false);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [isInteractionBlockingRowClick, setIsInteractionBlockingRowClick] = useState(false);
 
     // 批量创建文件 Modal 状态
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false);
@@ -70,12 +69,6 @@ export default function WorkoutsList() {
     }, [batchCreateForm]); // 依赖 form 实例
 
     // 2. Callback Definitions (Handlers)
-    const handleVideoClick = useCallback((e, url) => {
-        e.stopPropagation();
-        setPreviewVideoUrl(url);
-        setIsPreviewModalVisible(true);
-    }, []);
-
     const handleActionAreaClick = useCallback((e) => {
         setActionClicked(true);
         e.stopPropagation();
@@ -176,10 +169,10 @@ export default function WorkoutsList() {
     // 3. Memoized Definitions (that depend on handlers)
     const allColumnDefinitions = useMemo(() => {
         const definitions = [
-            { title: 'Cover Image', width: 120, dataIndex: 'coverImage', key: 'image', render: (text, record) => (<WorkoutMediaCell record={record} onVideoClick={handleVideoClick} />) },
-            { title: 'Detail Image', dataIndex: 'detailImage', key: 'detailImage', render: (text, record) => <WorkoutMediaCell record={{ ...record, image: record.detailImage }} type='image' onVideoClick={handleVideoClick} />, width: 120 },
-            { title: 'Thumbnail Image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', render: (text, record) => <WorkoutMediaCell record={{ ...record, image: record.thumbnailImage }} type='image' onVideoClick={handleVideoClick} />, width: 120 },
-            { title: 'Complete Image', dataIndex: 'completeImage', key: 'completeImage', render: (text, record) => <WorkoutMediaCell record={{ ...record, image: record.completeImage }} type='image' onVideoClick={handleVideoClick} />, width: 150 },
+            { title: 'Cover Image', showNewBadge: true, showLock: true, type: 'video', width: 120, dataIndex: 'coverImage', key: 'image', className: 'media-cell' },
+            { title: 'Detail Image', type: 'image', dataIndex: 'detailImage', key: 'detailImage', className: 'media-cell', width: 120 },
+            { title: 'Thumbnail Image', type: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', className: 'media-cell', width: 120 },
+            { title: 'Complete Image', type: 'image', dataIndex: 'completeImage', key: 'completeImage', className: 'media-cell', width: 150 },
             { title: 'Name', dataIndex: 'name', key: 'name', width: 350, render: (name) => <div className='name-cell'>{name}</div> },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
@@ -190,11 +183,11 @@ export default function WorkoutsList() {
                 render: (status) => {
                     let color;
                     switch (status) {
-                        case 'Draft': color = token.colorTextSecondary; break; // 草稿 - 次要文本颜色
-                        case 'Enabled': color = token.colorSuccess; break;    // 启用 - 成功色
-                        case 'Disabled': color = token.colorError; break;     // 禁用 - 错误色
-                        case 'Deprecated': color = '#bfcaca'; break; // 弃用 - 警告色
-                        case 'Premium': color = token.colorInfo; break;      // Premium - 信息色 (或自定义)
+                        case 'Draft': color = token.colorTextSecondary; break;
+                        case 'Enabled': color = token.colorSuccess; break;
+                        case 'Disabled': color = token.colorError; break;
+                        case 'Deprecated': color = '#bfcaca'; break;
+                        case 'Premium': color = token.colorInfo; break;
                         default: color = token.colorText;
                     }
                     return <span style={{ color }}>{status}</span>;
@@ -206,10 +199,10 @@ export default function WorkoutsList() {
                 sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
                 width: 150,
                 render: (duration) => {
-                    if (!duration) return '-'; // 如果没有时长，显示 -
+                    if (!duration) return '-';
                     const minutes = Math.floor(duration / 60);
                     const seconds = duration % 60;
-                    return `${minutes}:${seconds.toString().padStart(2, '0')}`; // 格式化为 M:SS
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
             },
             { title: 'Calorie (Kcal)', align: 'center', dataIndex: 'calorie', key: 'calorie', sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0), render: (calorie) => calorie || '-', align: 'right', width: 150 },
@@ -237,18 +230,18 @@ export default function WorkoutsList() {
                 render: (status) => {
                     let color;
                     switch (status) {
-                        case 'Successful': color = token.colorSuccess; break; // 成功 - 成功色
-                        case 'Processing': color = token.colorInfo; break;    // 处理中 - 信息色
-                        case 'Failed': color = token.colorError; break;     // 失败 - 错误色
+                        case 'Successful': color = token.colorSuccess; break;
+                        case 'Processing': color = token.colorInfo; break;
+                        case 'Failed': color = token.colorError; break;
                         default: color = token.colorText;
                     }
-                    return <span style={{ color }}>{status || '-'}</span>; // 如果状态为空则显示 -
+                    return <span style={{ color }}>{status || '-'}</span>;
                 }
             },
             { title: 'Actions', key: 'actions', fixed: 'right', width: 70, align: 'center', render: actionRender },
         ];
         return definitions;
-    }, [handleVideoClick, actionRender]);
+    }, [actionRender, token]);
 
     // 4. Memoized calculations (that depend on definitions)
     const configurableKeys = useMemo(() => new Set([...DEFAULT_VISIBLE_TABLE_COLUMN_KEYS, ...ALL_TABLE_COLUMN_KEYS]), []);
@@ -342,17 +335,32 @@ export default function WorkoutsList() {
         debouncedSearch('', {}); // Reset search with empty values
     }, [debouncedSearch]);
 
+    // 新增：处理交互状态变化的回调
+    const handleInteractionStateChange = useCallback((isBlocking) => {
+        console.log('Interaction blocking row click:', isBlocking); // 调试日志
+        setIsInteractionBlockingRowClick(isBlocking);
+    }, []);
+
     const handleRowClick = useCallback((record, event) => {
-        if (event.target.closest('.ant-image-preview-root') || actionClicked) {
+        // 首先检查交互状态是否阻止点击
+        if (isInteractionBlockingRowClick) {
+            console.log('Row click blocked by interaction state');
             return;
         }
-        navigate(`/workouts/editor?id=${record.id}`);
-    }, [navigate, actionClicked]);
 
-    const handlePreviewModalCancel = useCallback(() => {
-        setIsPreviewModalVisible(false);
-        setPreviewVideoUrl('');
-    }, []);
+        // 检查点击事件是否起源于操作按钮容器 (保持这个检查)
+        const isActionClick = event.target.closest('.actions-container');
+
+        // 如果是操作按钮点击，或全局 actionClicked 标志为 true，则阻止导航
+        if (actionClicked || isActionClick) {
+            console.log('Row click blocked by:', { actionClicked, isActionClick });
+            return; // 阻止导航
+        }
+
+        // 如果以上都不是，则执行导航
+        console.log('Row click allowed, navigating.');
+        navigate(`/workouts/editor?id=${record.id}`);
+    }, [navigate, actionClicked, isInteractionBlockingRowClick]); // 添加 isInteractionBlockingRowClick 依赖
 
     const handleUndo = useCallback(() => {
         if (operationHistory.length === 0) return;
@@ -363,8 +371,12 @@ export default function WorkoutsList() {
                 message.success('Successfully undone duplicate operation');
                 break;
             case 'delete':
-                setDataSource(current => [...current, lastOperation.oldData]);
-                message.success('Successfully restored deleted item');
+                if (lastOperation.oldData) {
+                    setDataSource(current => [...current, lastOperation.oldData]);
+                    message.success('Successfully restored deleted item');
+                } else {
+                    message.error("Could not restore item: original data missing.");
+                }
                 break;
             case 'status':
                 setDataSource(current => current.map(item => item.id === lastOperation.oldData.id ? lastOperation.oldData : item));
@@ -375,7 +387,7 @@ export default function WorkoutsList() {
         setOperationHistory(prev => prev.slice(1));
         setUndoMessage(null);
         setCanUndo(false);
-    }, [operationHistory]); // Add dependencies
+    }, [operationHistory]);
 
     // 批量创建 Modal 取消处理
     const handleBatchCreateModalCancel = useCallback(() => {
@@ -542,7 +554,7 @@ export default function WorkoutsList() {
                 visibleColumnKeys={visibleColumnKeys}
                 onVisibilityChange={handleVisibilityChange}
                 searchConfig={{
-                    placeholder: "Search content ID or name...",
+                    placeholder: "Search name or ID...",
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}
@@ -552,30 +564,11 @@ export default function WorkoutsList() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems} // 传递左侧按钮组
+                leftToolbarItems={leftToolbarItems}
                 extraToolbarItems={extraToolbarItems}
                 rowSelection={rowSelection}
+                onInteractionStateChange={handleInteractionStateChange}
             />
-
-            <Modal
-                title="Video Preview"
-                open={isPreviewModalVisible}
-                onCancel={handlePreviewModalCancel}
-                footer={null}
-                destroyOnClose
-                width={800}
-            >
-                {previewVideoUrl && (
-                    <video
-                        src={previewVideoUrl}
-                        controls
-                        autoPlay
-                        style={{ width: '800px' }}
-                    >
-                        Your browser does not support the video tag.
-                    </video>
-                )}
-            </Modal>
 
             <Modal
                 title="Confirm Deletion"

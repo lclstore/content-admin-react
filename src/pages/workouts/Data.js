@@ -25,7 +25,7 @@ export const ALL_TABLE_COLUMN_KEYS = [
     'position',         // 体位
     'target',           // 目标部位
     'exerciseNum',      // Exercise 数量
-    'newDate',          // 新的合并日期列
+    'newDate',          // 恢复旧的合并日期列 Key
     'audioLang',        // 音频语言
     'fileStatus',       // 文件状态
 ];
@@ -74,25 +74,28 @@ export const filterSections = [
 export const mockWorkoutsForList = [
     {
         id: 1,
-        type: 'video',
-        image: 'https://hhcontent.s3.eu-central-1.amazonaws.com/t/none/u/undefined/w/67f5dfa1916d1900124391ea/x/video_720p.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KU4XQXHZETDYO3V%2F20250415%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250415T085513Z&X-Amz-Expires=604800&X-Amz-Signature=5aaf8d86a1deccfda9931d29ab10753adc3aaba5e0b4588015aac99a2640cd58&X-Amz-SignedHeaders=host&x-amz-request-payer=requester&x-id=GetObject', // 列表/编辑器封面图
-        name: 'Morning RunMorning RunMorning RunMorning RunMorning RunMorning RunMorning Run',
-        status: 'Enabled',
-        difficulty: 'Medium',
-        equipment: 'Running Shoes',
-        position: 'Standing', // 使用字符串而非数字
-        target: 'Cardio',
-        newDate: '2025-01-26 06:00:00',
-        category: 'Cardio', // Workout 分类
-        duration: 185, // 时长 (秒)
-        calorie: 150, // 卡路里 (kcal)
-        isSubscription: false, // 是否为 Premium 内容
-        detailImage: 'https://via.placeholder.com/800x600.png?text=Detail+Image+1', // 详情页图片
-        thumbnailImage: 'https://via.placeholder.com/150.png?text=Thumb+1', // 缩略图
-        completeImage: 'https://via.placeholder.com/400x300.png?text=Complete+1', // 完成页图片
-        exerciseNum: 8, // 包含的 Exercise 数量
-        audioLang: 'en-US', // 音频语言
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)], // 文件状态 (例如视频/音频文件)
+        type: 'image',
+        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        posterImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        name: 'Weight Lifting',
+        status: 'Disabled',
+        difficulty: 'Hard',
+        equipment: 'Dumbbells, Barbell',
+        position: 'Standing',
+        target: 'Strength',
+        newStartTime: '2025-02-17 18:00:00',
+        newEndTime: '2025-07-06 18:00:00',
+        category: 'Strength',
+        duration: 3600,
+        calorie: 450,
+        Premium: true,
+        isSubscription: false,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 12,
+        audioLang: null,
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
         id: 2,
@@ -104,14 +107,15 @@ export const mockWorkoutsForList = [
         equipment: 'Dumbbells, Barbell',
         position: 'Standing',
         target: 'Strength',
-        newDate: '2025-02-27 18:00:00',
+        newStartTime: '2025-02-27 18:00:00',
+        newEndTime: '2025-03-06 18:00:00',
         category: 'Strength',
         duration: 3600,
         calorie: 450,
         isSubscription: false,
-        detailImage: null,
-        thumbnailImage: 'https://via.placeholder.com/150.png?text=Thumb+2',
-        completeImage: null,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         exerciseNum: 12,
         audioLang: null,
         fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
@@ -126,14 +130,15 @@ export const mockWorkoutsForList = [
         equipment: 'Yoga Mat',
         position: 'Lying',
         target: 'Flexibility',
-        newDate: '2025-07-28 08:00:00',
+        newStartTime: '2025-07-28 08:00:00',
+        newEndTime: '2025-08-04 08:00:00',
         category: 'Yoga',
         duration: 2700,
         calorie: 200,
-        isSubscription: true, // 示例 Premium 内容
-        detailImage: 'https://via.placeholder.com/800x600.png?text=Detail+Image+3',
-        thumbnailImage: 'https://via.placeholder.com/150.png?text=Thumb+3',
-        completeImage: 'https://via.placeholder.com/400x300.png?text=Complete+3',
+        isSubscription: true,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         exerciseNum: 15,
         audioLang: 'en-US',
         fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
@@ -141,24 +146,25 @@ export const mockWorkoutsForList = [
     {
         id: 44,
         type: 'image',
-        image: null,
+        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Cycling',
         status: 'Draft',
         difficulty: 'Medium',
         equipment: 'Bicycle, Helmet',
         position: 'Seated',
         target: 'Cardio, Endurance',
-        newDate: '2025-07-29 17:00:00',
+        newStartTime: '2025-07-29 17:00:00',
+        newEndTime: '2025-08-05 17:00:00',
         category: 'Cardio',
         duration: 5400,
         calorie: 600,
         isSubscription: false,
-        detailImage: null,
-        thumbnailImage: null,
-        completeImage: null,
-        exerciseNum: 1, // 可能只有一个主要动作
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 1,
         audioLang: 'zh-CN',
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)], // 草稿状态也可能有文件状态
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
         id: 5,
@@ -170,17 +176,18 @@ export const mockWorkoutsForList = [
         equipment: 'None',
         position: 'Standing',
         target: 'Fat Loss, Fitness',
-        newDate: '2025-07-30 12:00:00',
+        newStartTime: '2025-07-30 12:00:00',
+        newEndTime: '2025-08-06 12:00:00',
         category: 'HIIT',
         duration: 1800,
         calorie: 350,
         isSubscription: false,
-        detailImage: 'https://via.placeholder.com/800x600.png?text=Detail+Image+5',
-        thumbnailImage: 'https://via.placeholder.com/150.png?text=Thumb+5',
-        completeImage: 'https://via.placeholder.com/400x300.png?text=Complete+5',
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         exerciseNum: 10,
         audioLang: 'en-US',
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)], // 示例错误状态
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
 ];
 
@@ -195,7 +202,8 @@ export const initialWorkoutData = {
     position: null,
     target: '',
     image: null, // Workout 的封面图，与结构(Structure)中的 Exercise 图片不同
-    newDate: null,
+    newStartTime: null, // 新增开始时间
+    newEndTime: null, // 新增结束时间
     structure: [], // 结构数组，初始为空
     videoPreferences: {}, // 视频偏好设置，初始为空对象
     musicLinks: [], // 音乐链接数组，初始为空

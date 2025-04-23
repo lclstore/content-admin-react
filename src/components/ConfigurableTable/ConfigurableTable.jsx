@@ -3,6 +3,7 @@ import { Table, Input, Button, Spin, Space } from 'antd';
 import { SearchOutlined, FilterOutlined, SettingOutlined } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import './ConfigurableTable.css';
+import MediaCell from '@/components/MediaCell/MediaCell';
 
 // 默认分页配置
 const DEFAULT_PAGINATION = {
@@ -37,6 +38,7 @@ const DEFAULT_PAGINATION = {
  * @param {boolean} [props.showColumnSettings=true] - 是否显示列设置按钮
  * @param {Array<string>} [props.configurableColumnKeys=[]] - 定义哪些列是用户可以配置显示/隐藏的 key 数组
  * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
+ * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  */
 function ConfigurableTable({
     uniqueId,
@@ -45,6 +47,7 @@ function ConfigurableTable({
     rowKey,
     loading = false,
     onRowClick,
+    isInteractionBlockingRowClick, // 接收状态
     actionColumnKey,
     mandatoryColumnKeys = [], // 强制列 Key
     defaultVisibleColumnKeys, // 默认可见的 *可配置* 列 Key (可能为 undefined)
@@ -191,24 +194,51 @@ function ConfigurableTable({
         }, 0);
     }, [currentlyVisibleColumns, scrollX]);
 
-    // 处理行点击
-    const handleRow = (record) => ({
-        onClick: (event) => {
-            if (onRowClick) {
-                let targetElement = event.target;
-                let isActionColumnClick = false;
-                while (targetElement && targetElement !== event.currentTarget) {
-                    if (targetElement.dataset.actionKey === actionColumnKey) {
-                        isActionColumnClick = true;
-                        break;
-                    }
-                    targetElement = targetElement.parentElement;
+    // 处理行事件 (根据 isInteractionBlockingRowClick 决定是否绑定 onClick)
+    const handleRow = (record) => {
+        // 如果交互状态阻止点击，则不为行附加 onClick 处理器
+        if (isInteractionBlockingRowClick) {
+            // 返回空对象，不绑定任何事件
+            return {};
+        }
+
+        // 否则，正常绑定 onClick
+        return {
+            onClick: (event) => {
+                // 首先检查全局图片预览状态 - 如果预览激活，直接阻止行点击
+                if (window.IMAGE_PREVIEW_ACTIVE === true) {
+                    console.log('Row click blocked: Image preview is active');
+                    return;
                 }
-                if (!isActionColumnClick) onRowClick(record, event);
-            }
-        },
-        style: onRowClick ? { cursor: 'pointer' } : {},
-    });
+
+                if (onRowClick) {
+                    // 保持原有的检查逻辑（操作列等）
+                    let targetElement = event.target;
+                    let isActionColumnClick = false;
+                    let isMediaCellClick = false; // 添加媒体单元格点击检查
+
+                    while (targetElement && targetElement !== event.currentTarget) {
+                        if (targetElement.dataset && targetElement.dataset.actionKey === actionColumnKey) {
+                            isActionColumnClick = true;
+                            break;
+                        }
+                        // 启用对媒体单元格的检查
+                        if (targetElement.closest('td.media-cell')) {
+                            isMediaCellClick = true; // 标记为媒体单元格点击
+                            break;
+                        }
+                        targetElement = targetElement.parentElement;
+                    }
+
+                    // 如果既不是操作列点击，也不是媒体单元格点击，才触发行点击事件
+                    if (!isActionColumnClick && !isMediaCellClick) {
+                        onRowClick(record, event);
+                    }
+                }
+            },
+            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
+        };
+    };
 
     // 为操作列的 render 函数包裹一层 div
     const columnsWithActionMarker = useMemo(() => {
@@ -236,6 +266,40 @@ function ConfigurableTable({
         config.total = dataSource?.length || 0;
         return config;
     }, [paginationConfig, dataSource]);
+
+    // 处理列渲染: 根据 type 渲染 MediaCell 并添加 Action Marker
+    const processedColumns = useMemo(() => {
+        const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
+        return currentlyVisibleColumns.map(col => {
+            let processedCol = { ...col };
+
+            // 检查 type 是否是定义的媒体类型之一，且没有自定义 render
+            if (mediaTypes.includes(processedCol.type) && typeof processedCol.render === 'undefined') {
+                // 设置 render 函数来渲染 MediaCell
+                processedCol.render = (text, record) => {
+                    // 直接将列定义的 type ('image', 'video', 'audio') 传递给 MediaCell
+                    return (
+                        <MediaCell
+                            record={record}
+                            processedCol={processedCol} // 直接使用列定义的配置信息
+                        />
+                    );
+                };
+            }
+
+            // 为操作列添加标记 (保持不变)
+            if ((processedCol.key || processedCol.dataIndex) === actionColumnKey && processedCol.render) {
+                const originalRender = processedCol.render;
+                processedCol.render = (...args) => (
+                    <div data-action-key={actionColumnKey}>
+                        {originalRender(...args)}
+                    </div>
+                );
+            }
+
+            return processedCol;
+        });
+    }, [currentlyVisibleColumns, actionColumnKey]);
 
     return (
         <div className="configurable-table-container">
@@ -317,7 +381,7 @@ function ConfigurableTable({
             {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
             <div className="configurable-table-body">
                 <Table
-                    columns={columnsWithActionMarker}
+                    columns={processedColumns}
                     dataSource={dataSource}
                     rowKey={rowKey}
                     loading={loading}

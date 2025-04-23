@@ -1,59 +1,64 @@
 .imageContainer {
-    width: 120px;
-    /* 固定宽度 */
-    height: 75px;
+    width: 100%;
+    height: 100%;
     max-height: 75px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
     background-color: #f0f0f0;
-    /* 占位背景色 */
+    /* 保留背景色作为占位 */
     position: relative;
-    /* 为了定位叠加层 */
     cursor: default;
-
-    /* 覆盖行的指针 */
 }
 
-.imageContainer.noImage {
-    border: 1px dashed #d9d9d9;
-    font-size: 24px;
-    color: #bfbfbf;
-}
+
 
 .imageContainer .ant-image {
     width: 100%;
     height: 100%;
+    max-height: 100%;
     display: flex;
-    /* 让 antd Image 组件充满容器 */
+    align-items: center;
+    justify-content: center;
 }
 
 .imageContainer .ant-image img {
     width: 100%;
     height: 100%;
+    max-height: 100%;
     object-fit: cover;
-    /* 保持比例填充 */
 }
 
 .videoContainer {
-    width: 120px;
-    height: 67.5px;
+    width: 100%;
+    /* 宽度填充父元素 */
+    height: 100%;
+    max-height: 100%;
+    /* 高度填充父元素 */
     position: relative;
     overflow: hidden;
     background-color: black;
+    /* 保留背景色 */
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    /* 指示可点击预览 */
+    /* background-color: lime !important; */
+    /* 移除调试背景色 */
 }
 
 .tabVideo {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    max-height: 100%;
     object-fit: cover;
     display: block;
+    /* background-color: magenta !important; */
+    /* 移除调试背景色 */
 }
 
 .videoOverlay {
@@ -93,7 +98,7 @@
 /* 预览提示在悬停时显示 */
 .videoPreviewHintOverlay {
     opacity: 0;
-    font-size: 12px;
+    font-size: 14px;
     pointer-events: auto;
     /* 允许点击 */
 }
@@ -131,4 +136,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* 新增：锁图标样式 */
+.lock-icon {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    padding: 4px;
+    background-color: var(--active-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 50%;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:global(.ant-table-cell.media-cell) {
+    position: relative;
+    padding: 0 4px !important;
+    height: 75px !important;
+    max-height: 75px !important;
+    vertical-align: middle;
+    box-sizing: border-box;
 }

@@ -31,11 +31,11 @@ const Login = () => {
     // 登录逻辑
     const login = () => {
         // 本地开发环境跳过登录
-        if (process.env.NODE_ENV === 'local') {
+        if (process.env.NODE_ENV === 'development') {
             const token = "123456789";
             dispatch({ type: 'modifyData', payload: { name: "token", newdata: token } });
             localDown(token);
-            navigate('/dashboard'); // 假设路由路径
+            navigate('/exercises/list'); // 假设路由路径
             return;
         }
 
@@ -75,7 +75,7 @@ const Login = () => {
                     const token = res.data.token;
                     dispatch({ type: 'modifyData', payload: { name: "token", newdata: token } });
                     localDown(token);
-                    navigate('/exercises-list');
+                    navigate('/exercises/list');
                 } else {
                     // 处理登录失败情况
                     setAccountError("Your email or password seem to be incorrect. Please try again.");
@@ -83,7 +83,7 @@ const Login = () => {
             })
             .catch(error => {
                 setLoading(false);
-                navigate('/exercises-list');
+                navigate('/exercises/list');
                 console.error('Login error:', error);
                 setAccountError("Your email or password seem to be incorrect. Please try again.");
             });

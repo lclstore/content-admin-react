@@ -16,7 +16,7 @@ import {
 } from 'antd';
 import { UserOutlined, CameraOutlined, SaveOutlined } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import '../profile-settings/ProfileSettings.css'; // 引入样式
+import '@/pages/profileSettings/list.css'; // 引入样式
 
 const { Title, Text } = Typography;
 const { useWatch } = Form; // 导入 useWatch

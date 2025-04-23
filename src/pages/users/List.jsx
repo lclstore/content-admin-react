@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { Table, Input, Button, Avatar, Dropdown, Menu, message } from 'antd';
 import { UserOutlined, PlusOutlined, CheckCircleFilled, CloseCircleOutlined, CloseCircleFilled, EllipsisOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation} from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import _debounce from 'lodash/debounce';
@@ -96,6 +96,7 @@ export default function UsersList() {
     // 搜索输入框的值
     const [searchValue, setSearchValue] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
     // 设置保存按钮状态
     useEffect(() => {
@@ -214,7 +215,7 @@ export default function UsersList() {
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
-                    onClick={() => navigate('/users-editor')}
+                    onClick={() => navigate(`/${location.pathname}/editor`)}
                 >
                     Add User
                 </Button>
@@ -239,7 +240,7 @@ export default function UsersList() {
                                 return;
                             }
                             console.log('Row clicked:', record);
-                            navigate(`/users-editor?id=${record.id}`); // 使用查询参数跳转
+                            navigate(`/${location.pathname}/editor?id=${record.id}`); // 使用查询参数跳转
                         },
                         style: { cursor: 'pointer' } // 添加鼠标悬停样式
                     };

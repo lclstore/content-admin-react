@@ -36,14 +36,14 @@
 }
 
 .filterButton {
-    padding: 8px 16px;
+    padding: 6px 16px;
     /* 内边距 */
     border: 1px solid #d9d9d9;
     /* 默认边框 */
     border-radius: 16px;
     /* 更大的圆角 */
     cursor: pointer;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
     color: #595959;
     /* 默认文字颜色 */
@@ -121,4 +121,13 @@
 :global(.ant-popover.popoverOverlay .ant-popover-arrow) {
     display: none;
     /* 隐藏默认箭头 */
+}
+
+/* 增大 Badge 红点 */
+.filterBadge :global(.ant-badge-dot) {
+    width: 8px;
+    /* 原默认为 6px */
+    height: 8px;
+    min-width: 8px;
+    /* 确保宽度 */
 }

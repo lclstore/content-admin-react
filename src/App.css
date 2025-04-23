@@ -116,6 +116,16 @@
   border: none;
 }
 
+/* 多选表格选中效果 */
+.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
+  background: #e6f4ff;
+}
+
+/* 多选表格选择框的圆角 */
+.ant-checkbox .ant-checkbox-inner {
+  border-radius: 3px;
+}
+
 /* 表格单元格内边距 */
 .ant-table-wrapper>tr .ant-table-cell,
 .ant-table-wrapper .ant-table-tbody>tr>td {
@@ -123,6 +133,7 @@
   height: 75px;
   line-height: 75px;
 }
+
 
 .ant-table-wrapper .ant-table-tbody>tr>td.imgContainer {
   padding: 0;
@@ -150,14 +161,27 @@
   color: var(--primary-color);
 }
 
+/* 表格checkbox */
+.ant-table-wrapper .ant-checkbox .ant-checkbox-inner {
+  width: 18px;
+  height: 18px;
+}
+
+
+.ant-table-wrapper .ant-table-tbody>tr>td .name-cell {
+  padding: 0 16px;
+  line-height: 1.5;
+  height: auto;
+}
+
 .ant-table-wrapper .ant-table-tbody>tr>td.ant-table-cell .success-icon {
-  color: var(--active-border-color);
+  color: #52c41a;
   font-weight: bolder;
   font-size: 16px;
 }
 
 .ant-table-wrapper .ant-table-tbody>tr>td.ant-table-cell .error-icon {
-  color: var(--color-error-light);
+  color: #ff4d4f;
   font-weight: bolder;
   font-size: 16px;
 }
@@ -282,7 +306,7 @@
 
 .searchBar .ant-input-affix-wrapper {
 
-  width: 300px;
+  width: 400px;
   /* border-color: #fff; */
 }
 
@@ -311,7 +335,7 @@
 }
 
 .ant-form-item {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 
@@ -337,4 +361,16 @@
 
 .ant-form-item .ant-form-item-label>label {
   font-size: 14px;
+}
+
+.ant-form-item .ant-form-item-explain {
+  padding: 5px 0 10px 0;
+  font-size: 12px;
+}
+
+/* 去掉日期选择器范围选择背景色 */
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-in-range:not(.ant-picker-cell-disabled):before,
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-disabled):before,
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-end:not(.ant-picker-cell-disabled):before {
+  background: #e8e8e8;
 }

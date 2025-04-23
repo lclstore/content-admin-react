@@ -189,9 +189,9 @@ export const download = (url, params = {}, filename) => {
 
 // 从响应头中获取文件名
 const getFilenameFromResponse = (response) => {
-  const contentDisposition = response.headers['content-disposition'];
-  if (contentDisposition) {
-    const filenameMatch = contentDisposition.match(/filename=(.+)/);
+  const contentDisPremium = response.headers['content-disPremium'];
+  if (contentDisPremium) {
+    const filenameMatch = contentDisPremium.match(/filename=(.+)/);
     if (filenameMatch && filenameMatch.length > 1) {
       return filenameMatch[1];
     }

@@ -91,78 +91,12 @@ src/
 
 ### 安装依赖
 ```bash
+# 安装项目所有基础依赖
 npm install
+
+# 安装拖拽排序功能所需的依赖
+npm install @dnd-kit/core @dnd-kit/sortable
 ```
 
 ### 运行命令
-- 开发环境：`npm run dev`
-- 测试环境：`npm run dev:test`
-- 生产环境：`npm run dev:prod`
-- 构建生产：`npm run build`
-- 构建测试：`npm run build:test`
-- 运行测试：`npm run test`
-
-### 环境配置
-支持开发、测试和生产三种环境：
-- `.env.development` - 开发环境
-- `.env.test` - 测试环境
-- `.env.production` - 生产环境
-
-## 项目规范
-
-- **代码风格**：ESLint + Prettier
-- **提交规范**：Conventional Commits
-- **命名规范**：
-  - 组件：PascalCase
-  - 工具/Hooks：camelCase
-  - 常量：UPPER_SNAKE_CASE
-- **路径引用**：使用别名路径（如`@/components`）
-- **API组织**：按业务模块划分
-- **服务层**：复杂业务逻辑放在服务层
-- **常量管理**：集中管理，避免魔法字符串
-
-## 版本信息
-
-- **当前版本**：v1.0.0
-- **创建日期**：2025年4月9日
-- **基础环境**：Node.js v20.19.0, npm v10.8.2
-
-# 版本记录
-
-本文档记录项目依赖的主要技术栈版本信息，便于项目维护和版本管理。
-
-## 运行环境
-
-| 软件 | 版本 | 说明 |
-|------|------|------|
-| Node.js | v20.19.0 | 运行时环境 |
-| npm | v10.8.2 | 包管理器 |
-
-## 核心依赖
-
-| 依赖 | 版本 | 说明 |
-|------|------|------|
-| React | ^18.2.0 | 前端框架 |
-| React DOM | ^18.2.0 | React DOM 渲染 |
-| React Router | ^7.5.0 | 路由管理 |
-| Redux Toolkit | ^1.9.7 | 状态管理 |
-| Ant Design | ^5.11.5 | UI 组件库 |
-| Ant Design Icons | ^5.2.6 | 图标库 |
-| Axios | ^1.6.2 | HTTP 客户端 |
-| Lodash | ^4.17.21 | 工具库 |
-| PropTypes | ^15.8.1 | 类型检查 |
-
-## 开发依赖
-
-| 依赖 | 版本 | 说明 |
-|------|------|------|
-| Vite | ^5.0.4 | 构建工具 |
-| ESLint | ^8.55.0 | 代码检查 |
-| Vitest | ^1.6.1 | 测试框架 |
-| JSDOM | ^24.1.3 | DOM 环境模拟 |
-
-## 版本兼容性说明
-
-- React Router v7 要求 Node.js >= v20.0.0
-- React Router v7 要求 React >= 18
-- 当前项目配置满足所有依赖的版本要求 
+- 开发环境：`

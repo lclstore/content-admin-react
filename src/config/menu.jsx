@@ -20,6 +20,7 @@ import {
     SettingOutlined,
     LoginOutlined,
     ThunderboltOutlined,
+    AudioOutlined
 } from '@ant-design/icons';
 import settings from './settings';
 
@@ -29,7 +30,9 @@ export const iconMap = {
     workouts: <DashboardOutlined />,
     users: <UserOutlined />,
     'profile-settings': <SettingOutlined />,
-    login: <LoginOutlined />
+    login: <LoginOutlined />,
+    music: <AudioOutlined />
+
 };
 
 // 静态菜单项 - 只有登录页
@@ -56,7 +59,7 @@ try {
         sign: 'pages',
         suffix: '.jsx',
         // 二次处理符合api结构
-        createRule(routerConfig){
+        createRule(routerConfig) {
             [
                 routerConfig.folderName,
                 routerConfig.hideInMenu,
@@ -66,14 +69,14 @@ try {
                 routerConfig.title,
                 routerConfig.Component,
             ] = [
-                routerConfig.meta,
-                routerConfig.noShow,
-                iconMap[routerConfig.meta] || null,
-                routerConfig.path,
-                settings.menu?.menuOrder?.[routerConfig.meta] || 999,
-                routerConfig.showName,
-                pageFiles['../pages/' + routerConfig.component]
-            ]
+                    routerConfig.meta,
+                    routerConfig.noShow,
+                    iconMap[routerConfig.meta] || null,
+                    routerConfig.path,
+                    settings.menu?.menuOrder?.[routerConfig.meta] || 999,
+                    routerConfig.showName,
+                    pageFiles['../pages/' + routerConfig.component]
+                ]
         }
     })
     dynamicMenus = registerList

@@ -43,8 +43,8 @@ const TagSelector = ({ options, value, onChange, mode = 'single', placeholder })
     const hasValue = mode === 'multiple' ? (Array.isArray(value) && value.length > 0) : !!value;
 
     return (
-        <div className="tag-selector-container">
-            <div className="tag-selector-options">
+        <div className={`tag-selector-container `}>
+            <div className={`tag-selector-options tag-selector-container-${mode}`}>
                 {options.length > 0 ? (
                     options.map(option => (
                         <div
@@ -62,7 +62,7 @@ const TagSelector = ({ options, value, onChange, mode = 'single', placeholder })
                 {/* 如果有选项但没有值被选中，且需要显示占位符 */}
                 {options.length > 0 && !hasValue && placeholder && mode === 'single' && <span className="tag-selector-placeholder" style={{ marginLeft: '5px' }}>{placeholder}</span>}
             </div>
-        </div>
+        </div >
     );
 };
 

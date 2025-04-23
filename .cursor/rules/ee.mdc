@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+对话使用中文对话
+代码注释为中文注释
+- You can @ files here
+- You can use markdown but dont have to

@@ -104,6 +104,19 @@ const settings = {
         colorPrimaryHover: '#11af75',
         inactiveColor: '#c0c6c6',
       },
+      DatePicker: {
+        colorPrimary: '#1c8',
+        colorPrimaryHover: '#11af75',
+        inactiveColor: '#c0c6c6',
+        cellHeight: 40,
+        controlHeight: 40,
+        borderWidth: 1,
+        activeBorderColor: '#1c8',
+        hoverBorderColor: '#1c8',
+        activeShadow: 'none',
+        cellInRangeBg: 'none',
+      },
+
     }
   }
 

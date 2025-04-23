@@ -8,15 +8,27 @@
     overflow-y: auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
     margin-bottom: 16px;
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+    /* 防止内容溢出 */
+    margin-right: 8px !important;
 }
 
 .editor-form-panel .title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
     margin-bottom: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+    /* 防止标题收缩 */
+}
+
+.editor-form-panel .editor-form {
+    padding: 0 16px;
 }
 
 .editor-form-panel .title .info-icon {
@@ -27,6 +39,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    color: rgba(0, 0, 0, 0.45);
 }
 
 .editor-form-panel .collapse-icon {
@@ -41,6 +54,13 @@
     color: #fff !important;
     padding: 5px;
     border-radius: 50%;
+    margin-right: 8px;
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 16px;
+}
+
+.ant-collapse-ghost>.ant-collapse-item>.ant-collapse-content>.ant-collapse-content-box {
+    padding: 0 16px;
 }
 
 .editor-form-panel .workout-details-collapse.ant-collapse-ghost>.ant-collapse-item {
@@ -53,6 +73,7 @@
     font-weight: 600;
     padding: 12px 16px !important;
     border-radius: 8px;
+    font-size: 16px;
     border: none;
     transition: background-color 0.3s ease, color 0.3s ease !important;
 }
@@ -62,6 +83,14 @@
     border-color: var(--active-color);
     border-width: 1px;
     border-style: solid;
+    border-bottom: none;
+}
+
+.editor-form-panel .ant-btn.ant-btn-icon-only {
+    width: 30px;
+}
+
+.editor-form-panel .structure-list .ant-list-item {
     border-bottom: none;
 }
 
@@ -89,9 +118,240 @@
 }
 
 .editor-form-panel .workout-details-collapse .ant-collapse-expand-icon svg {
-    color: rgb(17, 204, 136);
+    /* 恢复之前的颜色或移除此规则，这里暂时注释掉 */
+    /* color: var(--primary-color); */
 }
 
 .ant-form-vertical .ant-form-item:not(.ant-form-item-horizontal) .ant-col-xl-24.ant-form-item-label {
     padding: 0 0 5px;
+}
+
+.ant-collapse>.ant-collapse-item>.ant-collapse-header .ant-collapse-arrow {
+    color: var(--active-color);
+    font-size: 20px;
+}
+
+.editor-form {
+    padding: 24px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* 折叠面板组件样式 */
+.workout-details-collapse {
+    background-color: #fff;
+    border: none;
+}
+
+.workout-details-collapse .ant-collapse-item {
+    border-bottom: 1px solid #f0f0f0 !important;
+    /* 使用 !important 需谨慎 */
+}
+
+.workout-details-collapse .ant-collapse-item:last-child {
+    border-bottom: none !important;
+}
+
+.workout-details-collapse .ant-collapse-header {
+    padding: 12px 0 !important;
+    align-items: center;
+}
+
+.workout-details-collapse .ant-collapse-content {
+    padding: 16px 0;
+    background-color: #fff;
+}
+
+.workout-details-collapse .ant-collapse-content-box {
+    padding: 0;
+}
+
+.collapse-left-icon {
+    background-color: #889e9e;
+    color: #fff !important;
+    padding: 5px;
+    border-radius: 50%;
+    margin-right: 8px;
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 16px;
+}
+
+/* Structure 面板标题特定样式 */
+.structure-panel-header .ant-space-item:not(:last-child) {
+    margin-right: 8px !important;
+}
+
+
+
+
+.item-wrapper {
+    /* margin-bottom: 16px; */
+    padding: 3px 0;
+    border: 1px solid #fff;
+}
+
+/* 展开内容的样式 */
+.item-wrapper.expanded .expanded-content {
+    background-color: transparent;
+    padding-top: 16px;
+}
+
+/* 应用边框和内边距到展开项的 WRAPPER */
+.item-wrapper.expanded {
+    padding: 6px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border: 1px solid var(--active-color);
+}
+
+.ant-list-vertical .ant-list-item .ant-list-item-meta {
+    display: flex;
+    align-items: center;
+}
+
+.ant-list-vertical .ant-list-item .ant-list-item-meta .ant-list-item-meta-title {
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* 设置 Structure 项右侧操作按钮的图标大小 */
+.structure-item-actions .anticon {
+    font-size: 20px !important;
+    color: var(--active-color) !important;
+}
+
+/* 单独设置删除按钮图标为红色 */
+.structure-item-actions .ant-btn-dangerous .anticon {
+    color: #ff4d4f !important;
+    /* Ant Design 的危险红色 */
+}
+
+/* 包裹 Avatar 的 div，用于相对定位 */
+.structure-item-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    /* 或者 block，根据需要 */
+    line-height: 1;
+    /* 防止额外的行高影响布局 */
+}
+
+/* 播放图标样式 */
+.structure-item-play-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
+    color: #fff;
+}
+
+/* ValueStepper 输入框样式 */
+.value-stepper-input {
+    width: 80px;
+    text-align: center;
+}
+
+/* 可排序项行样式 */
+.sortable-item-row {
+    cursor: pointer;
+    /* 光标指示行可点击 */
+    width: 100%;
+}
+
+/* 可排序项 Meta 区域样式 */
+.structure-item-meta {
+    align-items: center;
+    display: flex;
+    align-content: center;
+    gap: 0 6px;
+}
+
+/* 排序/拖拽句柄按钮样式 */
+.sort-handle {
+    cursor: grab;
+    /* 视觉提示可拖拽 */
+}
+
+/* 展开内容中的 InfoCircleOutlined 图标样式 */
+.expanded-content .info-circle-icon {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+/* DatePicker 100% 宽度 */
+.full-width-datepicker {
+    width: 100%;
+}
+
+/* 轮次输入区域样式 */
+.round-input-space {
+    margin-bottom: 16px;
+}
+
+/* 轮次 InputNumber 样式 */
+.round-input-number {
+    width: 60px;
+}
+
+/* --- 新增：独立 Structure 面板容器样式 --- */
+.structure-panel-container {
+    margin-top: 16px;
+
+}
+
+.structure-panel-header {
+    padding-right: 16px;
+    margin: 26px 0 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-color);
+
+}
+
+
+
+/* --- 新增：Structure 名称输入容器样式调整 --- */
+.structure-name-input-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+}
+
+.structure-name-label {
+    white-space: nowrap;
+    /* 防止 Label 换行 */
+}
+
+/* 调整 Round 设置区域的下边距 */
+.round-input-space {
+    margin-bottom: 16px;
+    /* 与下方列表的间距 */
+}
+
+/* --- 新增：Structure 面板 Add 按钮样式 --- */
+.structure-add-button {
+    /* 可以设置文字颜色，如果需要的话 */
+    color: var(--primary-color);
+    display: inline-flex;
+    /* 让图标和文字在同一行 */
+    align-items: center;
+    /* 垂直居中 */
+    gap: 4px;
+    /* 图标和文字之间的间距 */
+    cursor: pointer;
+}
+
+.structure-add-button svg {
+    fill: var(--primary-color);
+    /* 设置图标颜色 */
+    /* 可以根据需要调整图标大小 */
+    /* font-size: 18px; */
+}
+
+.calculated-data-label {
+    font-size: 14px;
+    color: var(--primary-color);
+    font-weight: 600;
 }

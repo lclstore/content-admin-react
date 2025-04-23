@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import {
     Form,
     Input,
@@ -26,7 +26,7 @@ import {
     UserOutlined
 } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import './ProfileSettings.css';
+import './list.css';
 
 const { Title, Text, Paragraph } = Typography;
 

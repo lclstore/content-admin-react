@@ -15,7 +15,6 @@ import styles from './FiltersPopover.module.css';
  * @param {string} [popoverPlacement='bottomRight'] - Popover 的弹出位置
  * @param {boolean} [applyImmediately=false] - 点击选项后是否立即触发 onUpdate 并关闭 Popover (仅过滤器类型有效)
  * @param {string} [clearButtonText='Clear'] - 清除按钮的文本 (仅过滤器类型有效)
- * @param {string} [confirmButtonText='Search'] - 确认按钮的文本
  * @param {boolean} [showBadgeDot=false] - 是否在触发元素上显示小红点 (设置类型按钮不会显示)
  * @param {React.ReactNode} children - 触发 Popover 的元素 (必需)
  * @param {boolean} [showClearIcon=false] - 是否在触发元素旁边显示清除图标 (设置类型按钮不会显示)
@@ -29,7 +28,6 @@ const FiltersPopover = ({
     popoverPlacement = 'bottomRight',
     applyImmediately = false,
     clearButtonText = 'Clear',
-    confirmButtonText = 'Search',
     children,
     showBadgeDot = false,
     showClearIcon = false,
@@ -53,8 +51,7 @@ const FiltersPopover = ({
         setIsVisible(open);
     };
 
-    const handleOptionClick = (sectionKey, optionValue, isDisabled) => {
-        if (isDisabled) return;
+    const handleOptionClick = (sectionKey, optionValue) => {
         // 预先计算下一个状态值
         const calculateNextState = (prev) => {
             const currentSelection = prev[sectionKey] ? [...prev[sectionKey]] : [];
@@ -74,8 +71,15 @@ const FiltersPopover = ({
             return nextSelectedValues;
         });
 
-        // 如果需要立即应用且不是设置类型，则使用计算好的 nextSelectedValues 调用 onUpdate
-        if (applyImmediately && !isSettingsType && onUpdate) {
+        // 如果需要立即应用，则使用计算好的 nextSelectedValues 调用 onUpdate
+        if (applyImmediately && onUpdate) {
+            // 确保 nextSelectedValues 已经被 calculateNextState 函数赋值
+            // 注意：虽然 setState 是异步的，但 calculateNextState 是同步执行的，
+            // 并且 nextSelectedValues 在 setState 的 updater 函数内部被赋值。
+            // 然而，为了确保在 if 条件判断时 nextSelectedValues 一定有值，
+            // 应该在 setState 之外计算它。
+
+            // 修正：在 setState 外部计算 nextSelectedValues
             const currentState = tempSelectedValues; // 获取当前状态
             const trulyNextSelectedValues = calculateNextState(currentState);
 
@@ -88,7 +92,7 @@ const FiltersPopover = ({
             // setIsVisible(false); // 如果点击立即生效，通常也需要关闭 Popover
         }
     };
-    // 重置
+
     const handleReset = () => {
         if (onReset) {
             onReset();
@@ -96,7 +100,7 @@ const FiltersPopover = ({
         setTempSelectedValues({});
         setIsVisible(false);
     };
-    // 确认/更新
+
     const handleUpdate = () => {
         if (onUpdate) {
             onUpdate(JSON.parse(JSON.stringify(tempSelectedValues)));
@@ -109,8 +113,6 @@ const FiltersPopover = ({
     const shouldShowClearIcon = showClearIcon && !isSettingsPopover;
     const shouldShowBadgeDot = showBadgeDot && !isSettingsPopover;
 
-    // 判断是否需要显示底部按钮区域
-    const shouldShowFooter = onReset || (!applyImmediately && onUpdate) || isSettingsType;
     const content = (
         <div className={styles.filterContent}>
             {filterSections.map((section, index) => (
@@ -118,21 +120,15 @@ const FiltersPopover = ({
                     <div className={styles.filterSectionItem}>
                         <div className={styles.filterSectionTitle}>{section.title}</div>
                         <div className={styles.filterSection}>
-                            {console.log('section.options', section.options)}
-
                             {section.options.map(option => {
-                                // 支持新的options格式，每个选项可以是字符串或包含key和label的对象
-                                const optionKey = typeof option === 'object' ? option.key : option;
-                                const optionLabel = typeof option === 'object' ? option.label : option;
-
-                                const isSelected = tempSelectedValues[section.key]?.includes(optionKey);
+                                const isSelected = tempSelectedValues[section.key]?.includes(option);
                                 return (
                                     <div
-                                        key={optionKey}
-                                        onClick={() => handleOptionClick(section.key, optionKey, option.disabled)}
-                                        className={`${styles.filterButton} ${isSelected ? styles.active : ''} ${option.disabled ? styles.disabled : ''} `}
+                                        key={option}
+                                        onClick={() => handleOptionClick(section.key, option)}
+                                        className={`${styles.filterButton} ${isSelected ? styles.active : ''}`}
                                     >
-                                        {optionLabel}
+                                        {option}
                                     </div>
                                 );
                             })}
@@ -142,7 +138,7 @@ const FiltersPopover = ({
                 </React.Fragment>
             ))}
 
-            {shouldShowFooter && (
+            {(onReset || (!applyImmediately && onUpdate)) && (
                 <div className={styles.filterFooter}>
                     <Space>
                         {onReset && (
@@ -150,9 +146,9 @@ const FiltersPopover = ({
                                 {clearButtonText}
                             </Button>
                         )}
-                        {((!applyImmediately && onUpdate) || isSettingsType) && (
+                        {!applyImmediately && onUpdate && (
                             <Button type="primary" onClick={handleUpdate} className={`${styles.footerButton} ${styles.updateButton}`}>
-                                {isSettingsType ? 'Apply' : confirmButtonText}
+                                Search
                             </Button>
                         )}
                     </Space>

@@ -15,7 +15,6 @@ export const statusOrder = {
 
 // (可选) 定义强制显示和默认显示的列 key
 export const MANDATORY_COLUMN_KEYS = ['audio', 'name'];
-export const DEFAULT_VISIBLE_TABLE_COLUMN_KEYS = ['audio', 'name', 'status', 'duration', 'actions']; // 添加 actions 列
 
 // (可选) 定义筛选器配置
 export const filterSections = [

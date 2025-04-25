@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Table, Input, Button, Spin, Space } from 'antd';
 import { SearchOutlined, FilterOutlined, SettingOutlined } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
-import './ConfigurableTable.css';
+import styles from './ConfigurableTable.module.css';
+import MediaCell from '@/components/MediaCell/MediaCell';
 
 // 默认分页配置
 const DEFAULT_PAGINATION = {
@@ -36,6 +37,8 @@ const DEFAULT_PAGINATION = {
  * @param {object} [props.tableProps] - 其他 Table props
  * @param {boolean} [props.showColumnSettings=true] - 是否显示列设置按钮
  * @param {Array<string>} [props.configurableColumnKeys=[]] - 定义哪些列是用户可以配置显示/隐藏的 key 数组
+ * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
+ * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  */
 function ConfigurableTable({
     uniqueId,
@@ -44,6 +47,7 @@ function ConfigurableTable({
     rowKey,
     loading = false,
     onRowClick,
+    isInteractionBlockingRowClick, // 接收状态
     actionColumnKey,
     mandatoryColumnKeys = [], // 强制列 Key
     defaultVisibleColumnKeys, // 默认可见的 *可配置* 列 Key (可能为 undefined)
@@ -56,8 +60,9 @@ function ConfigurableTable({
     scrollX = true,
     rowSelection,
     tableProps,
-    showColumnSettings = true,
+    showColumnSettings = true,//展示列设置按钮
     configurableColumnKeys = [], // 可配置列的 Key 列表
+    leftToolbarItems = [], // 左侧工具栏按钮
 }) {
     const storageKey = `table_visible_columns_${uniqueId}`;
 
@@ -189,24 +194,51 @@ function ConfigurableTable({
         }, 0);
     }, [currentlyVisibleColumns, scrollX]);
 
-    // 处理行点击
-    const handleRow = (record) => ({
-        onClick: (event) => {
-            if (onRowClick) {
-                let targetElement = event.target;
-                let isActionColumnClick = false;
-                while (targetElement && targetElement !== event.currentTarget) {
-                    if (targetElement.dataset.actionKey === actionColumnKey) {
-                        isActionColumnClick = true;
-                        break;
-                    }
-                    targetElement = targetElement.parentElement;
+    // 处理行事件 (根据 isInteractionBlockingRowClick 决定是否绑定 onClick)
+    const handleRow = (record) => {
+        // 如果交互状态阻止点击，则不为行附加 onClick 处理器
+        if (isInteractionBlockingRowClick) {
+            // 返回空对象，不绑定任何事件
+            return {};
+        }
+
+        // 否则，正常绑定 onClick
+        return {
+            onClick: (event) => {
+                // 首先检查全局图片预览状态 - 如果预览激活，直接阻止行点击
+                if (window.IMAGE_PREVIEW_ACTIVE === true) {
+                    console.log('Row click blocked: Image preview is active');
+                    return;
                 }
-                if (!isActionColumnClick) onRowClick(record, event);
-            }
-        },
-        style: onRowClick ? { cursor: 'pointer' } : {},
-    });
+
+                if (onRowClick) {
+                    // 保持原有的检查逻辑（操作列等）
+                    let targetElement = event.target;
+                    let isActionColumnClick = false;
+                    let isMediaCellClick = false; // 添加媒体单元格点击检查
+
+                    while (targetElement && targetElement !== event.currentTarget) {
+                        if (targetElement.dataset && targetElement.dataset.actionKey === actionColumnKey) {
+                            isActionColumnClick = true;
+                            break;
+                        }
+                        // 启用对媒体单元格的检查
+                        if (targetElement.closest('td.media-cell')) {
+                            isMediaCellClick = true; // 标记为媒体单元格点击
+                            break;
+                        }
+                        targetElement = targetElement.parentElement;
+                    }
+
+                    // 如果既不是操作列点击，也不是媒体单元格点击，才触发行点击事件
+                    if (!isActionColumnClick && !isMediaCellClick) {
+                        onRowClick(record, event);
+                    }
+                }
+            },
+            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
+        };
+    };
 
     // 为操作列的 render 函数包裹一层 div
     const columnsWithActionMarker = useMemo(() => {
@@ -235,11 +267,98 @@ function ConfigurableTable({
         return config;
     }, [paginationConfig, dataSource]);
 
+    // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
+    const processedColumns = useMemo(() => {
+        const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
+        return currentlyVisibleColumns.map(col => {
+            let processedCol = { ...col };
+
+            // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
+            if (mediaTypes.includes(processedCol.mediaType)) {
+                // 为包含媒体类型的列添加特殊的className
+                processedCol.className = styles.mediaCell;
+                // 添加 onCell 方法给单元格添加类名
+                processedCol.onCell = () => ({
+                    className: 'media-cell', // 为单元格添加 media-cell 类名
+                });
+
+                // 只有在没有自定义render函数时才设置默认的MediaCell渲染
+                if (typeof processedCol.render === 'undefined') {
+                    // 设置 render 函数来渲染 MediaCell
+                    processedCol.render = (text, record) => {
+                        // 直接将列定义的 mediaType ('image', 'video', 'audio') 传递给 MediaCell
+                        return (
+                            <MediaCell
+                                record={record}
+                                processedCol={processedCol} // 直接使用列定义的配置信息
+                            />
+                        );
+                    };
+                }
+            }
+
+            // 如果列有 iconMap 属性，设置 render 函数使用图标映射渲染内容
+            if (processedCol.iconMap && !processedCol.render) {
+                //  图标映射
+                const iconMap = processedCol.iconMap;
+                console.log('iconMap', iconMap);
+
+                processedCol.render = (text, record) => {
+                    // 尝试获取小写形式的键值
+                    const key = typeof text === 'string'
+                        ? text.toLowerCase()
+                        : text;
+                    const iconConfig = iconMap[key];
+                    // 如果在映射中找不到，返回原始文本
+                    if (!iconConfig) return text;
+
+                    const Icon = iconConfig.icon;
+                    return (
+                        <span style={{ color: iconConfig.color }}>
+                            {iconConfig.icon && <Icon style={{ marginRight: '5px' }} />}
+                            {!processedCol.hideIconText && text}
+                        </span>
+                    );
+                };
+            }
+
+            // 为操作列添加标记 (保持不变)
+            if ((processedCol.key || processedCol.dataIndex) === actionColumnKey && processedCol.render) {
+                const originalRender = processedCol.render;
+                processedCol.render = (...args) => (
+                    <div data-action-key={actionColumnKey}>
+                        {originalRender(...args)}
+                    </div>
+                );
+            }
+
+            return processedCol;
+        });
+    }, [currentlyVisibleColumns, actionColumnKey]);
+
     return (
-        <div className="configurable-table-container">
+        <div className={styles.configurableTableContainer}>
             {/* 工具栏 */}
-            <div className="searchBar">
-                <Space wrap>
+            <div className={styles.configurableTableToolbar}>
+                {/* 左侧按钮区域 */}
+                <Space wrap className={styles.configurableTableToolbarLeft}>
+                    {leftToolbarItems.map(item => (
+                        <Button
+                            key={item.key}
+                            onClick={item.onClick}
+                            type={item.type || 'default'} // 默认为 default 类型
+                            icon={item.icon}
+                            disabled={item.disabled}
+                            // 可以传递其他 Button props
+                            {...item.buttonProps}
+                        >
+                            {item.label}
+                        </Button>
+                    ))}
+                </Space>
+
+                {/* 右侧工具区域 */}
+                <Space wrap className={styles.configurableTableToolbarRight}>
                     {searchConfig && (
                         <Input
                             maxLength={100}
@@ -248,7 +367,7 @@ function ConfigurableTable({
                             value={searchConfig.searchValue}
                             prefix={<SearchOutlined />}
                             onChange={searchConfig.onSearchChange}
-                            className="configurable-table-search-input"
+                            className={styles.configurableTableSearchInput}
                             suffix={loading ? <Spin size="small" /> : null}
                             allowClear
                         />
@@ -264,7 +383,7 @@ function ConfigurableTable({
                         >
                             <Button
                                 icon={<FilterOutlined />}
-                                className="configurable-table-toolbar-btn"
+                                className={styles.configurableTableToolbarBtn}
                             >
                                 Filters
                             </Button>
@@ -285,22 +404,19 @@ function ConfigurableTable({
                         >
                             <Button
                                 icon={<SettingOutlined />}
-                                className="configurable-table-toolbar-btn configurable-table-settings-btn"
+                                className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
                             >
                                 Table Settings
                             </Button>
                         </FiltersPopover>
                     )}
                 </Space>
-                <div className="configurable-table-extra-toolbar">
-                    {extraToolbarItems}
-                </div>
             </div>
 
             {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
-            <div className="configurable-table-body">
+            <div className={styles.configurableTableBody}>
                 <Table
-                    columns={columnsWithActionMarker}
+                    columns={processedColumns}
                     dataSource={dataSource}
                     rowKey={rowKey}
                     loading={loading}

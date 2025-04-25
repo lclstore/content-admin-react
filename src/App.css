@@ -129,9 +129,12 @@
 /* 表格单元格内边距 */
 .ant-table-wrapper>tr .ant-table-cell,
 .ant-table-wrapper .ant-table-tbody>tr>td {
-  padding: 0 16px;
+  padding: 0 8px;
   height: 75px;
-  line-height: 75px;
+}
+
+.ant-table-wrapper .ant-table-tbody>tr>td.media-cell {
+  padding: 0;
 }
 
 
@@ -166,11 +169,7 @@
 }
 
 
-.ant-table-wrapper .ant-table-tbody>tr>td .name-cell {
-  padding: 0 16px;
-  line-height: 1.5;
-  height: auto;
-}
+
 
 .ant-table-wrapper .ant-table-tbody>tr>td.ant-table-cell .success-icon {
   color: #52c41a;
@@ -295,7 +294,7 @@
 
 .searchBar .ant-input-affix-wrapper {
 
-  width: 400px;
+  width: 500px;
   /* border-color: #fff; */
 }
 

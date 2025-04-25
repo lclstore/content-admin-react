@@ -41,7 +41,22 @@ export function formatDate(date, format = 'YYYY-MM-DD') {
 
   return format.replace(/YYYY|MM|DD|HH|mm|ss/g, match => formatMap[match]);
 }
-
+/**
+* 格式化一段日期区间
+* @param {string|Date|null|undefined} start - 开始时间
+* @param {string|Date|null|undefined} end - 结束时间
+* @param {string} pattern - 格式化模板，默认 'YYYY-MM-DD'
+* @returns {string} - 返回 'start to end'，或全部为空时返回 '-'
+*/
+export function formatDateRange(start, end, pattern = 'YYYY-MM-DD') {
+  const formattedStart = start ? formatDate(start, pattern) : '-';
+  const formattedEnd = end ? formatDate(end, pattern) : '-';
+  // 如果两端都为空，就直接返回 '-'
+  if (formattedStart === '-' && formattedEnd === '-') {
+    return '-';
+  }
+  return `${formattedStart} to ${formattedEnd}`;
+}
 /**
  * 防抖函数
  * @param {Function} fn 需要防抖的函数

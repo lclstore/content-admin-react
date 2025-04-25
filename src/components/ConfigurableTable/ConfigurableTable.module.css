@@ -1,8 +1,8 @@
-.configurable-table-container {
+.configurableTableContainer {
     width: 100%;
 }
 
-.configurable-table-toolbar {
+.configurableTableToolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -14,22 +14,16 @@
 }
 
 /* 左侧工具栏组 */
-.configurable-table-toolbar>.ant-space {
+.configurableTableToolbar>.ant-space {
     flex-wrap: wrap;
     /* 允许按钮换行 */
     gap: 10px !important;
     /* 按钮之间的间隙 */
 }
 
-
-.configurable-table-search-input {
-    min-width: 250px;
-    /* 给搜索框一个最小宽度 */
-    flex-grow: 1;
-    /* 允许搜索框伸展 */
+.configurableTableSearchInput {
+    width: 500px;
 }
-
-
 
 /* 确保操作列的内容即使在有 data-action-key 时也能正常显示 */
 [data-action-key] {
@@ -38,14 +32,14 @@
 }
 
 /* 微调下拉菜单按钮，防止被行点击覆盖 */
-[data-action-key] .action-dropdown .action-button {
+[data-action-key] .actionDropdown .actionButton {
     position: relative;
     /* 确保 z-index 生效 */
     z-index: 1;
     /* 尝试提高层级 */
 }
 
-.larger-badge-dot .ant-badge-dot {
+.largerBadgeDot .ant-badge-dot {
     width: 10px;
     /* 设置点的宽度 */
     height: 10px;
@@ -55,12 +49,12 @@
 }
 
 /* 添加操作菜单的样式 */
-.actions-container {
+.actionsContainer {
     display: inline-block;
     cursor: pointer;
 }
 
-.action-button {
+.actionButton {
     padding: 4px 8px;
 }
 
@@ -70,7 +64,7 @@
 }
 
 /* 撤销操作样式 */
-.undo-message {
+.undoMessage {
     display: flex;
     align-items: center;
     margin-left: 16px;
@@ -80,12 +74,12 @@
     animation: fadeIn 0.3s ease;
 }
 
-.undo-message span {
+.undoMessage span {
     margin-right: 8px;
     color: rgba(0, 0, 0, 0.65);
 }
 
-.undo-message .ant-btn-link {
+.undoMessage .ant-btn-link {
     padding: 0 4px;
     height: auto;
 }
@@ -113,4 +107,9 @@
 
 .searchInput {
     width: 300px;
+}
+
+/* 给MediaCell对应的表格单元格设置padding为0 */
+.configurableTableContainer .mediaCellTd {
+    padding: 0 !important;
 }

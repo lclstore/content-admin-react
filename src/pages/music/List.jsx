@@ -3,7 +3,7 @@ import { Tooltip, message, Dropdown, Button, Modal } from 'antd'; // 添加 Drop
 import { EllipsisOutlined, EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons'; // 添加图标
 import { debounce } from 'lodash';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable'; // 导入可配置表格组件
-import { mockMusicData, statusOrder, MANDATORY_COLUMN_KEYS, DEFAULT_VISIBLE_TABLE_COLUMN_KEYS, filterSections } from './Data'; // 从 Data.js 导入
+import { mockMusicData, statusOrder, MANDATORY_COLUMN_KEYS, filterSections } from './Data'; // 从 Data.js 导入
 // import './List.css'; // 如果需要自定义样式，可以取消注释
 
 // 将 formatDuration 移到组件外部或 utils 文件中
@@ -283,7 +283,7 @@ export default function MusicList() {
                 onRowClick={handleRowClick} // 行点击回调
                 actionColumnKey="actions" // !!! 指定操作列的 key，以便 ConfigurableTable 识别 !!!
                 mandatoryColumnKeys={MANDATORY_COLUMN_KEYS} // 强制显示的列
-                defaultVisibleColumnKeys={DEFAULT_VISIBLE_TABLE_COLUMN_KEYS} // 默认显示的列
+
                 searchConfig={{
                     placeholder: "Search content ID or name...",
                     searchValue: searchValue,

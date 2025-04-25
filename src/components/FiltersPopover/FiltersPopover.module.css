@@ -2,7 +2,9 @@
 
 .filterContent {
     padding: 16px;
-    max-width: 580px;
+    max-width: 550px;
+    max-height: 480px;
+    overflow-y: auto;
     background-color: #fff;
     /* 背景色 */
     border-radius: 8px;
@@ -55,11 +57,15 @@
     /* 防止文本选中 */
 }
 
-.filterButton:hover {
-    /* border-color: var(--active-color); */
-    /* 悬停时边框颜色 */
-    color: var(--text-secondary);
-    /* 悬停时文字颜色 */
+.disabled {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: #d9d9d9;
+    color: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+}
+
+.filterButton:not(.disabled):hover {
+    opacity: 0.8;
 }
 
 .filterButton.active {
@@ -77,9 +83,6 @@
     height: 1px;
     /* 设置高度 */
     background-color: #f0f0f0;
-    /* 设置颜色 (与页脚分割线一致) */
-    margin: 0 0 16px 0;
-    /* 调整外边距，下方留出间距 */
 }
 
 .filterFooter {

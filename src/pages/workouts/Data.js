@@ -4,16 +4,7 @@ export const statusOrder = { 'Enabled': 1, 'Draft': 2, 'Disabled': 3, 'Deprecate
 // 定义难度排序权重
 export const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
 
-// 定义 localStorage 中存储可见列信息的 Key
-export const WORKOUT_LIST_VISIBLE_COLUMNS_KEY = 'workoutListVisibleColumns';
 
-
-// 默认可见表格列的 Key
-export const DEFAULT_VISIBLE_TABLE_COLUMN_KEYS = [
-    'subscription',
-    'duration',
-    'calorie'
-];
 
 // 所有额外的 Workout 列表表格列 Key (用于列选择器)
 export const ALL_TABLE_COLUMN_KEYS = [
@@ -76,8 +67,8 @@ export const mockWorkoutsForList = [
         id: 1,
         type: 'image',
         image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        posterImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
         status: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',
@@ -89,7 +80,7 @@ export const mockWorkoutsForList = [
         duration: 3600,
         calorie: 450,
         Premium: true,
-        isSubscription: false,
+        isSubscription: 0,
         detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
@@ -101,6 +92,7 @@ export const mockWorkoutsForList = [
         id: 2,
         type: 'image',
         image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting',
         status: 'Disabled',
         difficulty: 'Hard',
@@ -112,7 +104,7 @@ export const mockWorkoutsForList = [
         category: 'Strength',
         duration: 3600,
         calorie: 450,
-        isSubscription: false,
+        isSubscription: 0,
         detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
@@ -122,8 +114,9 @@ export const mockWorkoutsForList = [
     },
     {
         id: 3,
+        image: "https://amber.7mfitness.com/cms/music/audio/c235093a365340f0ad7bfb817a128e68.mp3?alt=media&name=975e862596b94fc5b21955c6d85a80b7.mp3",
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Yoga Session',
         status: 'Enabled',
         difficulty: 'Easy',
@@ -135,7 +128,7 @@ export const mockWorkoutsForList = [
         category: 'Yoga',
         duration: 2700,
         calorie: 200,
-        isSubscription: true,
+        isSubscription: 1,
         detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
@@ -147,6 +140,7 @@ export const mockWorkoutsForList = [
         id: 44,
         type: 'image',
         image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Cycling',
         status: 'Draft',
         difficulty: 'Medium',
@@ -158,7 +152,7 @@ export const mockWorkoutsForList = [
         category: 'Cardio',
         duration: 5400,
         calorie: 600,
-        isSubscription: false,
+        isSubscription: 0,
         detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
@@ -170,8 +164,9 @@ export const mockWorkoutsForList = [
         id: 5,
         type: 'image',
         image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'HIIT Workout',
-        status: 'Deprecated',
+        status: 'Enabled',
         difficulty: 'Hard',
         equipment: 'None',
         position: 'Standing',
@@ -181,7 +176,7 @@ export const mockWorkoutsForList = [
         category: 'HIIT',
         duration: 1800,
         calorie: 350,
-        isSubscription: false,
+        isSubscription: 0,
         detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',

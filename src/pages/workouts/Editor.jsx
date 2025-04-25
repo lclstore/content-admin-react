@@ -36,7 +36,7 @@ const simpleArrayMove = (array, from, to) => {
 };
 
 export default function WorkoutsEditor() {
-    const { setSaveButtonState, setCustomPageTitle } = useContext(HeaderContext);
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const location = useLocation();
     const navigate = useNavigate();
     const { workoutId } = useParams();
@@ -239,25 +239,34 @@ export default function WorkoutsEditor() {
 
     // 设置页面头部按钮和标题
     useEffect(() => {
-        const title = workoutId ? `编辑 Workout: ${form.getFieldValue('workoutName') || '加载中...'}` : '添加 Workout';
+        const title = workoutId ? `Edit Workout: ${form.getFieldValue('workoutName') || 'Loading...'}` : 'Add Workout';
         setCustomPageTitle(title);
-        setSaveButtonState({
-            showSaveButton: true,
-            saveButtonText: 'Save',
-            saveButtonLoading: saveLoading,
-            saveButtonDisabled: pageLoading,
-            onSaveButtonClick: handleSaveChanges,
-            saveButtonIcon: SaveOutlined,
-            showBackButton: true,
-            onBackButtonClick: handleBackClick,
-            backButtonIcon: ArrowLeftOutlined,
-        });
+
+        // 使用新API设置按钮
+        setButtons([
+            {
+                key: 'save',
+                text: 'Save',
+                icon: SaveOutlined,
+                type: 'primary',
+                loading: saveLoading,
+                disabled: pageLoading,
+                onClick: handleSaveChanges
+            },
+            {
+                key: 'back',
+                text: 'Back',
+                icon: ArrowLeftOutlined,
+                onClick: handleBackClick
+            }
+        ]);
+
         // 清理函数：组件卸载时移除按钮和标题
         return () => {
-            setSaveButtonState({ showSaveButton: false, showBackButton: false });
+            setButtons([]);
             setCustomPageTitle(null);
         };
-    }, [workoutId, form, saveLoading, pageLoading, setSaveButtonState, setCustomPageTitle, handleSaveChanges, handleBackClick]); // 更新依赖项
+    }, [workoutId, form, saveLoading, pageLoading, setButtons, setCustomPageTitle, handleSaveChanges, handleBackClick]); // 更新依赖项
 
     // 表单变化处理
     const handleFormChange = () => {
@@ -266,7 +275,7 @@ export default function WorkoutsEditor() {
         }
         const newName = form.getFieldValue('workoutName');
         // 动态更新页面标题中的 Workout 名称
-        setCustomPageTitle(workoutId ? `编辑 Workout: ${newName || ''}` : '添加 Workout');
+        setCustomPageTitle(workoutId ? `Edit Workout: ${newName || ''}` : 'Add Workout');
     };
 
     // Structure 结构变化处理

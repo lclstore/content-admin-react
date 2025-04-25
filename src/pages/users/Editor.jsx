@@ -74,7 +74,7 @@ const initialUserData = {
 
 export default function UsersEditor() {
     // 获取header上下文中的保存按钮状态设置函数和自定义标题设置函数
-    const { setSaveButtonState, setCustomPageTitle } = useContext(HeaderContext);
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const location = useLocation(); // 获取 location 对象
     const searchParams = new URLSearchParams(location.search); // 解析查询字符串
     const userId = searchParams.get('id'); // 获取 'id' 参数的值 (重命名为 userId 避免与 HTML id 冲突)
@@ -152,25 +152,30 @@ export default function UsersEditor() {
     // 设置顶部保存按钮状态和页面标题
     useEffect(() => {
         const title = userId ? 'Edit User' : 'Add User';
-        setCustomPageTitle(title); // 设置自定义标题
+        setCustomPageTitle(title);
 
-        setSaveButtonState({
-            showSaveButton: true,
-            saveButtonText: 'Save',
-            saveButtonLoading: saveLoading,
-            saveButtonDisabled: !isFormDirty || saveSuccess,
-            onSaveButtonClick: handleSaveChanges,
-            // saveButtonIcon: <SaveOutlined />, // 如果 Header 组件支持，可以取消注释
-            // --- 重新添加返回按钮配置 ---
-            showBackButton: true, // 指示 Header 显示返回按钮
-            onBackButtonClick: handleBackClick, // 设置返回按钮的点击处理函数
-        });
-        // 清理函数
+        setButtons([
+            {
+                key: 'save',
+                text: 'Save',
+                type: 'primary',
+                loading: saveLoading,
+                disabled: !isFormDirty || saveSuccess,
+                onClick: handleSaveChanges,
+                icon: SaveOutlined
+            },
+            {
+                key: 'back',
+                text: 'Back',
+                onClick: () => navigate('/users')
+            }
+        ]);
+
         return () => {
-            setSaveButtonState({ showSaveButton: false });
-            setCustomPageTitle(null); // 清除自定义标题
+            setButtons([]); // 清空按钮
+            setCustomPageTitle(null);
         };
-    }, [userId, saveLoading, isFormDirty, saveSuccess, setSaveButtonState, setCustomPageTitle, navigate]); // 重新添加 navigate
+    }, [userId, saveLoading, isFormDirty, saveSuccess, setButtons, setCustomPageTitle, navigate]); // 依赖更新
 
     /**
      * 处理表单字段变化

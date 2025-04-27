@@ -59,7 +59,7 @@ export default function ProfileSettings() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 获取HeaderContext的方法，用于控制全局头部按钮
-    const { setSaveButtonState } = useContext(HeaderContext);
+    const { setButtons, setButton } = useContext(HeaderContext);
 
     // 创建Upload组件引用
     const uploadRef = useRef(null);
@@ -101,9 +101,7 @@ export default function ProfileSettings() {
                 // 1秒后重置成功状态，重新启用按钮
                 setTimeout(() => {
                     setSaveSuccess(false);
-                    setSaveButtonState({
-                        saveButtonDisabled: true
-                    });
+                    setButton('save', { disabled: true });
                 }, 1000);
             }, 800);
         }).catch(err => {
@@ -117,16 +115,22 @@ export default function ProfileSettings() {
      * 控制按钮的显示、文本和加载状态
      */
     useEffect(() => {
-        // 配置Header的保存按钮
-        setSaveButtonState({
-            showSaveButton: true,
-            saveButtonText: 'Save',
-            saveButtonLoading: saveLoading,
-            saveButtonType: 'primary',
-            saveButtonDisabled: saveSuccess, // 保存成功后禁用按钮
-            onSaveButtonClick: handleSaveChanges
-        });
-    }, []);
+        setButtons([
+            {
+                key: 'save',
+                text: 'Save Changes',
+                icon: <SaveOutlined />,
+                type: 'primary',
+                disabled: !isFormDirty || saveLoading,
+                loading: saveLoading,
+                onClick: handleSaveChanges
+            }
+        ]);
+
+        return () => {
+            setButtons([]); // 清空按钮
+        };
+    }, [isFormDirty, saveLoading, handleSaveChanges, setButtons]);
 
     /**
      * 处理头像上传变更

@@ -1,765 +1,584 @@
-import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { Table, Input, Button, Spin, Dropdown, Modal, message, Badge, Tooltip } from 'antd';
+import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import { Modal, message, Form, Table } from 'antd';
 import {
     PlusOutlined,
-    EllipsisOutlined,
-    EditOutlined,
-    CopyOutlined,
-    DeleteOutlined,
-    CheckOutlined,
-    StopOutlined,
-    DisconnectOutlined,
-    UndoOutlined,
-    FilterOutlined,
-    SearchOutlined,
-    CloseOutlined,
-    SettingOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDate } from '@/utils';
-import { debounce } from 'lodash';
-import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
-import WorkoutMediaCell from '@/components/MediaCell/MediaCell';
-import './List.css';
+import { formatDateRange } from '@/utils';
+import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
+import TagSelector from '@/components/TagSelector/TagSelector';
+import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
-    mockWorkouts,
-    WORKOUT_LIST_VISIBLE_COLUMNS_KEY,
-    MANDATORY_COLUMN_KEYS,
-    DEFAULT_VISIBLE_COLUMN_KEYS,
-    filterSections
+    mockWorkoutsForList,
+    filterSections,
+    BATCH_FILE_OPTIONS,
+    MOCK_LANG_OPTIONS
 } from './Data';
 
 export default function WorkoutsList() {
-    const { setSaveButtonState } = useContext(HeaderContext);
-    const navigate = useNavigate();
-    const [dataSource, setDataSource] = useState(mockWorkouts);
-    const [loading, setLoading] = useState(false);
-    const [searchValue, setSearchValue] = useState('');
-    const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] });
-    const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
-    const [previewVideoUrl, setPreviewVideoUrl] = useState('');
-    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-    const [currentRecord, setCurrentRecord] = useState(null);
-    const [actionInProgress, setActionInProgress] = useState(false);
-    const [actionClicked, setActionClicked] = useState(false);
-    const [isDuplicateModalVisible, setIsDuplicateModalVisible] = useState(false);
-    const [duplicatedRecord, setDuplicatedRecord] = useState(null);
-    const [operationHistory, setOperationHistory] = useState([]);
-    const [undoMessage, setUndoMessage] = useState(null);
-    const [canUndo, setCanUndo] = useState(false);
+    // 1. 状态定义 - 组件内部状态管理
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
+    const navigate = useNavigate(); // 路由导航
+    const [dataSource, setDataSource] = useState(mockWorkoutsForList); // 表格数据源
+    const [loading, setLoading] = useState(false); // 加载状态
+    const [searchValue, setSearchValue] = useState(''); // 搜索关键词
+    const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] }); // 筛选条件
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // 删除确认弹窗
+    const [currentRecord, setCurrentRecord] = useState(null); // 当前操作的记录
+    const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
+    const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行
+    const [messageApi, contextHolder] = message.useMessage();
 
-    // 恢复列可见性状态
-    const [visibleColumnKeys, setVisibleColumnKeys] = useState(() => {
-        try {
-            const storedKeys = localStorage.getItem(WORKOUT_LIST_VISIBLE_COLUMNS_KEY);
-            if (storedKeys) {
-                const parsedKeys = JSON.parse(storedKeys);
-                // 确保强制列始终存在
-                return Array.from(new Set([...parsedKeys, ...MANDATORY_COLUMN_KEYS]));
-            }
-        } catch (error) {
-            console.error("从 localStorage 读取列可见性时出错:", error);
-        }
-        return [...DEFAULT_VISIBLE_COLUMN_KEYS]; // 使用默认值
-    });
+    // 批量创建文件 Modal 状态
+    const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
+    const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
+    const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
 
-    // 恢复列可见性更改处理程序
-    const handleVisibilityChange = (newVisibleKeys) => {
-        // 确保强制列始终包含在内
-        const finalKeys = Array.from(new Set([...newVisibleKeys, ...MANDATORY_COLUMN_KEYS]));
-        setVisibleColumnKeys(finalKeys);
-        try {
-            localStorage.setItem(WORKOUT_LIST_VISIBLE_COLUMNS_KEY, JSON.stringify(finalKeys));
-        } catch (error) {
-            console.error("保存列可见性到 localStorage 时出错:", error);
-        }
-    };
-
-    // 先定义 actionRender
-    const actionRender = (text, record) => (
-        <div
-            className="actions-container"
-            onClick={handleActionAreaClick}
-            onMouseDown={(e) => e.stopPropagation()}
-        >
-            <Dropdown
-                menu={{ items: menuItems(record) }}
-                trigger={['click']}
-                onClick={handleActionAreaClick}
-                className="action-dropdown"
-            >
-                <Button
-                    type="text"
-                    icon={<EllipsisOutlined />}
-                    className="action-button"
-                    onClick={handleActionAreaClick}
-                />
-            </Dropdown>
-        </div>
-    );
-
-    // 再定义 columns
-    const columns = [
-        {
-            title: 'Image',
-            dataIndex: 'image',
-            key: 'image',
-            render: (text, record) => (
-                <WorkoutMediaCell
-                    record={record}
-                    onVideoClick={handleVideoClick}
-                />
-            ),
-            fixed: 'left',
-            width: 150,
-        },
-        {
-            title: 'Id',
-            dataIndex: 'id',
-            key: 'id',
-            align: 'center',
-            width: 100,
-        },
-        {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-            render: (name) => (
-                <Tooltip placement="topLeft" title={name}>
-                    <span>{name}</span>
-                </Tooltip>
-            ),
-            ellipsis: { showTitle: false },
-        },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-            showSorterTooltip: false,
-            width: 100,
-            ellipsis: true,
-        },
-        {
-            title: 'Subscription',
-            dataIndex: 'isSubscription',
-            key: 'subscription',
-            render: (isSubscription) => (
-                isSubscription
-                    ? <CheckOutlined className='success-icon' />
-                    : <CloseOutlined className='error-icon' />
-            ),
-            align: 'center',
-            width: 120,
-        },
-        {
-            title: 'Difficulty',
-            dataIndex: 'difficulty',
-            key: 'difficulty',
-            sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty],
-            showSorterTooltip: false,
-            width: 100,
-            ellipsis: true,
-        },
-        {
-            title: 'Equipment',
-            dataIndex: 'equipment',
-            key: 'equipment',
-            width: 200,
-            ellipsis: true,
-        },
-        {
-            title: 'Position',
-            dataIndex: 'position',
-            key: 'position',
-            sorter: (a, b) => a.position - b.position,
-            showSorterTooltip: false,
-            width: 100,
-        },
-        {
-            title: 'Target',
-            dataIndex: 'target',
-            key: 'target',
-            width: 200,
-            ellipsis: true,
-        },
-        {
-            title: 'New Start Time',
-            dataIndex: 'newStartTime',
-            key: 'newStartTime',
-            sorter: (a, b) => new Date(a.newStartTime) - new Date(b.newStartTime),
-            showSorterTooltip: false,
-            render: (time) => formatDate(time, 'YYYY-MM-DD HH:mm'),
-            width: 160,
-        },
-        {
-            title: 'New End Time',
-            dataIndex: 'newEndTime',
-            key: 'newEndTime',
-            sorter: (a, b) => new Date(a.newEndTime) - new Date(b.newEndTime),
-            showSorterTooltip: false,
-            render: (time) => formatDate(time, 'YYYY-MM-DD HH:mm'),
-            width: 160,
-        },
-        {
-            title: 'Actions',
-            key: 'actions',
-            fixed: 'right',
-            width: 70,
-            align: 'center',
-            render: actionRender,
-        },
-    ];
-
-    // 可选列（用于列设置 Popover）
-    const optionalColumnsForSetting = useMemo(() => {
-        return columns
-            .filter(col => !MANDATORY_COLUMN_KEYS.includes(col.key || col.dataIndex))
-            .map(col => ({ key: col.key || col.dataIndex, title: col.title }));
-    }, [columns]);
-
-    // 准备列设置 Filter Section 数据
-    const columnSettingsSection = {
-        title: 'Visible Columns',
-        key: 'visibleColumns', // 使用唯一 key
-        options: optionalColumnsForSetting.map(col => col.title), // Popover 显示列标题
-        keys: optionalColumnsForSetting.map(col => col.key), // 内部使用列 key
-    };
-
+    // 在Modal打开时重置表单
     useEffect(() => {
-        setSaveButtonState({
-            showSaveButton: true,
-            saveButtonText: 'Add Workout',
-            saveButtonIcon: PlusOutlined,
-            saveButtonType: 'primary',
-            saveButtonLoading: false,
-            saveButtonDisabled: false,
-            onSaveButtonClick: () => navigate('/workouts/editor'),
-            showBackButton: false
-        });
+        if (isBatchCreateModalVisible) {
+            batchCreateForm.resetFields();
+            batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
+        }
+    }, [isBatchCreateModalVisible, batchCreateForm]);
 
-        return () => {
-            setSaveButtonState({
-                showSaveButton: false,
-                saveButtonText: 'SAVE CHANGES',
-                saveButtonIcon: null,
-                saveButtonLoading: false,
-                saveButtonDisabled: false,
-                onSaveButtonClick: () => { },
-                showBackButton: true
-            });
-        };
-    }, [setSaveButtonState, navigate]);
-
-    useEffect(() => {
-        const handleGlobalClick = () => {
-            setActionClicked(false);
-        };
-
-        document.addEventListener('click', handleGlobalClick);
-
-        return () => {
-            document.removeEventListener('click', handleGlobalClick);
-        };
+    // 2. 回调函数定义 - 用户交互和事件处理
+    /**
+     * 批量创建文件按钮点击处理
+     * 显示弹窗
+     */
+    const handleBatchCreateFile = useCallback(() => {
+        setIsBatchCreateModalVisible(true);
     }, []);
 
-    useEffect(() => {
-        if (undoMessage) {
-            const timer = setTimeout(() => {
-                setUndoMessage(null);
-                setCanUndo(false);
-            }, 5000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [undoMessage]);
-
-    const recordOperation = (type, oldData, newData, message) => {
-        const historyItem = {
-            type,
-            timestamp: new Date().getTime(),
-            oldData,
-            newData,
-            message
-        };
-
-        setOperationHistory(prev => [historyItem, ...prev].slice(0, 10));
-        setUndoMessage(message);
-        setCanUndo(true);
-    };
-
-    const handleUndo = () => {
-        if (operationHistory.length === 0) return;
-
-        const lastOperation = operationHistory[0];
-        switch (lastOperation.type) {
-            case 'duplicate':
-                setDataSource(current =>
-                    current.filter(item => item.id !== lastOperation.newData.id)
-                );
-                message.success('成功撤销复制操作');
-                break;
-
-            case 'delete':
-                setDataSource(current => [...current, lastOperation.oldData]);
-                message.success('成功恢复已删除项目');
-                break;
-
-            case 'status':
-                setDataSource(current =>
-                    current.map(item =>
-                        item.id === lastOperation.oldData.id ? lastOperation.oldData : item
-                    )
-                );
-                message.success('成功撤销状态变更');
-                break;
-
-            default:
-                message.info('无法撤销此操作');
-                break;
-        }
-
-        setOperationHistory(prev => prev.slice(1));
-        setUndoMessage(null);
-        setCanUndo(false);
-    };
-
-    const menuItems = (record) => {
-        const items = [];
-
-        const handleMenuClick = (key, record, e) => {
-            if (e && e.domEvent) {
-                e.domEvent.stopPropagation();
-            }
-
-            console.log(`Clicked ${key} for record:`, record);
-            setCurrentRecord(record);
-
-            switch (key) {
-                case 'edit':
-                    handleEdit(record);
-                    break;
-                case 'duplicate':
-                    handleDuplicate(record);
-                    break;
-                case 'delete':
-                    setIsDeleteModalVisible(true);
-                    break;
-                case 'enable':
-                    handleStatusChange(record, 'Enabled');
-                    break;
-                case 'disable':
-                    handleStatusChange(record, 'Disabled');
-                    break;
-                case 'deprecate':
-                    handleStatusChange(record, 'Deprecated');
-                    break;
-                default:
-                    break;
-            }
-        };
-
-        const addItem = (key, label, icon) => {
-            items.push({
-                key,
-                label,
-                icon,
-                onClick: (e) => {
-                    e.domEvent.stopPropagation();
-                    handleMenuClick(key, record, e);
-                },
-            });
-        };
-
-        const addCommonActions = () => {
-            addItem('edit', 'Edit', <EditOutlined />);
-            addItem('duplicate', 'Duplicate', <CopyOutlined />);
-        };
-
-        switch (record.status) {
-            case 'Draft':
-                addCommonActions();
-                addItem('delete', 'Delete', <DeleteOutlined />);
-                break;
-            case 'Disabled':
-                addCommonActions();
-                addItem('enable', 'Enable', <CheckOutlined />);
-                addItem('delete', 'Delete', <DeleteOutlined />);
-                break;
-            case 'Enabled':
-                addCommonActions();
-                addItem('disable', 'Disable', <StopOutlined />);
-                addItem('deprecate', 'Deprecate', <DisconnectOutlined />);
-                break;
-            case 'Subscription':
-                addCommonActions();
-                addItem('disable', 'Disable', <StopOutlined />);
-                break;
-            case 'Deprecated':
-                addItem('duplicate', 'Duplicate', <CopyOutlined />);
-                break;
-            default:
-                break;
-        }
-
-        return items;
-    };
-
-    const debouncedSearch = debounce((searchText, filters) => {
-        setLoading(true);
-        setTimeout(() => {
-            let filteredData = mockWorkouts;
-
-            const statuses = filters?.status || [];
-            if (statuses.length > 0) {
-                filteredData = filteredData.filter(workout => statuses.includes(workout.status));
-            }
-
-            const types = filters?.type || [];
-            if (types.length > 0) {
-                filteredData = filteredData.filter(workout => types.includes(workout.type));
-            }
-
-            const difficulties = filters?.difficulty || [];
-            if (difficulties.length > 0) {
-                filteredData = filteredData.filter(workout => difficulties.includes(workout.difficulty));
-            }
-
-            const positions = filters?.position || [];
-            if (positions.length > 0) {
-                filteredData = filteredData.filter(workout => positions.includes(workout.position));
-            }
-
-            const targets = filters?.target || [];
-            if (targets.length > 0) {
-                filteredData = filteredData.filter(workout => {
-                    if (!workout.target) return false;
-                    const workoutTargets = workout.target.split(', ').map(t => t.trim());
-                    return targets.some(filterTarget => workoutTargets.includes(filterTarget));
-                });
-            }
-
-            if (searchText) {
-                const lowerCaseSearch = searchText.toLowerCase();
-                filteredData = filteredData.filter(workout =>
-                    (workout.name && workout.name.toLowerCase().includes(lowerCaseSearch)) ||
-                    (workout.equipment && workout.equipment.toLowerCase().includes(lowerCaseSearch)) ||
-                    (workout.target && workout.target.toLowerCase().includes(lowerCaseSearch))
-                );
-            }
-            setDataSource(filteredData);
-            setLoading(false);
-        }, 500);
-    }, 300);
-
-    const handleSearchInputChange = (e) => {
-        const { value } = e.target;
-        setSearchValue(value);
-        debouncedSearch(value, selectedFilters);
-    };
-
-    const handleFilterUpdate = (newFilters) => {
-        setSelectedFilters(newFilters);
-        debouncedSearch(searchValue, newFilters);
-    };
-
-    // 新增：处理列可见性 Popover 的更新
-    const handleColumnVisibilityUpdate = (newSelections) => {
-        // newSelections 格式为 { visibleColumns: ['Difficulty', 'Equipment', ...] }
-        const selectedTitles = newSelections.visibleColumns || [];
-
-        // 将选中的标题映射回列的 key
-        const selectedKeys = optionalColumnsForSetting
-            .filter(col => selectedTitles.includes(col.title))
-            .map(col => col.key);
-
-        handleVisibilityChange(selectedKeys);
-    };
-
-    const handleFilterReset = () => {
-        const resetFilters = { status: [], functionType: [], difficulty: [], position: [], target: [] };
-        setSelectedFilters(resetFilters);
-        debouncedSearch(searchValue, resetFilters);
-    };
-
-    // 新增：处理列可见性 Popover 的重置
-    const handleColumnVisibilityReset = () => {
-        // 调用 handleVisibilityChange 并传入空数组，它会自动处理强制列
-        handleVisibilityChange([]);
-    };
-
-    const handleRowClick = (record, event) => {
-        // 检查点击事件是否源自 Ant Design 图片预览组件
-        if (event.target.closest('.ant-image-preview-root')) {
-            return; // 如果是，则不执行任何操作
-        }
-
-        if (actionClicked) {
-            return;
-        }
-
-        navigate(`/workouts/editor?id=${record.id}`);
-    };
-
-    const handleVideoClick = (e, url) => {
-        e.stopPropagation();
-        setPreviewVideoUrl(url);
-        setIsPreviewModalVisible(true);
-    };
-
-    const handlePreviewModalCancel = () => {
-        setIsPreviewModalVisible(false);
-        setPreviewVideoUrl('');
-    };
-
-    const handleEdit = (record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
-    };
-
-    const handleDuplicate = (record) => {
+    /**
+     * 操作区域点击处理
+     * 设置操作点击标志，阻止事件冒泡以防止触发行点击事件
+     */
+    const handleActionAreaClick = useCallback((e) => {
         setActionClicked(true);
+        e.stopPropagation();
+    }, []);
 
+    /**
+     * 编辑按钮处理
+     * 导航到训练计划编辑页面
+     */
+    const handleEdit = useCallback((record) => {
+        navigate(`/workouts/editor?id=${record.id}`);
+    }, [navigate]);
+
+    /**
+     * 复制workout处理
+     * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
+     */
+    const handleDuplicate = useCallback((record) => {
+        navigate(`/workouts/editor?id=${record.id}`);
+    }, [navigate]);
+
+    /**
+     * 状态变更处理
+     * 更新训练计划的状态（启用/禁用/弃用）
+     */
+    const handleStatusChange = useCallback((record, newStatus) => {
         setActionInProgress(true);
-        const newId = Math.max(...dataSource.map(item => item.id)) + 1;
-
-        const newRecord = {
-            ...record,
-            id: newId,
-            name: `${record.name} (Copy)`,
-            status: 'Draft',
-        };
-
-        setDataSource(current => [...current, newRecord]);
-        setDuplicatedRecord(newRecord);
-        setActionInProgress(false);
-
-        recordOperation('duplicate', record, newRecord, `已复制 "${record.name}"`);
-
-        message.success(`成功复制 "${record.name}"`);
-        setIsDuplicateModalVisible(true);
-    };
-
-    const handleGoToEdit = () => {
-        if (duplicatedRecord) {
-            setIsDuplicateModalVisible(false);
-            setTimeout(() => {
-                navigate(`/workouts/editor?id=${duplicatedRecord.id}`);
-            }, 100);
-        }
-    };
-
-    const handleCancelEdit = () => {
-        setIsDuplicateModalVisible(false);
-    };
-
-    const handleDelete = () => {
-        if (!currentRecord) return;
-
-        setActionInProgress(true);
-
-        recordOperation('delete', currentRecord, null, `已删除 "${currentRecord.name}"`);
-
-        setDataSource(current => current.filter(item => item.id !== currentRecord.id));
-
-        setActionInProgress(false);
-        setIsDeleteModalVisible(false);
-
-        message.success(`成功删除 "${currentRecord.name}"`);
-    };
-
-    const handleStatusChange = (record, newStatus) => {
-        setActionInProgress(true);
-
-        const oldRecord = { ...record };
         const updatedRecord = { ...record, status: newStatus };
-
         setDataSource(current =>
             current.map(item =>
                 item.id === record.id ? updatedRecord : item
             )
         );
-
         setActionInProgress(false);
-
         const actionMap = {
             'Enabled': 'enabled',
             'Disabled': 'disabled',
             'Deprecated': 'deprecated',
-            'Subscription': 'added to subscription'
+            'Premium': 'added to subscription'
         };
-        recordOperation('status', oldRecord, updatedRecord, `已将 "${record.name}" 的状态更改为 ${newStatus}`);
+        messageApi.success(`Successfully ${actionMap[newStatus]} "${record.name}"`);
+    }, [messageApi]);
 
-        message.success(`成功将 "${record.name}" ${actionMap[newStatus]}`);
-    };
+    /**
+     * 处理按钮点击事件
+     */
+    const handleActionClick = useCallback((actionName, record, event) => {
+        if (event) event.stopPropagation();
+        setCurrentRecord(record);
 
-    const handleActionAreaClick = (e) => {
-        setActionClicked(true);
-        e.stopPropagation();
-    };
+        switch (actionName) {
+            case 'edit':
+                handleEdit(record);
+                break;
+            case 'duplicate':
+                handleDuplicate(record);
+                break;
+            case 'delete':
+                setIsDeleteModalVisible(true);
+                break;
+            case 'enable':
+                handleStatusChange(record, 'Enabled');
+                break;
+            case 'disable':
+                handleStatusChange(record, 'Disabled');
+                break;
+            case 'deprecate':
+                handleStatusChange(record, 'Deprecated');
+                break;
+            default:
+                break;
+        }
+    }, [handleEdit, handleDuplicate, handleStatusChange]);
 
-    const hasActiveFilters = Object.values(selectedFilters).some(arr => arr.length > 0);
+    // 定义按钮显示规则
+    const isButtonVisible = useCallback((record, btnName) => {
+        const status = record.status;
+        // 简单的状态-按钮映射关系
+        if (status === 'Draft' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'Disabled' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'Enabled' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
 
-    // 恢复根据可见性状态过滤列的逻辑
-    const visibleColumns = useMemo(() => {
-        return columns.filter(col => visibleColumnKeys.includes(col.key || col.dataIndex));
-    }, [columns, visibleColumnKeys]);
+        return false;
+    }, []);
 
-    // 恢复计算可见列的总宽度的逻辑
-    const totalVisibleWidth = useMemo(() => {
-        return visibleColumns.reduce((acc, col) => {
-            let width = 0;
-            if (typeof col.width === 'number') {
-                width = col.width;
-            } else if (typeof col.width === 'string') {
-                const parsedWidth = parseInt(col.width, 10);
-                if (!isNaN(parsedWidth)) {
-                    width = parsedWidth;
+    // 3. 表格渲染配置项
+    const allColumnDefinitions = useMemo(() => {
+        return [
+            { title: 'Cover Image', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'coverImage', key: 'image' },
+            { title: 'Detail Image', mediaType: 'audio', dataIndex: 'detailImage', key: 'detailImage', width: 80, visibleColumn: 1 },
+            { title: 'Thumbnail Image', mediaType: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', width: 130, visibleColumn: 1 },
+            { title: 'Complete Image', mediaType: 'image', dataIndex: 'completeImage', key: 'completeImage', width: 130, visibleColumn: 1 },
+            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0 },
+            {
+                title: 'Status', dataIndex: 'status', key: 'status',
+                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                iconMap: STATUS_ICON_MAP,
+                width: 120,
+                visibleColumn: 0
+            },
+            { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, iconMap: RESULT_ICON_MAP, hideIconText: true, display: 1, visibleColumn: 2 },
+            {
+                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
+                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
+                width: 150,
+                visibleColumn: 2,
+                render: (duration) => {
+                    if (!duration) return '-';
+                    const minutes = Math.floor(duration / 60);
+                    const seconds = duration % 60;
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
+            },
+            { title: 'Calorie (Kcal)', align: 'center', dataIndex: 'calorie', key: 'calorie', sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0), width: 150, visibleColumn: 2 },
+            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
+            { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
+            { title: 'Position', dataIndex: 'position', key: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
+            { title: 'Target', dataIndex: 'target', key: 'target', width: 200, visibleColumn: 1 },
+            { title: 'Exercise Num', align: 'center', dataIndex: 'exerciseNum', key: 'exerciseNum', sorter: (a, b) => (a.exerciseNum || 0) - (b.exerciseNum || 0), width: 130, visibleColumn: 1 },
+            {
+                title: 'New Date',
+                key: 'newDate',
+                render: (text, record) => {
+                    return formatDateRange(record.newStartTime, record.newEndTime);
+                },
+                width: 220,
+                visibleColumn: 1
+            },
+            { title: 'Audio Lang', dataIndex: 'audioLang', key: 'audioLang', width: 120, visibleColumn: 1 },
+            {
+                title: 'File Status', dataIndex: 'fileStatus', key: 'fileStatus',
+                width: 120,
+                ellipsis: true,
+                iconMap: FILE_STATUS_ICON_MAP,
+                visibleColumn: 1
+            },
+            {
+                title: 'Actions',
+                key: 'actions',
+                fixed: 'right',
+                width: 70,
+                align: 'center',
+                // 定义所有可能的按钮
+                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
+                // 控制按钮显示规则
+                isShow: isButtonVisible,
+                // 按钮点击处理函数
+                onActionClick: handleActionClick
+            },
+        ];
+    }, [isButtonVisible, handleActionClick]);
+
+    /**
+     * 处理行选择变化
+     * 用于批量操作功能
+     */
+    const onSelectChange = useCallback((newSelectedRowKeys) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    }, []);
+
+    /**
+     * 搜索处理函数
+     * 直接执行搜索，根据条件过滤数据
+     */
+    const performSearch = useCallback((searchText, filters, pagination) => {
+        setLoading(true);
+        setTimeout(() => {
+            let filteredData = mockWorkoutsForList;
+            // 按状态过滤
+            const statuses = filters?.status || [];
+            if (statuses.length > 0) filteredData = filteredData.filter(w => statuses.includes(w.status));
+
+            // 按难度过滤
+            const difficulties = filters?.difficulty || [];
+            if (difficulties.length > 0) filteredData = filteredData.filter(w => difficulties.includes(w.difficulty));
+
+            // 按姿势过滤
+            const positions = filters?.position || [];
+            if (positions.length > 0) filteredData = filteredData.filter(w => positions.includes(w.position));
+
+            // 按目标部位过滤
+            const targets = filters?.target || [];
+            if (targets.length > 0) {
+                filteredData = filteredData.filter(w => {
+                    if (!w.target) return false;
+                    const workoutTargets = w.target.split(', ').map(t => t.trim().toLowerCase());
+                    return targets.some(ft => workoutTargets.includes(ft.toLowerCase()));
+                });
             }
-            // 给没有宽度的列一个默认值，以更好地估算总宽度
-            // 也可以根据实际情况调整此默认值
-            return acc + (width > 0 ? width : 150);
-        }, 0);
-    }, [visibleColumns]);
 
-    // 准备传递给列设置 Popover 的初始选中值
-    const initialVisibleColumnTitles = useMemo(() => {
-        return {
-            visibleColumns: optionalColumnsForSetting
-                .filter(col => visibleColumnKeys.includes(col.key))
-                .map(col => col.title)
+            // 关键词搜索
+            if (searchText) {
+                const lowerCaseSearch = searchText.toLowerCase();
+                filteredData = filteredData.filter(w =>
+                    (w.name && w.name.toLowerCase().includes(lowerCaseSearch)) ||
+                    (w.equipment && w.equipment.toLowerCase().includes(lowerCaseSearch)) ||
+                    (w.target && w.target.toLowerCase().includes(lowerCaseSearch))
+                );
+            }
+
+            // 这里可以添加分页处理逻辑
+            // 如果有分页信息，可以在这里进行处理
+            if (pagination) {
+                console.log('【performSearch】处理分页:', pagination);
+                // 真实环境中这里应该是向后端请求分页数据
+                // 当前是前端模拟，不需要额外处理
+            }
+
+            setDataSource(filteredData);
+            setLoading(false);
+        }, 0); // 立即执行
+    }, [setDataSource, setLoading]);
+
+    /**
+     * 搜索输入变化处理
+     */
+    const handleSearchInputChange = useCallback((e) => {
+        const { value } = e.target;
+        setSearchValue(value);
+        performSearch(value, selectedFilters);
+    }, [performSearch, selectedFilters]);
+
+    /**
+     * 筛选更新处理
+     */
+    const handleFilterUpdate = useCallback((newFilters) => {
+        setSelectedFilters(newFilters);
+        performSearch(searchValue, newFilters);
+    }, [performSearch, searchValue]);
+
+    /**
+     * 重置筛选器处理
+     */
+    const handleFilterReset = useCallback(() => {
+        setSelectedFilters({});
+        setSearchValue('');
+        performSearch('', {});
+    }, [performSearch]);
+
+    /**
+     * 处理行点击
+     */
+    const handleRowClick = useCallback((record, event) => {
+        // 如果全局媒体预览处于激活状态，不处理行点击
+        if (window.MEDIA_PREVIEW && window.MEDIA_PREVIEW.isAnyPreviewActive()) {
+            return;
+        }
+
+        // 如果操作按钮被点击，不处理行点击
+        if (actionClicked) {
+            return;
+        }
+
+        // 检查是否点击了操作区域
+        const isActionClick = event.target.closest('.actions-container');
+        if (isActionClick) {
+            return;
+        }
+
+        // 检查是否点击了媒体单元格
+        const isMediaClick = event.target.closest('td.media-cell') ||
+            (event.target.classList &&
+                (event.target.classList.contains('media-cell') ||
+                    event.target.classList.contains('mediaCell')));
+        if (isMediaClick) {
+            console.log('行点击被阻止：点击了媒体单元格');
+            return;
+        }
+
+        // 检查是否点击了复选框单元格
+        const isCheckboxClick = event.target.closest('td.ant-table-cell.ant-table-selection-column') ||
+            (event.target.classList &&
+                (event.target.classList.contains('ant-table-selection-column') ||
+                    event.target.classList.contains('ant-checkbox-wrapper') ||
+                    event.target.classList.contains('ant-checkbox') ||
+                    event.target.classList.contains('ant-checkbox-input')));
+        if (isCheckboxClick) {
+            console.log('行点击被阻止：点击了复选框');
+            return;
+        }
+
+        // 正常导航到编辑页面
+        navigate(`/workouts/editor?id=${record.id}`);
+    }, [navigate, actionClicked]);
+
+    /**
+     * 批量创建 Modal 取消处理
+     */
+    const handleBatchCreateModalCancel = useCallback(() => {
+        setIsBatchCreateModalVisible(false);
+    }, []);
+
+    /**
+     * 批量创建 Modal 确认处理
+     */
+    const handleBatchCreateModalOk = useCallback(async () => {
+        try {
+            setBatchCreateLoading(true);
+            const values = await batchCreateForm.validateFields();
+            const { files, lang } = values;
+
+            // 更新数据源
+            const updatedDataSource = dataSource.map(item => {
+                if (selectedRowKeys.includes(item.id)) {
+                    let updatedItem = { ...item };
+                    if (files.includes('Audio-JSON')) {
+                        // 更新 Audio Language 字段
+                        const existingLangs = new Set((updatedItem.audioLang || '').split(',').map(l => l.trim()).filter(Boolean));
+                        lang.forEach(l => existingLangs.add(l));
+                        updatedItem.audioLang = Array.from(existingLangs).sort().join(', ');
+                    }
+                    return updatedItem;
+                }
+                return item;
+            });
+            setDataSource(updatedDataSource);
+
+            messageApi.success(`Task submitted, files will be generated for ${selectedRowKeys.length} workouts.`);
+            setIsBatchCreateModalVisible(false);
+
+        } catch (errorInfo) {
+            console.log('表单验证失败:', errorInfo);
+        } finally {
+            setBatchCreateLoading(false);
+        }
+    }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
+
+    // 7. 副作用 - 组件生命周期相关处理
+    /**
+     * 设置导航栏按钮
+     */
+    useEffect(() => {
+        // 设置自定义页面标题
+        setCustomPageTitle('Workout List');
+
+        // 设置头部按钮
+        setButtons([
+            {
+                key: 'create',
+                text: 'Create Workout',
+                icon: <PlusOutlined />,
+                type: 'primary',
+                onClick: () => navigate('/workouts/editor'),
+            }
+        ]);
+
+        return () => {
+            // 组件卸载时清理
+            setButtons([]);
+            setCustomPageTitle(null);
         };
-    }, [visibleColumnKeys, optionalColumnsForSetting]);
+    }, [setButtons, setCustomPageTitle, navigate]);
 
-    // 检查列设置是否有非默认值
-    const hasActiveColumnSettings = useMemo(() => {
-        const currentOptionalVisibleKeys = visibleColumnKeys.filter(key => !MANDATORY_COLUMN_KEYS.includes(key));
-        const defaultOptionalVisibleKeys = DEFAULT_VISIBLE_COLUMN_KEYS.filter(key => !MANDATORY_COLUMN_KEYS.includes(key));
-        // 检查当前可选列集合是否与默认可选列集合不同（忽略顺序）
-        return currentOptionalVisibleKeys.length !== defaultOptionalVisibleKeys.length ||
-            !currentOptionalVisibleKeys.every(key => defaultOptionalVisibleKeys.includes(key));
-    }, [visibleColumnKeys]);
+    /**
+     * 重置操作标志
+     */
+    useEffect(() => {
+        const handleGlobalClick = () => setActionClicked(false);
+        document.addEventListener('click', handleGlobalClick);
+        return () => document.removeEventListener('click', handleGlobalClick);
+    }, []);
 
+    // 8. 表格数据和配置
+    /**
+     * 筛选后的表格数据
+     */
+    const filteredDataForTable = useMemo(() => {
+        setLoading(true);
+        let tempData = [...dataSource];
+        setLoading(false);
+        return tempData;
+    }, [dataSource]);
+
+    /**
+     * 左侧工具栏按钮定义
+     */
+    const leftToolbarItems = useMemo(() => [
+        {
+            key: 'batchCreate',
+            label: 'Batch Create File',
+            onClick: handleBatchCreateFile,
+            icon: <PlusOutlined />,
+            disabled: selectedRowKeys.length === 0
+        }
+    ], [handleBatchCreateFile, selectedRowKeys]);
+
+    /**
+     * 行选择配置
+     */
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+        columnWidth: 60,
+        selections: [
+            Table.SELECTION_ALL,
+            Table.SELECTION_INVERT,
+            Table.SELECTION_NONE,
+        ],
+    };
+
+    // 处理表格变更（排序、筛选、分页）
+    const handleTableChange = useCallback((pagination, filters, sorter) => {
+        console.log('【List组件】分页已变化:', pagination);
+        console.log('【List组件】当前页:', pagination.current);
+        console.log('【List组件】每页记录数:', pagination.pageSize);
+        // 将分页信息传递给 performSearch 函数
+        performSearch(searchValue, filters, pagination);
+    }, [performSearch, searchValue]);
+
+    // 9. 渲染 - 组件UI呈现
     return (
         <div className="workoutsContainer">
-            <div className="searchBar">
-                <Input
-                    placeholder="Search content ID or name..."
-                    value={searchValue}
-                    prefix={<SearchOutlined />}
-                    onChange={handleSearchInputChange}
-                    className="searchInput"
-                    suffix={loading ? <Spin size="small" /> : null}
-                    allowClear
-                />
-                <FiltersPopover
-                    filterSections={filterSections}
-                    activeFilters={selectedFilters}
-                    onUpdate={handleFilterUpdate}
-                    onReset={handleFilterReset}
-                >
-                    <Badge dot={hasActiveFilters} offset={[-10, 5]} className="larger-badge-dot">
-                        <Button icon={<FilterOutlined />}>
-                            Filters
-                        </Button>
-                    </Badge>
-                </FiltersPopover>
-                <FiltersPopover
-                    filterSections={[columnSettingsSection]}
-                    activeFilters={initialVisibleColumnTitles}
-                    onUpdate={handleColumnVisibilityUpdate}
-                    onReset={handleColumnVisibilityReset}
-                    popoverPlacement="bottomRight"
-                    applyImmediately={true}
-                    clearButtonText="Reset"
-                >
-                    <Button icon={<SettingOutlined />}>
-                        Table Settings
-                    </Button>
-                </FiltersPopover>
-                {canUndo && (
-                    <div className="undo-message">
-                        <span>{undoMessage}</span>
-                        <Button
-                            type="link"
-                            icon={<UndoOutlined />}
-                            onClick={handleUndo}
-                        >
-                            撤销
-                        </Button>
-                    </div>
-                )}
-            </div>
+            {/* 消息上下文提供器 */}
+            {contextHolder}
 
-            <Table
-                columns={visibleColumns}
-                dataSource={dataSource}
+            {/* 可配置表格组件 */}
+            <ConfigurableTable
+                uniqueId={'workoutsList'}
+                columns={allColumnDefinitions}
+                dataSource={filteredDataForTable}
                 rowKey="id"
                 loading={loading}
-                onRow={(record) => ({
-                    onClick: (event) => {
-                        handleRowClick(record, event);
-                    },
-                    style: { cursor: 'pointer' },
-                })}
-                pagination={{
-                    total: dataSource.length,
-                    pageSize: 10,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-                    showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50'],
+                onRowClick={handleRowClick}
+                actionColumnKey="actions"
+                searchConfig={{
+                    placeholder: "Search name or ID...",
+                    searchValue: searchValue,
+                    onSearchChange: handleSearchInputChange,
                 }}
-                scroll={{ x: totalVisibleWidth }}
+                filterConfig={{
+                    filterSections: filterSections,
+                    activeFilters: selectedFilters,
+                    onUpdate: handleFilterUpdate,
+                    onReset: handleFilterReset,
+                }}
+                leftToolbarItems={leftToolbarItems}
+                rowSelection={rowSelection}
+                tableProps={{
+                    onChange: handleTableChange
+                }}
             />
 
+            {/* 删除确认弹窗 */}
             <Modal
-                title="视频预览"
-                open={isPreviewModalVisible}
-                onCancel={handlePreviewModalCancel}
-                footer={null}
-                destroyOnClose
-                width={800}
-            >
-                {previewVideoUrl && (
-                    <video
-                        src={previewVideoUrl}
-                        controls
-                        autoPlay
-                        style={{ width: '100%', maxHeight: '80vh' }}
-                    >
-                        您的浏览器不支持 video 标签。
-                    </video>
-                )}
-            </Modal>
-
-            <Modal
-                title="确认删除"
+                title="Confirm Deletion"
                 open={isDeleteModalVisible}
-                onOk={handleDelete}
+                onOk={() => {
+                    setActionInProgress(true);
+                    setDataSource(current => current.filter(item => item.id !== currentRecord.id));
+                    setActionInProgress(false);
+                    setIsDeleteModalVisible(false);
+                    messageApi.success(`Successfully deleted "${currentRecord.name}"`);
+                }}
                 onCancel={() => setIsDeleteModalVisible(false)}
-                okText="删除"
-                cancelText="取消"
+                okText="Delete"
+                cancelText="Cancel"
                 okButtonProps={{
                     danger: true,
                     loading: actionInProgress
                 }}
                 cancelButtonProps={{ disabled: actionInProgress }}
             >
-                <p>您确定要删除 "{currentRecord?.name}" 吗？此操作无法撤销。</p>
+                <p>Are you sure you want to delete "{currentRecord?.name}"? This action cannot be undone.</p>
             </Modal>
 
+            {/* 批量创建文件 Modal */}
             <Modal
-                title="Workout 已复制"
-                open={isDuplicateModalVisible}
-                onOk={handleGoToEdit}
-                onCancel={handleCancelEdit}
-                okText="立即编辑"
-                cancelText="留在列表"
+                title="Batch Create Files"
+                open={isBatchCreateModalVisible}
+                onOk={handleBatchCreateModalOk}
+                onCancel={handleBatchCreateModalCancel}
+                confirmLoading={batchCreateLoading}
+                okText="OK"
+                cancelText="Cancel"
             >
-                <p>"{duplicatedRecord?.name}" 已成功创建。您想现在编辑它吗？</p>
+                <Form
+                    style={{ width: '350px', height: '200px', padding: '20px 50px' }}
+                    form={batchCreateForm}
+                    layout="vertical"
+                    name="batch_create_form"
+                    initialValues={{ files: ['Video-M3U8'], lang: ['EN'] }}
+                >
+                    <Form.Item
+                        style={{ marginBottom: '26px' }}
+                        name="files"
+                        label="File"
+                        rules={[{ required: true, message: 'Please select at least one file!' }]}
+                    >
+                        <TagSelector
+                            options={BATCH_FILE_OPTIONS.map(opt => opt.value)}
+                            mode="multiple"
+                            placeholder="Select file"
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) => prevValues.files !== currentValues.files}
+                    >
+                        {(form) => {
+                            const filesValue = form.getFieldValue('files') || [];
+                            const showLang = filesValue.includes('Audio-JSON');
+                            return showLang ? (
+                                <Form.Item
+                                    name="lang"
+                                    label="Lang (Required for Audio-JSON)"
+                                    rules={[{ required: true, message: 'Please select at least one language for Audio!' }]}
+                                >
+                                    <TagSelector
+                                        options={MOCK_LANG_OPTIONS.map(opt => opt.value)}
+                                        mode="multiple"
+                                        placeholder="Select languages"
+                                    />
+                                </Form.Item>
+                            ) : null;
+                        }}
+                    </Form.Item>
+                </Form>
             </Modal>
         </div>
     );

@@ -13,7 +13,7 @@
  * @returns {Array<Object>}
  */
 class RouterRegister {
-    constructor({fileAddresList, dir, sign, sort, createRule,suffix,nameTransform,iconConifg,FatherComponent }) {
+    constructor({ fileAddresList, dir, sign, sort, createRule, suffix, nameTransform, iconConifg, FatherComponent }) {
         this.sign = sign;
         this.dir = dir;
         this.sort = sort;
@@ -49,15 +49,15 @@ class RouterRegister {
                         dirArry.push(dirObj)
                     }
                     // 更新list容器
-                    dirArry = dirObj.children
+                    dirArry = dirObj.children || []
                 })
             }
             dirArry.push(this.createRoute(address))
         })
         // 节点排序
         this.sort && this.registerArray.sort((a, b) => {
-            let aSort = this.sort.indexOf(a.meta) !== -1 ? this.sort.indexOf(a.meta):this.registerArray.length
-            let bSort = this.sort.indexOf(b.meta) !== -1 ? this.sort.indexOf(b.meta):this.registerArray.length
+            let aSort = this.sort.indexOf(a.meta) !== -1 ? this.sort.indexOf(a.meta) : this.registerArray.length
+            let bSort = this.sort.indexOf(b.meta) !== -1 ? this.sort.indexOf(b.meta) : this.registerArray.length
             return aSort - bSort
         })
     }
@@ -123,20 +123,20 @@ class RouterRegister {
         return RouterObj
     }
     // 查询 registerArray 中的节点
-    searchDir(addressArr){
+    searchDir(addressArr) {
         let list = this.registerArray
         let nodeCache = null
-        addressArr.some((pathName,index) => {
+        addressArr.some((pathName, index) => {
             let searchRes = list.filter(i => i.meta === pathName)
             // 中途一层没找到就直接退出
-            if(searchRes.length !== 0){
+            if (searchRes.length !== 0) {
                 // 最后一层没退出找到的就是结果
-                if(index === addressArr.length - 1){
+                if (index === addressArr.length - 1) {
                     nodeCache = searchRes[0]
-                }else{
+                } else {
                     list = searchRes[0].children
                 }
-            }else{
+            } else {
                 return true
             }
         })
@@ -144,4 +144,4 @@ class RouterRegister {
     }
 }
 
-export  default RouterRegister
+export default RouterRegister

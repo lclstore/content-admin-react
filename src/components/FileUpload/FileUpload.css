@@ -1,0 +1,71 @@
+/* src/components/FileUpload/FileUpload.css */
+
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #f7fafa;
+    /* 匹配图片的浅色背景 */
+    border-radius: 8px;
+    gap: 24px;
+    /* 元素间距 */
+    border: 1px solid #e8e8e8;
+    /* 可选：添加细微边框 */
+}
+
+.upload-area {
+    width: 80px;
+    /* 图标区域固定宽度 */
+    height: 80px;
+    /* 固定高度 */
+    border: 2px dashed #d9d9d9;
+    /* 虚线边框 */
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    /* 方框白色背景 */
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.upload-icon {
+    font-size: 32px;
+    color: #595959;
+    /* 图标颜色 */
+}
+
+.upload-info {
+    flex-grow: 1;
+}
+
+.upload-info h4 {
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #262626;
+    /* 较深文本颜色 */
+}
+
+.upload-info .recommendation {
+    font-size: 12px;
+    color: #8c8c8c;
+    /* 灰色文本 */
+    margin-bottom: 8px;
+}
+
+/* Ant Design Upload 组件本身的样式 */
+.file-upload-container .ant-upload-list {
+    display: none;
+    /* 如果只显示占位符/按钮，隐藏默认文件列表 */
+}
+
+/* 为必填项标题添加红色星号 */
+.upload-info h4.required::before {
+    content: '*';
+    color: red;
+    margin-right: 4px;
+    font-size: 14px;
+    /* 与标题字体大小一致 */
+}

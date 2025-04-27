@@ -2,7 +2,9 @@
 
 .filterContent {
     padding: 16px;
-    max-width: 580px;
+    max-width: 550px;
+    max-height: 480px;
+    overflow-y: auto;
     background-color: #fff;
     /* 背景色 */
     border-radius: 8px;
@@ -36,14 +38,14 @@
 }
 
 .filterButton {
-    padding: 8px 16px;
+    padding: 6px 16px;
     /* 内边距 */
     border: 1px solid #d9d9d9;
     /* 默认边框 */
     border-radius: 16px;
     /* 更大的圆角 */
     cursor: pointer;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
     color: #595959;
     /* 默认文字颜色 */
@@ -55,11 +57,15 @@
     /* 防止文本选中 */
 }
 
-.filterButton:hover {
-    /* border-color: var(--active-color); */
-    /* 悬停时边框颜色 */
-    color: var(--text-secondary);
-    /* 悬停时文字颜色 */
+.disabled {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: #d9d9d9;
+    color: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+}
+
+.filterButton:not(.disabled):hover {
+    opacity: 0.8;
 }
 
 .filterButton.active {
@@ -77,9 +83,6 @@
     height: 1px;
     /* 设置高度 */
     background-color: #f0f0f0;
-    /* 设置颜色 (与页脚分割线一致) */
-    margin: 0 0 16px 0;
-    /* 调整外边距，下方留出间距 */
 }
 
 .filterFooter {
@@ -121,4 +124,13 @@
 :global(.ant-popover.popoverOverlay .ant-popover-arrow) {
     display: none;
     /* 隐藏默认箭头 */
+}
+
+/* 增大 Badge 红点 */
+.filterBadge :global(.ant-badge-dot) {
+    width: 8px;
+    /* 原默认为 6px */
+    height: 8px;
+    min-width: 8px;
+    /* 确保宽度 */
 }

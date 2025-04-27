@@ -84,9 +84,6 @@ export const mockWorkouts = [
     },
 ];
 
-// 定义 localStorage key
-export const WORKOUT_LIST_VISIBLE_COLUMNS_KEY = 'workoutListVisibleColumns';
-
 // 定义强制显示和默认显示的列键
 export const MANDATORY_COLUMN_KEYS = ['image', 'id', 'name', 'actions'];
 

@@ -3,12 +3,22 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: hidden;
     padding: 16px;
     width: 100%;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
-    overflow: hidden;
+}
+
+.content-library-item.selectable-item {
+    cursor: pointer;
+}
+
+/* 新增：用于包裹 InfiniteScroll 的滚动容器样式 */
+.content-library-scroll-container {
+    flex: 1;
+    overflow: auto;
 }
 
 .workout-editor-panel {
@@ -31,11 +41,7 @@
     margin-bottom: 16px;
 }
 
-.content-library-list {
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    flex: 1;
-}
+
 
 .content-library-item .ant-list-item-meta-title {
     margin-bottom: 0 !important;
@@ -111,9 +117,9 @@
     margin-bottom: 0;
 }
 
-.structure-list .ant-list-item {
+.content-library-panel .structure-list .ant-list-item {
     padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
+    /* border-bottom: 1px solid #f0f0f0; */
     align-items: center;
 }
 

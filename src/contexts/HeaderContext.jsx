@@ -2,50 +2,44 @@ import React, { createContext, useState, useCallback } from 'react';
 
 /**
  * HeaderContext - 全局头部按钮状态管理上下文
- * 用于控制全局头部保存按钮的显示、文本、图标和事件处理
+ * 使用动态按钮数组实现灵活的头部控制
  */
 export const HeaderContext = createContext({
-    showSaveButton: true,        // 是否显示保存按钮
-    saveButtonText: '',// 按钮文本
-    saveButtonLoading: false,     // 按钮加载状态
-    saveButtonIcon: '', // 按钮图标组件
-    saveButtonType: 'primary',    // 按钮类型 (primary/default等)
-    saveButtonSize: 'middle',     // 按钮大小 (small/middle/large)
-    saveButtonDisabled: false,    // 按钮是否禁用
-    onSaveButtonClick: () => { },  // 按钮点击事件处理函数
-    setSaveButtonState: () => { }, // 更新按钮状态方法
+    buttons: [],                  // 动态按钮数组
+    setButtons: () => { },       // 设置按钮数组的方法
+    setButton: () => { },        // 更新单个按钮的方法
     customPageTitle: null,        // 自定义页面标题
-    setCustomPageTitle: () => { }  // 设置自定义页面标题的方法
+    setCustomPageTitle: () => { } // 设置自定义页面标题的方法
 });
 
 /**
  * HeaderProvider - 提供全局头部按钮状态的组件
- * 包装应用根组件，使所有子组件都能访问HeaderContext
  */
 export const HeaderProvider = ({ children }) => {
-    // 头部按钮状态
-    const [headerState, setHeaderState] = useState({
-        showSaveButton: false,
-        saveButtonText: 'SAVE CHANGES',
-        saveButtonLoading: false,
-        saveButtonIcon: '',
-        saveButtonType: 'primary',
-        saveButtonSize: 'middle',
-        saveButtonDisabled: false,
-        onSaveButtonClick: () => { }
-    });
+    // 头部按钮数组状态
+    const [buttons, setButtonsState] = useState([]);
+
     // 自定义页面标题状态
     const [customPageTitle, setCustomPageTitleState] = useState(null);
 
-    // 更新按钮状态的方法，使用useCallback确保引用稳定性
-    const setSaveButtonState = useCallback((state) => {
-        setHeaderState(prevState => ({
-            ...prevState,
-            ...state
-        }));
+    // 更新整个按钮数组
+    const setButtons = useCallback((newButtons) => {
+        setButtonsState(newButtons);
     }, []);
 
-    // 设置自定义标题的方法，使用useCallback确保引用稳定性
+    // 更新单个按钮属性
+    const setButton = useCallback((key, buttonProps) => {
+        setButtonsState(prevButtons => {
+            const index = prevButtons.findIndex(btn => btn.key === key);
+            if (index === -1) return prevButtons;
+
+            const newButtons = [...prevButtons];
+            newButtons[index] = { ...newButtons[index], ...buttonProps };
+            return newButtons;
+        });
+    }, []);
+
+    // 设置自定义标题
     const setCustomPageTitle = useCallback((title) => {
         setCustomPageTitleState(title);
     }, []);
@@ -53,10 +47,11 @@ export const HeaderProvider = ({ children }) => {
     return (
         <HeaderContext.Provider
             value={{
-                ...headerState,
-                setSaveButtonState,
-                customPageTitle,      // 传递自定义标题
-                setCustomPageTitle   // 传递设置函数
+                buttons,
+                setButtons,
+                setButton,
+                customPageTitle,
+                setCustomPageTitle
             }}
         >
             {children}

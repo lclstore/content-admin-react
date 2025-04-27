@@ -1,67 +1,370 @@
-import React from 'react';
-import { Image } from 'antd';
-import { FileImageOutlined, PlayCircleOutlined, EyeOutlined } from '@ant-design/icons';
+import React, { useState, useCallback, useEffect, memo, useMemo } from 'react';
+import { Image, Modal } from 'antd';
+import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
-import './MediaCell.css';
+import styles from './MediaCell.module.css'; // 导入 CSS Modules
+// MediaType[] = ['video', 'audio', 'image'];
+// 全局状态标记，用于跟踪是否有预览处于激活状态
+window.MEDIA_PREVIEW = {
+    IMAGE: false,
+    VIDEO: false,
+    AUDIO: false,
+    isAnyPreviewActive() {
+        return this.IMAGE || this.VIDEO || this.AUDIO;
+    }
+};
 
-const WorkoutMediaCell = ({ record, onVideoClick }) => {
+// 新标签和锁图标组件
+const MediaTags = memo(({ showNewTag, showLockIcon }) => {
+    const newTagElement = showNewTag ? <div className={styles['new-tag']}>New</div> : null;
+    const lockElement = showLockIcon ? <div className={styles['lock-icon']}><LockFilled /></div> : null;
 
-    const { image, type, duration, name, newStartTime, newEndTime } = record;
+    return (
+        <>
+            {newTagElement}
+            {lockElement}
+        </>
+    );
+});
 
-    // 判断当前时间是否在newStartTime和newEndTime之间显示new标签
-    const showNewTag = React.useMemo(() => {
+// 视频媒体组件
+const VideoMedia = memo(({ src, posterImage, duration, onPreview }) => {
+    if (!src) {
+        return <div className={`${styles.videoContainer} ${styles.mediaCell}`}></div>;
+    }
+
+    return (
+        <div
+            className={`${styles.videoContainer} ${styles.mediaCell}`}
+            onClick={(e) => onPreview(e, src)}
+        >
+            <video
+                poster={posterImage || undefined}
+                src={src}
+                className={styles.tabVideo}
+                preload="none"
+                loading="lazy"
+                muted
+                playsInline
+                onClick={(e) => e.stopPropagation()}
+            />
+            <div className={`${styles.videoOverlay} ${styles.videoPlayIconOverlay}`}>
+                <PlayCircleOutlined />
+            </div>
+            {duration !== undefined && (
+                <div className={styles.videoDurationOverlay}>
+                    {formatDuration(duration)}
+                </div>
+            )}
+            <div className={`${styles.videoOverlay} ${styles.videoPreviewHintOverlay}`}>
+                <EyeOutlined />
+                <span style={{ marginLeft: '5px' }}>Preview</span>
+            </div>
+        </div>
+    );
+});
+
+// 音频媒体组件
+const AudioMedia = memo(({ src, onPreview }) => {
+    if (!src) {
+        return <div className={`${styles.audioContainer} ${styles.mediaCell}`}></div>;
+    }
+
+    return (
+        <div
+            className={`${styles.audioContainer} ${styles.mediaCell}`}
+            onClick={(e) => onPreview(e, src)}
+        >
+            <CaretRightFilled className={styles.audioIcon} />
+        </div>
+    );
+});
+
+// 图片媒体组件
+const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) => {
+    if (!src) {
+        return <div className={`${styles.imageContainer} ${styles.mediaCell}`}></div>;
+    }
+
+    return (
+        <div className={`${styles.imageContainer} ${styles.mediaCell}`}>
+            <Image
+                src={src}
+                onClick={(e) => e.stopPropagation()}
+                alt={`${name || 'Media'}'s image`}
+                preview={{
+                    onVisibleChange: onPreviewVisibleChange,
+                    mask: (
+                        <div>
+                            <EyeOutlined />
+                            <span>Preview</span>
+                        </div>
+                    )
+                }}
+                onError={onImageError}
+                loading="lazy"
+                placeholder={
+                    <div className={styles.imagePlaceholder}>
+                        <FileImageOutlined style={{ fontSize: '20px', opacity: 0.5 }} />
+                    </div>
+                }
+            />
+        </div>
+    );
+});
+
+// 媒体预览模态框组件
+const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
+    // 使用ref引用modal容器，避免事件冒泡
+    const modalContainerRef = React.useRef(null);
+
+    const isVideo = type === 'video';
+    const title = isVideo ? "Video Preview" : "Audio Preview";
+
+    // 处理关闭按钮点击事件
+    const handleCloseClick = useCallback((e) => {
+        // 阻止事件冒泡但不阻止默认行为
+        if (e) e.stopPropagation();
+        onCancel();
+    }, [onCancel]);
+
+    return (
+        <Modal
+            title={title}
+            open={visible}
+            onCancel={handleCloseClick}
+            footer={null}
+            destroyOnClose
+            centered
+            width={800}
+            maskClosable={true}
+            closeIcon={<span className="custom-close-icon" data-media-modal-close="true">×</span>}
+            wrapClassName="media-preview-modal-wrap prevent-row-click"
+            styles={{
+                mask: { pointerEvents: 'auto' },
+                wrapper: { pointerEvents: 'auto' },
+                closeButton: { pointerEvents: 'auto', zIndex: 1001 }
+            }}
+        >
+            {isVideo ? (
+                <video
+                    src={url}
+                    controls
+                    style={{ width: '100%', display: 'block' }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    Your browser does not support the video tag.
+                </video>
+            ) : (
+                <audio
+                    src={url}
+                    controls
+                    style={{ width: '100%', display: 'block' }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    Your browser does not support the audio tag.
+                </audio>
+            )}
+        </Modal>
+    );
+});
+
+// 主组件
+const WorkoutMediaCell = memo(({ record, processedCol }) => {
+    const { image, duration, name, newStartTime, newEndTime, posterImage, Premium } = record;
+    const { mediaType, showNewBadge, showLock, dataIndex } = processedCol;
+
+    // 图片相关状态
+    const [imgError, setImgError] = useState(false);
+    const [isAntdPreviewVisible, setIsAntdPreviewVisible] = useState(false);
+
+    // 媒体预览状态
+    const [previewState, setPreviewState] = useState({
+        visible: false,
+        url: '',
+        type: '' // 'video' 或 'audio'
+    });
+
+    // 判断是否显示New标签
+    const showNewTag = useMemo(() => {
         const now = new Date().getTime();
         const start = newStartTime ? new Date(newStartTime).getTime() : null;
         const end = newEndTime ? new Date(newEndTime).getTime() : null;
+
         if (start && end) {
-            return now >= start && now <= end;
+            return now >= start && now <= end && showNewBadge;
         }
         return false;
-    }, [newStartTime, newEndTime]);
-    const newTagElement = showNewTag ? <div className="new-tag">New</div> : null;
+    }, [newStartTime, newEndTime, showNewBadge]);
 
-    if (!image) {
-        return <div className="imageContainer noImage"><FileImageOutlined /></div>;
-    }
+    // 判断是否显示锁图标
+    const showLockIcon = Premium && showLock;
 
-    if (type === 'video') {
-        return (
-            <div className="videoContainer" onClick={(e) => onVideoClick(e, image)}>
-                {newTagElement}
-                <video
-                    src={image}
-                    className="tabVideo"
-                    preload="metadata"
-                    muted
-                    playsInline
-                >
-                </video>
-                <div className="videoOverlay videoPlayIconOverlay">
-                    <PlayCircleOutlined />
-                </div>
-                {duration !== undefined && (
-                    <div className="videoDurationOverlay">
-                        {formatDuration(duration)}
+    // 图片加载错误处理
+    const handleImageError = useCallback(() => {
+        setImgError(true);
+    }, []);
+
+    // 媒体预览模态框状态控制
+    const handleMediaPreview = useCallback((e, url, type) => {
+        e.stopPropagation();
+        // 设置全局预览状态
+        if (type === 'video') {
+            window.MEDIA_PREVIEW.VIDEO = true;
+        } else if (type === 'audio') {
+            window.MEDIA_PREVIEW.AUDIO = true;
+        }
+        setPreviewState({ visible: true, url, type });
+    }, []);
+
+    // 视频预览处理
+    const handleVideoPreview = useCallback((e, url) => {
+        handleMediaPreview(e, url, 'video');
+    }, [handleMediaPreview]);
+
+    // 音频预览处理
+    const handleAudioPreview = useCallback((e, url) => {
+        handleMediaPreview(e, url, 'audio');
+    }, [handleMediaPreview]);
+
+    // 媒体预览关闭处理
+    const handleMediaPreviewClose = useCallback(() => {
+        // 重置全局预览状态
+        if (previewState.type === 'video') {
+            window.MEDIA_PREVIEW.VIDEO = false;
+        } else if (previewState.type === 'audio') {
+            window.MEDIA_PREVIEW.AUDIO = false;
+        }
+        setPreviewState(prev => ({ ...prev, visible: false }));
+    }, [previewState.type]);
+
+    // 图片预览状态变化处理
+    const handleImagePreviewChange = useCallback((visible) => {
+        // 更新全局标志
+        window.MEDIA_PREVIEW.IMAGE = visible;
+        setIsAntdPreviewVisible(visible);
+    }, []);
+
+    // 更新全局状态并设置事件处理器
+    useEffect(() => {
+        // 全局事件拦截器
+        const handleGlobalClick = (e) => {
+            if (window.MEDIA_PREVIEW.isAnyPreviewActive() && e.target && e.target.classList) {
+                // 检查是否点击了模态框关闭按钮（检查自定义数据属性或类名）
+                const isCloseButton = e.target.dataset && e.target.dataset.mediaModalClose === 'true' ||
+                    e.target.closest('.ant-modal-close') ||
+                    e.target.classList.contains('ant-modal-close') ||
+                    e.target.classList.contains('ant-modal-close-x') ||
+                    e.target.classList.contains('custom-close-icon');
+
+                // 如果是关闭按钮，不要阻止事件，让它正常工作
+                if (isCloseButton) {
+                    // 不执行任何操作，让默认的关闭处理逻辑工作
+                    return;
+                }
+
+                const isMaskOrWrap =
+                    e.target.classList.contains('ant-modal-mask') ||
+                    e.target.classList.contains('ant-modal-wrap') ||
+                    e.target.classList.contains('ant-image-preview-mask');
+
+                if (isMaskOrWrap) {
+                    e.stopPropagation();
+
+                    // 如果是媒体预览的蒙层点击，关闭媒体预览
+                    if (previewState.visible && !e.target.classList.contains('ant-image-preview-mask')) {
+                        handleMediaPreviewClose();
+                    }
+                }
+            }
+        };
+
+        // 使用捕获阶段处理事件
+        if (window.MEDIA_PREVIEW.isAnyPreviewActive()) {
+            document.addEventListener('click', handleGlobalClick, true);
+            document.addEventListener('mousedown', handleGlobalClick, true);
+        }
+
+        return () => {
+            document.removeEventListener('click', handleGlobalClick, true);
+            document.removeEventListener('mousedown', handleGlobalClick, true);
+        };
+    }, [previewState.visible, handleMediaPreviewClose]);
+
+    // 根据媒体类型渲染不同组件
+    const renderMediaByType = () => {
+        const mediaSrc = record[dataIndex];
+
+        // 媒体标签组件（在各媒体组件内部使用）
+        const tags = <MediaTags showNewTag={showNewTag} showLockIcon={showLockIcon} />;
+
+        // 根据媒体类型渲染
+        switch (mediaType) {
+            case 'video':
+                return (
+                    <>
+                        <VideoMedia
+                            src={mediaSrc}
+                            posterImage={posterImage}
+                            duration={duration}
+                            onPreview={handleVideoPreview}
+                        />
+                        {tags}
+                        {previewState.visible && (
+                            <MediaPreviewModal
+                                type={previewState.type}
+                                url={previewState.url}
+                                visible={previewState.visible}
+                                onCancel={handleMediaPreviewClose}
+                            />
+                        )}
+                    </>
+                );
+
+            case 'audio':
+                return (
+                    <>
+                        <AudioMedia
+                            src={mediaSrc}
+                            onPreview={handleAudioPreview}
+                        />
+                        {tags}
+                        {previewState.visible && (
+                            <MediaPreviewModal
+                                type={previewState.type}
+                                url={previewState.url}
+                                visible={previewState.visible}
+                                onCancel={handleMediaPreviewClose}
+                            />
+                        )}
+                    </>
+                );
+
+            default: // 默认作为图片处理
+                // 图片加载错误或没有图片源
+                if (imgError || !mediaSrc) {
+                    return (
+                        <div className={`${styles.imageContainer} ${styles.mediaCell}`}>
+                            {tags}
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className={`${styles.imageContainer} ${styles.mediaCell}`}>
+                        <ImageMedia
+                            src={mediaSrc}
+                            name={name}
+                            onImageError={handleImageError}
+                            onPreviewVisibleChange={handleImagePreviewChange}
+                        />
+                        {tags}
                     </div>
-                )}
-                <div className="videoOverlay videoPreviewHintOverlay">
-                    <EyeOutlined />
-                    <span style={{ marginLeft: '5px' }}>Preview</span>
-                </div>
-            </div>
-        );
-    } else {
-        return (
-            <div className="imageContainer">
-                {newTagElement}
-                <Image
-                    src={image}
-                    alt={`${name}'s image`}
-                    onClick={(e) => e.stopPropagation()} // 防止点击图片触发行点击事件
-                />
-            </div>
-        );
-    }
-};
+                );
+        }
+    };
+
+    return renderMediaByType();
+});
 
 export default WorkoutMediaCell; 

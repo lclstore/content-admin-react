@@ -20,13 +20,12 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import { debounce } from 'lodash';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
-import WorkoutMediaCell from '@/components/MediaCell/MediaCell';
+// import WorkoutMediaCell from '@/components/MediaCell/MediaCell';
 import './List.css';
 import {
     statusOrder,
     difficultyOrder,
     mockWorkouts,
-    WORKOUT_LIST_VISIBLE_COLUMNS_KEY,
     MANDATORY_COLUMN_KEYS,
     DEFAULT_VISIBLE_COLUMN_KEYS,
     filterSections
@@ -34,7 +33,7 @@ import {
 import settings from "@/config/settings.js";
 
 export default function WorkoutsList() {
-    const { setSaveButtonState } = useContext(HeaderContext);
+    const { setButtons } = useContext(HeaderContext);
     const navigate = useNavigate();
     const [dataSource, setDataSource] = useState(mockWorkouts);
     const [loading, setLoading] = useState(false);
@@ -108,12 +107,12 @@ export default function WorkoutsList() {
             title: 'Image',
             dataIndex: 'image',
             key: 'image',
-            render: (text, record) => (
-                <WorkoutMediaCell
-                    record={record}
-                    onVideoClick={handleVideoClick}
-                />
-            ),
+            // render: (text, record) => (
+            //     <WorkoutMediaCell
+            //         record={record}
+            //         onVideoClick={handleVideoClick}
+            //     />
+            // ),
             fixed: 'left',
             width: 150,
         },
@@ -199,7 +198,7 @@ export default function WorkoutsList() {
         () => columns
             .filter(col => !MANDATORY_COLUMN_KEYS.includes(col.key || col.dataIndex))
             .map(col => ({ key: col.key || col.dataIndex, title: col.title }))
-    , [columns]);
+        , [columns]);
 
     // 准备列设置 Filter Section 数据
     const columnSettingsSection = {
@@ -209,12 +208,20 @@ export default function WorkoutsList() {
         keys: optionalColumnsForSetting.map(col => col.key), // 内部使用列 key
     };
     useEffect(() => {
+        setButtons([
+            {
+                key: 'create',
+                text: 'Create Exercise',
+                icon: <PlusOutlined />,
+                type: 'primary',
+                onClick: () => navigate('/exercises/editor')
+            }
+        ]);
+
         return () => {
-            setSaveButtonState({
-                saveButtonDisabled: true,
-            });
+            setButtons([]); // 清空按钮
         };
-    }, [setSaveButtonState, navigate]);
+    }, [setButtons, navigate]);
 
     useEffect(() => {
         const handleGlobalClick = () => {
@@ -650,7 +657,7 @@ export default function WorkoutsList() {
                             icon={<UndoOutlined />}
                             onClick={handleUndo}
                         >
-                            撤销
+                            Undo
                         </Button>
                     </div>
                 )}

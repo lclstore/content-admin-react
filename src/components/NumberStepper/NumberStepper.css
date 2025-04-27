@@ -1,0 +1,61 @@
+/* src/components/NumberStepper/NumberStepper.css */
+.number-stepper-container {
+    display: inline-flex;
+    /* Use inline-flex to keep it compact */
+    align-items: center;
+    gap: 12px;
+    /* Gap between buttons and value */
+    border: 1px solid transparent;
+    /* Add transparent border for alignment within Form.Item */
+    padding: 4px 0;
+    /* Match Antd InputNumber padding */
+}
+
+.stepper-button {
+    border-radius: 8px !important;
+    /* Override Antd default for rounded corners */
+    border: 1px solid #d9d9d9 !important;
+    color: var(--primary-color) !important;
+    font-weight: 600 !important;
+    background-color: #fff !important;
+    box-shadow: none !important;
+    width: 32px;
+    /* Fixed width */
+    height: 32px;
+    /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    /* Remove default padding */
+}
+
+.stepper-button:hover,
+.stepper-button:focus {
+    border-color: var(--active-color) !important;
+}
+
+.stepper-button[disabled],
+.stepper-button[disabled]:hover {
+    border-color: #d9d9d9 !important;
+    color: rgba(0, 0, 0, 0.25) !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    cursor: not-allowed !important;
+}
+
+
+.stepper-value {
+    font-size: 24px;
+    /* Larger font size for the value */
+    font-weight: 600;
+    /* Bolder font */
+    color: #262626;
+    /* Darker color */
+    min-width: 50px;
+    /* Ensure some space for the value */
+    text-align: center;
+    line-height: 32px;
+    /* Match button height */
+    user-select: none;
+    /* Prevent text selection */
+}

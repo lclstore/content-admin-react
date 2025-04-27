@@ -1,104 +1,30 @@
-// 定义状态排序逻辑
+// 定义状态排序权重
 export const statusOrder = { 'Enabled': 1, 'Draft': 2, 'Disabled': 3, 'Deprecated': 4 };
 
-// 定义难度排序逻辑
+// 定义难度排序权重
 export const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
 
-// 模拟 Workout 数据
-export const mockWorkouts = [
-    {
-        id: 1,
-        type: 'video',
-        image: 'https://hhcontent.s3.eu-central-1.amazonaws.com/t/none/u/undefined/w/67f5dfa1916d1900124391ea/x/video_720p.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KU4XQXHZETDYO3V%2F20250415%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250415T085513Z&X-Amz-Expires=604800&X-Amz-Signature=5aaf8d86a1deccfda9931d29ab10753adc3aaba5e0b4588015aac99a2640cd58&X-Amz-SignedHeaders=host&x-amz-request-payer=requester&x-id=GetObject',
-        name: 'Morning RunMorning RunMorning RunMorning RunMorning RunMorning RunMorning Run',
-        status: 'Enabled',
-        difficulty: 'Medium',
-        equipment: 'Running Shoes',
-        position: 1,
-        target: 'Cardio',
-        newStartTime: '2025-01-26 06:00:00',
-        newEndTime: '2025-07-26 07:00:00',
-        category: 'Cardio',
-        duration: 185,
-        isSubscription: false,
-    },
-    {
-        id: 2,
-        type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting',
-        status: 'Disabled',
-        difficulty: 'Hard',
-        equipment: 'Dumbbells, Barbell',
-        position: 3,
-        target: 'Strength',
-        newStartTime: '2025-02-27 18:00:00',
-        newEndTime: '2025-07-27 19:30:00',
-        category: 'Strength',
-        isSubscription: false,
-    },
-    {
-        id: 3,
-        type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Yoga Session',
-        status: 'Enabled',
-        difficulty: 'Easy',
-        equipment: 'Yoga Mat',
-        position: 2,
-        target: 'Flexibility',
-        newStartTime: '2025-07-28 08:00:00',
-        newEndTime: '2025-07-28 09:00:00',
-        category: 'Yoga',
-        isSubscription: false,
-    },
-    {
-        id: 4,
-        type: 'image',
-        image: null,
-        name: 'Cycling',
-        status: 'Draft',
-        difficulty: 'Medium',
-        equipment: 'Bicycle, Helmet',
-        position: 5,
-        target: 'Cardio, Endurance',
-        newStartTime: '2025-07-29 17:00:00',
-        newEndTime: '2025-07-29 18:30:00',
-        category: 'Cardio',
-        isSubscription: false,
-    },
-    {
-        id: 5,
-        type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'HIIT Workout',
-        status: 'Deprecated',
-        difficulty: 'Hard',
-        equipment: 'None',
-        position: 4,
-        target: 'Fat Loss, Fitness',
-        newStartTime: '2025-07-30 12:00:00',
-        newEndTime: '2025-07-30 12:30:00',
-        category: 'HIIT',
-        isSubscription: false,
-    },
+
+
+// 所有额外的 Workout 列表表格列 Key (用于列选择器)
+export const ALL_TABLE_COLUMN_KEYS = [
+    'detailImage',      // 详情页图片
+    'thumbnailImage',   // 缩略图
+    'completeImage',    // 完成页图片
+    'difficulty',       // 难度
+    'equipment',        // 器材
+    'position',         // 体位
+    'target',           // 目标部位
+    'exerciseNum',      // Exercise 数量
+    'newDate',          // 恢复旧的合并日期列 Key
+    'audioLang',        // 音频语言
+    'fileStatus',       // 文件状态
 ];
 
-// 定义 localStorage key
-export const WORKOUT_LIST_VISIBLE_COLUMNS_KEY = 'workoutListVisibleColumns';
+// 定义 器材(Equipment) 选项 (用于编辑器和筛选器)
+export const equipmentOptions = ['Dumbbell', 'Resistance band', 'None'];
 
-// 定义强制显示和默认显示的列键
-export const MANDATORY_COLUMN_KEYS = ['image', 'id', 'name', 'actions'];
-
-// 默认可见列的键
-export const DEFAULT_VISIBLE_COLUMN_KEYS = [
-    'image', 'id', 'name', 'status', 'subscription', 'difficulty', 'equipment', 'target', 'actions'
-];
-
-// 定义 Equipment 选项 (用于编辑器)
-export const equipmentOptions = ['Dumbbell', 'Resistance band', 'None', 'Bodyweight', 'Kettlebells', 'Yoga mat', 'Chair', 'Bed', 'Cycling Bike']; // Added more based on mock data, adjust as needed
-
-// 定义筛选器配置
+// 定义筛选器配置 (筛选模式在具体组件使用时指定)
 export const filterSections = [
     {
         title: 'Status',
@@ -106,15 +32,21 @@ export const filterSections = [
         options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
     },
     {
-        title: 'Function Type',
-        key: 'functionType',
-        options: ['Warm Up', 'Main', 'Cool Down']
-    },
-    {
         title: 'Difficulty',
         key: 'difficulty',
-        options: ['Beginner', 'Intermediate', 'Advanced']
+        options: ['Beginner', 'Intermediate', 'Advanced'],
     },
+    {
+        title: 'Equipment',
+        key: 'equipment',
+        options: ['Dumbbells', 'Resistance band', 'None'],
+    },
+    // {
+    //     title: 'Function Type',
+    //     key: 'functionType',
+    //     options: ['Warm Up', 'Main', 'Cool Down'],
+    // },
+
     {
         title: 'Position',
         key: 'position',
@@ -127,85 +59,130 @@ export const filterSections = [
     }
 ];
 
-// --- 从 WorkoutsEditor.jsx 移动过来的数据 ---
+// --- 以下是从 WorkoutsEditor.jsx 移动并整理的数据 ---
 
-// 用于 Workout 列表页面的模拟数据 (保留原名以防列表页使用)
+// 模拟 Workout 列表数据 (保持原名 mockWorkoutsForList，以防列表页直接使用)
 export const mockWorkoutsForList = [
     {
         id: 1,
-        type: 'video',
-        image: 'https://hhcontent.s3.eu-central-1.amazonaws.com/t/none/u/undefined/w/67f5dfa1916d1900124391ea/x/video_720p.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KU4XQXHZETDYO3V%2F20250415%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250415T085513Z&X-Amz-Expires=604800&X-Amz-Signature=5aaf8d86a1deccfda9931d29ab10753adc3aaba5e0b4588015aac99a2640cd58&X-Amz-SignedHeaders=host&x-amz-request-payer=requester&x-id=GetObject',
-        name: 'Morning RunMorning RunMorning RunMorning RunMorning RunMorning RunMorning Run',
-        status: 'Enabled',
-        difficulty: 'Medium',
-        equipment: 'Running Shoes',
-        position: 1,
-        target: 'Cardio',
-        newStartTime: '2025-01-26 06:00:00',
-        newEndTime: '2025-07-26 07:00:00',
-        category: 'Cardio',
-        duration: 185,
-        isSubscription: false,
+        type: 'image',
+        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
+        status: 'Disabled',
+        difficulty: 'Hard',
+        equipment: 'Dumbbells, Barbell',
+        position: 'Standing',
+        target: 'Strength',
+        newStartTime: '2025-02-17 18:00:00',
+        newEndTime: '2025-07-06 18:00:00',
+        category: 'Strength',
+        duration: 3600,
+        calorie: 450,
+        Premium: true,
+        isSubscription: 0,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 12,
+        audioLang: null,
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
         id: 2,
         type: 'image',
         image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting',
         status: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',
-        position: 3,
+        position: 'Standing',
         target: 'Strength',
         newStartTime: '2025-02-27 18:00:00',
-        newEndTime: '2025-07-27 19:30:00',
+        newEndTime: '2025-03-06 18:00:00',
         category: 'Strength',
-        isSubscription: false,
+        duration: 3600,
+        calorie: 450,
+        isSubscription: 0,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 12,
+        audioLang: null,
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
         id: 3,
+        image: "https://amber.7mfitness.com/cms/music/audio/c235093a365340f0ad7bfb817a128e68.mp3?alt=media&name=975e862596b94fc5b21955c6d85a80b7.mp3",
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Yoga Session',
         status: 'Enabled',
         difficulty: 'Easy',
         equipment: 'Yoga Mat',
-        position: 2,
+        position: 'Lying',
         target: 'Flexibility',
         newStartTime: '2025-07-28 08:00:00',
-        newEndTime: '2025-07-28 09:00:00',
+        newEndTime: '2025-08-04 08:00:00',
         category: 'Yoga',
-        isSubscription: false,
+        duration: 2700,
+        calorie: 200,
+        isSubscription: 1,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 15,
+        audioLang: 'en-US',
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
-        id: 4,
+        id: 44,
         type: 'image',
-        image: null,
+        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Cycling',
         status: 'Draft',
         difficulty: 'Medium',
         equipment: 'Bicycle, Helmet',
-        position: 5,
+        position: 'Seated',
         target: 'Cardio, Endurance',
         newStartTime: '2025-07-29 17:00:00',
-        newEndTime: '2025-07-29 18:30:00',
+        newEndTime: '2025-08-05 17:00:00',
         category: 'Cardio',
-        isSubscription: false,
+        duration: 5400,
+        calorie: 600,
+        isSubscription: 0,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 1,
+        audioLang: 'zh-CN',
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
         id: 5,
         type: 'image',
         image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        coverImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'HIIT Workout',
-        status: 'Deprecated',
+        status: 'Enabled',
         difficulty: 'Hard',
         equipment: 'None',
-        position: 4,
+        position: 'Standing',
         target: 'Fat Loss, Fitness',
         newStartTime: '2025-07-30 12:00:00',
-        newEndTime: '2025-07-30 12:30:00',
+        newEndTime: '2025-08-06 12:00:00',
         category: 'HIIT',
-        isSubscription: false,
+        duration: 1800,
+        calorie: 350,
+        isSubscription: 0,
+        detailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        thumbnailImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        completeImage: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        exerciseNum: 10,
+        audioLang: 'en-US',
+        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
 ];
 
@@ -214,22 +191,21 @@ export const mockWorkoutsForList = [
 export const initialWorkoutData = {
     id: null,
     name: '',
-    status: 'Draft', // 新 workouts 的默认状态
+    status: 'Draft', // 新 Workout 的默认状态
     difficulty: 'Medium',
     equipment: '',
     position: null,
     target: '',
-    image: null, // 注意：这个 image 可能是 Workout 的封面图，与结构中的 exercise 图片不同
-    newStartTime: null,
-    newEndTime: null,
-    structure: [], // 添加空的结构数组
-    videoPreferences: {}, // 添加空的视频偏好
-    musicLinks: [], // 添加空的音乐链接
+    image: null, // Workout 的封面图，与结构(Structure)中的 Exercise 图片不同
+    newStartTime: null, // 新增开始时间
+    newEndTime: null, // 新增结束时间
+    structure: [], // 结构数组，初始为空
+    videoPreferences: {}, // 视频偏好设置，初始为空对象
+    musicLinks: [], // 音乐链接数组，初始为空
 };
 
-// 用于编辑器"结构(Structure)"部分的模拟数据
-// 恢复为直接的数组结构
-// 添加或填充用于筛选的字段：functionType, difficulty, position, target
+// 用于编辑器"结构(Structure)"部分的模拟 Exercise 数据
+// 注意：此数据也可能用于内容库 (Content Library)
 export const mockEditorStructureData = [
     {
         "id": 1896,
@@ -259,7 +235,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Advanced",
         "functionType": "Main",
-        "intensity": "level 2"
+        "intensity": "level 2",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1895,
@@ -289,7 +266,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Advanced",
         "functionType": "Main",
-        "intensity": "level 3"
+        "intensity": "level 3",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1894,
@@ -319,7 +297,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Intermediate",
         "functionType": "Warm Up",
-        "intensity": "level 3"
+        "intensity": "level 3",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1893,
@@ -349,7 +328,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Intermediate",
         "functionType": "Warm Up",
-        "intensity": "level 3"
+        "intensity": "level 3",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1874,
@@ -370,7 +350,7 @@ export const mockEditorStructureData = [
         "position": "Seated",
         "focus": "Relaxation",
         "equipment": "",
-        "met": null,
+        "met": 2.0,
         "star": null,
         "specialNeed": "",
         "remark": "",
@@ -379,7 +359,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Beginner",
         "functionType": "Cool Down",
-        "intensity": ""
+        "intensity": "",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1872,
@@ -409,7 +390,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Beginner",
         "functionType": "Cool Down",
-        "intensity": "level 1"
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1871,
@@ -439,7 +421,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Beginner",
         "functionType": "Cool Down",
-        "intensity": "level 1"
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1870,
@@ -469,7 +452,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Beginner",
         "functionType": "Main",
-        "intensity": "level 1"
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1869,
@@ -499,7 +483,8 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Beginner",
         "functionType": "Main",
-        "intensity": "level 1"
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     },
     {
         "id": 1868,
@@ -529,59 +514,175 @@ export const mockEditorStructureData = [
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Beginner",
         "functionType": "Main",
-        "intensity": "level 1"
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
+    },
+    {
+        "id": 1872,
+        "combination": "Normal",
+        "exerciseName": "SUPINE BENT KNEES YOGA",
+        "displayName": "SUPINE BENT KNEES",
+        "groupId": "703cff27c80d4c08b71dbddea17a6d1a",
+        "concatName": "",
+        "groupShow": 1,
+        "exerciseType": "Yoga",
+        "exerciseSubType": "",
+        "description": "Lying on a mat with your knees bent and feet flat on the floor. \n\nBreath deep and settle the spine on the floor to quickly bring the breathing back to normal.",
+        "videoLinkUrl": "https://youtu.be/VfSlEgg4ApE?t=1447",
+        "animationId": 1872,
+        "soundId": 1872,
+        "bodyPart": "Lower body",
+        "target": "Arm",
+        "position": "Lying",
+        "focus": "Relaxation",
+        "equipment": "Yoga mat",
+        "met": 3,
+        "star": 1,
+        "specialNeed": "",
+        "remark": "",
+        "status": 'Enabled',
+        "createTime": "2022-11-08 13:33:26",
+        "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
+        "difficulty": "Beginner",
+        "functionType": "Cool Down",
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
+    },
+    {
+        "id": 1871,
+        "combination": "Normal",
+        "exerciseName": "STAFF BENT KNEES YOGA",
+        "displayName": "STAFF BENT KNEES",
+        "groupId": "1c4db3154a74476ab612b540f9e8ba6a",
+        "concatName": "",
+        "groupShow": 1,
+        "exerciseType": "Yoga",
+        "exerciseSubType": "Ashtanga",
+        "description": "Distribute your weight between three points. \n\nFeet flat to the floor, bend in the knees, hands beside your hips.",
+        "videoLinkUrl": "https://youtu.be/sXz0OCjO3p4?t=250",
+        "animationId": 1871,
+        "soundId": 1871,
+        "bodyPart": "Upper body",
+        "target": "Abs",
+        "position": "Seated",
+        "focus": "Relaxation",
+        "equipment": "Resistance band,Yoga mat",
+        "met": 3,
+        "star": 1,
+        "specialNeed": "",
+        "remark": "",
+        "status": 'Enabled',
+        "createTime": "2022-11-08 13:33:26",
+        "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
+        "difficulty": "Beginner",
+        "functionType": "Cool Down",
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
+    },
+    {
+        "id": 1870,
+        "combination": "Left & Right",
+        "exerciseName": "123456",
+        "displayName": "low hunge123--bed",
+        "groupId": "691e4ffed881478ca3c25b6caddbe8b2",
+        "concatName": "(Left)",
+        "groupShow": 1,
+        "exerciseType": "Yoga",
+        "exerciseSubType": "Ashtanga,Hatha,Pilates,Vinyasa",
+        "description": "我是一颗小小的石头，深深的埋在泥土之中",
+        "videoLinkUrl": "https://youtu.be/O4xzzKdZy4Q?t=395",
+        "animationId": 1870,
+        "soundId": 1870,
+        "bodyPart": "Lower body",
+        "target": "Thigh,Butt,Leg,Hip,Hamstring",
+        "position": "Prone",
+        "focus": "Flexibility",
+        "equipment": "Bed",
+        "met": 3,
+        "star": 2,
+        "specialNeed": "",
+        "remark": "",
+        "status": 'Enabled',
+        "createTime": "2022-11-08 13:33:26",
+        "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
+        "difficulty": "Beginner",
+        "functionType": "Main",
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
+    },
+    {
+        "id": 1869,
+        "combination": "Left & Right",
+        "exerciseName": "123456",
+        "displayName": "low hunge123--bed",
+        "groupId": "691e4ffed881478ca3c25b6caddbe8b2",
+        "concatName": "(Right)",
+        "groupShow": 0,
+        "exerciseType": "Yoga",
+        "exerciseSubType": "Ashtanga,Hatha,Pilates,Vinyasa",
+        "description": "我是一颗小小的石头，深深的埋在泥土之中",
+        "videoLinkUrl": "https://youtu.be/O4xzzKdZy4Q?t=395",
+        "animationId": 1869,
+        "soundId": 1869,
+        "bodyPart": "Lower body",
+        "target": "Thigh,Butt,Leg,Hip,Hamstring",
+        "position": "Prone",
+        "focus": "Flexibility",
+        "equipment": "Bed",
+        "met": 3,
+        "star": 2,
+        "specialNeed": "",
+        "remark": "",
+        "status": 'Enabled',
+        "createTime": "2022-11-08 13:33:26",
+        "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
+        "difficulty": "Beginner",
+        "functionType": "Main",
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
+    },
+    {
+        "id": 1868,
+        "combination": "Left & Right",
+        "exerciseName": "奥力给就看到家里发大水654",
+        "displayName": "HIGH LUNGE123456--chair",
+        "groupId": "cda85a67b03e41af8b2ebd774a84fe4f",
+        "concatName": "(Left)",
+        "groupShow": 1,
+        "exerciseType": "Yoga",
+        "exerciseSubType": "Hatha,Pilates,Restorative",
+        "description": "11111111111",
+        "videoLinkUrl": "https://youtu.be/O4xzzKdZy4Q?t=409",
+        "animationId": 1868,
+        "soundId": 1868,
+        "bodyPart": "Total body",
+        "target": "Thigh,Butt,Leg,Back,Shoulder,Chest,Arm,Hip,Spine,Lower back",
+        "position": "Standing",
+        "focus": "Flexibility",
+        "equipment": "Chair",
+        "met": 3,
+        "star": 2,
+        "specialNeed": "",
+        "remark": "",
+        "status": 'Enabled',
+        "createTime": "2022-11-08 13:33:26",
+        "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
+        "difficulty": "Beginner",
+        "functionType": "Main",
+        "intensity": "level 1",
+        "duration": Math.floor(Math.random() * 51) + 10 // 随机 10-60
     }
 ];
 
-// 用于左侧内容库的模拟数据 (简化版)
-export const mockContentLibrary = [
-    {
-        id: 'lib-ex-1',
-        type: 'exercise',
-        displayName: 'Alternate Front & Lateral Raise',
-        animationPhoneUrl: 'https://via.placeholder.com/100/771796',
-        equipment: 'Dumbbells',
-        duration: 30,
-    },
-    {
-        id: 'lib-ex-2',
-        type: 'exercise',
-        displayName: 'Alternating Arm & Leg Extension',
-        animationPhoneUrl: 'https://via.placeholder.com/100/24f355',
-        equipment: 'Bodyweight',
-        duration: 45,
-    },
-    {
-        id: 'lib-ex-3',
-        type: 'exercise',
-        displayName: 'Alternating Forward Lunges',
-        animationPhoneUrl: 'https://via.placeholder.com/100/d32776',
-        equipment: 'Bodyweight',
-        duration: 40,
-    },
-    {
-        id: 'lib-ex-4',
-        type: 'exercise',
-        displayName: 'Alternating Hammer Biceps Curl',
-        animationPhoneUrl: 'https://via.placeholder.com/100/f66b97',
-        equipment: 'Dumbbells',
-        duration: 35,
-    },
-    {
-        id: 'lib-ex-5',
-        type: 'exercise',
-        displayName: 'Alternating Lateral Raise',
-        animationPhoneUrl: 'https://via.placeholder.com/100/56a8c2',
-        equipment: 'Dumbbells',
-        duration: 30,
-    },
-    {
-        id: 'lib-ex-6',
-        type: 'exercise',
-        displayName: 'Alternating One Leg Shoulder Bridge',
-        animationPhoneUrl: 'https://via.placeholder.com/100/b0f7cc',
-        equipment: 'Bodyweight',
-        duration: 50,
-    },
-    // 可以添加更多音频、组等内容
+export const BATCH_FILE_OPTIONS = [
+    { label: 'Video-M3U8 (生成M3U8视频文件)', value: 'Video-M3U8' },
+    { label: 'Audio-JSON (生成JSON音频文件)', value: 'Audio-JSON' },
+];
+
+// Mock language options (replace with actual API call later)
+export const MOCK_LANG_OPTIONS = [
+    { label: 'EN', value: 'EN' },
+    { label: 'ES', value: 'ES' },
+    { label: 'FR', value: 'FR' },
+    { label: 'DE', value: 'DE' },
 ]; 

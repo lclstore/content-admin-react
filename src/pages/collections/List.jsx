@@ -1,12 +1,11 @@
-// import Programs from './Programs';
+import children from './components/Programs';
 // import Categories from './Categories';
 
 export default function CollectionsList() {
     return (
         <div>
             <h1>Collections</h1>
-            {/* <Programs />
-            <Categories /> */}
+            {children}
         </div>
     );
 }

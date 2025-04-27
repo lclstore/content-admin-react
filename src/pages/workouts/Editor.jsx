@@ -247,17 +247,17 @@ export default function WorkoutsEditor() {
             {
                 key: 'save',
                 text: 'Save',
-                icon: SaveOutlined,
+                icon: <SaveOutlined />,
                 type: 'primary',
                 loading: saveLoading,
-                disabled: pageLoading,
-                onClick: handleSaveChanges
+                onClick: handleSaveChanges,
+                disabled: pageLoading || !form.isFieldsTouched(),
             },
             {
                 key: 'back',
                 text: 'Back',
-                icon: ArrowLeftOutlined,
-                onClick: handleBackClick
+                icon: <ArrowLeftOutlined />,
+                onClick: handleBackClick,
             }
         ]);
 

@@ -1,7 +1,24 @@
 /**
  * 应用相关常量
  */
-import { EditOutlined, StopOutlined, CheckCircleOutlined, CheckCircleFilled, CheckOutlined, CloseOutlined, CopyOutlined, DeleteOutlined, CloseCircleFilled, EditFilled } from '@ant-design/icons';
+import {
+    EditOutlined,
+    StopOutlined,
+    CheckCircleOutlined,
+    CheckCircleFilled,
+    CheckOutlined,
+    CloseOutlined,
+    CopyOutlined,
+    DeleteOutlined,
+    CloseCircleFilled,
+    EditFilled,
+    ThunderboltOutlined,
+    DashboardOutlined,
+    UserOutlined,
+    SettingOutlined,
+    LoginOutlined,
+    AudioOutlined
+} from '@ant-design/icons';
 // localStorage键名
 export const STORAGE_KEYS = {
     TOKEN: 'admin_token',
@@ -49,6 +66,17 @@ export const STATUS_ICON_MAP = {
         icon: CheckCircleFilled,
         color: '#52c41a',
     }
+};
+
+// 左侧菜单图标映射
+export const MENU_ICON_MAP = {
+    exercises: ThunderboltOutlined,
+    workouts: DashboardOutlined,
+    users: UserOutlined,
+    'profile-settings': SettingOutlined,
+    login: LoginOutlined,
+    music: AudioOutlined
+
 };
 // 勾 叉 图标映射配置
 export const RESULT_ICON_MAP = {

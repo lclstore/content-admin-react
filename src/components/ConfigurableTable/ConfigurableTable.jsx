@@ -494,7 +494,7 @@ function ConfigurableTable({
     return (
         <div className={styles.configurableTableContainer}>
             {/* 工具栏 */}
-            <div className={styles.configurableTableToolbar}>
+            <div className={`${styles.configurableTableToolbar} ${leftToolbarItems.length === 0 && styles.configurableTableNotToolbar}`}>
                 {/* 左侧按钮区域 */}
                 <Space wrap className={styles.configurableTableToolbarLeft}>
                     {leftToolbarItems.map(item => (
@@ -590,7 +590,7 @@ function ConfigurableTable({
                     {...tableProps}
                 />
             </div>
-        </div>
+        </div >
     );
 }
 

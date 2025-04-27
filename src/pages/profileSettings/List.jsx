@@ -118,8 +118,8 @@ export default function ProfileSettings() {
         setButtons([
             {
                 key: 'save',
-                text: 'Save Settings',
-                icon: SaveOutlined,
+                text: 'Save Changes',
+                icon: <SaveOutlined />,
                 type: 'primary',
                 disabled: !isFormDirty || saveLoading,
                 loading: saveLoading,

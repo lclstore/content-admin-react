@@ -38,11 +38,11 @@ export default function UsersList() {
      * 导航到用户编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`users/editor?id=${record.id}`);
+        navigate(`/users/editor?id=${record.id}`);
     }, [navigate]);
 
     /**
-     * 状态变更处理
+     * 状态变更å处理
      * 更新用户的状态（启用/禁用）
      */
     const handleStatusChange = useCallback((record, newStatus) => {
@@ -63,8 +63,13 @@ export default function UsersList() {
     const handleActionClick = useCallback((actionName, record, event) => {
         if (event) event.stopPropagation();
         setCurrentRecord(record);
-
-        handleStatusChange(record, actionName);
+        // 编辑按钮点击
+        if (actionName === 'edit') {
+            handleEdit(record);
+        } else {
+            // 状态变更按钮点击
+            handleStatusChange(record, actionName);
+        }
     }, [handleEdit, handleStatusChange]);
 
     // 定义按钮显示规则
@@ -73,6 +78,7 @@ export default function UsersList() {
         // 状态-按钮映射关系
         if (status === 'enable' && ['disable'].includes(btnName)) return true;
         if (status === 'disable' && ['enable'].includes(btnName)) return true;
+        if (btnName === 'edit') return true;  // 编辑按钮始终显示
 
         return false;
     }, []);
@@ -232,7 +238,7 @@ export default function UsersList() {
         }
 
         // 正常导航到编辑页面
-        navigate(`users/editor?id=${record.id}`);
+        navigate(`/users/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理
@@ -248,9 +254,9 @@ export default function UsersList() {
             {
                 key: 'create',
                 text: 'Create User',
-                icon: PlusOutlined,
+                icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate(`users/editor`),
+                onClick: () => navigate(`/users/editor`),
             }
         ]);
 

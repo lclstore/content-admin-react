@@ -14,7 +14,7 @@ import {
     message,
     Space, // Import Space
 } from 'antd';
-import { UserOutlined, CameraOutlined, SaveOutlined } from '@ant-design/icons';
+import { UserOutlined, CameraOutlined, SaveOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import '@/pages/profileSettings/list.css'; // 引入样式
 
@@ -157,17 +157,17 @@ export default function UsersEditor() {
         setButtons([
             {
                 key: 'save',
-                text: 'Save',
+                text: 'Save User',
+                icon: <SaveOutlined />,
                 type: 'primary',
                 loading: saveLoading,
                 disabled: !isFormDirty || saveSuccess,
                 onClick: handleSaveChanges,
-                icon: SaveOutlined
             },
             {
                 key: 'back',
                 text: 'Back',
-                onClick: () => navigate('/users')
+                onClick: () => navigate(-1)
             }
         ]);
 
@@ -190,6 +190,7 @@ export default function UsersEditor() {
      */
     const handleSaveChanges = () => {
         setSaveLoading(true);
+
         form.validateFields()
             .then(values => {
                 const dataToSave = {
@@ -225,7 +226,7 @@ export default function UsersEditor() {
             .catch(err => {
                 console.error('Validation failed:', err);
                 setSaveLoading(false);
-                messageApi.error('Please check the form fields.');
+
             });
     };
 
@@ -241,6 +242,7 @@ export default function UsersEditor() {
             const imageUrl = URL.createObjectURL(info.file.originFileObj); // 本地预览
             if (imageUrl) {
                 setAvatarUrl(imageUrl);
+                form.setFieldValue('avatar', imageUrl); // 更新隐藏的avatar表单字段
                 setIsFormDirty(true);
                 setSaveSuccess(false);
                 messageApi.success('Avatar uploaded successfully');
@@ -295,43 +297,49 @@ export default function UsersEditor() {
                     name: initialUserData.name,
                     email: initialUserData.email,
                     status: initialUserData.status, // 直接使用布尔值
+                    avatar: initialUserData.avatar, // 添加头像初始值
                 }}
             >
 
-                <div className="edit-form-item flex justify-between align-center" style={{ marginBottom: '24px' }}> {/* Use consistent class */}
-                    <div className="profile-avatar-container"> {/* 容器包裹头像和信息 */}
-                        <Form.Item noStyle> {/* Use Form.Item for consistency, but no data binding needed here */}
-                            <div ref={uploadRef}>
-                                <Upload
-                                    name="avatar" // 后端接收文件的字段名
-                                    listType="picture-card" // 卡片样式
-                                    className="avatar-uploader" // 复用样式类
-                                    showUploadList={false} // 不显示默认的文件列表
-                                    action="/api/upload/avatar" // TODO: 替换为你的上传 API 地址
-                                    beforeUpload={beforeUpload} // 添加上传前的校验
-                                    onChange={handleProfilePictureChange} // 处理上传状态变化
-                                    accept=".jpg,.jpeg,.png" // 限制文件类型
-                                >
-                                    {avatarUrl ? (
-                                        <img src={avatarUrl} alt="Avatar" className="avatar-img" /> // 显示头像
-                                    ) : (
-                                        <div className="upload-button"> {/* 上传按钮占位 */}
-                                            <UserOutlined style={{ fontSize: '32px', color: '#999' }} />
-                                        </div>
-                                    )}
-                                </Upload>
+                <Form.Item
+                    name="avatar"
+                    rules={[{ required: true, message: 'Please check the form fields.' }]}
+                > {/* 添加 name 属性绑定到表单 */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}> {/* 容器包裹头像和信息 */}
+                        <div ref={uploadRef} style={{ display: 'flex', alignItems: 'center' }}>
+                            <Upload.Dragger
+                                name="avatar" // 后端接收文件的字段名
+                                className="avatar-uploader" // 复用样式类
+                                showUploadList={false} // 不显示默认的文件列表
+                                action="/api/upload/avatar" // TODO: 替换为你的上传 API 地址
+                                beforeUpload={beforeUpload} // 添加上传前的校验
+                                onChange={handleProfilePictureChange} // 处理上传状态变化
+                                accept=".jpg,.jpeg,.png" // 限制文件类型
+                                style={{ width: '96px', height: '96px', minHeight: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                multiple={false} // 不允许多文件上传
+                            >
+                                {avatarUrl ? (
+                                    <img src={avatarUrl} alt="Avatar" className="avatar-img" style={{ maxWidth: '100%', maxHeight: '100%' }} /> // 显示头像
+                                ) : (
+                                    <div className="upload-button">
+                                        <CameraOutlined style={{ fontSize: '32px', color: '#999' }} />
+                                    </div>
+                                )}
+                            </Upload.Dragger>
+                            <div className="profile-info"> {/* 文字信息 */}
+                                <Title level={5} className="profile-picture-title" style={{ marginBottom: '4px' }}><span style={{ color: 'red' }}>* </span>User Avatar</Title> {/* 调整标题样式，必填标记放在前面 */}
+                                <div>Click or drag file to upload</div>
+                                <Text type="secondary" className="profile-picture-desc">
+                                    JPG or PNG. Max size 2MB.  {/* 更新提示文字，添加必传提示 */}
+                                </Text>
                             </div>
-                        </Form.Item>
-                        <div className="profile-info"> {/* 文字信息 */}
-                            <Title level={5} className="profile-picture-title" style={{ marginBottom: '4px' }}>User Avatar</Title> {/* 调整标题样式 */}
-                            <Text type="secondary" className="profile-picture-desc">
-                                JPG or PNG. Max size 2MB. {/* 更新提示文字 */}
-                            </Text>
                         </div>
+                        <Button color="default" variant="filled" className='change-btn' onClick={triggerUploadClick}>Change</Button>
                     </div>
-                    {/* Add Change Button */}
-                    <Button color="default" variant="filled" className='change-btn' onClick={triggerUploadClick}>Change</Button>
-                </div>
+
+
+                </Form.Item>
+
 
                 {/* 分隔线 (可选) */}
                 {/* <Divider className="divider" /> */}
@@ -354,6 +362,21 @@ export default function UsersEditor() {
                     ]}
                 >
                     <Input placeholder="Enter email address" />
+                </Form.Item>
+
+                <Form.Item
+                    name="password"
+                    label="Password" // 中文注释：密码
+                    rules={[
+                        { required: true, message: 'Please input the password!' },
+                        { max: 100, message: 'Password cannot exceed 100 characters!' }
+                    ]}
+                >
+                    <Input.Password
+                        placeholder="Enter password"
+                        maxLength={100}
+                        iconRender={(visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                    />
                 </Form.Item>
 
                 {/* 状态 - Corrected Structure */}
@@ -381,23 +404,8 @@ export default function UsersEditor() {
                     </Space>
                 </Form.Item>
 
-                {/* 创建信息 (只在编辑模式下显示) */}
-                {userId && userData.id && ( // 确保 userId 和 userData.id 都存在
-                    <>
-                        {/* 移除 Row 和 Col */}
-                        <Form.Item label="Create User" style={{ marginTop: '16px' }}> {/* 中文注释：创建用户 */}
-                            {/* 注意：userData 可能在编辑模式下延迟加载 */}
-                            <Input value={userData?.createUser || 'N/A'} disabled />
-                        </Form.Item>
-
-                        <Form.Item label="Create Time"> {/* 中文注释：创建时间 */}
-                            <Input value={userData?.createTime ? new Date(userData.createTime).toLocaleString() : 'N/A'} disabled />
-                        </Form.Item>
-                    </>
-                )}
-
                 {/* 页面底部的保存按钮已移至 HeaderContext 控制的全局 Header */}
             </Form>
-        </div >
+        </div>
     );
 }

@@ -212,7 +212,7 @@ export default function WorkoutsList() {
             {
                 key: 'create',
                 text: 'Create Exercise',
-                icon: PlusOutlined,
+                icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/exercises/editor')
             }

@@ -36,7 +36,7 @@ export default function Header() {
                     <Button
                         key={button.key || index}
                         type={button.type || 'default'}
-                        icon={button.icon && React.createElement(button.icon)}
+                        icon={button.icon}
                         onClick={button.onClick}
                         loading={button.loading}
                         size={button.size || 'middle'}

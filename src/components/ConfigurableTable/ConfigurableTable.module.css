@@ -8,9 +8,11 @@
     align-items: center;
     margin-bottom: 16px;
     flex-wrap: wrap;
-    /* 允许换行 */
     gap: 10px;
-    /* 项目之间的间隙 */
+}
+
+.configurableTableNotToolbar {
+    justify-content: flex-end;
 }
 
 /* 左侧工具栏组 */

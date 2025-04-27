@@ -14,26 +14,10 @@
  */
 import React from 'react';
 import RouterRegister from "./RouterRegister.js"
-import {
-    DashboardOutlined,
-    UserOutlined,
-    SettingOutlined,
-    LoginOutlined,
-    ThunderboltOutlined,
-    AudioOutlined
-} from '@ant-design/icons';
 import settings from './settings';
+import { MENU_ICON_MAP } from '@/constants/app.js';
 
-// 左侧菜单栏图标映射表
-export const iconMap = {
-    exercises: <ThunderboltOutlined />,
-    workouts: <DashboardOutlined />,
-    users: <UserOutlined />,
-    'profile-settings': <SettingOutlined />,
-    login: <LoginOutlined />,
-    music: <AudioOutlined />
 
-};
 
 // 静态菜单项 - 只有登录页
 const staticMenus = [
@@ -41,7 +25,10 @@ const staticMenus = [
         key: 'login',
         path: '/login',
         title: 'Login',
-        icon: iconMap.login,
+        icon: (() => {
+            const IconComponent = MENU_ICON_MAP.login;
+            return IconComponent ? <IconComponent /> : null;
+        })(),
         hideInMenu: true,
     }
 ];
@@ -71,7 +58,10 @@ try {
             ] = [
                     routerConfig.meta,
                     routerConfig.noShow,
-                    iconMap[routerConfig.meta] || null,
+                    (() => {
+                        const IconComponent = MENU_ICON_MAP[routerConfig.meta];
+                        return IconComponent ? <IconComponent /> : null;
+                    })(),
                     routerConfig.path,
                     settings.menu?.menuOrder?.[routerConfig.meta] || 999,
                     routerConfig.showName,

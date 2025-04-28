@@ -22,6 +22,12 @@ const settings = {
     // 是否开启接口错误提示
     showErrorMessage: true,
   },
+  //附件设置
+  file: {
+    baseURL: process.env.VITE_FILE_BASE_URL,
+    // 文件目录
+    dirname: 'test/file',
+  },
 
   // 路由重定向设置
   router: {

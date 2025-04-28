@@ -27,7 +27,7 @@ export const mockUsers = [
         id: 1,
         name: 'John Smith',
         email: 'john.smith@example.com',
-        avatar: 'https://hhcontent.s3.eu-central-1.amazonaws.com/u/67e4f264b1cc900012418c93/profile/i/5bfa5d43a78441ee8b20be70b7ce56c0%20%281%29.png-320x320.png',
+        avatar: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png',
         createUser: 'Admin',
         createTime: '2024-01-15 10:00:00',
         status: 'enable'
@@ -54,7 +54,7 @@ export const mockUsers = [
         id: 4,
         name: 'Sarah Davis',
         email: 'sarah.davis@example.com',
-        avatar: 'https://hhcontent.s3.eu-central-1.amazonaws.com/u/67e4f264b1cc900012418c93/profile/i/5bfa5d43a78441ee8b20be70b7ce56c0%20%281%29.png-320x320.png',
+        avatar: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png',
         createUser: 'Manager',
         createTime: '2024-01-18 16:45:00',
         status: 'enable'

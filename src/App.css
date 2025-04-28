@@ -322,9 +322,6 @@
   color: #fff;
 }
 
-.ant-form-item {
-  margin-bottom: 10px;
-}
 
 
 
@@ -351,10 +348,10 @@
   font-size: 14px;
 }
 
-.ant-form-item .ant-form-item-explain {
+/* .ant-form-item .ant-form-item-explain {
   padding: 5px 0 10px 0;
   font-size: 12px;
-}
+} */
 
 /* 去掉日期选择器范围选择背景色 */
 .ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-in-range:not(.ant-picker-cell-disabled):before,

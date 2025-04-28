@@ -28,6 +28,19 @@ export const STORAGE_KEYS = {
     REMEMBER_ME: 'admin_remember',
 };
 
+// 操作类型
+export const ACTION_TYPES = {
+    CREATE: 'create',
+    UPDATE: 'update',
+    DELETE: 'delete',
+    ENABLE: 'enable',
+    DISABLE: 'disable',
+    DUPLICATE: 'duplicate',
+    BATCH_DELETE: 'batchDelete',
+    BATCH_ENABLE: 'batchEnable',
+    BATCH_DISABLE: 'batchDisable',
+};
+
 // 主题模式
 export const THEME_MODES = {
     LIGHT: 'light',

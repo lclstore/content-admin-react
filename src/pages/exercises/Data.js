@@ -25,7 +25,7 @@ export const mockWorkouts = [
     {
         id: 2,
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting',
         status: 'Disabled',
         difficulty: 'Hard',
@@ -40,7 +40,7 @@ export const mockWorkouts = [
     {
         id: 3,
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Yoga Session',
         status: 'Enabled',
         difficulty: 'Easy',
@@ -70,7 +70,7 @@ export const mockWorkouts = [
     {
         id: 5,
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'HIIT Workout',
         status: 'Deprecated',
         difficulty: 'Hard',
@@ -147,7 +147,7 @@ export const mockWorkoutsForList = [
     {
         id: 2,
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting',
         status: 'Disabled',
         difficulty: 'Hard',
@@ -162,7 +162,7 @@ export const mockWorkoutsForList = [
     {
         id: 3,
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Yoga Session',
         status: 'Enabled',
         difficulty: 'Easy',
@@ -192,7 +192,7 @@ export const mockWorkoutsForList = [
     {
         id: 5,
         type: 'image',
-        image: 'https://amber.7mfitness.com/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
+        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'HIIT Workout',
         status: 'Deprecated',
         difficulty: 'Hard',

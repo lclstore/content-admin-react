@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
-import CommonEditor from '@/components/CommonEditorForm';
+import CommonEditorForm from '@/components/CommonEditorForm/CommonEditorForm';
 import { initialWorkoutData, mockEditorStructureData, mockWorkoutsForList, equipmentOptions } from './Data';
 
 // Helper function for moving array elements
@@ -380,35 +380,35 @@ export default function WorkoutEditorWithCommon() {
             name: 'workoutName',
             label: '训练名称',
             required: true,
-            placeholder: '请输入训练名称',
+            placeholder: 'Enter workout name',
         },
         {
             type: 'textarea',
             name: 'description',
             label: '描述',
-            placeholder: '请输入描述信息',
+            placeholder: 'Enter description',
             props: { rows: 4 }
         },
         {
             type: 'input',
             name: 'thumbnailImageUrl',
             label: '缩略图URL',
-            placeholder: '请输入缩略图URL',
+            placeholder: 'Enter thumbnail URL',
         },
         {
             type: 'input',
             name: 'coverImageUrl',
             label: '封面图URL',
-            placeholder: '请输入封面图URL',
+            placeholder: 'Enter cover image URL',
         },
         {
             type: 'select',
             name: 'difficulty',
             label: '难度',
             options: [
-                { label: '简单', value: 'Easy' },
-                { label: '中等', value: 'Medium' },
-                { label: '困难', value: 'Hard' },
+                { label: 'Easy', value: 'Easy' },
+                { label: 'Medium', value: 'Medium' },
+                { label: 'Hard', value: 'Hard' },
             ],
         },
         {
@@ -426,8 +426,8 @@ export default function WorkoutEditorWithCommon() {
             name: 'PremiumRequired',
             label: '是否需要会员',
             showStatus: true,
-            enableText: '需要',
-            disableText: '不需要'
+            enableText: 'Required',
+            disableText: 'Not Required'
         },
     ];
 
@@ -480,7 +480,7 @@ export default function WorkoutEditorWithCommon() {
     };
 
     return (
-        <CommonEditor
+        <CommonEditorForm
             formType="complex"
             config={editorConfig}
             fields={formFields}

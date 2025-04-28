@@ -3,6 +3,9 @@ import { Image, Modal } from 'antd';
 import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
 import styles from './MediaCell.module.css'; // 导入 CSS Modules
+import settings from '@/config/settings';
+const { file: fileSettings } = settings;
+
 // MediaType[] = ['video', 'audio', 'image'];
 // 全局状态标记，用于跟踪是否有预览处于激活状态
 window.MEDIA_PREVIEW = {
@@ -12,6 +15,16 @@ window.MEDIA_PREVIEW = {
     isAnyPreviewActive() {
         return this.IMAGE || this.VIDEO || this.AUDIO;
     }
+};
+
+// 获取完整URL的辅助函数
+const getFullUrl = (url) => {
+    if (!url) return '';
+    // 如果已经是完整URL或者是数据URL，则不添加baseURL
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
+        return url;
+    }
+    return `${fileSettings.baseURL}${url}`;
 };
 
 // 新标签和锁图标组件
@@ -33,14 +46,17 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview }) => {
         return <div className={`${styles.videoContainer} ${styles.mediaCell}`}></div>;
     }
 
+    const fullSrc = getFullUrl(src);
+    const fullPosterImage = getFullUrl(posterImage);
+
     return (
         <div
             className={`${styles.videoContainer} ${styles.mediaCell}`}
-            onClick={(e) => onPreview(e, src)}
+            onClick={(e) => onPreview(e, fullSrc)}
         >
             <video
-                poster={posterImage || undefined}
-                src={src}
+                poster={fullPosterImage || undefined}
+                src={fullSrc}
                 className={styles.tabVideo}
                 preload="none"
                 loading="lazy"
@@ -70,10 +86,12 @@ const AudioMedia = memo(({ src, onPreview }) => {
         return <div className={`${styles.audioContainer} ${styles.mediaCell}`}></div>;
     }
 
+    const fullSrc = getFullUrl(src);
+
     return (
         <div
             className={`${styles.audioContainer} ${styles.mediaCell}`}
-            onClick={(e) => onPreview(e, src)}
+            onClick={(e) => onPreview(e, fullSrc)}
         >
             <CaretRightFilled className={styles.audioIcon} />
         </div>
@@ -86,10 +104,12 @@ const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) =>
         return <div className={`${styles.imageContainer} ${styles.mediaCell}`}></div>;
     }
 
+    const fullSrc = getFullUrl(src);
+
     return (
         <div className={`${styles.imageContainer} ${styles.mediaCell}`}>
             <Image
-                src={src}
+                src={fullSrc}
                 onClick={(e) => e.stopPropagation()}
                 alt={`${name || 'Media'}'s image`}
                 preview={{
@@ -128,6 +148,8 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
         onCancel();
     }, [onCancel]);
 
+    const fullUrl = getFullUrl(url);
+
     return (
         <Modal
             title={title}
@@ -148,7 +170,7 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
         >
             {isVideo ? (
                 <video
-                    src={url}
+                    src={fullUrl}
                     controls
                     style={{ width: '100%', display: 'block' }}
                     onClick={(e) => e.stopPropagation()}
@@ -157,7 +179,7 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
                 </video>
             ) : (
                 <audio
-                    src={url}
+                    src={fullUrl}
                     controls
                     style={{ width: '100%', display: 'block' }}
                     onClick={(e) => e.stopPropagation()}

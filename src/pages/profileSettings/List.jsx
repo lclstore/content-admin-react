@@ -39,6 +39,9 @@ export default function ProfileSettings() {
     // 表单实例
     const [form] = Form.useForm();
 
+    // 添加一个挂载状态引用，避免循环渲染
+    const isMountedRef = useRef(false);
+
     // 获取消息实例
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -69,13 +72,17 @@ export default function ProfileSettings() {
      * 当用户修改表单时，标记表单为已修改状态
      */
     const handleFormChange = (changedValues, allValues) => {
-        setIsFormDirty(true);
-        setSaveSuccess(false);
-        setUserData({
-            ...userData,
-            ...changedValues
-        });
+        // 确保组件已挂载再更新状态
+        if (isMountedRef.current) {
+            setIsFormDirty(true);
+            setSaveSuccess(false);
+            setUserData({
+                ...userData,
+                ...changedValues
+            });
+        }
     };
+
 
     /**
      * 处理保存表单操作
@@ -115,20 +122,27 @@ export default function ProfileSettings() {
      * 控制按钮的显示、文本和加载状态
      */
     useEffect(() => {
-        setButtons([
-            {
-                key: 'save',
-                text: 'Save Changes',
-                icon: <SaveOutlined />,
-                type: 'primary',
-                disabled: !isFormDirty || saveLoading,
-                loading: saveLoading,
-                onClick: handleSaveChanges
-            }
-        ]);
+        // 首次挂载标记
+        isMountedRef.current = true;
+
+        // 只有在组件已挂载的情况下设置按钮
+        if (isMountedRef.current) {
+            setButtons([
+                {
+                    key: 'save',
+                    text: 'Save Changes',
+                    icon: <SaveOutlined />,
+                    type: 'primary',
+                    disabled: !isFormDirty || saveLoading,
+                    loading: saveLoading,
+                    onClick: handleSaveChanges
+                }
+            ]);
+        }
 
         return () => {
             setButtons([]); // 清空按钮
+            isMountedRef.current = false; // 组件卸载时重置标记
         };
     }, [isFormDirty, saveLoading, handleSaveChanges, setButtons]);
 

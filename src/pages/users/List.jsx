@@ -8,7 +8,6 @@ import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable'
 import { STATUS_ICON_MAP } from '@/constants/app';
 import { statusOrder, filterSections, mockUsers } from './Data';
 
-
 export default function UsersList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);

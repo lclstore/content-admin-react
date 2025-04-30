@@ -30,9 +30,23 @@ export const filterSections = [
         title: 'Status',
         key: 'status',
         options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
+    }, {
+        title: 'Duration(Min)',
+        key: 'duration',
+        options: ['10-15', '15-25', '25+'],
     }
 ];
-
+export const filterSections1 = [
+    {
+        title: 'Status',
+        key: 'status',
+        options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
+    }, {
+        title: 'Application',
+        key: 'application',
+        options: ['Plan', 'Plan-Workout'],
+    }, 
+];
 // --- 以下是从 WorkoutsEditor.jsx 移动并整理的数据 ---
 
 // 模拟 Workout 列表数据 (保持原名 mockWorkoutsForList，以防列表页直接使用)
@@ -44,6 +58,7 @@ export const mockWorkoutsForList = [
         audio: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
         status: 'Disabled',
+        generateStatus: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',
         position: 'Standing',
@@ -53,14 +68,16 @@ export const mockWorkoutsForList = [
         category: 'Strength',
         duration: 3600,
         calorie: 450,
-        HasAScript:false,
+        HasAScript: false,
         Premium: true,
         isSubscription: 0,
         detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         exerciseNum: 12,
+        workoutNum: 12,
         audioLang: null,
+        application:'Plan',
         fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
@@ -70,6 +87,7 @@ export const mockWorkoutsForList = [
         audio: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting',
         status: 'Disabled',
+        generateStatus: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',
         position: 'Standing',
@@ -79,13 +97,15 @@ export const mockWorkoutsForList = [
         category: 'Strength',
         duration: 3600,
         calorie: 450,
-        HasAScript:true,
+        HasAScript: true,
         isSubscription: 0,
         detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         exerciseNum: 12,
+        workoutNum: 12,
         audioLang: null,
+        application:'Plan',
         fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table, Switch,Space,Button } from 'antd';
+import { Modal, message, Form, Table, Switch, Space, Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -14,11 +14,12 @@ import {
     difficultyOrder,
     mockWorkoutsForList,
     filterSections,
+    filterSections1,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
 
-export default function Temlates() {
+export default function Resources() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -150,8 +151,19 @@ export default function Temlates() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            {
+                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
+                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
+                width: 150,
+                visibleColumn: 2,
+                render: (duration) => {
+                    if (!duration) return '-';
+                    const minutes = Math.floor(duration / 60);
+                    const seconds = duration % 60;
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
@@ -159,17 +171,11 @@ export default function Temlates() {
                 width: 120,
                 visibleColumn: 0
             },
-            {
-                title: 'Has a Script',sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
-                    console.log('HasAScript',text,record)
-                    return (
-                        <Space direction="vertical">
-                            <Switch disabled={true} checked={text} />
-                        </Space>
-                    );
-                }
-            },
-
+            { title: 'Application', dataIndex: 'application', key: 'application', width: 130, visibleColumn: 1 },
+            { title: 'Cover Image', mediaType: 'image', dataIndex: 'coverImage', key: 'coverImage', width: 130, visibleColumn: 1 },
+            { title: 'Detail Image', mediaType: 'image', dataIndex: 'detailImage', key: 'detailImage', width: 130, visibleColumn: 1 },
+            { title: 'Thumbnail Image', mediaType: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', width: 130, visibleColumn: 1 },
+            { title: 'Complete Image', mediaType: 'image', dataIndex: 'completeImage', key: 'completeImage', width: 130, visibleColumn: 1 },
             {
                 title: 'Actions',
                 key: 'actions',
@@ -465,7 +471,7 @@ export default function Temlates() {
                 }}
                 showColumnSettings={false}
                 filterConfig={{
-                    filterSections: filterSections,
+                    filterSections: filterSections1,
                     activeFilters: selectedFilters,
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,

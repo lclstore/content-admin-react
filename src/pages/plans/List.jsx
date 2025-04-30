@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-// import Temlates from './components/Temlates/Temlates';
+import Temlates from './components/Temlates';
+import Resources from './components/Resources';
 import TagSelector from '@/components/TagSelector/TagSelector';
 import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
@@ -26,13 +27,13 @@ export default function WorkoutsList() {
       const items = [
         {
           key: '1',
-          label: 'Tab 1',
-          children: Temlates,
+          label: 'Temlates',
+          children: <Temlates></Temlates>,
         },
         {
           key: '2',
-          label: 'Tab 2',
-          children: 'Content of Tab Pane 2',
+          label: 'Resources',
+          children: <Resources></Resources>,
         },
         {
           key: '3',

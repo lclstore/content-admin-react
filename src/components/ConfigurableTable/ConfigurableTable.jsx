@@ -4,7 +4,7 @@ import { SearchOutlined, FilterOutlined, SettingOutlined, EditOutlined, CopyOutl
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.css';
 import MediaCell from '@/components/MediaCell/MediaCell';
-import { DEFAULT_PAGINATION, ACTION_ICON_MAP } from '@/constants/app';
+import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
 
 /**
  * 可配置表格组件
@@ -21,7 +21,7 @@ import { DEFAULT_PAGINATION, ACTION_ICON_MAP } from '@/constants/app';
  * @param {function} props.onVisibilityChange - 可见列 key 数组变化的回调 (包含强制列和更新后的可见可配置列)
  * @param {object} [props.searchConfig] - 搜索框配置
  * @param {object} [props.filterConfig] - 筛选器配置
- * @param {object|boolean} [props.paginationConfig=DEFAULT_PAGINATION] - 分页配置
+ * @param {object|boolean} [props.paginationConfig=defaultPagination] - 分页配置
  * @param {boolean|number} [props.scrollX=true] - 横向滚动
  * @param {object} [props.rowSelection] - Ant Design Table 的行选择配置对象
  * @param {object} [props.tableProps] - 其他 Table props
@@ -42,7 +42,7 @@ function ConfigurableTable({
     onVisibilityChange, // 更新所有可见列的回调
     searchConfig,
     filterConfig,
-    paginationConfig = DEFAULT_PAGINATION,
+    paginationConfig = defaultPagination,
     scrollX = true,
     rowSelection,
     tableProps,
@@ -335,7 +335,7 @@ function ConfigurableTable({
     // 最终的分页配置
     const finalPaginationConfig = useMemo(() => {
         if (paginationConfig === false) return false;
-        const config = { ...DEFAULT_PAGINATION, ...paginationConfig };
+        const config = { ...defaultPagination, ...paginationConfig };
         config.total = dataSource?.length || 0;
         return config;
     }, [paginationConfig, dataSource]);
@@ -401,26 +401,23 @@ function ConfigurableTable({
                 }
             }
 
-            // 如果列有 iconMap 属性，设置 render 函数使用图标映射渲染内容
-            if (processedCol.iconMap && !processedCol.render) {
-                //  图标映射
-                const iconMap = processedCol.iconMap;
+            // 如果列有  options 属性，并且没有自定义 render 函数，则设置渲染逻辑
+            if (processedCol.options && !processedCol.render) {
+                const options = optionsConstants[processedCol.options];
 
                 processedCol.render = (text, record) => {
-                    // 尝试获取小写形式的键值
-                    const key = typeof text === 'string'
-                        ? text.toLowerCase()
-                        : text;
-                    const iconConfig = iconMap[key];
-                    // 如果在映射中找不到，返回原始文本
-                    if (!iconConfig) return text;
-
-                    const Icon = iconConfig.icon;
+                    const key = text;
+                    const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
+                    // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
+                    const DisplayText = optionConfig ? (optionConfig.name ?? text) : text;
+                    // 如果 iconOptions 和 options 都没有为当前 key 提供配置，则返回原始文本
+                    if (!optionConfig) {
+                        return text;
+                    }
+                    console.log(DisplayText);
+                    const B = () => DisplayText
                     return (
-                        <span style={{ display: 'flex', alignItems: 'center' }}>
-                            {!processedCol.hideIconText && <span style={{ color: !Icon && iconConfig.color }}>{text}</span>}
-                            {Icon && <Icon style={{ marginLeft: '6px', color: iconConfig.color, fontSize: '16px' }} />}
-                        </span>
+                        <B />
                     );
                 };
             }
@@ -453,7 +450,7 @@ function ConfigurableTable({
                                 items: processedCol.actionButtons
                                     .filter(btnName => processedCol.isShow(record, btnName))
                                     .map(btnName => {
-                                        const ActionIcon = ACTION_ICON_MAP[btnName];
+                                        const ActionIcon = actionIconMap[btnName];
                                         return {
                                             key: btnName,
                                             label: btnName.charAt(0).toUpperCase() + btnName.slice(1), // 首字母大写

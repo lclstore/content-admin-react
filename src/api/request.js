@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { message } from 'antd';
-import { HTTP_STATUS, STORAGE_KEYS } from '@/constants';
+import { HTTP_STATUS, storageKeys } from '@/constants';
 
 // 环境变量配置
 const config = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: parseInt(import.meta.env.VITE_APP_REQUEST_TIMEOUT),
   showErrorMessage: true,
 };
 
@@ -27,7 +27,7 @@ const request = axios.create({
 request.interceptors.request.use(
   (config) => {
     // 从localStorage中获取token
-    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    const token = localStorage.getItem(storageKeys.TOKEN);
 
     // 如果有token, 则添加到请求头
     if (token) {
@@ -67,8 +67,8 @@ request.interceptors.response.use(
       switch (status) {
         case HTTP_STATUS.UNAUTHORIZED:
           // 401: 未授权，清除用户信息并重定向到登录页
-          localStorage.removeItem(STORAGE_KEYS.TOKEN);
-          localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+          localStorage.removeItem(storageKeys.TOKEN);
+          localStorage.removeItem(storageKeys.USER_INFO);
           window.location.href = router.loginPath;
           message.error('登录已过期，请重新登录');
           break;
@@ -170,21 +170,29 @@ export const upload = (url, formData, config = {}) => {
  * 下载文件
  * @param {string} url - 请求地址
  * @param {Object} params - 请求参数
- * @param {string} filename - 文件名
- * @returns {Promise}
+ * @param {string} [filename] - 可选的文件名
+ * @returns {Promise<void>}
  */
-export const download = (url, params = {}, filename) => {
-  return request.get(url, {
-    params,
-    responseType: 'blob',
-  }).then(response => {
+export const download = async (url, params = {}, filename) => {
+  try {
+    const response = await request.get(url, {
+      params,
+      responseType: 'blob',
+    });
+
     const blob = new Blob([response.data]);
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
     link.download = filename || getFilenameFromResponse(response);
     link.click();
     window.URL.revokeObjectURL(link.href);
-  });
+  } catch (error) {
+    // 可以添加错误处理逻辑，例如显示消息
+    console.error('Download failed:', error);
+    message.error('File download failed.'); // 使用 antd message 显示错误
+    // 重新抛出错误或者根据需要处理
+    throw error;
+  }
 };
 
 // 从响应头中获取文件名

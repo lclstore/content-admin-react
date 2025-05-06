@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { STATUS_ICON_MAP } from '@/constants/app';
+import { statusIconMap, optionsConstants } from '@/constants';
 import { statusOrder, filterSections, mockUsers } from './Data';
-
+import settings from '@/config/settings';
+const { file: fileSettings } = settings;
 export default function UsersList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
@@ -75,8 +76,8 @@ export default function UsersList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 状态-按钮映射关系
-        if (status === 'enable' && ['disable'].includes(btnName)) return true;
-        if (status === 'disable' && ['enable'].includes(btnName)) return true;
+        if (status === 1 && ['disable'].includes(btnName)) return true;
+        if (status === 0 && ['enable'].includes(btnName)) return true;
         if (btnName === 'edit') return true;  // 编辑按钮始终显示
 
         return false;
@@ -94,7 +95,7 @@ export default function UsersList() {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         {record.avatar ? (
                             <img
-                                src={record.avatar}
+                                src={`${fileSettings.baseURL}${record.avatar}`}
                                 alt={`${record.name}'s avatar`}
                                 className="userAvatar"
                                 style={{ width: 36, height: 36, borderRadius: '50%', marginRight: 12 }}
@@ -128,7 +129,8 @@ export default function UsersList() {
                 dataIndex: 'status',
                 key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                iconMap: STATUS_ICON_MAP,
+                iconOptions: statusIconMap,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
@@ -288,7 +290,7 @@ export default function UsersList() {
 
     // 渲染 - 组件UI呈现
     return (
-        <div className="usersContainer">
+        <div className="usersContainer page-list">
             {/* 消息上下文提供器 */}
             {contextHolder}
 

@@ -1,0 +1,225 @@
+/* src/components/FileUpload/FileUpload.module.css */
+
+/* 上传组件容器 */
+.uploadContainer {
+    width: 100%;
+}
+
+/* 上传内容包装容器 */
+.uploadContentWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* 左侧区域包装容器 */
+.uploadLeftSection {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* 上传区域 - 尺寸通过行内样式控制 */
+.uploadArea {
+    position: relative;
+    /* 宽度和高度通过行内样式设置 */
+}
+
+/* 预览容器 */
+.previewContainer {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #d9d9d9;
+}
+
+/* 图片预览样式 */
+.previewContainer img,
+.previewContainer :global(.ant-image),
+.previewContainer :global(.ant-image-img) {
+    width: 100%;
+    height: 100%;
+}
+
+/* 图片操作区 */
+.previewContainer:hover .imageActions {
+    opacity: 1;
+}
+
+.imageActions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* 上传按钮 */
+.uploadButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* 上传图标 */
+.uploadIcon {
+    font-size: 30px;
+    color: #8c939d;
+}
+
+/* 上传信息区域 */
+.uploadInfo {
+    flex-grow: 1;
+}
+
+/* 上传标题 */
+.uploadTitle {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 上传描述 */
+.uploadDescription {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+/* 上传操作区域 */
+.uploadActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 操作按钮 */
+.actionButton {
+    margin-left: 16px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+/* 更改按钮 */
+.changeButton {
+    margin-left: 8px;
+}
+
+/* 清除按钮 */
+.clearButton {
+    position: absolute !important;
+    top: -10px;
+    right: 10px;
+    z-index: 10;
+    font-size: 20px;
+    color: var(--primary-color, #1890ff) !important;
+    display: none;
+}
+
+.uploadLeftSection:hover .clearButton {
+    display: block;
+}
+
+/* 文件信息容器 */
+.fileNameContainer {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.fileName {
+    margin-left: 8px;
+    font-size: 14px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 文件图标 */
+.fileIcon {
+    font-size: 18px;
+    color: #1890ff;
+}
+
+/* 文件预览 */
+.filePreview {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: #f9f9f9;
+}
+
+/* Ant Design Upload 组件自定义样式 */
+.avatarUploader :global(.ant-upload) {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.avatarUploader :global(.ant-upload-drag) {
+    padding: 16px;
+    border: 2px dashed #d9d9d9;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 70px;
+    background-color: #f5f5f5;
+}
+
+.avatarUploader :global(.ant-upload-drag:hover) {
+    opacity: 0.75;
+    border-color: rgb(184, 204, 204) !important;
+}
+
+.avatarUploader :global(.ant-upload-list-picture-card-container) {
+    width: 100%;
+    height: auto;
+}
+
+.avatarUploader :global(.ant-upload-drag-hover) {
+    border-color: var(--primary-color, #1890ff);
+    background: rgba(24, 144, 255, 0.05);
+}
+
+/* 全局样式 */
+:global(.ant-image) {
+    width: 100%;
+    height: 100%;
+    max-height: 100% !important;
+    max-width: 100% !important;
+}
+
+:global(.ant-image .ant-image-img) {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* 图片预览 */
+.avatarImg {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain !important;
+}
+
+/* 必填标记 */
+.uploadInfo h4.required::before {
+    content: '*';
+    color: red;
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+.audioPreview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}

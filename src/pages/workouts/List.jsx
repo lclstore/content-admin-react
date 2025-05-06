@@ -8,7 +8,7 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
+// import { statusIconMap, resultIconMap, fileStatusIconMap } from '@/constants';
 import {
     statusOrder,
     difficultyOrder,
@@ -137,11 +137,11 @@ export default function WorkoutsList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 简单的状态-按钮映射关系
-        if (status === 'Draft' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 'Disabled' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 'Enabled' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
-        if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
-        if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
+        if (status === 0 && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 2 && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 1 && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 3 && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 4 && ['duplicate'].includes(btnName)) return true;
 
         return false;
     }, []);
@@ -157,11 +157,11 @@ export default function WorkoutsList() {
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                iconMap: STATUS_ICON_MAP,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
-            { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, iconMap: RESULT_ICON_MAP, hideIconText: true, display: 1, visibleColumn: 2 },
+            { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
             {
                 title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
                 sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
@@ -177,7 +177,7 @@ export default function WorkoutsList() {
             { title: 'Calorie (Kcal)', align: 'center', dataIndex: 'calorie', key: 'calorie', sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0), width: 150, visibleColumn: 2 },
             { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
             { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
-            { title: 'Position', dataIndex: 'position', key: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
+            { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
             { title: 'Target', dataIndex: 'target', key: 'target', width: 200, visibleColumn: 1 },
             { title: 'Exercise Num', align: 'center', dataIndex: 'exerciseNum', key: 'exerciseNum', sorter: (a, b) => (a.exerciseNum || 0) - (b.exerciseNum || 0), width: 130, visibleColumn: 1 },
             {
@@ -194,7 +194,7 @@ export default function WorkoutsList() {
                 title: 'File Status', dataIndex: 'fileStatus', key: 'fileStatus',
                 width: 120,
                 ellipsis: true,
-                iconMap: FILE_STATUS_ICON_MAP,
+                options: 'fileStatus',
                 visibleColumn: 1
             },
             {

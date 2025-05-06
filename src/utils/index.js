@@ -1,6 +1,42 @@
+import settings from '@/config/settings';
+import { v4 as uuidv4 } from 'uuid';
+
+
+const { file: fileSettings } = settings;
 /**
  * 工具函数集合
  */
+
+/**
+ * 深度克隆对象
+ * @param {any} obj 需要克隆的对象
+ * @returns {any} 克隆后的新对象
+ */
+export function deepClone(obj) {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // 处理日期对象
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+
+  // 处理数组
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepClone(item));
+  }
+
+  // 处理普通对象
+  const clonedObj = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      clonedObj[key] = deepClone(obj[key]);
+    }
+  }
+
+  return clonedObj;
+}
 
 /**
  * 验证邮箱格式
@@ -101,4 +137,38 @@ export const formatDuration = (seconds) => {
   const formattedMinutes = String(minutes).padStart(2, '0');
   const formattedSeconds = String(remainingSeconds).padStart(2, '0');
   return `${formattedMinutes}:${formattedSeconds}`;
-}; 
+};
+/**
+ * 获取完整URL的辅助函数
+ * @param {string} url 需要处理的URL
+ * @returns {string} 完整URL
+ */
+export const getFullUrl = (url) => {
+  if (!url) return '';
+  // 如果已经是完整URL或者是数据URL，则不添加baseURL
+  if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
+    return url;
+  }
+  return `${fileSettings.baseURL}${url}`;
+};
+
+/**
+ * 验证密码格式
+ * @param {string} password - 需要验证的密码字符串
+ * @returns {boolean} 如果密码格式有效（8-12位，包含字母和数字），则返回 true，否则返回 false
+ */
+export const validatePassword = (password) => {
+  // 密码必须包含字母（大写或小写）和数字，且长度为8到12位
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/;
+  return passwordRegex.test(password);
+};
+
+/**
+ * 生成 UUID (v4)
+ * @returns {string} 返回一个新的 UUID 字符串
+ */
+export const generateUUID = () => {
+  return uuidv4();
+};
+
+

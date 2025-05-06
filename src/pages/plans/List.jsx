@@ -34,12 +34,7 @@ export default function WorkoutsList() {
           key: '2',
           label: 'Resources',
           children: <Resources></Resources>,
-        },
-        {
-          key: '3',
-          label: 'Tab 3',
-          children: 'Content of Tab Pane 3',
-        },
+        }
       ];
       return <Tabs defaultActiveKey="1" items={items} onChange={onChange} />;
 }   

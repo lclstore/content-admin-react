@@ -20,15 +20,14 @@ const items = [
 
 export default function CollectionsList() {
     const { setCustomPageTitle } = useContext(HeaderContext);
-    const defaultTabKey = items[0]?.key;
+    const defaultTabItem = items[0] || {};
     // 页面加载时设置默认标题
     useEffect(() => {
-        const tabBarName = items.find(item => item.key === defaultTabKey)?.label;
-        setCustomPageTitle(`${tabBarName} List`);
+        setCustomPageTitle(`${defaultTabItem.label} List`);
     }, [setCustomPageTitle]);
 
     const onChange = (key) => {
-        const tabBarName = items.find(item => item.key == key)?.label;
+        const tabBarName = items.find(item => item.key == key).label;
         setCustomPageTitle(`${tabBarName} List`);
     };
     const renderTabBar = (props, DefaultTabBar) => (
@@ -37,5 +36,5 @@ export default function CollectionsList() {
         </StickyBox>
     );
 
-    return <Tabs defaultActiveKey={defaultTabKey} onChange={onChange} renderTabBar={renderTabBar} items={items} />;
+    return <Tabs defaultActiveKey={defaultTabItem.key} onChange={onChange} renderTabBar={renderTabBar} items={items} />;
 }

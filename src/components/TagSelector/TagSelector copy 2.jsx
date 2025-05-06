@@ -6,11 +6,7 @@ import './TagSelector.css';
 /**
  * 自定义标签选择器组件，用于替换 Select 组件，提供类似 Tag 的视觉选项
  * 已优化支持在Form.Item中作为表单控件使用，通过配置项控制验证规则
- * 
- * previewStyle: 预览区域的样式，可通过外部传入自定义宽高，默认宽度400px，高度200px
  */
-
-
 const TagSelector = ({
     options,
     value,
@@ -18,12 +14,10 @@ const TagSelector = ({
     onChange,
     mode = 'single',
     disabled = false,
-    previewStyle, // 移除默认值，完全使用外部传入的样式
+    previewStyle = {}, // 添加预览样式参数
     form, // 父级表单实例
     fieldConfig = {} // 接收字段配置对象
 }) => {
-    console.log(form);
-
     // 使用内部状态跟踪选中的选项，以防父组件没有正确更新 value
     const [internalValue, setInternalValue] = useState(() => {
         const initialValue = value !== undefined ? value : defaultValue;
@@ -35,8 +29,6 @@ const TagSelector = ({
 
     // 存储预览输入框的值
     const [previewInputValue, setPreviewInputValue] = useState('');
-
-
 
     // 当外部 value 变化时更新内部状态
     useEffect(() => {
@@ -152,54 +144,61 @@ const TagSelector = ({
         if (!selectedOptions) return;
 
         if (mode === 'single' && selectedOptions.preview && selectedOptions.preview.type === 'input') {
-            // 从selectedOptions.preview中获取content
             const { content, defaultValue = '' } = selectedOptions.preview;
 
-            // 设置内部状态 
+            // 设置内部状态
             setPreviewInputValue(defaultValue);
 
-            // 如果有表单实例并且有content字段，同步到表单
+            // 如果有表单实例并且有字段名，同步到表单
             if (form && content) {
                 // 检查表单中是否已有该字段的值
                 const currentValue = form.getFieldValue(content);
 
                 // 如果字段值不存在，设置默认值
-                if (currentValue) {
-                    setPreviewInputValue(currentValue);
+                if (currentValue === undefined) {
+                    form.setFieldsValue({
+                        [content]: defaultValue
+                    });
                 }
             }
         }
     }, [selectedOptions, form, mode]);
 
+    // 处理预览输入框变化
+    const handlePreviewInputChange = (e) => {
+        const value = e.target.value;
+        setPreviewInputValue(value);
 
+        // 如果有表单且有字段名，同步到表单
+        if (selectedOptions && selectedOptions.preview && selectedOptions.preview.content && form) {
+            form.setFieldsValue({
+                [selectedOptions.preview.content]: value
+            });
+        }
+    };
 
     // 渲染预览内容
     const renderPreview = () => {
         if (mode === 'single' && selectedOptions && selectedOptions.preview) {
             const { type, content, required: previewRequired = false, defaultValue = '' } = selectedOptions.preview;
 
-
-            // 设置默认预览样式，如果外部没有传入则使用默认值
-            const finalPreviewStyle = previewStyle || {
-                width: '400px',
-                height: '200px'
-            };
+            // 使用配置项的required或预览配置的required
+            const isRequired = fieldConfig.required !== undefined ? fieldConfig.required : previewRequired;
 
             switch (type) {
                 case 'image':
                     return (
-                        <div className="tag-selector-preview" style={finalPreviewStyle}>
+                        <div className="tag-selector-preview" style={previewStyle}>
                             <Image
                                 src={content}
                                 alt={selectedOptions.label || ''}
-                                style={{ width: '100%', height: '100%' }}
                                 className="tag-selector-preview-image"
                             />
                         </div>
                     );
                 case 'text':
                     return (
-                        <div className="tag-selector-preview" style={finalPreviewStyle}>
+                        <div className="tag-selector-preview" style={previewStyle}>
                             <div className="tag-selector-preview-text">
                                 {content}
                             </div>
@@ -211,22 +210,34 @@ const TagSelector = ({
 
                     // 如果配置了required但没有具体规则，添加必填规则
                     const rules = fieldRules.length > 0 ? fieldRules :
-                        (previewRequired ? [{ required: true, message: `Please input ${content}` }] : []);
+                        (isRequired ? [{ required: true, message: `请输入${content}` }] : []);
 
                     return (
-                        <div className="tag-selector-preview" style={{ width: finalPreviewStyle.width }}>
-                            <Form.Item
-                                name={content}
-                                rules={rules}
-                                className="tag-selector-preview-input-item"
-                            >
+                        <div className="tag-selector-preview" style={previewStyle}>
+                            {form && content ? (
+                                <Form.Item
+                                    name={content}
+                                    rules={rules}
+                                    initialValue={defaultValue}
+                                    className="tag-selector-preview-input-item"
+                                    style={{ margin: 0 }}
+                                >
+                                    <Input
+                                        placeholder={`请输入${content}${isRequired ? '（必填）' : ''}`}
+                                        className="tag-selector-preview-input"
+                                        disabled={disabled}
+                                    />
+                                </Form.Item>
+                            ) : (
                                 <Input
                                     value={previewInputValue}
-                                    placeholder={`Please input ${content}`}
+                                    onChange={handlePreviewInputChange}
+                                    placeholder={`请输入${content}${isRequired ? '（必填）' : ''}`}
                                     className="tag-selector-preview-input"
+                                    required={isRequired}
                                     disabled={disabled}
                                 />
-                            </Form.Item>
+                            )}
                         </div>
                     );
                 default:
@@ -236,6 +247,12 @@ const TagSelector = ({
         return null;
     };
 
+    // 为了兼容Form.Item的使用，需要实现value和onChange属性
+    // 这样Form.Item才能正确识别TagSelector作为表单控件
+    const controlProps = {
+        value: normalizedValue,
+        onChange: onChange
+    };
 
     return (
         <div className="tag-selector-container">

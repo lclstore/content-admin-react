@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
-import CommonEditorForm from '@/components/CommonEditorForm/CommonEditorForm';
+import CommonEditorForm from '@/components/CommonEditorForm';
 import { initialWorkoutData, mockEditorStructureData, mockWorkoutsForList, equipmentOptions } from './Data';
 
 // Helper function for moving array elements

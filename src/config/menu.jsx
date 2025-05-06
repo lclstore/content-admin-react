@@ -15,7 +15,7 @@
 import React from 'react';
 import RouterRegister from "./RouterRegister.js"
 import settings from './settings';
-import { MENU_ICON_MAP } from '@/constants/app.js';
+import { menuIconMap } from '@/constants';
 import { Outlet } from "react-router"
 
 
@@ -26,7 +26,7 @@ const staticMenus = [
         path: '/login',
         title: 'Login',
         icon: (() => {
-            const IconComponent = MENU_ICON_MAP.login;
+            const IconComponent = menuIconMap.login;
             return IconComponent ? <IconComponent /> : null;
         })(),
         hideInMenu: true,
@@ -59,7 +59,7 @@ try {
                     routerConfig.meta,
                     routerConfig.noShow,
                     (() => {
-                        const IconComponent = MENU_ICON_MAP[routerConfig.meta];
+                        const IconComponent = menuIconMap[routerConfig.meta];
                         return IconComponent ? <IconComponent /> : null;
                     })(),
                     routerConfig.path,

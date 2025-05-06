@@ -6,7 +6,7 @@ import styles from './ConfigurableTable.module.css';
 import MediaCell from '@/components/MediaCell/MediaCell';
 
 // 默认分页配置
-const DEFAULT_PAGINATION = {
+const defaultPagination = {
     pageSize: 10,
     showSizeChanger: true,
     pageSizeOptions: ['10', '20', '50'],
@@ -30,7 +30,7 @@ const DEFAULT_PAGINATION = {
  * @param {function} props.onVisibilityChange - 可见列 key 数组变化的回调 (包含强制列和更新后的可见可配置列)
  * @param {object} [props.searchConfig] - 搜索框配置
  * @param {object} [props.filterConfig] - 筛选器配置
- * @param {object|boolean} [props.paginationConfig=DEFAULT_PAGINATION] - 分页配置
+ * @param {object|boolean} [props.paginationConfig=defaultPagination] - 分页配置
  * @param {React.ReactNode} [props.extraToolbarItems] - 额外工具栏项
  * @param {boolean|number} [props.scrollX=true] - 横向滚动
  * @param {object} [props.rowSelection] - Ant Design Table 的行选择配置对象
@@ -55,7 +55,7 @@ function ConfigurableTable({
     onVisibilityChange, // 更新所有可见列的回调
     searchConfig,
     filterConfig,
-    paginationConfig = DEFAULT_PAGINATION,
+    paginationConfig = defaultPagination,
     extraToolbarItems,
     scrollX = true,
     rowSelection,
@@ -262,7 +262,7 @@ function ConfigurableTable({
     // 最终的分页配置
     const finalPaginationConfig = useMemo(() => {
         if (paginationConfig === false) return false;
-        const config = { ...DEFAULT_PAGINATION, ...paginationConfig };
+        const config = { ...defaultPagination, ...paginationConfig };
         config.total = dataSource?.length || 0;
         return config;
     }, [paginationConfig, dataSource]);
@@ -297,18 +297,18 @@ function ConfigurableTable({
                 }
             }
 
-            // 如果列有 iconMap 属性，设置 render 函数使用图标映射渲染内容
-            if (processedCol.iconMap && !processedCol.render) {
+            // 如果列有 iconOptions 属性，设置 render 函数使用图标映射渲染内容
+            if (processedCol.iconOptions && !processedCol.render) {
                 //  图标映射
-                const iconMap = processedCol.iconMap;
-                console.log('iconMap', iconMap);
+                const iconOptions = processedCol.iconOptions;
+                console.log('iconOptions', iconOptions);
 
                 processedCol.render = (text, record) => {
                     // 尝试获取小写形式的键值
                     const key = typeof text === 'string'
                         ? text.toLowerCase()
                         : text;
-                    const iconConfig = iconMap[key];
+                    const iconConfig = iconOptions[key];
                     // 如果在映射中找不到，返回原始文本
                     if (!iconConfig) return text;
 

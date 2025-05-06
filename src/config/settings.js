@@ -1,6 +1,13 @@
-/**
- * 系统全局配置
- */
+import { generateUUID } from '@/utils';
+import fileApi from '@/api/file';
+import { Tabs } from 'antd';
+
+//文件上传
+const uploadFileFn = async ({ file }) => {
+  let fileUrl = await fileApi.uploadFile(file, settings.file.dirname)
+  return fileUrl
+}
+
 const settings = {
 
   // 布局设置
@@ -13,20 +20,16 @@ const settings = {
     theme: 'dark',
   },
 
-  // 请求设置
-  request: {
-    // 接口基础路径
-    baseURL: process.env.VITE_API_BASE_URL,
-    // 请求超时时间
-    timeout: 10000,
-    // 是否开启接口错误提示
-    showErrorMessage: true,
-  },
   //附件设置
   file: {
-    baseURL: process.env.VITE_FILE_BASE_URL,
+    baseURL: import.meta.env.VITE_FILE_PREVIEW_URL,
     // 文件目录
-    dirname: 'test/file',
+    dirname: 'test',
+    uploadFile: async ({ file }) => {
+      return await uploadFileFn({
+        file,
+      });
+    }
   },
 
   // 路由重定向设置
@@ -122,6 +125,15 @@ const settings = {
         activeShadow: 'none',
         cellInRangeBg: 'none',
       },
+      Tabs: {
+        colorBorderSecondary: 'none', //默认下划线
+        inkBarColor: '#1c8',          // 下划线颜色（激活tab）
+        lineWidthBold: 5,             // 下划线高度
+        itemColor: '#243636',            // 非激活tab颜色
+        itemActiveColor: '#243636',      // 激活tab文字颜色
+        itemHoverColor: '#243636',       // hover时颜色
+        itemSelectedColor: '#243636',    // 被选中tab文字颜色（等于 itemActiveColor）
+      }
 
     }
   }

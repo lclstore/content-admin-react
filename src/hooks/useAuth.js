@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { login as loginApi, getUserInfo as getUserInfoApi, logout as logoutApi } from '@/api/user';
-import { STORAGE_KEYS } from '../constants';
+import { storageKeys } from '../constants';
 import settings from '@/config/settings';
 
 /**
@@ -12,7 +12,7 @@ import settings from '@/config/settings';
 export default function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem(STORAGE_KEYS.TOKEN));
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem(storageKeys.TOKEN));
   const navigate = useNavigate();
 
   /**
@@ -26,7 +26,7 @@ export default function useAuth() {
       const response = await loginApi(values);
 
       // 保存token到localStorage
-      localStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
+      localStorage.setItem(storageKeys.TOKEN, response.token);
       setIsAuthenticated(true);
 
       // 获取用户信息
@@ -34,7 +34,7 @@ export default function useAuth() {
       setUser(userInfo);
 
       // 保存用户信息到localStorage
-      localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo));
+      localStorage.setItem(storageKeys.USER_INFO, JSON.stringify(userInfo));
 
       message.success('登录成功');
 
@@ -61,8 +61,8 @@ export default function useAuth() {
       await logoutApi();
 
       // 清除本地存储的认证信息
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER_INFO);
+      localStorage.removeItem(storageKeys.TOKEN);
+      localStorage.removeItem(storageKeys.USER_INFO);
 
       // 重置状态
       setUser(null);
@@ -89,7 +89,7 @@ export default function useAuth() {
       setLoading(true);
       const userInfo = await getUserInfoApi();
       setUser(userInfo);
-      localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo));
+      localStorage.setItem(storageKeys.USER_INFO, JSON.stringify(userInfo));
     } catch (error) {
       console.error('获取用户信息失败', error);
     } finally {
@@ -109,7 +109,7 @@ export default function useAuth() {
 
   // 在组件挂载时尝试获取用户信息
   useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEYS.USER_INFO);
+    const storedUser = localStorage.getItem(storageKeys.USER_INFO);
 
     if (storedUser) {
       try {

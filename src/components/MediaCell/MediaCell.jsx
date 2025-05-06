@@ -3,8 +3,7 @@ import { Image, Modal } from 'antd';
 import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
 import styles from './MediaCell.module.css'; // 导入 CSS Modules
-import settings from '@/config/settings';
-const { file: fileSettings } = settings;
+import { getFullUrl } from '@/utils';
 
 // MediaType[] = ['video', 'audio', 'image'];
 // 全局状态标记，用于跟踪是否有预览处于激活状态
@@ -17,15 +16,7 @@ window.MEDIA_PREVIEW = {
     }
 };
 
-// 获取完整URL的辅助函数
-const getFullUrl = (url) => {
-    if (!url) return '';
-    // 如果已经是完整URL或者是数据URL，则不添加baseURL
-    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
-        return url;
-    }
-    return `${fileSettings.baseURL}${url}`;
-};
+
 
 // 新标签和锁图标组件
 const MediaTags = memo(({ showNewTag, showLockIcon }) => {

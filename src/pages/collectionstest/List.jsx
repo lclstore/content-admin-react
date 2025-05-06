@@ -20,7 +20,7 @@ const items = [
 
 export default function CollectionsList() {
     const { setCustomPageTitle } = useContext(HeaderContext);
-    const defaultTabKey = '1';
+    const defaultTabKey = items[0]?.key;
     // 页面加载时设置默认标题
     useEffect(() => {
         const tabBarName = items.find(item => item.key === defaultTabKey)?.label;

@@ -10,7 +10,6 @@ import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable'
 import Temlates from './components/Temlates';
 import Resources from './components/Resources';
 import TagSelector from '@/components/TagSelector/TagSelector';
-import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,

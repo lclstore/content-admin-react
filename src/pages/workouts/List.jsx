@@ -472,7 +472,7 @@ export default function WorkoutsList() {
 
     // 9. 渲染 - 组件UI呈现
     return (
-        <div className="workoutsContainer">
+        <div className="workoutsContainer page-list">
             {/* 消息上下文提供器 */}
             {contextHolder}
 

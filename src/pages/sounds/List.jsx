@@ -8,7 +8,7 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
+import { statusIconMap, RESULT_ICON_MAP, FILE_statusIconMap } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
@@ -155,7 +155,7 @@ export default function WorkoutsList() {
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                iconMap: STATUS_ICON_MAP,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
@@ -445,7 +445,7 @@ export default function WorkoutsList() {
 
     // 9. 渲染 - 组件UI呈现
     return (
-        <div className="workoutsContainer">
+        <div className="workoutsContainer page-list">
             {/* 消息上下文提供器 */}
             {contextHolder}
 

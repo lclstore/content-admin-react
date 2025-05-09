@@ -17,11 +17,30 @@ export default function UserEditorWithCommon() {
     const [initialValues, setInitialValues] = useState({});
     // 加载状态
     const [loading, setLoading] = useState(false); // 默认为false，页面初始加载时显示loading状态
-    const formFields = useMemo(() => [
+    const [formFields, setFormFields] = useState([
         {
             type: 'switch',
             name: 'status221',
             label: 'Status1121',
+            onChange: (value) => {
+                // 更新formFields配置
+                setFormFields(prev => {
+                    const newFields = prev.map(item =>
+                        item.name === 'displayImage'
+                            ? { ...item, content: value ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png' : '' }
+                            : item
+                    );
+                    console.log('新的表单字段配置已更新:', newFields);
+                    return newFields;
+                });
+
+                // 更新initialValues中的值，确保switch组件的状态被正确设置
+                setInitialValues(prev => ({
+                    ...prev,
+                    status221: value,
+                    displayImage: value ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png' : ''
+                }));
+            },
         },
 
         {
@@ -35,13 +54,7 @@ export default function UserEditorWithCommon() {
             type: 'displayImage',
             name: 'displayImage',
             label: 'Display Image',
-            dependencies: ['status221'],           // 声明依赖
-            content: ({ getFieldValue }) => {      // content 支持函数
-                const status = getFieldValue('status221');
-                return status
-                    ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
-                    : 'internal/test/61ffe4d70e414130a1ed67c72a8e22cd.png';
-            },
+            content: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
             style: {
                 width: '100px',
                 height: '100px',
@@ -273,8 +286,8 @@ export default function UserEditorWithCommon() {
                 }
             ]
         }
+    ]);
 
-    ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
 
 

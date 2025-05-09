@@ -114,7 +114,7 @@ export default function UsersList() {
                                     color: '#999'
                                 }}
                             >
-                                {record.name.charAt(0).toUpperCase()}
+                                {record?.name?.charAt(0)?.toUpperCase()}
                             </div>
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column' }}>

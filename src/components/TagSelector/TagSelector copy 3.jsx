@@ -24,6 +24,8 @@ const TagSelector = ({
     form, // 父级表单实例
     fieldConfig = {} // 接收字段配置对象
 }) => {
+    console.log(form);
+
     // 使用内部状态跟踪选中的选项，以防父组件没有正确更新 value
     const [internalValue, setInternalValue] = useState(() => {
         const initialValue = value !== undefined ? value : defaultValue;

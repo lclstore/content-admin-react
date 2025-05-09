@@ -1,17 +1,11 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections,listData } from './Data';
+import {statusOrder, filterSections, listData} from './Data';
 
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
-    const navigate = useNavigate();
     const [dataSource, setDataSource] = useState(listData); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
@@ -19,58 +13,7 @@ export default () => {
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // 删除确认弹窗
     const [currentRecord, setCurrentRecord] = useState(null); // 当前操作的记录
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
-    const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [messageApi, contextHolder] = message.useMessage();
-
-    /**
-     * 编辑按钮处理
-     * 导航到用户编辑页面
-     */
-    const handleEdit = useCallback((record) => {
-        navigate(`/users/editor?id=${record.id}`);
-    }, [navigate]);
-
-    /**
-     * 状态变更å处理
-     * 更新用户的状态（启用/禁用）
-     */
-    const handleStatusChange = useCallback((record, newStatus) => {
-        setActionInProgress(true);
-        const updatedRecord = { ...record, status: newStatus };
-        setDataSource(current =>
-            current.map(item =>
-                item.id === record.id ? updatedRecord : item
-            )
-        );
-        setActionInProgress(false);
-        messageApi.success(`Successfully ${newStatus} user "${record.name}"`);
-    }, [messageApi]);
-
-    /**
-     * 处理按钮点击事件
-     */
-    const handleActionClick = useCallback((actionName, record, event) => {
-        if (event) event.stopPropagation();
-        setCurrentRecord(record);
-        // 编辑按钮点击
-        if (actionName === 'edit') {
-            handleEdit(record);
-        } else {
-            // 状态变更按钮点击
-            handleStatusChange(record, actionName);
-        }
-    }, [handleEdit, handleStatusChange]);
-
-    // 定义按钮显示规则
-    const isButtonVisible = useCallback((record, btnName) => {
-        const status = record.status;
-        // 状态-按钮映射关系
-        if (status === 'enable' && ['disable'].includes(btnName)) return true;
-        if (status === 'disable' && ['enable'].includes(btnName)) return true;
-        if (btnName === 'edit' || btnName === 'duplicate') return true;  // 编辑按钮始终显示
-
-        return false;
-    }, []);
 
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
@@ -78,11 +21,7 @@ export default () => {
             {
                 title: 'ID',
                 dataIndex: 'id',
-            },
-            {
-                title: 'Image',
-                dataIndex: 'imageCoverUrl',
-                mediaType: 'image',
+                width: 50,
             },
             {
                 title: 'Name',
@@ -91,84 +30,32 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Status',
-                dataIndex: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options:"status",
+                title: 'Update Type',
+                dataIndex: 'updateType',
+                options:[{ name:"Add",value:"ADD" }],
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'MET',
+                title: 'After Data',
                 dataIndex: 'met',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'Structure Type',
-                dataIndex: 'structureType',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                title: 'Update User',
+                dataIndex: 'updateUser',
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'Difficulty',
-                dataIndex: 'difficulty',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                title: 'Update Time',
+                dataIndex: 'updateTime',
                 width: 120,
                 visibleColumn: 0
             },
-            {
-                title: 'Equipment',
-                dataIndex: 'equipment',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Position',
-                dataIndex: 'position',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Target',
-                dataIndex: 'target',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Front Video Status',
-                dataIndex: 'frontVideoStatus',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Side Video Status',
-                dataIndex: 'sideVideoStatus',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Actions',
-                key: 'actions',
-                fixed: 'right',
-                width: 70,
-                align: 'center',
-                // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable','edit','duplicate'],
-                // 控制按钮显示规则
-                isShow: isButtonVisible,
-                // 按钮点击处理函数
-                onActionClick: handleActionClick
-            }
         ];
-    }, [isButtonVisible, handleActionClick]);
+    }, []);
 
     /**
      * 搜索处理函数
@@ -212,6 +99,7 @@ export default () => {
     const handleSearchInputChange = useCallback((e) => {
         const { value } = e.target;
         setSearchValue(value);
+        console.log(value)
         performSearch(value, selectedFilters);
     }, [performSearch, selectedFilters]);
 
@@ -236,58 +124,13 @@ export default () => {
      * 处理行点击
      */
     const handleRowClick = useCallback((record, event) => {
-        // 如果操作按钮被点击，不处理行点击
-        if (actionClicked) {
-            setActionClicked(false);
-            return;
-        }
-
         // 检查是否点击了操作区域
         const isActionClick = event.target.closest('.actions-container');
         if (isActionClick) {
             return;
         }
 
-        // 正常导航到编辑页面
-        navigate(`/users/editor?id=${record.id}`);
-    }, [navigate, actionClicked]);
-
-    // 副作用 - 组件生命周期相关处理
-    /**
-     * 设置导航栏按钮
-     */
-    useEffect(() => {
-        // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('Exercise List');
-
-        // 设置头部按钮
-        setButtons([
-            {
-                key: 'create',
-                text: 'Create',
-                icon: <PlusOutlined />,
-                type: 'primary',
-                onClick: () => navigate(`/users/editor`),
-            }
-        ]);
-
-        return () => {
-            // 组件卸载时清理
-            setButtons([]);
-            setCustomPageTitle && setCustomPageTitle(null);
-        };
-    }, [setButtons, setCustomPageTitle, navigate]);
-
-    /**
-     * 重置操作标志
-     */
-    useEffect(() => {
-        const handleGlobalClick = () => setActionClicked(false);
-        document.addEventListener('click', handleGlobalClick);
-        return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
-
-    // 表格数据和配置
     /**
      * 筛选后的表格数据
      */
@@ -298,6 +141,15 @@ export default () => {
         return tempData;
     }, [dataSource]);
 
+    // 副作用 - 组件生命周期相关处理
+
+    /**
+     * 重置操作标志
+     */
+    useEffect(() => {
+    }, []);
+
+    // 表格数据和配置
     // 渲染 - 组件UI呈现
     return (
         <div className="usersContainer">
@@ -306,7 +158,7 @@ export default () => {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'exerciseList'}
+                uniqueId={'categoryList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"

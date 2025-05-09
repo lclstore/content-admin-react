@@ -556,7 +556,7 @@
 }
 
 /* 日历控件 */
-.ant-picker-dropdown .ant-picker-panel-container {
+:global(.ant-picker-dropdown .ant-picker-panel-container) {
     width: 100%;
 }
 

@@ -1,23 +1,62 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { message, Spin } from 'antd';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
-import { optionsConstants } from '@/constants';
-import settings from '@/config/settings';
-const { file: fileSettings } = settings;
-export default function UserEditorWithCommon() {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const searchParams = new URLSearchParams(location.search);
-    const userId = searchParams.get('id'); // 获取用户ID
 
-    // 初始用户数据状态
-    const [initialValues, setInitialValues] = useState({});
-    // 加载状态
-    const [loading, setLoading] = useState(false); // 默认为false，页面初始加载时显示loading状态
+export default function UserEditorWithCommon() {
+    const navigate = useNavigate();
+
+
+    const [loading, setLoading] = useState(true);
+    // 初始用户数据状态--可设默认值
+    const initialValues = {
+        // layoutType: 1,
+        // status2: [1, 2],
+        // status: 1, // 确保status有默认值1
+        // // 为联动选择器设置默认值 - 使用数字类型
+        // contentStyle: 'style1'
+    }
+    // 表单字段配置
     const formFields = useMemo(() => [
+        {
+            type: 'select',
+            mode: 'single',
+            name: 'layoutType',
+            label: 'layoutType',
+            options: 'status',
+            required: true,
+        },
+        {
+            type: 'input',
+            name: 'layoutTypeText',
+            label: '',
+            required: true,
+            maxLength: 100,
+            showCount: true,
+            style: {
+                width: '300px',
+            },
+            dependencies: ['layoutType'],           // 声明依赖
+            content: ({ getFieldValue }) => {      // content 支持函数
+                const layoutType = getFieldValue('layoutType');
+                return layoutType === 2
+                    ? true
+                    : false;
+            },
+        },
+        {
+            type: 'displayImage',
+            name: 'displayImage1',
+            label: '',
+            dependencies: ['layoutType'],           // 声明依赖
+            content: ({ getFieldValue }) => {      // content 支持函数
+                const layoutType = getFieldValue('layoutType');
+                return layoutType === 1
+                    ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
+                    : null;
+            },
+        },
         {
             type: 'switch',
             name: 'status221',
@@ -26,7 +65,7 @@ export default function UserEditorWithCommon() {
 
         {
             type: 'dateRange',
-            name: 'timeRange', // 仍然保留此字段名以兼容原有逻辑
+            name: 'timeRange',
             label: 'New Time',
             // keys: ['startDate', 'endDate'],//默认可不设置
             required: true,
@@ -34,13 +73,13 @@ export default function UserEditorWithCommon() {
         {
             type: 'displayImage',
             name: 'displayImage',
-            label: 'Display Image',
+            label: '',
             dependencies: ['status221'],           // 声明依赖
             content: ({ getFieldValue }) => {      // content 支持函数
                 const status = getFieldValue('status221');
                 return status
                     ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
-                    : 'internal/test/61ffe4d70e414130a1ed67c72a8e22cd.png';
+                    : null;
             },
             style: {
                 width: '100px',
@@ -52,81 +91,26 @@ export default function UserEditorWithCommon() {
             name: 'birthday', // 遵循命名规范，使用Url后缀
             label: 'Birthday',
             required: true,
-            // 移除不相关的上传属性
-            // previewWidth: '96px',//预览宽度
-            // previewHeight: '96px',//预览高度
-            // uploadFn: fileSettings.uploadFile,
-            // acceptedFileTypes: 'jpg,png,jpeg',
-            // maxFileSize: 2 * 1024,
         },
         {
             type: 'upload',
             // required: true,
             name: 'videoUrl', // 视频文件
             label: 'Introduction Video',
-            // maxFileSize: 3.21,
-            // previewWidth: '190px',//预览宽度
-            // previewHeight: '190px',//预览高度
+            // maxFileSize: 1024 * 1024 * 10,
+            style: {
+                width: '290px',
+                height: '140px',
+            },
             acceptedFileTypes: 'mp4,mp3,webm,ts',
         },
-        {
-            type: 'select',
-            mode: 'single',
-            name: 'layoutType',
-            label: 'layoutType',
-            // previewStyle: { width: '1400px', height: '150px' }, // 增大高度并添加边框颜色以测试样式是否生效
-            options: [
-                {
-                    value: 1, // 确保使用数字类型
-                    label: 'Banner', // 使用label属性定义显示文本
-                    // 定义预览内容，有此对象时会自动显示预览
-                    preview: {
-                        type: 'image', // 预览内容类型：text文本类型或image图片类型
-                        content: 'https://inews.gtimg.com/om_bt/OXUoiYf_yZjuc_eIBOjTWwf4wQ47dH4bFK85-ZPZiF_p8AA/641'
-                    }
-                },
-                {
-                    value: 2, // 确保使用数字类型
-                    label: 'Intro', // 使用label属性定义显示文本
-                    preview: {
-                        type: 'image', // 文本类型预览
-                        content: 'https://inews.gtimg.com/om_bt/OPDx1Hq5wp8xwEdAtU7IH4ZQxxXgBaPIb2Q4OUGSYeh2MAA/641'
-                    }
-                },
-                {
-                    value: 3, // 确保使用数字类型
-                    label: 'Horizontal', // 使用label属性定义显示文本
-                    preview: {
-                        type: 'input',
-                        content: 'soundScript',
-                        required: true
-                    }
-                },
-                {
-                    value: 4, // 确保使用数字类型
-                    label: 'Grid', // 使用label属性定义显示文本
-                    preview: {
-                        type: 'displayText', // 文本类型预览
-                        content: 'Grid预览内容测试'
-                    }
-                },
-                {
-                    value: 5, // 确保使用数字类型
-                    label: 'Card', // 使用label属性定义显示文本
-                    preview: {
-                        type: 'displayText', // 文本类型预览
-                        content: 'Card预览内容测试'
-                    }
-                }
-            ],
-            required: true,
-        },
+
         {
             type: 'inputGroup',
             name: 'warmUp',
             label: '',
             // required: true,
-            componentConfig: [
+            inputConfig: [
                 {
                     type: 'input',
                     name: 'warmName',
@@ -176,7 +160,7 @@ export default function UserEditorWithCommon() {
             // required: true,
             // previewWidth: '96px',//预览宽度
             previewHeight: '96px',//预览高度
-            uploadFn: fileSettings.uploadFile,
+            // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },
@@ -186,24 +170,19 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            // disabled: true,
-            name: 'status1', // 遵循命名规范，使用Url后缀
+            name: 'status1',
             label: 'Status1',
-            options: optionsConstants.status,
+            options: 'testStatus',
             required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
-            uploadFn: fileSettings.uploadFile,
-            acceptedFileTypes: 'jpg,png,jpeg',
-            maxFileSize: 2 * 1024,
+
         },
         {
             type: 'select',
             mode: 'multiple',
-            // disabled: true,
-            name: 'status2', // 遵循命名规范，使用Url后缀
+            disabled: true,
+            name: 'status2',
             label: 'Status2',
-            options: optionsConstants.status,
+            options: 'status',
             required: true,
 
         },
@@ -225,11 +204,10 @@ export default function UserEditorWithCommon() {
             maxLength: 100,
             label: 'Email',
             required: true,
-            // placeholder: 'Enter email address',
-            // disabled: !!userId,
             rules: [
                 { required: true, message: 'Please input Email.' },
                 { max: 100, message: 'Email cannot exceed 100 characters' },
+                // 邮箱格式验证
                 {
                     validator: async (_, value) => {
                         if (value && !validateEmail(value)) {
@@ -238,20 +216,6 @@ export default function UserEditorWithCommon() {
                         return Promise.resolve();
                     },
                 },
-                {
-                    validator: async (_, value) => {
-                        if (!value) return Promise.resolve();
-
-                        const currentId = userId ? parseInt(userId, 10) : null;
-                        const isDuplicate = mockUsers.some(user => user.email === value && user.id !== currentId);
-
-                        if (isDuplicate) {
-                            return Promise.reject('Email existed.');
-                        }
-                        return Promise.resolve();
-                    },
-                    validateTrigger: 'onBlur',
-                }
             ]
         },
         {
@@ -275,59 +239,6 @@ export default function UserEditorWithCommon() {
         }
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
-
-
-
-    // 加载用户数据
-    useEffect(() => {
-
-        let isMounted = true; // 组件挂载标记
-
-        const loadUserData = async () => {
-            if (userId) {
-                setLoading(true);
-                // 用户编辑模式，加载现有数据
-                const currentId = parseInt(userId, 10);
-                const userToEdit = mockUsers.find(user => user.id === currentId);
-
-                if (userToEdit) {
-                    // 模拟数据加载延迟，保持loading状态
-                    setTimeout(() => {
-                        if (isMounted) {
-                            // 设置初始值
-                            setInitialValues(userToEdit);
-
-                            // 数据加载完成后，关闭loading状态
-                            setLoading(false);
-                        }
-                    }, 400); // 模拟加载时间
-                } else if (isMounted) {
-                    message.error('用户数据未找到，正在返回列表页');
-                    setTimeout(() => navigate('/users'), 300);
-                }
-            } else {
-                // 新增用户，设置默认值
-                setInitialValues({
-                    layoutType: 1,
-                    status2: [1, 2],
-                    status: 1, // 确保status有默认值1
-                    // 为联动选择器设置默认值 - 使用数字类型
-                    contentStyle: 'style1'
-                });
-
-                // 新增用户不需要等待，直接关闭loading状态
-                setLoading(false);
-            }
-        };
-
-        // 执行数据加载
-        loadUserData();
-
-        // 清理函数
-        return () => {
-            isMounted = false;
-        };
-    }, [userId, navigate]);
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
@@ -369,25 +280,30 @@ export default function UserEditorWithCommon() {
         navigate(-1);
     };
 
-    // 编辑器配置
-    const editorConfig = useMemo(() => ({
-        formName: 'User',
-    }), []); // 使用useMemo优化性能
-
-    // 为表单提供唯一key，确保在userId变更时重新创建表单
-    const formKey = userId || 'new-user';
-    const initFormData = () => userId ? mockUsers.find(user => user.id === parseInt(userId, 10)) : {};//初始化表单数据
+    //请求列数据方法
+    const initFormData = (id) => {
+        return new Promise((resolve) => {
+            // 模拟延迟 1 秒
+            setTimeout(() => {
+                if (id) {
+                    // 查找对应用户
+                    const user = mockUsers.find(u => u.id === parseInt(id, 10));
+                    resolve(user || {});  // 找不到也返回空对象，避免 undefined
+                } else {
+                    // 新增场景：直接返回空对象
+                    resolve(initialValues);
+                }
+            }, 1000);
+        });
+    };
     return (
-        <Spin spinning={loading} size="large" tip="loading...">
-            <CommonEditorForm
-                initFormData={initFormData}
-                key={formKey}
-                formType="basic"
-                config={editorConfig}
-                fields={formFields}
-                initialValues={initialValues}
-                onSave={handleSaveUser}
-            />
-        </Spin>
+        <CommonEditorForm
+            initFormData={initFormData}
+            formType="basic"
+            config={{ formName: 'User' }}
+            fields={formFields}
+            initialValues={initialValues}
+            onSave={handleSaveUser}
+        />
     );
 } 

@@ -171,4 +171,11 @@ export const generateUUID = () => {
   return uuidv4();
 };
 
-
+/**
+ * 睡眠函数
+ * @param {number} ms 睡眠时间，单位毫秒
+ * @returns {Promise} 返回一个 Promise 对象，在指定时间后 resolve
+ */
+export const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

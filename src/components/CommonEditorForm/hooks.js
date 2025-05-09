@@ -235,7 +235,8 @@ export const useHeaderConfig = (params) => {
                 icon: React.createElement(SaveOutlined),
                 type: 'primary',
                 onClick: handleSaveChanges,
-                disabled: !config.allowEmptySave && !isFormDirty,
+                // disabled: !config.allowEmptySave && !isFormDirty,// 如果表单内容没修改时禁用按钮
+                disabled: !config.allowEmptySave,
             },
             {
                 key: 'back',

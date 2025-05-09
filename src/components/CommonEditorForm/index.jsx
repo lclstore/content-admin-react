@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Collapse, Button, Card, Space, Divider } from 'antd';
+import { Form, Collapse, Button, Card, Space, Spin } from 'antd';
 import {
     SaveOutlined,
     ArrowLeftOutlined,
@@ -49,7 +49,7 @@ export default function CommonEditor(props) {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
-
+    const [loading, setLoading] = useState(true);
     // 使用自定义钩子管理表单状态
     const {
         form,
@@ -59,7 +59,8 @@ export default function CommonEditor(props) {
         formValues,
         messageApi,
         contextHolder,
-        mounted
+        mounted,
+        getLatestValues
     } = useFormState(initialValues);
     // 复杂表单特定状态
     const [structurePanels, setStructurePanels] = useState(
@@ -87,12 +88,13 @@ export default function CommonEditor(props) {
         complexConfig,
         structurePanels,
         headerContext,
-        setIsFormDirty
+        setIsFormDirty,
+        getLatestValues
     });
     // 判断是否是日期
 
     // 转换日期
-    const transformDatesInObject = (obj, fields) => {
+    const transformDatesInObject = (obj = {}, fields = []) => {
         fields.forEach(field => {
             if (field.type === 'date' || field.type === 'dateRange') {
                 obj[field.name] = dayjs(obj[field.name]);
@@ -173,12 +175,34 @@ export default function CommonEditor(props) {
     };
     // 初始化表单数据
     useEffect(() => {
-        if (initFormData && id) {
-            const initData = initFormData();
-            const transformedData = transformDatesInObject(initData, fields); // 转换日期
+        const fetchData = async () => {
+            let response = initialValues; // 初始化表单数据
+            setLoading(true);
+            response = await initFormData(id) || {};
+            const transformedData = transformDatesInObject(response, fields); // 转换日期
             form.setFieldsValue(transformedData);
-        }
-    }, [initFormData]);
+
+            // 确保表单值更新后，设置表单状态为"未修改"
+            setIsFormDirty(false);
+
+            // 在这里可以添加一个回调函数通知其他组件数据已加载完成
+            if (config.onDataLoaded) {
+                config.onDataLoaded(transformedData);
+            }
+            // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
+            if (headerContext.setButtons) {
+                console.log(transformedData);
+                const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 0;
+                headerButtons[0].disabled = isNonZeroStatus;
+                const saveButton = headerButtons.find(button => button.key === 'save');
+                saveButton.disabled = isNonZeroStatus && saveButton.disabled;
+                headerContext.setButtons(headerButtons);
+            }
+            setLoading(false);
+        };
+
+        fetchData();
+    }, [id, initFormData, fields, form, initialValues, config, setIsFormDirty]);
 
     // 设置页面标题和头部按钮
     useEffect(() => {
@@ -189,10 +213,7 @@ export default function CommonEditor(props) {
             headerContext.setCustomPageTitle(pageTitle);
         }
 
-        // 设置头部按钮
-        if (headerContext.setButtons) {
-            headerContext.setButtons(headerButtons);
-        }
+
     }, [
         config.formName,
         id,
@@ -377,9 +398,11 @@ export default function CommonEditor(props) {
     };
 
     return (
-        <div className={styles.commonEditorContainer}>
-            {contextHolder}
-            {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
-        </div>
+        <Spin spinning={loading}>
+            <div className={styles.commonEditorContainer}>
+                {contextHolder}
+                {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
+            </div>
+        </Spin>
     );
 }

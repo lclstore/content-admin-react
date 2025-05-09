@@ -42,8 +42,10 @@ const FileUpload = ({
     uploadPlaceholder,    // 上传区域占位文本
     changeButtonText,     // 更改按钮文本
     uploadButtonText,     // 上传按钮文本
-    previewWidth = '96',  // 预览区域宽度
-    previewHeight = '96px'   // 预览区域高度
+    style = {
+        width: '96px',
+        height: '96px'
+    },
 }) => {
     // 消息提示API
     const [messageApi, contextHolder] = message.useMessage();
@@ -75,11 +77,6 @@ const FileUpload = ({
     // 是否有文件
     const hasFile = !!displayValue;
 
-    // 计算预览区域样式
-    const previewAreaStyle = useMemo(() => ({
-        width: previewWidth,
-        height: previewHeight
-    }), [previewWidth, previewHeight]);
 
     // 媒体元素样式，不直接传递自定义属性到DOM
     const mediaElementStyle = useMemo(() => ({
@@ -896,7 +893,7 @@ const FileUpload = ({
 
                     {/* 左侧区域：预览或上传区 */}
                     <div className={styles.uploadLeftSection}>
-                        <div className={styles.uploadArea} style={previewAreaStyle}>
+                        <div className={styles.uploadArea} style={{ ...style }}>
                             {hasFile ? (
                                 <div className={styles.previewContainer}>
                                     {renderFilePreview()}

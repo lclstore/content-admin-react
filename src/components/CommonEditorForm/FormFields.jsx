@@ -20,6 +20,7 @@ import NumberStepper from '@/components/NumberStepper/NumberStepper';//数字步
 import TagSelector from '@/components/TagSelector/TagSelector';//标签选择器组件
 import styles from './style.module.css';
 import { dateRangeKeys } from '@/constants/app';
+import { optionsConstants } from '@/constants';
 import settings from '@/config/settings';
 const { file: fileSettings } = settings;
 
@@ -163,10 +164,12 @@ export const renderFormControl = (field, options = {}) => {
             </div>;
         // 图片展示字段
         case 'displayImage':
-            return field.src ? <Image className={styles.displayImg} src={field.src} style={{ ...field.style }} /> : '';
+            field.style = field.style || { width: '300px', height: '100px' };
+            return field.content ? <Image className={styles.displayImg} src={field.content} style={{ ...field.style }} /> : '';
         case 'input':
             return <Input
-                placeholder={placeholder || `Enter ${label}`}
+                style={field.style}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 allowClear
                 maxLength={field.maxLength}
@@ -177,7 +180,7 @@ export const renderFormControl = (field, options = {}) => {
         //文本输入框
         case 'textarea':
             return <Input.TextArea
-                placeholder={placeholder || `Enter ${label}`}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
@@ -188,7 +191,7 @@ export const renderFormControl = (field, options = {}) => {
         //密码输入框
         case 'password':
             return <Input.Password
-                placeholder={placeholder || `Enter ${label}`}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 iconRender={(visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                 allowClear
@@ -260,8 +263,14 @@ export const renderFormControl = (field, options = {}) => {
                 />
             )
         case 'select':
+            //选项处理使用统一的optins映射
+            const newField = JSON.parse(JSON.stringify(field));
+            if (field.options && typeof field.options === 'string') {
+                newField.options = optionsConstants[field.options];
+            }
             return <TagSelector
-                {...field}
+                {...newField}
+
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
@@ -287,8 +296,7 @@ export const renderFormControl = (field, options = {}) => {
                 uploadErrorMessage,
                 dirKey,
                 uploadFn,
-                previewWidth,
-                previewHeight,
+                style,
             } = field;
 
             // FileUpload 组件不需要在这里添加 Form.Item，因为 renderFormItem 已经创建了一个
@@ -308,20 +316,19 @@ export const renderFormControl = (field, options = {}) => {
                     uploadErrorMessage={uploadErrorMessage}
                     dirKey={dirKey}
                     uploadFn={uploadFn}
-                    previewWidth={previewWidth}
-                    previewHeight={previewHeight}
+                    style={style}
                     {...fieldProps}
                 />
             );
         //输入框组
         case 'inputGroup':
-            const { componentConfig } = field;
+            const { inputConfig } = field;
             return (
                 <Form.Item
                     label={label}
                 >
                     <div style={{ display: 'flex', gap: '0 40px', maxWidth: '100%', overflowX: 'auto' }}>
-                        {componentConfig.map((config, index) => {
+                        {inputConfig.map((config, index) => {
                             // 处理每个子项的验证规则
                             const itemRules = processValidationRules(config.rules || [], {
                                 required: config.required,
@@ -397,7 +404,7 @@ export const renderFormControl = (field, options = {}) => {
 
         default:
             return <Input
-                placeholder={placeholder || `Enter ${label}`}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 {...fieldProps}
             />;
@@ -456,24 +463,21 @@ export const renderFormItem = (field, options = {}) => {
         return (
             <Form.Item
                 noStyle
-                dependencies={['status221']}
+                dependencies={dependencies}
             >
                 {({ getFieldValue }) => {
                     // 1) 动态计算 content（可能是函数）
                     const content = typeof field.content === 'function'
                         ? field.content({ getFieldValue })
                         : field.content;
-                    // 2) 拼接完整 URL
-                    const src = fileSettings.baseURL + content;
-                    console.log(src);
-                    newField.src = src;
-                    // 3) 根据 status221 决定是否渲染
-                    // return <Image
-                    //     className={styles.displayImg}
-                    //     src={src}
-                    //     style={field.style}
-                    // />
-                    return renderFormItem(newField, options)
+                    // 处理图片展示字段
+                    if (field.type === 'displayImage') {
+                        newField.content = content ? fileSettings.baseURL + content : null;
+                    }
+                    console.log(newField, options);
+
+                    // 渲染组件
+                    return content ? renderFormItem(newField, options) : null
                 }}
             </Form.Item>
         );

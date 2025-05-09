@@ -30,7 +30,7 @@ export const defaultPagination = {
 
 
 
-
+export const dateRangeKeys = ['startDate', 'endDate'];
 
 // 响应状态
 export const responseStatus = {

@@ -83,6 +83,7 @@ const settings = {
         colorPrimary: '#1c8',
         colorPrimaryHover: '#11af75',
         inactiveColor: '#c0c6c6',
+        lineHeight: 1.7
       },
       Input: {
         activeBorderColor: '#1c8',

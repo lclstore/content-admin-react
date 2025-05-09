@@ -495,6 +495,7 @@ export const SwitchField = React.memo(({ name, componentProps = {}, disabled, va
                             className="switch-preview-input-item"
                         >
                             <Input
+                                autoComplete="off"
                                 placeholder={`Please input ${content}`}
                                 className="switch-preview-input"
                                 disabled={disabled}

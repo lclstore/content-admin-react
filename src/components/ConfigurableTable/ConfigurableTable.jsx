@@ -403,7 +403,7 @@ function ConfigurableTable({
 
             // 如果列有  options 属性，并且没有自定义 render 函数，则设置渲染逻辑
             if (processedCol.options && !processedCol.render) {
-                const options = optionsConstants[processedCol.options];
+                const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
 
                 processedCol.render = (text, record) => {
                     const key = text;

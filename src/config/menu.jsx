@@ -16,7 +16,7 @@ import React from 'react';
 import RouterRegister from "./RouterRegister.js"
 import settings from './settings';
 import { menuIconMap } from '@/constants';
-
+import { Outlet } from "react-router"
 
 
 // 静态菜单项 - 只有登录页
@@ -65,7 +65,7 @@ try {
                     routerConfig.path,
                     settings.menu?.menuOrder?.[routerConfig.meta] || 999,
                     routerConfig.showName,
-                    pageFiles['../pages/' + routerConfig.component]
+                    routerConfig.FatherComponent ? <Outlet/> : pageFiles['../pages/' + routerConfig.component]
                 ]
         }
     })

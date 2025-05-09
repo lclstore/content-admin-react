@@ -84,7 +84,24 @@ export const mockWorkouts = [
     },
 ];
 
-export const listData = [
+export const programListData = [
+    {
+        id: 1,
+        type: 'video',
+        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name:"123",
+        status:"draft",
+        met:"1",
+        structureType:"asd",
+        difficulty:"asd",
+        equipment:"asd",
+        position:"asd",
+        target:"asd",
+        frontVideoStatus:"Successful",
+        sideVideoStatus:"Processing"
+    },
+]
+export const categoryListData = [
     {
         id: 1,
         type: 'video',

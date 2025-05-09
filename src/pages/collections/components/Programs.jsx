@@ -1,18 +1,14 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections,listData } from './Data';
+import { statusOrder, filterSections,programListData } from './Data';
 
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
-    const [dataSource, setDataSource] = useState(listData); // 表格数据源
+    const [dataSource, setDataSource] = useState(programListData); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [], createUser: [] }); // 筛选条件
@@ -80,7 +76,12 @@ export default () => {
                 dataIndex: 'id',
             },
             {
-                title: 'Image',
+                title: 'Cover Image',
+                dataIndex: 'imageCoverUrl',
+                mediaType: 'image',
+            },
+            {
+                title: 'Detail Image',
                 dataIndex: 'imageCoverUrl',
                 mediaType: 'image',
             },
@@ -99,22 +100,15 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'MET',
+                title: 'Show Type',
                 dataIndex: 'met',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'Structure Type',
-                dataIndex: 'structureType',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficulty',
+                title: 'Duration(Week)',
+                dataIndex: 'met',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 0
@@ -127,29 +121,8 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Position',
-                dataIndex: 'position',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Target',
-                dataIndex: 'target',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Front Video Status',
-                dataIndex: 'frontVideoStatus',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Side Video Status',
-                dataIndex: 'sideVideoStatus',
+                title: 'New Date',
+                dataIndex: 'equipment',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 0
@@ -178,7 +151,7 @@ export default () => {
         setLoading(true);
         setTimeout(() => {
             // 复制原始数据
-            let filteredData = [...listData];
+            let filteredData = [...programListData];
 
             // 按状态过滤
             const statuses = filters?.status || [];
@@ -253,30 +226,6 @@ export default () => {
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理
-    /**
-     * 设置导航栏按钮
-     */
-    useEffect(() => {
-        // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('Exercise List');
-
-        // 设置头部按钮
-        setButtons([
-            {
-                key: 'create',
-                text: 'Create',
-                icon: <PlusOutlined />,
-                type: 'primary',
-                onClick: () => navigate(`/users/editor`),
-            }
-        ]);
-
-        return () => {
-            // 组件卸载时清理
-            setButtons([]);
-            setCustomPageTitle && setCustomPageTitle(null);
-        };
-    }, [setButtons, setCustomPageTitle, navigate]);
 
     /**
      * 重置操作标志
@@ -306,7 +255,7 @@ export default () => {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'exerciseList'}
+                uniqueId={'programsList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"

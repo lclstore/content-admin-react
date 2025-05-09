@@ -163,10 +163,7 @@ export const renderFormControl = (field, options = {}) => {
             </div>;
         // 图片展示字段
         case 'displayImage':
-            const src = fileSettings.baseURL + field.src;
-            console.log(src);
-            // return field.src ? <Image className={styles.displayImg} src={src} style={{ ...field.style }} /> : '';
-            return <Image className={styles.displayImg} src={src} style={{ ...field.style }} />
+            return field.src ? <Image className={styles.displayImg} src={field.src} style={{ ...field.style }} /> : '';
         case 'input':
             return <Input
                 placeholder={placeholder || `Enter ${label}`}
@@ -476,7 +473,7 @@ export const renderFormItem = (field, options = {}) => {
                     //     src={src}
                     //     style={field.style}
                     // />
-                    { renderFormItem(newField, options) }
+                    return renderFormItem(newField, options)
                 }}
             </Form.Item>
         );

@@ -8,17 +8,17 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-// import { statusIconMap, RESULT_ICON_MAP } from '@/constants/app';
+// import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
     mockWorkoutsForList,
-    filterSections,
+    filterSections1,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
 
-export default function WorkoutsList() {
+export default function Playlists() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -150,7 +150,6 @@ export default function WorkoutsList() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
@@ -159,16 +158,15 @@ export default function WorkoutsList() {
                 width: 120,
                 visibleColumn: 0
             },
+            // { title: 'subscription', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
             {
-                title: 'Has a Script',sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
-                    console.log('HasAScript',text,record)
-                    return (
-                        <Space direction="vertical">
-                            <Switch disabled={true} checked={text} />
-                        </Space>
-                    );
-                }
+                title: 'Generate Status', dataIndex: 'generateStatus', key: 'generateStatus',
+                options: 'displayStatus',
+                width: 120,
+                visibleColumn: 0
             },
+            { title: 'Music Num',  dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
+            { title: 'Type',  dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
 
             {
                 title: 'Actions',
@@ -465,7 +463,7 @@ export default function WorkoutsList() {
                 }}
                 showColumnSettings={false}
                 filterConfig={{
-                    filterSections: filterSections,
+                    filterSections: filterSections1,
                     activeFilters: selectedFilters,
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,

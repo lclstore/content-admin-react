@@ -1,39 +1,39 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal,Tabs, message, Form, Table, Switch,Space,Button } from 'antd';
-import {
-    PlusOutlined,
-} from '@ant-design/icons';
-import { useNavigate } from 'react-router';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
-import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
+import React, { useContext, useEffect } from 'react';
+import { Tabs } from 'antd';
 import Temlates from './components/Temlates';
 import Resources from './components/Resources';
-import TagSelector from '@/components/TagSelector/TagSelector';
-import {
-    statusOrder,
-    difficultyOrder,
-    mockWorkoutsForList,
-    filterSections,
-    BATCH_FILE_OPTIONS,
-    MOCK_LANG_OPTIONS
-} from './Data';
+import StickyBox from 'react-sticky-box';
+import { HeaderContext } from '@/contexts/HeaderContext';
 
-export default function WorkoutsList() {
-    const onChange = key => {
-        console.log(key);
-      };
-      const items = [
-        {
-          key: '1',
-          label: 'Temlates',
-          children: <Temlates></Temlates>,
-        },
-        {
-          key: '2',
-          label: 'Resources',
-          children: <Resources></Resources>,
-        }
-      ];
-      return <Tabs defaultActiveKey="1" items={items} onChange={onChange} />;
-}   
+const items = [
+  {
+      key: '1',
+      label: 'Temlates',
+      children: <Temlates />,
+  },
+  {
+      key: '2',
+      label: 'Resources',
+      children: <Resources />,
+  }
+];
+export default function CollectionsList() {
+  const { setCustomPageTitle } = useContext(HeaderContext);
+  const defaultTabItem = items[0] || {};
+  // 页面加载时设置默认标题
+  useEffect(() => {
+      setCustomPageTitle(`${defaultTabItem.label} List`);
+  }, [setCustomPageTitle]);
+
+  const onChange = (key) => {
+      const tabBarName = items.find(item => item.key == key).label;
+      setCustomPageTitle(`${tabBarName} List`);
+  };
+  const renderTabBar = (props, DefaultTabBar) => ( 
+      <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
+          <DefaultTabBar {...props} />
+      </StickyBox>
+  );
+
+  return <Tabs defaultActiveKey={defaultTabItem.key} onChange={onChange} renderTabBar={renderTabBar} items={items} />;
+}

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table, Switch,Space,Button } from 'antd';
+import { Modal, message, Form, Table, Switch, Space, Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -8,17 +8,18 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-// import { statusIconMap, RESULT_ICON_MAP } from '@/constants/app';
+// import { STATUS_ICON_MAP, statusIconMap,RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
     mockWorkoutsForList,
     filterSections,
+    filterSections1,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
 
-export default function WorkoutsList() {
+export default function Musics() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -149,8 +150,8 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
+            { title: 'Audio', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'audio', key: 'image' },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
@@ -159,17 +160,6 @@ export default function WorkoutsList() {
                 width: 120,
                 visibleColumn: 0
             },
-            {
-                title: 'Has a Script',sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
-                    console.log('HasAScript',text,record)
-                    return (
-                        <Space direction="vertical">
-                            <Switch disabled={true} checked={text} />
-                        </Space>
-                    );
-                }
-            },
-
             {
                 title: 'Actions',
                 key: 'actions',

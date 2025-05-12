@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form } from 'antd';
+import { Form, Row, Col } from 'antd';
 import {
     TextField,
     InputField,
@@ -48,7 +48,12 @@ const FormItemRenderer = ({
     preview,
     onChange,
     disabled,
-    render
+    render,
+    formatter,
+    min,
+    max,
+    step,
+    componentConfig
 }) => {
     // 如果提供了自定义渲染函数，使用它
     if (render) {
@@ -58,7 +63,7 @@ const FormItemRenderer = ({
     // 准备表单项属性
     const formItemProps = {
         name,
-        label,
+        label: label,
         className,
         hidden,
         noStyle
@@ -69,7 +74,7 @@ const FormItemRenderer = ({
     if (required && !finalRules.some(rule => rule.required)) {
         finalRules.push({
             required: true,
-            message: requiredMessage || `Please ${type === 'select' || type === 'single' || type === 'multiple' || type === 'date' || type === 'datepicker' || type === 'dateRange' ? 'select' : type === 'upload' ? 'upload' : 'input'} ${label}`
+            message: requiredMessage || `Please ${type === 'select' || type === 'single' || type === 'numberStepper' || type === 'multiple' || type === 'date' || type === 'datepicker' || type === 'dateRange' ? 'select' : type === 'upload' ? 'upload' : 'input'} ${label}`
         });
     }
 
@@ -103,10 +108,12 @@ const FormItemRenderer = ({
 
     // 根据类型选择要渲染的控件
     let Control;
+    //  
     const controlProps = {
         disabled,
         value,
         defaultValue,
+
         onChange: (newValue) => {
             // 安全处理值变更后再调用外部onChange
             if (typeof onChange === 'function') {
@@ -148,25 +155,46 @@ const FormItemRenderer = ({
             controlProps.showCount = showCount;
             controlProps.componentProps = componentProps;
             break;
-
-
+        case 'inputGroup':
+            return (
+                <Form.Item
+                    label={label}
+                    required={required}
+                    rules={rules}
+                >
+                    <div style={{ display: 'flex', gap: '0 40px', maxWidth: '100%', overflowX: 'auto' }}>
+                        {componentConfig.map((config, index) => (
+                            <div style={{ flex: 1, minWidth: config.previewWidth }} key={index}>
+                                <Form.Item
+                                    noStyle
+                                    name={config.name}
+                                    required={config.required}
+                                    rules={config.rules}
+                                    initialValue={config.defaultValue}
+                                >
+                                    {FormItemRenderer(config)}
+                                </Form.Item>
+                            </div>
+                        ))}
+                    </div>
+                </Form.Item>
+            );
         case 'numberStepper':
-            <Form.Item {...formItemProps}>
-                <NumberStepper
-                    form={form}
-                    options={options}
-                    previewStyle={previewStyle}
-                    value={value}
-                    {... !name && defaultValue ? { defaultValue } : {}}
-                    onChange={onChange}
-                    mode='single'
-                    disabled={disabled}
-                    {...componentProps}
-                />
-            </Form.Item>
-
+            return (
+                <Form.Item {...formItemProps}>
+                    <NumberStepper
+                        min={min}
+                        max={max}
+                        step={step}
+                        formatter={formatter} // 格式化显示为 0:XX
+                        value={value}
+                        onChange={onChange}
+                        disabled={disabled}
+                        {...componentProps}
+                    />
+                </Form.Item>
+            );
         case 'single':
-
             return (
                 <Form.Item {...formItemProps}>
                     <TagSelector
@@ -291,19 +319,10 @@ const FormItemRenderer = ({
             formItemProps.valuePropName = 'value'; // 仍然使用value让Form.Item工作
             break;
         case 'upload':
+
             Control = UploadField;
             // 不仅传递 componentProps，而是直接构造 field 对象
             controlProps.field = {
-                acceptedFileTypes: componentProps.acceptedFileTypes,
-                maxFileSize: componentProps.maxFileSize,
-                uploadDescription: componentProps.uploadDescription,
-                uploadSuccessMessage: componentProps.uploadSuccessMessage,
-                uploadFailMessage: componentProps.uploadFailMessage,
-                uploadErrorMessage: componentProps.uploadErrorMessage,
-                dirKey: componentProps.dirKey,
-                uploadFn: componentProps.uploadFn,
-                previewWidth: componentProps.previewWidth,
-                previewHeight: componentProps.previewHeight,
                 ...componentProps
             };
 
@@ -335,5 +354,6 @@ const FormItemRenderer = ({
         </Form.Item>
     );
 };
+
 
 export default FormItemRenderer; 

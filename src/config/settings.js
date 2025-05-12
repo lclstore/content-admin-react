@@ -83,6 +83,7 @@ const settings = {
         colorPrimary: '#1c8',
         colorPrimaryHover: '#11af75',
         inactiveColor: '#c0c6c6',
+        lineHeight: 1.7
       },
       Input: {
         activeBorderColor: '#1c8',
@@ -133,8 +134,10 @@ const settings = {
         itemActiveColor: '#243636',      // 激活tab文字颜色
         itemHoverColor: '#243636',       // hover时颜色
         itemSelectedColor: '#243636',    // 被选中tab文字颜色（等于 itemActiveColor）
+      },
+      Collapse:{
+        colorTextHeading:"rgba(0,0,0,0.7)"
       }
-
     }
   }
 

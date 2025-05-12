@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
@@ -41,14 +41,17 @@ const NumberStepper = ({
     };
 
     // 直接使用 value，假设它是数字或 undefined
-    const numericValue = typeof value === 'number' ? value : undefined;
+    const numericValue = value !== undefined ? value : min;
     // 格式化用于显示，如果值无效，可以显示基于 min 的格式化值或空/占位符
     const displayValue = numericValue !== undefined ? formatter(numericValue) : (min !== -Infinity ? formatter(min) : '...');
-
     // 禁用按钮的条件
     const isMinDisabled = numericValue !== undefined && numericValue <= min;
     const isMaxDisabled = numericValue !== undefined && numericValue >= max;
-
+    useEffect(() => {
+        if (value === undefined) {
+            onChange(min);
+        }
+    }, [value, onChange, min]);
     return (
         // 添加 id 以便 Form.Item 的 label 可以关联
         <div className="number-stepper-container" id={id}>

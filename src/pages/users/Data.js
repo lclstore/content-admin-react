@@ -37,7 +37,7 @@ export const mockUsers = [
         avatar: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
         createUser: 'Admin',
         createTime: '2024-01-15 10:00:00',
-        status: 1, // 'enable' -> 1
+        status: 2, // 'enable' -> 1
         status1: 1,
         birthday: '1990-01-15',
         startDate: '2024-05-01',
@@ -70,18 +70,26 @@ export const mockUsers = [
     {
         id: 4,
         name: 'Sarah Davis',
+        displayImage: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
         email: 'sarah.davis@example.com',
         avatar: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
         createUser: 'Manager',
         createTime: '2024-02-18 16:45:00',
-        birthday: "2000-05-13",
+        birthday: "2001-05-13",
         status: 1,
+        status1: 'Enabled1',
+        status221: 1,
+        status2: [1, 2],
         startDate: '2024-07-25',
         endDate: '2025-09-25',
-        layoutType: 2,
         contentStyle: 'style2',
-        layoutType: 3,
-        soundScript: 'soundScript饿饿饿饿'
-
+        layoutType: 2,
+        layoutTypeText: 'saasdadas',
+        soundScript: 'soundScript饿饿饿饿',
+        name23: 'textareaxx soundScript饿饿饿饿 soundScript饿饿饿饿 s  soundScript饿饿饿饿soundScript饿饿饿饿soundScript饿饿饿饿soundScript饿饿饿饿 oundScript饿饿饿饿 soundScript饿饿饿饿 xxx',
+        warmNumber: 30,
+        warmCycles: 4,
+        warmName: 'warmName',
+        userPassword: '1sdf23456',
     }
 ];

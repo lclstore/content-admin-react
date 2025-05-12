@@ -9,6 +9,7 @@ export const optionsConstants = {
         { name: <div><CheckOutlined style={{ color: "#889e9e", fontSize: '18px' }} /></div>, value: 1 },
         { name: <div><CloseOutlined style={{ color: "#ff4d4f", fontSize: '18px' }} /></div>, value: 0 },
     ],
+    testStatus: ['Draft1', 'Enabled1', 'Disabled1'],//用于测试后期删除
     status: [
         { name: 'Draft', value: 0 },
         { name: 'Enabled', value: 1 },

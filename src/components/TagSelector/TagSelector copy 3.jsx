@@ -24,6 +24,8 @@ const TagSelector = ({
     form, // 父级表单实例
     fieldConfig = {} // 接收字段配置对象
 }) => {
+    console.log(form);
+
     // 使用内部状态跟踪选中的选项，以防父组件没有正确更新 value
     const [internalValue, setInternalValue] = useState(() => {
         const initialValue = value !== undefined ? value : defaultValue;
@@ -170,6 +172,67 @@ const TagSelector = ({
     }, [selectedOptions, form, mode]);
 
 
+
+    // 渲染预览内容
+    const renderPreview = () => {
+        if (mode === 'single' && selectedOptions && selectedOptions.preview) {
+            const { type, content, required: previewRequired = false, defaultValue = '' } = selectedOptions.preview;
+
+
+
+            switch (type) {
+                case 'image':
+                    return (
+                        <div className="tag-selector-preview" >
+                            <Image
+                                src={content}
+                                alt={selectedOptions.label || ''}
+                                style={{ width: previewStyle.width, height: previewStyle.height }}
+                                className="tag-selector-preview-image"
+                            />
+                        </div>
+                    );
+                case 'text':
+                    return (
+                        <div className="tag-selector-preview"  >
+                            <div className="tag-selector-preview-text" style={{ ...previewStyle }}>
+                                {content}
+                            </div>
+                        </div>
+                    );
+                case 'input':
+                    // 使用配置的验证规则或创建默认规则
+                    const fieldRules = fieldConfig.rules || [];
+
+                    // 如果配置了required但没有具体规则，添加必填规则
+                    const rules = fieldRules.length > 0 ? fieldRules :
+                        (previewRequired ? [{ required: true, message: `Please input ${content}` }] : []);
+
+                    return (
+                        <div className="tag-selector-preview" style={{ width: previewStyle.width }}>
+                            <Form.Item
+                                name={content}
+                                rules={rules}
+                                className="tag-selector-preview-input-item"
+                            >
+                                <Input
+                                    autoComplete="off"
+                                    value={previewInputValue}
+                                    placeholder={`Please input ${content}`}
+                                    className="tag-selector-preview-input"
+                                    disabled={disabled}
+                                />
+                            </Form.Item>
+                        </div>
+                    );
+                default:
+                    return null;
+            }
+        }
+        return null;
+    };
+
+
     return (
         <div className="tag-selector-container">
             <div className={`tag-selector-options tag-selector-container-${mode} ${disabled ? 'tag-selector-disabled' : ''}`}>
@@ -187,7 +250,7 @@ const TagSelector = ({
                     );
                 })}
             </div>
-
+            {renderPreview()}
         </div>
     );
 };

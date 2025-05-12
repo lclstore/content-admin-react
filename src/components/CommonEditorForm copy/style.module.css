@@ -191,21 +191,7 @@
     height: auto;
 }
 
-:global(.ant-form-item) {
-    margin-bottom: 0;
-}
 
-/* 表单项 label 样式 */
-
-
-:global(.ant-form-item .ant-form-item-label>label) {
-    font-size: 16px;
-    font-weight: 600;
-}
-
-:global(.editorform-item) {
-    margin-bottom: 24px !important;
-}
 
 .avatarUploader :global(.ant-upload-drag-hover) {
     border-color: var(--primary-color);
@@ -225,17 +211,17 @@
     color: #8c939d;
 }
 
-/* :global(.ant-image) {
+:global(.ant-image) {
     width: 100%;
     height: 100%;
     max-height: 100% !important;
     max-width: 100% !important;
-} */
+}
 
-/* :global(.ant-image .ant-image-img) {
+:global(.ant-image .ant-image-img) {
     width: 100% !important;
     height: 100% !important;
-} */
+}
 
 :global(.imagePreviewContainer .ant-image .ant-image-mask) {
     height: 100% !important;
@@ -267,8 +253,8 @@
 }
 
 .uploadInfo {
-    margin-left: 16px;
     font-size: 14px;
+    margin-bottom: 4px;
     display: flex;
     align-items: center;
 }
@@ -381,11 +367,14 @@
     width: 100%;
 }
 
-/* 文本展示字段 */
-.displayText {
-    padding: 6px 11px;
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.88);
+/* 文本字段 */
+.textField {
+    padding: 4px 11px;
+    min-height: 32px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background-color: #f5f5f5;
+    color: rgba(0, 0, 0, 0.65);
 }
 
 /* 基础表单容器 */
@@ -446,124 +435,4 @@
 
 .switchPreviewInput {
     width: 100%;
-}
-
-/* 面板项目样式 */
-.emptyItem {
-    padding: 12px;
-    color: #999;
-    font-size: 14px;
-    text-align: center;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    margin-bottom: 16px;
-}
-
-.panelItemFields {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 8px;
-}
-
-.panelItemField {
-    padding: 4px;
-    box-sizing: border-box;
-}
-
-.structurePanelsContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
-}
-
-.structurePanel {
-    width: 100%;
-    margin-bottom: 16px;
-}
-
-.panelItemsContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-}
-
-.panelItem {
-    border: 1px solid #f0f0f0;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 12px;
-}
-
-.panelItem.expanded {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.itemHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background-color: #fafafa;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.itemHeader:hover {
-    background-color: #f5f5f5;
-}
-
-.itemTitle {
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.itemActions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.itemContent {
-    padding: 16px;
-    background-color: #fff;
-}
-
-.emptyPanel {
-    padding: 24px;
-    text-align: center;
-    color: #999;
-    font-size: 14px;
-    background-color: #fafafa;
-    border-radius: 4px;
-}
-
-/* 高级表单样式 */
-.advancedForm {
-    width: 100%;
-}
-
-.formCollapse {
-    background-color: transparent;
-    border: none;
-}
-
-.formPanel {
-    margin-bottom: 16px;
-    background-color: #fff;
-}
-
-/* 日历控件 */
-:global(.ant-picker-dropdown .ant-picker-panel-container) {
-    width: 100%;
-}
-
-:global(.ant-picker-dropdown .ant-picker-header-view>button) {
-    color: var(--primary-color);
-}
-
-:global(.ant-picker-dropdown .ant-picker-header-view>button:hover) {
-    color: var(--primary-color);
 }

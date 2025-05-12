@@ -37,7 +37,7 @@ export const mockUsers = [
         avatar: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
         createUser: 'Admin',
         createTime: '2024-01-15 10:00:00',
-        status: 1, // 'enable' -> 1
+        status: 2, // 'enable' -> 1
         status1: 1,
         birthday: '1990-01-15',
         startDate: '2024-05-01',

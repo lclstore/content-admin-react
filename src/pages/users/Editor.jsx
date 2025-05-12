@@ -98,6 +98,14 @@ export default function UserEditorWithCommon() {
             name: 'videoUrl', // 视频文件
             label: 'Introduction Video',
             // maxFileSize: 1024 * 1024 * 10,
+
+            //文件上传后修改name
+            onChange: (value, file, form) => {
+                form.setFieldsValue({
+                    name: file?.name || '',
+                });
+                console.log(file, form);
+            },
             style: {
                 width: '290px',
                 height: '140px',

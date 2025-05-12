@@ -303,9 +303,9 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <FileUpload
                     value={fieldValue}
-                    onChange={(value) => {
+                    onChange={(value, file) => {
                         if (field.onChange) {
-                            field.onChange(value);
+                            field.onChange(value, file, form);
                         }
                     }}
                     acceptedFileTypes={acceptedFileTypes}

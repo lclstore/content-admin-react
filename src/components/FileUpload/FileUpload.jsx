@@ -322,7 +322,7 @@ const FileUpload = ({
 
                 // 更新表单值
                 if (onChange) {
-                    onChange(urlToSet);
+                    onChange(urlToSet, file);
                 }
 
                 // 显示成功消息 - 在这里处理一次即可

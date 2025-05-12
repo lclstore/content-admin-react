@@ -196,7 +196,7 @@ TagSelector.propTypes = {
     options: PropTypes.array.isRequired,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
     defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
-    onChange: PropTypes.func.isRequired,
+    // onChange: PropTypes.func.isRequired,
     mode: PropTypes.string,
     disabled: PropTypes.bool,
     previewStyle: PropTypes.object,

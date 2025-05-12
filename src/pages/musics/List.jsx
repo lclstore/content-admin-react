@@ -1,20 +1,20 @@
 import React, { useContext, useEffect } from 'react';
 import { Tabs } from 'antd';
-import Programs from './components/Programs';
-import Categories from './components/Categories';
+import Musics from './components/Musics';
+import Playlists from './components/Playlists';
 import StickyBox from 'react-sticky-box';
 import { HeaderContext } from '@/contexts/HeaderContext';
 
 const items = [
     {
         key: '1',
-        label: 'Programs',
-        children: <Programs />,
+        label: 'Musics',
+        children: <Musics />,
     },
     {
         key: '2',
         label: 'Categories',
-        children: <Categories />,
+        children: <Playlists />,
     }
 ];
 

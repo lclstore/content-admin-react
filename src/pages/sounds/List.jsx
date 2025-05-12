@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table } from 'antd';
+import { Modal, message, Form, Table, Switch,Space,Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -8,13 +8,13 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-// import { statusIconMap, resultIconMap, fileStatusIconMap } from '@/constants';
+// import { statusIconMap, RESULT_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
     mockWorkoutsForList,
     filterSections,
-    BATCH_FILE_OPTIONS, 
+    BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
 
@@ -25,7 +25,7 @@ export default function WorkoutsList() {
     const [dataSource, setDataSource] = useState(mockWorkoutsForList); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
-    const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] }); // 筛选条件
+    const [selectedFilters, setSelectedFilters] = useState({ status: [] }); // 筛选条件
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // 删除确认弹窗
     const [currentRecord, setCurrentRecord] = useState(null); // 当前操作的记录
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
@@ -137,11 +137,11 @@ export default function WorkoutsList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 简单的状态-按钮映射关系
-        if (status === 0 && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 2 && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 1 && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
-        if (status === 3 && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
-        if (status === 4 && ['duplicate'].includes(btnName)) return true;
+        if (status === 'Draft' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'Disabled' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'Enabled' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
 
         return false;
     }, []);
@@ -149,11 +149,9 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'Cover Image', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'coverImage', key: 'image' },
-            { title: 'Detail Image', mediaType: 'audio', dataIndex: 'detailImage', key: 'detailImage', width: 80, visibleColumn: 1 },
-            { title: 'Thumbnail Image', mediaType: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', width: 130, visibleColumn: 1 },
-            { title: 'Complete Image', mediaType: 'image', dataIndex: 'completeImage', key: 'completeImage', width: 130, visibleColumn: 1 },
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0 },
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
+            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
+            { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
@@ -161,42 +159,17 @@ export default function WorkoutsList() {
                 width: 120,
                 visibleColumn: 0
             },
-            { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
             {
-                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
-                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
-                width: 150,
-                visibleColumn: 2,
-                render: (duration) => {
-                    if (!duration) return '-';
-                    const minutes = Math.floor(duration / 60);
-                    const seconds = duration % 60;
-                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                title: 'Has a Script',sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
+                    console.log('HasAScript',text,record)
+                    return (
+                        <Space direction="vertical">
+                            <Switch disabled={true} checked={text} />
+                        </Space>
+                    );
                 }
             },
-            { title: 'Calorie (Kcal)', align: 'center', dataIndex: 'calorie', key: 'calorie', sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0), width: 150, visibleColumn: 2 },
-            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
-            { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
-            { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
-            { title: 'Target', dataIndex: 'target', key: 'target', width: 200, visibleColumn: 1 },
-            { title: 'Exercise Num', align: 'center', dataIndex: 'exerciseNum', key: 'exerciseNum', sorter: (a, b) => (a.exerciseNum || 0) - (b.exerciseNum || 0), width: 130, visibleColumn: 1 },
-            {
-                title: 'New Date',
-                key: 'newDate',
-                render: (text, record) => {
-                    return formatDateRange(record.newStartTime, record.newEndTime);
-                },
-                width: 220,
-                visibleColumn: 1
-            },
-            { title: 'Audio Lang', dataIndex: 'audioLang', key: 'audioLang', width: 120, visibleColumn: 1 },
-            {
-                title: 'File Status', dataIndex: 'fileStatus', key: 'fileStatus',
-                width: 120,
-                ellipsis: true,
-                options: 'fileStatus',
-                visibleColumn: 1
-            },
+
             {
                 title: 'Actions',
                 key: 'actions',
@@ -490,6 +463,7 @@ export default function WorkoutsList() {
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}
+                showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,
                     activeFilters: selectedFilters,

@@ -94,7 +94,7 @@ export default function Musics() {
             )
         );
         setActionInProgress(false);
-        const actionMap = {
+        const actionMap = { 
             'Enabled': 'enabled',
             'Disabled': 'disabled',
             'Deprecated': 'deprecated',
@@ -150,7 +150,7 @@ export default function Musics() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'Audio', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'audio', key: 'image' },
+            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 1 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {

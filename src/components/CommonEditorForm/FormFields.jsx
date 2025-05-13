@@ -129,17 +129,18 @@ const TransferField = React.memo(({ field, disabled, value, onChange }) => {
  * @returns {ReactNode} 渲染的表单控件
  */
 export const renderFormControl = (field, options = {}) => {
-    const {
-        type,
-        name,
-        label,
-        placeholder,
-        options: fieldOptions,
-        disabled,
-        props: fieldProps = {},
-        render,
-    } = field;
+    // 删除不必要的console.log
 
+    // 表单字段的标准属性
+    const {
+        type = 'input',
+        label,
+        name,
+        initialValue,
+        placeholder,
+        disabled = false,
+        width,
+    } = field;
     const { form, formConnected, initialValues, mounted } = options;
 
     // 获取字段值，仅用于显示，不在渲染中更新状态
@@ -151,8 +152,8 @@ export const renderFormControl = (field, options = {}) => {
     }
 
     // 如果提供了自定义渲染函数，使用它
-    if (render) {
-        return render(formConnected ? form : null, field);
+    if (field.render) {
+        return field.render(formConnected ? form : null, field);
     }
 
     // 根据类型渲染不同控件
@@ -167,30 +168,38 @@ export const renderFormControl = (field, options = {}) => {
             field.style = field.style || { width: '300px', height: '100px' };
             return field.content ? <Image className={styles.displayImg} src={field.content} style={{ ...field.style }} /> : '';
         case 'input':
+            const { key: inputKey, style: inputStyle, ...inputRest } = field;
             return <Input
-                style={field.style}
+                key={inputKey}
+                style={inputStyle}
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 allowClear
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
                 autoComplete="off"
-                {...fieldProps}
+                {...field.props}
+                {...inputRest}
             />;
         //文本输入框
         case 'textarea':
+            const { key: textareaKey, ...textareaRest } = field;
             return <Input.TextArea
+                key={textareaKey}
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
                 allowClear
                 autoComplete="off"
-                {...fieldProps}
+                {...field.props}
+                {...textareaRest}
             />;
         //密码输入框
         case 'password':
+            const { key: passwordKey, ...passwordRest } = field;
             return <Input.Password
+                key={passwordKey}
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 iconRender={(visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
@@ -198,7 +207,8 @@ export const renderFormControl = (field, options = {}) => {
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
                 autoComplete="off"
-                {...fieldProps}
+                {...field.props}
+                {...passwordRest}
             />;
 
 
@@ -234,8 +244,6 @@ export const renderFormControl = (field, options = {}) => {
                     acc[key] = dateStrings[idx];
                     return acc;
                 }, {});
-                console.log(mapped);
-
             };
             return (
                 <DatePicker.RangePicker
@@ -249,28 +257,35 @@ export const renderFormControl = (field, options = {}) => {
             field.checkedChildren = field.checkedChildren || 'Enabled';
             field.unCheckedChildren = field.unCheckedChildren || 'Disabled';
             field.defaultChecked = fieldValue === 1 || fieldValue === true;
-            console.log(fieldValue);
+
+            // 提取key属性，确保不会传递给Switch组件
+            const { key: switchKey, ...switchRest } = field;
 
             return (
                 <Switch
+                    key={switchKey}
                     defaultChecked={fieldValue === 1 || fieldValue === true}
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑
                         form.setFieldValue(name, newValue);
                     }}
-                    {...field}
+                    {...switchRest}
                 />
             )
         case 'select':
-            //选项处理使用统一的optins映射
-            const newField = JSON.parse(JSON.stringify(field));
+            //选项处理使用统一的options映射
+            const fieldCopy = JSON.parse(JSON.stringify(field));
             if (field.options && typeof field.options === 'string') {
-                newField.options = optionsConstants[field.options];
+                fieldCopy.options = optionsConstants[field.options];
             }
-            return <TagSelector
-                {...newField}
 
+            // 确保完全移除key属性
+            const { key: selectKey, ...selectRest } = fieldCopy;
+
+            return <TagSelector
+                key={selectKey}
+                {...selectRest}
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
@@ -297,11 +312,15 @@ export const renderFormControl = (field, options = {}) => {
                 dirKey,
                 uploadFn,
                 style,
+                key: uploadKey,
+                ...uploadRest
             } = field;
-
+            // 从options中解构出form对象
             // FileUpload 组件不需要在这里添加 Form.Item，因为 renderFormItem 已经创建了一个
             return (
                 <FileUpload
+                    form={options.form}
+                    key={uploadKey}
                     value={fieldValue}
                     onChange={(value, file) => {
                         if (field.onChange) {
@@ -317,7 +336,8 @@ export const renderFormControl = (field, options = {}) => {
                     dirKey={dirKey}
                     uploadFn={uploadFn}
                     style={style}
-                    {...fieldProps}
+                    {...field.props}
+                    {...uploadRest}
                 />
             );
         //输入框组
@@ -327,7 +347,7 @@ export const renderFormControl = (field, options = {}) => {
                 <Form.Item
                     label={label}
                 >
-                    <div style={{ display: 'flex', gap: '0 40px', maxWidth: '100%', overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {
                             // 处理每个子项的验证规则
                             const itemRules = processValidationRules(config.rules || [], {
@@ -338,7 +358,7 @@ export const renderFormControl = (field, options = {}) => {
                             });
 
                             return (
-                                <div style={{ flex: 1, minWidth: config.previewWidth }} key={index}>
+                                <div style={{ flex: 1, minWidth: config.width || '' }} key={index}>
                                     <Form.Item
                                         className='editorform-item'
                                         name={config.name}
@@ -356,10 +376,13 @@ export const renderFormControl = (field, options = {}) => {
             );
         //数字步进器
         case 'numberStepper':
+            // 提取key属性，确保其不会通过展开运算符传递
+            const { key: stepperKey, ...stepperRest } = field;
 
             return (
                 <NumberStepper
-                    {...field}
+                    key={stepperKey}
+                    {...stepperRest}
                 />
             );
         case 'transfer':
@@ -406,7 +429,7 @@ export const renderFormControl = (field, options = {}) => {
             return <Input
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
-                {...fieldProps}
+                {...field.props}
             />;
     }
 };
@@ -420,6 +443,11 @@ export const renderFormControl = (field, options = {}) => {
  * @returns {ReactNode} 渲染的表单项
  */
 export const renderFormItem = (field, options = {}) => {
+    // 删除不必要的console.log
+    if (!field) {
+        return null;
+    }
+
     const {
         name, // 字段的标识符
         label,
@@ -436,7 +464,6 @@ export const renderFormItem = (field, options = {}) => {
     } = field;
 
     const { form, formConnected } = options;
-
     // 特殊渲染情况：当 shouldUpdate 为 true 时
     // 这些情况通常自定义渲染逻辑，并且 Form.Item 的 name 属性不用于表单值收集
     if (shouldUpdate) {
@@ -456,7 +483,6 @@ export const renderFormItem = (field, options = {}) => {
     // 特殊渲染情况：当存在 dependencies 时
     // 同上，这些情况的 Form.Item 的 name 属性不用于表单值收集
     if (dependencies) {
-        console.log(field, options);
         const newField = JSON.parse(JSON.stringify(field));
         delete newField.dependencies;
 
@@ -474,7 +500,6 @@ export const renderFormItem = (field, options = {}) => {
                     if (field.type === 'displayImage') {
                         newField.content = content ? fileSettings.baseURL + content : null;
                     }
-                    console.log(newField, options);
 
                     // 渲染组件
                     return content ? renderFormItem(newField, options) : null

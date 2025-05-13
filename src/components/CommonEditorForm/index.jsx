@@ -2,20 +2,17 @@ import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { Form, Collapse, Button, Card, Space, Spin } from 'antd';
 import {
-    SaveOutlined,
-    ArrowLeftOutlined,
-    CaretRightOutlined,
     PlusOutlined,
     DeleteOutlined,
-    DownOutlined,
-    UpOutlined
+
 } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import styles from './style.module.css';
 import { useFormState, useHeaderConfig } from './hooks';
-import { renderFormItem, renderBasicForm, renderPanelFields } from './FormFields';
+import { renderBasicForm, renderPanelFields } from './FormFields';
+import CommonList from './CommonList'; //左侧列表数据
+import CollapseForm from './CollapseForm'; //右侧折叠表单
 import dayjs from 'dayjs';
-const { Panel } = Collapse;
 import { dateRangeKeys } from '@/constants/app';
 /**
  * 通用编辑器组件
@@ -29,6 +26,7 @@ import { dateRangeKeys } from '@/constants/app';
  * @param {Function} props.onSave 保存回调函数
  * @param {Function} props.validate 自定义验证函数
  * @param {Object} props.complexConfig 复杂表单特定配置
+ * @param {Object} props.collapseFormConfig 折叠表单配置
  * @param {string} props.formName 表单名称
  * @param {Object} props.initFormData 初始化表单数据
  */
@@ -41,9 +39,10 @@ export default function CommonEditor(props) {
         initFormData,
         onSave,
         validate,
-        complexConfig = {} // 高级表单特定配置
+        commonListConfig = {},
+        complexConfig = {}, // 高级表单特定配置
+        collapseFormConfig = {} // 折叠表单配置
     } = props;
-
     // 路由相关的钩子
     const navigate = useNavigate();
     const location = useLocation();
@@ -66,7 +65,14 @@ export default function CommonEditor(props) {
     const [structurePanels, setStructurePanels] = useState(
         complexConfig.structurePanels || []
     );
-    const [activeCollapseKeys, setActiveCollapseKeys] = useState(['1']);
+    // 初始化激活的折叠面板key - 使用第一个面板的name
+    const [activeCollapseKeys, setActiveCollapseKeys] = useState(() => {
+        if (collapseFormConfig && collapseFormConfig.fields && collapseFormConfig.fields.length > 0) {
+            // 使用第一个面板的name作为默认打开的面板
+            return [collapseFormConfig.fields[0].name];
+        }
+        return [];
+    });
     const [expandedItems, setExpandedItems] = useState({});
 
     // 获取HeaderContext
@@ -128,8 +134,9 @@ export default function CommonEditor(props) {
     }, []);
 
     // 处理折叠面板变更的函数
-    const handleCollapseChange = useCallback((keys) => {
-        setActiveCollapseKeys(keys);
+    const handleCollapseChange = useCallback((key) => {
+        // 手风琴模式下，key是单个字符串而不是数组
+        setActiveCollapseKeys(key ? [key] : []);
     }, []);
 
     // 处理添加项目的函数
@@ -173,36 +180,41 @@ export default function CommonEditor(props) {
             complexConfig.onStructurePanelsChange(newPanels);
         }
     };
+    const fetchData = async () => {
+        console.log('fetchData');
+
+        let response = initialValues; // 初始化表单数据
+        setLoading(true);
+        // 如果id存在，则请求获取数据
+        if (id) {
+            response = await initFormData(id) || {};
+        }
+        const transformedData = transformDatesInObject(response, fields); // 转换日期
+        form.setFieldsValue(transformedData);
+
+        // 确保表单值更新后，设置表单状态为"未修改"
+        setIsFormDirty(false);
+
+        // 在这里可以添加一个回调函数通知其他组件数据已加载完成
+        if (config.onDataLoaded) {
+            config.onDataLoaded(transformedData);
+        }
+        // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
+        if (headerContext.setButtons) {
+            const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 0 && transformedData.status !== 2;
+            headerButtons[0].disabled = isNonZeroStatus;
+            const saveButton = headerButtons.find(button => button.key === 'save');
+            saveButton.disabled = isNonZeroStatus && saveButton.disabled;
+            headerContext.setButtons(headerButtons);
+        }
+        setLoading(false);
+    };
     // 初始化表单数据
     useEffect(() => {
-        const fetchData = async () => {
-            let response = initialValues; // 初始化表单数据
-            setLoading(true);
-            response = await initFormData(id) || {};
-            const transformedData = transformDatesInObject(response, fields); // 转换日期
-            form.setFieldsValue(transformedData);
 
-            // 确保表单值更新后，设置表单状态为"未修改"
-            setIsFormDirty(false);
-
-            // 在这里可以添加一个回调函数通知其他组件数据已加载完成
-            if (config.onDataLoaded) {
-                config.onDataLoaded(transformedData);
-            }
-            // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
-            if (headerContext.setButtons) {
-                console.log(transformedData);
-                const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 0 && transformedData.status !== 2;
-                headerButtons[0].disabled = isNonZeroStatus;
-                const saveButton = headerButtons.find(button => button.key === 'save');
-                saveButton.disabled = isNonZeroStatus && saveButton.disabled;
-                headerContext.setButtons(headerButtons);
-            }
-            setLoading(false);
-        };
 
         fetchData();
-    }, [id, initFormData, fields, form, initialValues, config, setIsFormDirty]);
+    }, [id]);
 
     // 设置页面标题和头部按钮
     useEffect(() => {
@@ -253,156 +265,106 @@ export default function CommonEditor(props) {
                                 </Space>
                             }
                         >
-                            {panelItems.length > 0 ? (
-                                <div className={styles.panelItemsContainer}>
-                                    {panelItems.map((item, itemIndex) => {
-                                        const isExpanded = expandedItems[`${panelIndex}-${itemIndex}`] !== false;
-
-                                        return (
-                                            <div
-                                                key={`item-${panelIndex}-${itemIndex}`}
-                                                className={`${styles.panelItem} ${isExpanded ? styles.expanded : ''}`}
+                            {panelItems.map((item, itemIndex) => (
+                                <div key={`item-${panelIndex}-${itemIndex}`}>
+                                    <div className={styles.itemHeader}>
+                                        <h4>{item.title || `Item ${itemIndex + 1}`}</h4>
+                                        {complexConfig.allowAddRemoveItems && (
+                                            <Button
+                                                type="text"
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                onClick={() => handleRemoveItem(panelIndex, itemIndex)}
                                             >
-                                                <div
-                                                    className={styles.itemHeader}
-                                                    onClick={() => handleToggleExpandItem(`${panelIndex}-${itemIndex}`)}
-                                                >
-                                                    <span className={styles.itemTitle}>
-                                                        {item.title || `Item ${itemIndex + 1}`}
-                                                    </span>
-                                                    <div className={styles.itemActions}>
-                                                        {complexConfig.allowAddRemoveItems && (
-                                                            <Button
-                                                                size="small"
-                                                                danger
-                                                                icon={<DeleteOutlined />}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleRemoveItem(panelIndex, itemIndex);
-                                                                }}
-                                                            >
-                                                                Delete
-                                                            </Button>
-                                                        )}
-                                                        <Button
-                                                            type="link"
-                                                            size="small"
-                                                            icon={isExpanded ? <UpOutlined /> : <DownOutlined />}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleToggleExpandItem(`${panelIndex}-${itemIndex}`);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {isExpanded && (
-                                                    <div className={styles.itemContent}>
-                                                        {renderPanelFields(
-                                                            panel,
-                                                            panelIndex,
-                                                            item,
-                                                            itemIndex,
-                                                            {
-                                                                form,
-                                                                formConnected,
-                                                                initialValues: transformedInitialValues,
-                                                                mounted
-                                                            }
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
+                                                Remove
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div className={styles.itemFields}>
+                                        {renderPanelFields(panel, panelIndex, item, itemIndex, {
+                                            form,
+                                            formConnected,
+                                            initialValues,
+                                            mounted
+                                        })}
+                                    </div>
                                 </div>
-                            ) : (
-                                <div className={styles.emptyPanel}>
-                                    No items in this panel
-                                </div>
-                            )}
+                            ))}
                         </Card>
                     );
                 })}
             </div>
         );
     };
-    const transformedInitialValues = {};
-    console.log(transformedInitialValues);
 
-    // 渲染基础表单内容
+    // 渲染基础表单
     const renderBasicContent = () => {
         return (
-            <Form
-                form={form}
-                layout={config.layout || 'vertical'}
-                onValuesChange={handleFormValuesChange}
-                onFinish={headerButtons[0].onClick}
-                // initialValues={transformedInitialValues}
-                className={styles.basicFormContainer}
-                size={config.size || 'middle'}
-            >
-                <div className={styles.fieldGroupContainer}>
-                    {renderBasicForm(fields, {
-                        form,
-                        formConnected,
-                        initialValues: transformedInitialValues,
-                        oneColumnKeys: config.oneColumnKeys || [],
-                        mounted
-                    })}
-                </div>
-            </Form>
+            <div className={styles.basicEditorForm}>
+                <Spin spinning={loading}>
+                    <Form
+                        form={form}
+                        name={config.formName || 'basicForm'}
+                        layout={config.layout || 'vertical'}
+                        onValuesChange={handleFormValuesChange}
+                        onFinish={headerButtons[0].onClick}
+                        initialValues={initialValues}
+                        className={styles.form}
+                    >
+                        {renderBasicForm(fields, {
+                            form,
+                            formConnected,
+                            initialValues,
+                            oneColumnKeys: config.oneColumnKeys || [],
+                            mounted
+                        })}
+                    </Form>
+                </Spin>
+            </div>
         );
     };
 
-    // 渲染高级表单内容
+    // 渲染高级表单
     const renderAdvancedContent = () => {
         return (
-            <Form
-                form={form}
-                layout={config.layout || 'vertical'}
-                onValuesChange={handleFormValuesChange}
-                onFinish={headerButtons[0].onClick}
-                initialValues={transformedInitialValues}
-                className={styles.advancedForm}
-            >
-                <Collapse
-                    defaultActiveKey={activeCollapseKeys}
-                    activeKey={activeCollapseKeys}
-                    onChange={handleCollapseChange}
-                    expandIcon={({ isActive }) => (
-                        <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                    )}
-                    className={styles.formCollapse}
-                >
-                    {complexConfig.showBasicPanel !== false && (
-                        <Panel header="Basic Information" key="1" className={styles.formPanel}>
-                            {renderBasicForm(complexConfig.basicFields || [], {
-                                form,
-                                formConnected,
-                                initialValues: transformedInitialValues,
-                                oneColumnKeys: config.oneColumnKeys || [],
-                                mounted
-                            })}
-                        </Panel>
-                    )}
+            <div className={styles.advancedFormContent}>
+                {/* 渲染左侧列表 */}
+                <CommonList {...commonListConfig} />
+                {/* 渲染右侧表单 */}
+                <div className={`${styles.advancedEditorForm}`}>
+                    <Form
+                        form={form}
+                        name={config.formName || 'advancedForm'}
+                        layout={config.layout || 'vertical'}
+                        onValuesChange={handleFormValuesChange}
+                        onFinish={headerButtons[0].onClick}
+                        initialValues={initialValues}
+                        className={styles.form}
+                    >
+                        {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
+                        {collapseFormConfig && Object.keys(collapseFormConfig).length > 0 && (
+                            <CollapseForm
+                                fields={collapseFormConfig.fields || []}
+                                form={form}
+                                initialValues={initialValues}
+                                activeKeys={activeCollapseKeys}
+                                onCollapseChange={handleCollapseChange}
+                                isCollapse={collapseFormConfig.isCollapse !== false}
+                            />
+                        )}
 
-                    {complexConfig.showStructurePanel !== false && complexConfig.includeStructurePanels && (
-                        <Panel header="Structured Data" key="2" className={styles.formPanel}>
-                            {renderStructurePanels()}
-                        </Panel>
-                    )}
-                </Collapse>
-            </Form>
+                        {/* 如果配置了结构面板，则渲染结构面板 */}
+                        {complexConfig.includeStructurePanels && renderStructurePanels()}
+                    </Form>
+                </div>
+            </div>
         );
     };
 
     return (
-        <Spin spinning={loading}>
-            <div className={styles.commonEditorContainer}>
-                {contextHolder}
-                {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
-            </div>
-        </Spin>
+        <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer}`}>
+            {contextHolder}
+            {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
+        </div>
     );
 }

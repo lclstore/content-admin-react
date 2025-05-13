@@ -1,0 +1,78 @@
+/* 通用列表组件样式 */
+.commonList {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding: 16px;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.item.selectableItem {
+    cursor: pointer;
+}
+
+/* 滚动容器样式 */
+.scrollContainer {
+    flex: 1;
+    overflow: auto;
+}
+
+/* 搜索栏样式 */
+.search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.searchInput {
+    flex: 1;
+    margin-right: 8px;
+}
+
+/* 列表项样式 */
+.item :global(.ant-list-item-meta-title) {
+    margin-bottom: 0 !important;
+    font-weight: 500;
+}
+
+.item :global(.ant-list-item-meta-description) {
+    font-size: 12px;
+}
+
+.item :global(.ant-list-item-action>li) {
+    padding-left: 8px;
+}
+
+/* 头像和播放图标样式 */
+.itemAvatar {
+    position: relative;
+}
+
+.playIcon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
+    color: #fff;
+}
+
+/* 选中状态样式 */
+.itemSelected {
+    background-color: rgba(0, 144, 255, 0.05);
+}
+
+/* 禁用状态样式 */
+.itemDisabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 列表项悬停效果 */
+.item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}

@@ -65,21 +65,12 @@ export default function UserEditorWithCommon() {
             name: 'birthday', // 遵循命名规范，使用Url后缀
             label: 'Birthday',
             required: true,
-            // 移除不相关的上传属性
-            // previewWidth: '96px',//预览宽度
-            // previewHeight: '96px',//预览高度
-            // uploadFn: fileSettings.uploadFile,
-            // acceptedFileTypes: 'jpg,png,jpeg',
-            // maxFileSize: 2 * 1024,
         },
         {
             type: 'upload',
             // required: true,
             name: 'videoUrl', // 视频文件
             label: 'Introduction Video',
-            // maxFileSize: 3.21,
-            // previewWidth: '190px',//预览宽度
-            // previewHeight: '190px',//预览高度
             acceptedFileTypes: 'mp4,mp3,webm,ts',
         },
         {
@@ -146,7 +137,7 @@ export default function UserEditorWithCommon() {
                     label: 'warmName',
                     required: true,
                     maxLength: 100,
-                    previewWidth: '310px',
+                    width: '310px',
                     showCount: true,
                 },
                 {
@@ -187,8 +178,6 @@ export default function UserEditorWithCommon() {
             name: 'avatar', // 遵循命名规范，使用Url后缀
             label: 'Avatar',
             // required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
             uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
@@ -204,8 +193,6 @@ export default function UserEditorWithCommon() {
             label: 'Status1',
             options: optionsConstants.status,
             required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
             uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,

@@ -1,26 +1,26 @@
 import Programs from './components/Programs.jsx';
 import Category from './components/Category.jsx'
 // import Categories from './Categories';
-import {HeaderContext} from '@/contexts/HeaderContext';
-import React, {useContext, useEffect} from "react";
-import {PlusOutlined} from "@ant-design/icons";
-import {useNavigate} from 'react-router';
-import {Tabs} from 'antd';
+import { HeaderContext } from '@/contexts/HeaderContext';
+import React, { useContext, useEffect } from "react";
+import { PlusOutlined } from "@ant-design/icons";
+import { useNavigate } from 'react-router';
+import { Tabs } from 'antd';
 import StickyBox from "react-sticky-box";
 
 export default function CollectionsList() {
-    const {setButtons, setCustomPageTitle} = useContext(HeaderContext);
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate(); // 路由导航
     const tabItems = [
         {
             key: 'category',
             label: 'Category',
-            children: <Category/>,
+            children: <Category />,
         },
         {
             key: 'program',
             label: 'Program',
-            children: <Programs/>,
+            children: <Programs />,
         },
     ];
     const defaultTabItem = tabItems[0] || {};
@@ -37,10 +37,10 @@ export default function CollectionsList() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
-                icon: <PlusOutlined/>,
+                text: 'Create Category',
+                icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/workouts/editor'),
+                onClick: () => navigate('/collections/editor'),
             }
         ])
     }, []);
@@ -49,8 +49,8 @@ export default function CollectionsList() {
             <DefaultTabBar {...props} />
         </StickyBox>
     );
-    return <Tabs style={{backgroundColor: 'white'}} defaultActiveKey="1"
-                 renderTabBar={renderTabBar}
-                 items={tabItems.map(i => ({ ...i,children: <div style={{padding:'20px'}}>{i.children}</div> }))}
-                 onChange={onChange}/>
+    return <Tabs style={{ backgroundColor: 'white' }} defaultActiveKey="1"
+        renderTabBar={renderTabBar}
+        items={tabItems.map(i => ({ ...i, children: <div style={{ padding: '20px' }}>{i.children}</div> }))}
+        onChange={onChange} />
 }

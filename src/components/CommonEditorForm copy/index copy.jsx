@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Collapse, Button, Card, Space, Divider } from 'antd';
+import { Form, Collapse, Button, Card, Space, Spin } from 'antd';
 import {
     SaveOutlined,
     ArrowLeftOutlined,
@@ -13,10 +13,10 @@ import {
 import { HeaderContext } from '@/contexts/HeaderContext';
 import styles from './style.module.css';
 import { useFormState, useHeaderConfig } from './hooks';
-import { renderBasicForm, renderPanelFields } from './FormFields';
-
+import { renderFormItem, renderBasicForm, renderPanelFields } from './FormFields';
+import dayjs from 'dayjs';
 const { Panel } = Collapse;
-
+import { dateRangeKeys } from '@/constants/app';
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -30,6 +30,7 @@ const { Panel } = Collapse;
  * @param {Function} props.validate 自定义验证函数
  * @param {Object} props.complexConfig 复杂表单特定配置
  * @param {string} props.formName 表单名称
+ * @param {Object} props.initFormData 初始化表单数据
  */
 export default function CommonEditor(props) {
     const {
@@ -37,6 +38,7 @@ export default function CommonEditor(props) {
         config = {},
         fields = [],
         initialValues = {},
+        initFormData,
         onSave,
         validate,
         complexConfig = {} // 高级表单特定配置
@@ -47,7 +49,7 @@ export default function CommonEditor(props) {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
-
+    const [loading, setLoading] = useState(true);
     // 使用自定义钩子管理表单状态
     const {
         form,
@@ -57,9 +59,9 @@ export default function CommonEditor(props) {
         formValues,
         messageApi,
         contextHolder,
-        mounted
+        mounted,
+        getLatestValues
     } = useFormState(initialValues);
-
     // 复杂表单特定状态
     const [structurePanels, setStructurePanels] = useState(
         complexConfig.structurePanels || []
@@ -86,9 +88,25 @@ export default function CommonEditor(props) {
         complexConfig,
         structurePanels,
         headerContext,
-        setIsFormDirty
+        setIsFormDirty,
+        getLatestValues
     });
+    // 判断是否是日期
 
+    // 转换日期
+    const transformDatesInObject = (obj = {}, fields = []) => {
+        fields.forEach(field => {
+            if (field.type === 'date' || field.type === 'dateRange') {
+                obj[field.name] = dayjs(obj[field.name]);
+                if (field.type === 'dateRange') {
+                    // 如果是日期范围，则将日期范围转换为dayjs数组
+                    const { keys = dateRangeKeys } = field;
+                    obj[field.name] = [dayjs(obj[keys[0]]), dayjs(obj[keys[1]])];
+                }
+            }
+        });
+        return obj;
+    }
     // 表单变更处理函数
     const handleFormValuesChange = (changedValues, allValues) => {
         if (!isFormDirty) {
@@ -155,6 +173,36 @@ export default function CommonEditor(props) {
             complexConfig.onStructurePanelsChange(newPanels);
         }
     };
+    // 初始化表单数据
+    useEffect(() => {
+        const fetchData = async () => {
+            let response = initialValues; // 初始化表单数据
+            setLoading(true);
+            response = await initFormData(id) || {};
+            const transformedData = transformDatesInObject(response, fields); // 转换日期
+            form.setFieldsValue(transformedData);
+
+            // 确保表单值更新后，设置表单状态为"未修改"
+            setIsFormDirty(false);
+
+            // 在这里可以添加一个回调函数通知其他组件数据已加载完成
+            if (config.onDataLoaded) {
+                config.onDataLoaded(transformedData);
+            }
+            // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
+            if (headerContext.setButtons) {
+                console.log(transformedData);
+                const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 0 && transformedData.status !== 2;
+                headerButtons[0].disabled = isNonZeroStatus;
+                const saveButton = headerButtons.find(button => button.key === 'save');
+                saveButton.disabled = isNonZeroStatus && saveButton.disabled;
+                headerContext.setButtons(headerButtons);
+            }
+            setLoading(false);
+        };
+
+        fetchData();
+    }, [id, initFormData, fields, form, initialValues, config, setIsFormDirty]);
 
     // 设置页面标题和头部按钮
     useEffect(() => {
@@ -165,10 +213,7 @@ export default function CommonEditor(props) {
             headerContext.setCustomPageTitle(pageTitle);
         }
 
-        // 设置头部按钮
-        if (headerContext.setButtons) {
-            headerContext.setButtons(headerButtons);
-        }
+
     }, [
         config.formName,
         id,
@@ -261,7 +306,7 @@ export default function CommonEditor(props) {
                                                             {
                                                                 form,
                                                                 formConnected,
-                                                                initialValues: formValues,
+                                                                initialValues: transformedInitialValues,
                                                                 mounted
                                                             }
                                                         )}
@@ -282,6 +327,8 @@ export default function CommonEditor(props) {
             </div>
         );
     };
+    const transformedInitialValues = {};
+    console.log(transformedInitialValues);
 
     // 渲染基础表单内容
     const renderBasicContent = () => {
@@ -291,7 +338,7 @@ export default function CommonEditor(props) {
                 layout={config.layout || 'vertical'}
                 onValuesChange={handleFormValuesChange}
                 onFinish={headerButtons[0].onClick}
-                initialValues={formValues}
+                // initialValues={transformedInitialValues}
                 className={styles.basicFormContainer}
                 size={config.size || 'middle'}
             >
@@ -299,7 +346,7 @@ export default function CommonEditor(props) {
                     {renderBasicForm(fields, {
                         form,
                         formConnected,
-                        initialValues: formValues,
+                        initialValues: transformedInitialValues,
                         oneColumnKeys: config.oneColumnKeys || [],
                         mounted
                     })}
@@ -316,7 +363,7 @@ export default function CommonEditor(props) {
                 layout={config.layout || 'vertical'}
                 onValuesChange={handleFormValuesChange}
                 onFinish={headerButtons[0].onClick}
-                initialValues={formValues}
+                initialValues={transformedInitialValues}
                 className={styles.advancedForm}
             >
                 <Collapse
@@ -333,7 +380,7 @@ export default function CommonEditor(props) {
                             {renderBasicForm(complexConfig.basicFields || [], {
                                 form,
                                 formConnected,
-                                initialValues: formValues,
+                                initialValues: transformedInitialValues,
                                 oneColumnKeys: config.oneColumnKeys || [],
                                 mounted
                             })}
@@ -351,9 +398,11 @@ export default function CommonEditor(props) {
     };
 
     return (
-        <div className={styles.commonEditorContainer}>
-            {contextHolder}
-            {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
-        </div>
+        <Spin spinning={loading}>
+            <div className={styles.commonEditorContainer}>
+                {contextHolder}
+                {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
+            </div>
+        </Spin>
     );
 }

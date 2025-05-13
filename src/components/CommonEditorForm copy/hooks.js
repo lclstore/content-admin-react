@@ -50,7 +50,6 @@ export const useFormState = (initialValues = {}) => {
 
     // 监控表单实例挂载状态
     useEffect(() => {
-
         if (form && typeof form.getFieldsValue === 'function') {
             setFormConnected(true);
             mounted.current = true;
@@ -112,7 +111,7 @@ export const useHeaderConfig = (params) => {
 
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
-        if (!form) return;
+        if (!formConnected) return;
 
         form.validateFields()
             .then(values => {
@@ -175,7 +174,7 @@ export const useHeaderConfig = (params) => {
                 }
 
                 if (onSave) {
-                    const editId = id;
+                    const editId = id
                     const callbackUtils = {
                         setDirty: setIsFormDirty,
                         messageApi,
@@ -192,7 +191,6 @@ export const useHeaderConfig = (params) => {
                 }
             })
             .catch((error) => {
-
                 messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
             });
     }, [
@@ -233,7 +231,6 @@ export const useHeaderConfig = (params) => {
         return [
             {
                 key: 'save',
-                hidden: config.hideSaveButton,
                 text: config.saveButtonText || 'Save',
                 icon: React.createElement(SaveOutlined),
                 type: 'primary',
@@ -243,7 +240,6 @@ export const useHeaderConfig = (params) => {
             },
             {
                 key: 'back',
-                hidden: config.hideBackButton,
                 text: config.backButtonText || 'Back',
                 icon: React.createElement(ArrowLeftOutlined),
                 onClick: handleBackClick,

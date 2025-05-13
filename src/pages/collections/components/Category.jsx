@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useMemo, useCallback } from 're
 import { Modal, message } from 'antd';
 import { useNavigate } from 'react-router';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import {statusOrder, filterSections, categoryListData} from './Data';
+import { statusOrder, filterSections, categoryListData } from './Data';
 
 
 export default () => {
@@ -95,7 +95,7 @@ export default () => {
                 title: 'Status',
                 dataIndex: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options:"status",
+                options: "status",
                 width: 120,
                 visibleColumn: 0
             },
@@ -127,7 +127,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable','edit','duplicate'],
+                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数
@@ -215,7 +215,7 @@ export default () => {
         }
 
         // 正常导航到编辑页面
-        navigate(`/users/editor?id=${record.id}`);
+        navigate(`/collections/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理

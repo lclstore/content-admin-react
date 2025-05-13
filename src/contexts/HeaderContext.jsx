@@ -9,7 +9,7 @@ export const HeaderContext = createContext({
     setButtons: () => { },       // 设置按钮数组的方法
     setButton: () => { },        // 更新单个按钮的方法
     customPageTitle: null,        // 自定义页面标题
-    setCustomPageTitle: () => { } // 设置自定义页面标题的方法
+    setCustomPageTitle: (title) => { } // 设置自定义页面标题的方法
 });
 
 /**

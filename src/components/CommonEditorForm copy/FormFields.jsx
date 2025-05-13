@@ -19,7 +19,10 @@ import FileUpload from '@/components/FileUpload/FileUpload';//文件上传组件
 import NumberStepper from '@/components/NumberStepper/NumberStepper';//数字步进器组件
 import TagSelector from '@/components/TagSelector/TagSelector';//标签选择器组件
 import styles from './style.module.css';
-
+import { dateRangeKeys } from '@/constants/app';
+import { optionsConstants } from '@/constants';
+import settings from '@/config/settings';
+const { file: fileSettings } = settings;
 
 
 /**
@@ -52,144 +55,6 @@ export const processValidationRules = (rules = [], { required, label, type, requ
     return finalRules;
 };
 
-/**
- * 日期范围选择器组件
- * 处理日期范围选择，支持分离字段模式
- */
-const DateRangePickerField = ({ placeholder, disabled, componentProps, fieldNames, form, onChange }) => {
-    const handleChange = (dates, dateStrings) => {
-        if (onChange) {
-            onChange(dates, dateStrings);
-        }
-    };
-
-    return (
-        <DatePicker.RangePicker
-            placeholder={placeholder}
-            disabled={disabled}
-            onChange={handleChange}
-            style={{ width: '100%' }}
-            {...componentProps}
-        />
-    );
-};
-
-/**
- * 开关控件组件
- * 支持将布尔值转换为0/1
- * 支持预览功能，可根据开关状态显示不同内容
- */
-const SwitchField = React.memo(({ field }) => {
-    // 从field对象中解构需要的属性
-    const {
-        name,
-        onChange,
-        value,
-        disabled,
-        checkedChildren = 'Enabled',
-        unCheckedChildren = 'Disabled',
-        preview,
-        props: componentProps = {},
-        previewStyle = { height: '200px' },
-    } = field;
-
-    // 获取字段值，优先使用props.value
-    const initialValue = value !== undefined ? value :
-        componentProps.value !== undefined ? componentProps.value :
-            field.defaultValue !== undefined ? field.defaultValue : false;
-
-    // 使用内部状态管理开关值，确保正确处理各种值类型
-    const [checked, setChecked] = useState(initialValue === 1 || initialValue === true);
-
-    // 当外部值变化时更新内部状态
-    useEffect(() => {
-        if (field.value === undefined) return;
-        // 确保value是有效值，处理undefined和null的情况
-        const newChecked = field.value === 1 || field.value === true;
-
-        // 仅当状态真正需要更新时才设置状态
-        if (checked !== newChecked) {
-            setChecked(newChecked);
-        }
-    }, [field.value, checked]);
-
-    // 值变化处理函数 - 使用useCallback优化性能
-    const handleChange = useCallback((newChecked) => {
-        // 更新内部状态
-        setChecked(newChecked);
-
-        // 将布尔值转换为 0 或 1
-        const numericValue = newChecked ? 1 : 0;
-
-        // 调用外部onChange，传递数字值
-        if (typeof onChange === 'function') {
-            onChange(numericValue);
-        }
-    }, [onChange]);
-
-    // 使用useMemo优化预览配置获取
-    const previewConfig = useMemo(() => {
-        if (!preview) return null;
-        return checked ? preview.on : preview.off;
-    }, [preview, checked]);
-
-    // 渲染预览内容 - 使用useMemo优化渲染
-    const renderedPreview = useMemo(() => {
-        if (!previewConfig) return null;
-
-        const { type, content } = previewConfig;
-
-        switch (type) {
-            case 'image':
-                return (
-                    <span>
-                        <Image
-                            src={content}
-                            alt='preview'
-                            style={{ ...previewStyle, objectFit: 'contain' }}
-                            className="switch-preview-image"
-                        />
-                    </span>
-                );
-            case 'text':
-                return (
-                    <div className="switch-preview" style={previewStyle}>
-                        <div className="switch-preview-text" style={{ padding: '10px', fontSize: '14px', color: '#666' }}>
-                            {content}
-                        </div>
-                    </div>
-                );
-            default:
-                return null;
-        }
-    }, [previewConfig, previewStyle]);
-
-    // 过滤掉不应该传递给Switch组件的属性
-    const filteredProps = useMemo(() => {
-        const { preview, previewStyle, onChange, form, ...rest } = componentProps;
-        return rest;
-    }, [componentProps]);
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div>
-                <Switch
-                    disabled={disabled}
-                    checked={checked}
-                    onChange={handleChange}
-                    checkedChildren={checkedChildren}
-                    unCheckedChildren={unCheckedChildren}
-                    {...filteredProps}
-                />
-            </div>
-            {preview && previewConfig && (
-                <div>
-                    {renderedPreview}
-                </div>
-            )}
-        </div>
-    );
-});
 
 /**
  * 穿梭框控件组件
@@ -278,7 +143,7 @@ export const renderFormControl = (field, options = {}) => {
     const { form, formConnected, initialValues, mounted } = options;
 
     // 获取字段值，仅用于显示，不在渲染中更新状态
-    let fieldValue = null;
+    let fieldValue = '';
     if (mounted?.current && formConnected && form) {
         fieldValue = form.getFieldValue(name);
     } else if (initialValues && name in initialValues) {
@@ -292,14 +157,19 @@ export const renderFormControl = (field, options = {}) => {
 
     // 根据类型渲染不同控件
     switch (type) {
-        case 'text':
-            return <div className={styles.textField}>
+        // 文本展示字段
+        case 'displayText':
+            return <div className={styles.displayText} style={{ ...field.style }}>
                 {fieldValue !== undefined ? fieldValue : ''}
             </div>;
-
+        // 图片展示字段
+        case 'displayImage':
+            field.style = field.style || { width: '300px', height: '100px' };
+            return field.content ? <Image className={styles.displayImg} src={field.content} style={{ ...field.style }} /> : '';
         case 'input':
             return <Input
-                placeholder={placeholder || `Enter ${label}`}
+                style={field.style}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 allowClear
                 maxLength={field.maxLength}
@@ -310,7 +180,7 @@ export const renderFormControl = (field, options = {}) => {
         //文本输入框
         case 'textarea':
             return <Input.TextArea
-                placeholder={placeholder || `Enter ${label}`}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
@@ -321,7 +191,7 @@ export const renderFormControl = (field, options = {}) => {
         //密码输入框
         case 'password':
             return <Input.Password
-                placeholder={placeholder || `Enter ${label}`}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 iconRender={(visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                 allowClear
@@ -333,128 +203,74 @@ export const renderFormControl = (field, options = {}) => {
 
 
         case 'date':
-        case 'datepicker':
             // 合并样式，确保宽度设置不会被覆盖
             const datePickerStyle = {
                 width: '50%', // 百分比宽度
-                ...(fieldProps.style || {})
+                position: 'relative',
+                ...(field.style || {})
             };
 
-            // 复制一份 fieldProps，移除 style 属性避免覆盖
-            const datePickerProps = { ...fieldProps };
-            delete datePickerProps.style; // 避免 style 被覆盖
 
             // 配置弹出层样式，防止撑开容器
             const popupStyle = {
                 position: 'absolute',
                 zIndex: 1050,
             };
-
+            field.placeholder = field.placeholder || `Select ${field.label}`;
             return (
-                <div className={styles.datePickerWrapper}>
-                    <DatePicker
-                        placeholder={placeholder || `Select ${label}`}
-                        disabled={disabled}
-                        style={datePickerStyle}
-                        popupStyle={popupStyle}
-                        getPopupContainer={triggerNode => triggerNode.parentNode}
-                        {...datePickerProps}
-                    />
-                </div>
+                <DatePicker
+                    style={datePickerStyle}
+                    popupStyle={popupStyle}
+                    getPopupContainer={triggerNode => triggerNode.parentNode}
+                    {...field}
+                />
             );
 
         case 'dateRange':
-            // 获取字段属性，支持从item.props或fieldProps中获取
-            const dateRangeProps = {
-                ...(fieldProps || {}),
-                format: (field.props?.format || fieldProps.format || 'YYYY-MM-DD'),
-                placeholder: (field.props?.placeholder || fieldProps.placeholder || ['开始日期', '结束日期'])
+            const { keys = dateRangeKeys } = field;
+            const handleChange = (dates, dateStrings) => {
+                // 将日期字符串映射到keys中
+                const mapped = keys.reduce((acc, key, idx) => {
+                    acc[key] = dateStrings[idx];
+                    return acc;
+                }, {});
+                console.log(mapped);
+
             };
-
-            // 获取字段名配置，支持从props或顶层配置获取
-            const fieldNameConfig = field.props?.fieldNames || fieldProps.fieldNames;
-
-            // 检查是否为分离字段模式
-            const isSeparatedFields = fieldNameConfig && fieldNameConfig.start && fieldNameConfig.end;
-
-            // 添加禁用日期配置
-            if (field.props?.disabledDate || fieldProps.disabledDate) {
-                dateRangeProps.disabledDate = field.props?.disabledDate || fieldProps.disabledDate;
-            }
-
-            // 如果使用分离字段模式，我们需要在表单中隐式添加这些字段
-            if (isSeparatedFields && form) {
-                // 如果表单连接成功，确保这些字段已经在表单中注册
-                const startFieldName = fieldNameConfig.start;
-                const endFieldName = fieldNameConfig.end;
-
-                // 添加隐藏的表单项，用于提交值
-                const hiddenFields = (
-                    <>
-                        <Form.Item name={startFieldName} hidden noStyle className="editorform-item"></Form.Item>
-                        <Form.Item name={endFieldName} hidden noStyle className="editorform-item"></Form.Item>
-                    </>
-                );
-
-                // 直接将表单实例和字段名传递给组件
-                return (
-                    <div style={{ width: '100%', display: 'block' }}>
-                        {hiddenFields}
-                        <DateRangePickerField
-                            placeholder={dateRangeProps.placeholder}
-                            disabled={dateRangeProps.disabled}
-                            componentProps={{
-                                ...dateRangeProps,
-                                name: field.name // 传递原字段名
-                            }}
-                            fieldNames={fieldNameConfig} // 直接传递字段名配置
-                            form={form} // 直接传递表单实例
-                            onChange={(dates, dateStrings) => {
-                                // 处理onChange，确保更新表单字段
-                                if (!dates) {
-                                    // 清除日期
-                                    form.setFieldsValue({
-                                        [startFieldName]: null,
-                                        [endFieldName]: null,
-                                        [field.name]: null // 同时清除原字段
-                                    });
-                                } else {
-                                    // 设置日期 - 使用dateStrings而不是dates对象
-                                    form.setFieldsValue({
-                                        [startFieldName]: dateStrings[0],
-                                        [endFieldName]: dateStrings[1],
-                                        [field.name]: dateStrings // 存储格式化的字符串数组，而不是日期对象
-                                    });
-                                }
-
-                                // 调用原onChange
-                                if (dateRangeProps.onChange) {
-                                    dateRangeProps.onChange(dates, dateStrings);
-                                }
-                            }}
-                        />
-                    </div>
-                );
-            }
-
-            // 非分离模式，直接渲染单一字段
             return (
-                <div style={{ width: '100%', display: 'block' }}>
-                    <DatePicker.RangePicker
-                        style={{ width: '100%' }}
-                        disabled={disabled}
-                        {...dateRangeProps}
-                    />
-                </div>
+                <DatePicker.RangePicker
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    onChange={handleChange}
+                    style={{ width: '100%' }}
+                />
             );
-
         case 'switch':
-            return <SwitchField
-                field={field}
-            />;
+            field.checkedChildren = field.checkedChildren || 'Enabled';
+            field.unCheckedChildren = field.unCheckedChildren || 'Disabled';
+            field.defaultChecked = fieldValue === 1 || fieldValue === true;
+            console.log(fieldValue);
+
+            return (
+                <Switch
+                    defaultChecked={fieldValue === 1 || fieldValue === true}
+                    onChange={(checked) => {
+                        const newValue = checked ? 1 : 0;
+                        // 回传表单或状态更新逻辑
+                        form.setFieldValue(name, newValue);
+                    }}
+                    {...field}
+                />
+            )
         case 'select':
+            //选项处理使用统一的optins映射
+            const newField = JSON.parse(JSON.stringify(field));
+            if (field.options && typeof field.options === 'string') {
+                newField.options = optionsConstants[field.options];
+            }
             return <TagSelector
-                {...field}
+                {...newField}
+
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
@@ -467,6 +283,8 @@ export const renderFormControl = (field, options = {}) => {
                     }
                 }}
             />;
+
+
         // 文件上传并预览
         case 'upload':
             const {
@@ -478,17 +296,16 @@ export const renderFormControl = (field, options = {}) => {
                 uploadErrorMessage,
                 dirKey,
                 uploadFn,
-                previewWidth,
-                previewHeight,
+                style,
             } = field;
 
             // FileUpload 组件不需要在这里添加 Form.Item，因为 renderFormItem 已经创建了一个
             return (
                 <FileUpload
                     value={fieldValue}
-                    onChange={(value) => {
+                    onChange={(value, file) => {
                         if (field.onChange) {
-                            field.onChange(value);
+                            field.onChange(value, file, form);
                         }
                     }}
                     acceptedFileTypes={acceptedFileTypes}
@@ -499,21 +316,19 @@ export const renderFormControl = (field, options = {}) => {
                     uploadErrorMessage={uploadErrorMessage}
                     dirKey={dirKey}
                     uploadFn={uploadFn}
-                    previewWidth={previewWidth}
-                    previewHeight={previewHeight}
+                    style={style}
                     {...fieldProps}
                 />
             );
         //输入框组
         case 'inputGroup':
-            const { componentConfig } = field;
+            const { inputConfig } = field;
             return (
                 <Form.Item
                     label={label}
-
                 >
                     <div style={{ display: 'flex', gap: '0 40px', maxWidth: '100%', overflowX: 'auto' }}>
-                        {componentConfig.map((config, index) => {
+                        {inputConfig.map((config, index) => {
                             // 处理每个子项的验证规则
                             const itemRules = processValidationRules(config.rules || [], {
                                 required: config.required,
@@ -523,7 +338,7 @@ export const renderFormControl = (field, options = {}) => {
                             });
 
                             return (
-                                <div style={{ flex: 1, minWidth: config.previewWidth }} key={index}>
+                                <div style={{ flex: 1, minWidth: config.width || '100%' }} key={index}>
                                     <Form.Item
                                         className='editorform-item'
                                         name={config.name}
@@ -531,14 +346,7 @@ export const renderFormControl = (field, options = {}) => {
                                         required={config.required}
                                         rules={itemRules}
                                     >
-                                        {(control) => {
-                                            // 确保将Form.Item提供的控件属性传递给子组件
-                                            return renderFormControl(config, {
-                                                ...options,
-                                                onChange: control.onChange,
-                                                value: control.value
-                                            });
-                                        }}
+                                        {renderFormControl(config)}
                                     </Form.Item>
                                 </div>
                             );
@@ -548,15 +356,10 @@ export const renderFormControl = (field, options = {}) => {
             );
         //数字步进器
         case 'numberStepper':
-            const { min, max, step, formatter, props: numberStepperProps = {} } = field;
+
             return (
                 <NumberStepper
-                    min={min}
-                    max={max}
-                    step={step}
-                    formatter={formatter} // 格式化显示为 0:XX
-                    disabled={disabled}
-                    {...numberStepperProps}
+                    {...field}
                 />
             );
         case 'transfer':
@@ -601,7 +404,7 @@ export const renderFormControl = (field, options = {}) => {
 
         default:
             return <Input
-                placeholder={placeholder || `Enter ${label}`}
+                placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 {...fieldProps}
             />;
@@ -618,89 +421,123 @@ export const renderFormControl = (field, options = {}) => {
  */
 export const renderFormItem = (field, options = {}) => {
     const {
-        name,
+        name, // 字段的标识符
         label,
-        rules = [],
+        rules = [], // 字段的原始规则
         labelCol,
         wrapperCol,
         dependencies,
         shouldUpdate,
-        valuePropName,
+        valuePropName: initialValuePropName, // 用户指定的 valuePropName
         hidden,
         noStyle,
         className,
-        required
+        required // 字段级别的必填标记
     } = field;
 
     const { form, formConnected } = options;
 
-    // 处理必填规则
-    const finalRules = processValidationRules(rules, {
-        required,
-        label,
-        type: field.type,
-        requiredMessage: field.requiredMessage
-    });
-
-    // 特殊渲染情况处理
+    // 特殊渲染情况：当 shouldUpdate 为 true 时
+    // 这些情况通常自定义渲染逻辑，并且 Form.Item 的 name 属性不用于表单值收集
     if (shouldUpdate) {
         return (
             <Form.Item
-                key={name || `item-${Math.random()}`}
+                key={name || `item-${Math.random()}`} // key 仍然需要 name 或一个回退值
                 shouldUpdate={shouldUpdate}
-                className={`${className} editorform-item`}
+                className={`${className || ''} editorform-item`} // 确保 className 安全处理
                 hidden={hidden}
+            // 注意：原始代码中此场景下没有 noStyle，保持一致
             >
                 {() => field.render(formConnected ? form : null)}
             </Form.Item>
         );
     }
 
+    // 特殊渲染情况：当存在 dependencies 时
+    // 同上，这些情况的 Form.Item 的 name 属性不用于表单值收集
     if (dependencies) {
+        console.log(field, options);
+        const newField = JSON.parse(JSON.stringify(field));
+        delete newField.dependencies;
+
         return (
             <Form.Item
-                key={name || `item-${Math.random()}`}
+                noStyle
                 dependencies={dependencies}
-                noStyle={noStyle}
             >
-                {() => field.render(formConnected ? form : null)}
+                {({ getFieldValue }) => {
+                    // 1) 动态计算 content（可能是函数）
+                    const content = typeof field.content === 'function'
+                        ? field.content({ getFieldValue })
+                        : field.content;
+                    // 处理图片展示字段
+                    if (field.type === 'displayImage') {
+                        newField.content = content ? fileSettings.baseURL + content : null;
+                    }
+                    console.log(newField, options);
+
+                    // 渲染组件
+                    return content ? renderFormItem(newField, options) : null
+                }}
             </Form.Item>
         );
     }
 
-    // 根据字段类型确定 valuePropName
-    let finalValuePropName = valuePropName;
-    if (!finalValuePropName) {
-        if (field.type === 'switch') {
-            finalValuePropName = 'checked';
-        } else {
-            finalValuePropName = 'value';
-        }
-    }
+    // Form.Item 的通用基础属性 (不包含 key)
+    const formItemRestProps = {
+        label: label,
+        labelCol: labelCol,
+        wrapperCol: wrapperCol,
+        // 确保 className 的拼接是安全的，并处理 field.type 对 className 的影响
+        className: `${className || ''} ${field.type === 'inputGroup' ? '' : 'editorform-item'}`.trim(),
+        hidden: hidden,
+        noStyle: noStyle,
+    };
 
-    return (
-        <Form.Item
-            key={name}
-            name={name}
-            label={label}
-            rules={finalRules}
-            labelCol={labelCol}
-            wrapperCol={wrapperCol}
-            valuePropName={finalValuePropName}
-            className={`${className} ${field.type === 'inputGroup' ? '' : 'editorform-item'}`}
-            hidden={hidden}
-            noStyle={noStyle}
-        >
-            {(control) => {
-                // 将Form.Item提供的控件属性（包括onChange）传递给renderFormControl
-                return renderFormControl(field, {
-                    ...options,
-                    onChange: control.onChange,
-                    value: control.value
-                });
-            }}
-        </Form.Item>
-    );
+    // 判断是否为纯展示类型的字段
+    const isDisplayType = field.type === 'displayText' || field.type === 'displayImage';
+
+    if (isDisplayType) {
+        // 对于纯展示类型，Form.Item 仅用于布局
+        // 不应传递 name, rules, valuePropName，因为它们不参与表单控制
+        return (
+            <Form.Item key={name} {...formItemRestProps}> {/* key 直接传递, 其余 props 展开 */}
+                {renderFormControl(field, options)}
+            </Form.Item>
+        );
+    } else {
+        // 对于需要表单控制的输入/交互型字段
+
+        // 处理表单验证规则 (仅对非展示型字段有意义)
+        const finalRules = processValidationRules(rules, {
+            required,
+            label,
+            type: field.type,
+            requiredMessage: field.requiredMessage
+        });
+
+        // 根据字段类型确定 valuePropName (仅对非展示型字段有意义)
+        let finalValuePropName = initialValuePropName;
+        if (!finalValuePropName) {
+            if (field.type === 'switch') {
+                finalValuePropName = 'checked';
+            } else {
+                finalValuePropName = 'value'; // 默认为 'value'
+            }
+        }
+
+        return (
+            <Form.Item
+                key={name} // React key 直接传递
+                {...formItemRestProps} // 其余布局 props 展开
+                name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
+                rules={finalRules}
+                valuePropName={finalValuePropName}
+            >
+                {renderFormControl(field, options)}
+            </Form.Item>
+        );
+    }
 };
 
 /**

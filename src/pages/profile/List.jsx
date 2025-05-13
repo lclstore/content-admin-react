@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { PlusOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
@@ -22,6 +22,18 @@ export default function UserEditorWithCommon() {
     }
     // 表单字段配置
     const formFields = useMemo(() => [
+
+        {
+            type: 'upload',
+            name: 'profilePicture', // 遵循命名规范，使用Url后缀
+            label: 'Profile Picture',
+            // required: true,
+            // previewWidth: '96px',//预览宽度
+            previewHeight: '96px',//预览高度
+            // uploadFn: fileSettings.uploadFile,
+            acceptedFileTypes: 'jpg,png,jpeg',
+            maxFileSize: 2 * 1024,
+        },
         {
             type: 'input',
             name: 'appCode', // 遵循命名规范，使用驼峰命名
@@ -34,33 +46,51 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            type: 'upload',
-            name: 'appIcon', // 遵循命名规范，使用Url后缀
-            label: 'App Icon',
-            // required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
-            // uploadFn: fileSettings.uploadFile,
-            acceptedFileTypes: 'jpg,png,jpeg',
-            maxFileSize: 2 * 1024,
-        },
-        {
             type: 'input',
-            name: 'appleStoreName', // 遵循命名规范，使用驼峰命名
-            label: 'Apple Store Name',
+            name: 'emailAddress',
             maxLength: 100,
-            placeholder: 'Enter Apple Store Name',
+            label: 'Email Address',
+            required: true,
             rules: [
-                { max: 100, message: 'Name cannot exceed 100 characters' }
+                { required: true, message: 'Please input Email.' },
+                { max: 100, message: 'Email cannot exceed 100 characters' },
+                // 邮箱格式验证
+                {
+                    validator: async (_, value) => {
+                        if (value && !validateEmail(value)) {
+                            return Promise.reject('Email is not valid.');
+                        }
+                        return Promise.resolve();
+                    },
+                },
             ]
         },
+        {
+            type: 'password',
+            name: 'userPassword',
+            label: 'Password',
+            required: true,
+            rules: [
+                { required: true, message: 'Please input passowrd.' },
+                {
+                    validator: async (_, value) => {
+                        if (value && !validatePassword(value)) {
+                            return Promise.reject(
+                                'The password must contain letters (uppercase or lowercase) and numbers (0-9) and be 8-12 characters long.'
+                            );
+                        }
+                        return Promise.resolve();
+                    },
+                }
+            ]
+        }
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
     useEffect(() => {
         // 设置自定义页面标题
         setCustomPageTitle && setCustomPageTitle('User List');
-        console.log('setCustomPageTitle',setCustomPageTitle)
+        console.log('setCustomPageTitle', setCustomPageTitle)
 
         // 设置头部按钮
         setButtons([
@@ -140,7 +170,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'List' ,hideBackButton: true }}
+            config={{ formName: 'List', hideBackButton: true }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

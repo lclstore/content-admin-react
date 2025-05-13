@@ -1,13 +1,10 @@
-import React, { useState,useEffect,useContext, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { PlusOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
-import { HeaderContext } from '@/contexts/HeaderContext';
 import { validateEmail, validatePassword } from '@/utils';
 
 export default function UserEditorWithCommon() {
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
 
 
@@ -23,62 +20,71 @@ export default function UserEditorWithCommon() {
     // 表单字段配置
     const formFields = useMemo(() => [
         {
+            type: 'upload',
+            // required: true,
+            name: 'audioUrl', // 视频文件
+            label: 'Audio',
+            // maxFileSize: 1024 * 1024 * 10,
+
+            //文件上传后修改name
+            onChange: (value, file, form) => {
+                form.setFieldsValue({
+                    name: file?.name || '',
+                });
+            },
+            style: {
+                width: '290px',
+                height: '140px',
+            },
+            acceptedFileTypes: 'mp3',
+        },
+        {
             type: 'input',
-            name: 'appCode', // 遵循命名规范，使用驼峰命名
-            label: 'App Code',
+            name: 'name', // 遵循命名规范，使用驼峰命名
+            label: 'Name',
             maxLength: 100,
             required: true,
-            placeholder: 'Enter App Code',
+            placeholder: 'Enter user name',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
         },
         {
-            type: 'upload',
-            name: 'appIcon', // 遵循命名规范，使用Url后缀
-            label: 'App Icon',
-            // required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
-            // uploadFn: fileSettings.uploadFile,
-            acceptedFileTypes: 'jpg,png,jpeg',
-            maxFileSize: 2 * 1024,
+            type: 'switch',
+            name: 'hasAScript',
+            label: 'Has a Script',
         },
         {
             type: 'input',
-            name: 'appleStoreName', // 遵循命名规范，使用驼峰命名
-            label: 'Apple Store Name',
+            name: 'soundScript',
+            label: 'Sound Script',
+            required: true,
             maxLength: 100,
-            placeholder: 'Enter Apple Store Name',
+            showCount: true,
+            style: {
+                width: '300px',
+            },
+            dependencies: ['hasAScript'],           // 声明依赖
+            content: ({ getFieldValue }) => {      // content 支持函数
+                const layoutType = getFieldValue('hasAScript');
+                console.log('layoutType',layoutType)
+                return layoutType === 1
+                    ? true
+                    : false;
+            },
+        },
+        {
+            type: 'textarea',
+            name: 'script', // 遵循命名规范，使用驼峰命名
+            label: 'Script',
+            maxLength: 1000,
+            placeholder: 'Enter user name',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
         },
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
-
-    useEffect(() => {
-        // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('User List');
-        console.log('setCustomPageTitle',setCustomPageTitle)
-
-        // 设置头部按钮
-        setButtons([
-            {
-                key: 'create',
-                text: 'Create User',
-                icon: <PlusOutlined />,
-                type: 'primary',
-                onClick: () => navigate(`/users/editor`),
-            }
-        ]);
-
-        return () => {
-            // 组件卸载时清理
-            setButtons([]);
-            setCustomPageTitle && setCustomPageTitle(null);
-        };
-    }, [setButtons, setCustomPageTitle, navigate]);
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
@@ -140,7 +146,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'List' ,hideBackButton: true }}
+            config={{ formName: 'Sounds' }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

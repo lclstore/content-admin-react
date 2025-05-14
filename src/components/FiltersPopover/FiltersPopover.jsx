@@ -118,8 +118,6 @@ const FiltersPopover = ({
                     <div className={styles.filterSectionItem}>
                         <div className={styles.filterSectionTitle}>{section.title}</div>
                         <div className={styles.filterSection}>
-                            {console.log('section.options', section.options)}
-
                             {section.options.map(option => {
                                 // 支持新的options格式，每个选项可以是字符串或包含key和label的对象
                                 const optionKey = typeof option === 'object' ? option.key : option;

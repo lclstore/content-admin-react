@@ -38,7 +38,7 @@ export const menuIconMap = {
     users: UserOutlined,
     'profile-settings': SettingOutlined,
     login: LoginOutlined,
-    music: AudioOutlined
+    musics: AudioOutlined
 
 };
 

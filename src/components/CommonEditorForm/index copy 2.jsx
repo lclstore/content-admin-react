@@ -103,14 +103,13 @@ export default function CommonEditor(props) {
 
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
-        console.log(obj);
         fields.forEach(field => {
             if (field.type === 'date' || field.type === 'dateRange') {
-                obj[field.name] = obj[field.name] ? dayjs(obj[field.name]) : null;
+                obj[field.name] = dayjs(obj[field.name]);
                 if (field.type === 'dateRange') {
                     // 如果是日期范围，则将日期范围转换为dayjs数组
                     const { keys = dateRangeKeys } = field;
-                    obj[field.name] = [obj[keys[0]] ? dayjs(obj[keys[0]]) : null, obj[keys[1]] ? dayjs(obj[keys[1]]) : null];
+                    obj[field.name] = [dayjs(obj[keys[0]]), dayjs(obj[keys[1]])];
                 }
             }
         });

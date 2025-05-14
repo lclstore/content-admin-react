@@ -38,7 +38,7 @@ export default function UsersList() {
      * 导航到用户编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/users/editor?id=${record.id}`);
+        navigate(`/formTemplate/editor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -239,7 +239,7 @@ export default function UsersList() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/users/editor?id=${record.id}`);
+        navigate(`/formTemplate/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理
@@ -257,7 +257,7 @@ export default function UsersList() {
                 text: 'Create User',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate(`/users/editor`),
+                onClick: () => navigate(`/formTemplate/editor`),
             }
         ]);
 

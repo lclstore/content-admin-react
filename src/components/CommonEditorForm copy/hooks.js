@@ -2,7 +2,7 @@ import { Form, message } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import React from 'react';
-import { dateRangeKeys } from '@/constants/app';
+
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -50,7 +50,6 @@ export const useFormState = (initialValues = {}) => {
 
     // 监控表单实例挂载状态
     useEffect(() => {
-
         if (form && typeof form.getFieldsValue === 'function') {
             setFormConnected(true);
             mounted.current = true;
@@ -120,25 +119,21 @@ export const useHeaderConfig = (params) => {
                     return;
                 }
 
-
                 let dataToSave = { ...values };
 
                 // 处理dateRange类型字段 - 确保在分离字段模式下移除原始字段
                 fields.forEach(field => {
-                    if (field.type === 'dateRange') {
-                        debugger
-                        // 如果使用分离字段模式且字段名在值中，移除原始timeRange字段
-                        const fieldNameConfig = field.keys || dateRangeKeys;
-                        const date = form.getFieldValue(field.name);
-                        if (date && date.length === 2) {
-                            form.setFieldValue(fieldNameConfig[0], date[0]);
-                            form.setFieldValue(fieldNameConfig[1], date[1]);
-                        } else {
-                            form.setFieldValue(fieldNameConfig[0], null);
-                            form.setFieldValue(fieldNameConfig[1], null);
-                        }
-                        delete dataToSave[field.name];
+                    if (field.type === 'dateRange' && field.props?.fieldNames) {
+                        const fieldNameConfig = field.props.fieldNames;
 
+                        // 如果使用分离字段模式且字段名在值中，移除原始timeRange字段
+                        if (fieldNameConfig.start && fieldNameConfig.end &&
+                            dataToSave[fieldNameConfig.start] !== undefined &&
+                            dataToSave[fieldNameConfig.end] !== undefined &&
+                            dataToSave[field.name] !== undefined) {
+                            // 移除原始字段，仅保留分离字段值
+                            delete dataToSave[field.name];
+                        }
                     }
 
                     // 确保所有日期值都转换为字符串
@@ -179,7 +174,7 @@ export const useHeaderConfig = (params) => {
                 }
 
                 if (onSave) {
-                    const editId = id;
+                    const editId = id
                     const callbackUtils = {
                         setDirty: setIsFormDirty,
                         messageApi,
@@ -196,9 +191,6 @@ export const useHeaderConfig = (params) => {
                 }
             })
             .catch((error) => {
-
-                // 可选：滚动到第一个错误字段
-                form.scrollToField(error.errorFields[0].name);
                 messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
             });
     }, [
@@ -239,7 +231,6 @@ export const useHeaderConfig = (params) => {
         return [
             {
                 key: 'save',
-                hidden: config.hideSaveButton,
                 text: config.saveButtonText || 'Save',
                 icon: React.createElement(SaveOutlined),
                 type: 'primary',
@@ -249,7 +240,6 @@ export const useHeaderConfig = (params) => {
             },
             {
                 key: 'back',
-                hidden: config.hideBackButton,
                 text: config.backButtonText || 'Back',
                 icon: React.createElement(ArrowLeftOutlined),
                 onClick: handleBackClick,

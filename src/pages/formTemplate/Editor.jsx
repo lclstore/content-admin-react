@@ -11,7 +11,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        // layoutType: 1,
+        layoutType: 1,
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
         // // 为联动选择器设置默认值 - 使用数字类型
@@ -101,6 +101,7 @@ export default function UserEditorWithCommon() {
 
             //文件上传后修改name
             onChange: (value, file, form) => {
+                debugger
                 form.setFieldsValue({
                     name: file?.name || '',
                 });
@@ -125,7 +126,7 @@ export default function UserEditorWithCommon() {
                     label: 'warmName',
                     required: true,
                     maxLength: 100,
-                    previewWidth: '310px',
+                    width: '340px',
                     showCount: true,
                 },
                 {
@@ -165,10 +166,6 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'avatar', // 遵循命名规范，使用Url后缀
             label: 'Avatar',
-            // required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
-            // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },
@@ -187,7 +184,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'multiple',
-            disabled: true,
+            disabled: false,
             name: 'status2',
             label: 'Status2',
             options: 'status',
@@ -308,7 +305,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'User' }}
+            config={{ formName: 'User', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

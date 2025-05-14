@@ -1,212 +1,4 @@
-// 定义状态排序权重 (将被移除)
-export const statusOrder = { 'Enabled': 1, 'Draft': 2, 'Disabled': 3, 'Deprecated': 4 };
-
-// 定义难度排序权重
-export const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
-
-
-
-// 所有额外的 Workout 列表表格列 Key (用于列选择器)
-export const ALL_TABLE_COLUMN_KEYS = [
-    'detailImage',      // 详情页图片
-    'thumbnailImage',   // 缩略图
-    'completeImage',    // 完成页图片
-    'difficulty',       // 难度
-    'equipment',        // 器材
-    'position',         // 体位
-    'target',           // 目标部位
-    'exerciseNum',      // Exercise 数量
-    'newDate',          // 恢复旧的合并日期列 Key
-    'audioLang',        // 音频语言
-    'fileStatus',       // 文件状态
-];
-
-// 定义 器材(Equipment) 选项 (用于编辑器和筛选器)
-export const equipmentOptions = ['Dumbbell', 'Resistance band', 'None'];
-
-// 定义筛选器配置 (筛选模式在具体组件使用时指定)
-export const filterSections = [
-    {
-        title: 'Status',
-        key: 'status',
-        options: ['Draft', 'Enabled', 'Disabled'],
-    },
-    {
-        title: 'Difficulty',
-        key: 'difficulty',
-        options: ['Beginner', 'Intermediate', 'Advanced'],
-    },
-    {
-        title: 'Equipment',
-        key: 'equipment',
-        options: ['Dumbbells', 'Resistance band', 'None'],
-    },
-    // {
-    //     title: 'Function Type',
-    //     key: 'functionType',
-    //     options: ['Warm Up', 'Main', 'Cool Down'],
-    // },
-
-    {
-        title: 'Position',
-        key: 'position',
-        options: ['Standing', 'Lying', 'Seated', 'Prone', 'Kneeling'],
-    },
-    {
-        title: 'Target',
-        key: 'target',
-        options: ['Full Body', 'Arm', 'Back', 'Butt', 'Abs', 'Leg', 'Core'],
-    }
-];
-
-// --- 以下是从 WorkoutsEditor.jsx 移动并整理的数据 ---
-
-// 模拟 Workout 列表数据 (保持原名 mockWorkoutsForList，以防列表页直接使用)
-export const mockWorkoutsForList = [
-    {
-        id: 1,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        coverImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
-        status: 'enabled',
-        difficulty: 'Hard',
-        equipment: 'Dumbbells, Barbell',
-        position: 0,
-        target: 'Strength',
-        newStartTime: '2025-02-17 18:00:00',
-        newEndTime: '2025-07-06 18:00:00',
-        category: 'Strength',
-        duration: 3600,
-        calorie: 450,
-        Premium: true,
-        isSubscription: 0,
-        detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        exerciseNum: 12,
-        audioLang: null,
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
-    },
-    {
-        id: 2,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        coverImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting',
-        status: 'enabled',
-        difficulty: 'Hard',
-        equipment: 'Dumbbells, Barbell',
-        position: 0,
-        target: 'Strength',
-        newStartTime: '2025-02-27 18:00:00',
-        newEndTime: '2025-03-06 18:00:00',
-        category: 'Strength',
-        duration: 3600,
-        calorie: 450,
-        isSubscription: 0,
-        detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        exerciseNum: 12,
-        audioLang: null,
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
-    },
-    {
-        id: 3,
-        image: "/cms/music/audio/c235093a365340f0ad7bfb817a128e68.mp3?alt=media&name=975e862596b94fc5b21955c6d85a80b7.mp3",
-        type: 'image',
-        coverImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Yoga Session',
-        status: 1,
-        difficulty: 'Easy',
-        equipment: 'Yoga Mat',
-        position: 1,
-        target: 'Flexibility',
-        newStartTime: '2025-07-28 08:00:00',
-        newEndTime: '2025-08-04 08:00:00',
-        category: 'Yoga',
-        duration: 2700,
-        calorie: 200,
-        isSubscription: 1,
-        detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        exerciseNum: 15,
-        audioLang: 'en-US',
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
-    },
-    {
-        id: 44,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        coverImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Cycling',
-        status: 0,
-        difficulty: 'Medium',
-        equipment: 'Bicycle, Helmet',
-        position: 2,
-        target: 'Cardio, Endurance',
-        newStartTime: '2025-07-29 17:00:00',
-        newEndTime: '2025-08-05 17:00:00',
-        category: 'Cardio',
-        duration: 5400,
-        calorie: 600,
-        isSubscription: 0,
-        detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        exerciseNum: 1,
-        audioLang: 'zh-CN',
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
-    },
-    {
-        id: 5,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        coverImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'HIIT Workout',
-        status: 1,
-        difficulty: 'Hard',
-        equipment: 'None',
-        position: 0,
-        target: 'Fat Loss, Fitness',
-        newStartTime: '2025-07-30 12:00:00',
-        newEndTime: '2025-08-06 12:00:00',
-        category: 'HIIT',
-        duration: 1800,
-        calorie: 350,
-        isSubscription: 0,
-        detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        completeImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        exerciseNum: 10,
-        audioLang: 'en-US',
-        fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
-    },
-];
-
-
-// 新 Workout 的初始数据结构
-export const initialWorkoutData = {
-    id: null,
-    name: '',
-    status: 0, // 新 Workout 的默认状态: 'Draft' -> 0
-    difficulty: 'Medium',
-    equipment: '',
-    position: 0, // 默认体位: Standing -> 0
-    target: '',
-    image: null, // Workout 的封面图，与结构(Structure)中的 Exercise 图片不同
-    newStartTime: null, // 新增开始时间
-    newEndTime: null, // 新增结束时间
-    structure: [], // 结构数组，初始为空
-    videoPreferences: {}, // 视频偏好设置，初始为空对象
-    musicLinks: [], // 音乐链接数组，初始为空
-};
-
-// 用于编辑器"结构(Structure)"部分的模拟 Exercise 数据
-// 注意：此数据也可能用于内容库 (Content Library)
-export const mockEditorStructureData = [
+export const commonListData = [
     {
         "id": 1896,
         "combination": "Normal",
@@ -230,7 +22,7 @@ export const mockEditorStructureData = [
         "star": null,
         "specialNeed": "",
         "remark": "",
-        "status": 'Enabled',
+        "status": 1,
         "createTime": "2023-09-14 11:09:18",
         "animationPhoneUrl": "https://hhcontent.s3.eu-central-1.amazonaws.com/t/63eb70af702b9300128171bb/u/63eb7057702b93001281719d/e/66903b25f042440012b67170/poster_a_720p.jpg",
         "difficulty": "Advanced",
@@ -674,15 +466,37 @@ export const mockEditorStructureData = [
     }
 ];
 
-export const BATCH_FILE_OPTIONS = [
-    { label: 'Video-M3U8 (生成M3U8视频文件)', value: 'Video-M3U8' },
-    { label: 'Audio-JSON (生成JSON音频文件)', value: 'Audio-JSON' },
-];
+// 定义筛选器配置 (筛选模式在具体组件使用时指定)
+export const filterSections = [
+    {
+        title: 'Status',
+        key: 'status',
+        options: ['Draft', 'Enabled', 'Disabled'],
+    },
+    {
+        title: 'Difficulty',
+        key: 'difficulty',
+        options: ['Beginner', 'Intermediate', 'Advanced'],
+    },
+    {
+        title: 'Equipment',
+        key: 'equipment',
+        options: ['Dumbbells', 'Resistance band', 'None'],
+    },
+    // {
+    //     title: 'Function Type',
+    //     key: 'functionType',
+    //     options: ['Warm Up', 'Main', 'Cool Down'],
+    // },
 
-// Mock language options (replace with actual API call later)
-export const MOCK_LANG_OPTIONS = [
-    { label: 'EN', value: 'EN' },
-    { label: 'ES', value: 'ES' },
-    { label: 'FR', value: 'FR' },
-    { label: 'DE', value: 'DE' },
-]; 
+    {
+        title: 'Position',
+        key: 'position',
+        options: ['Standing', 'Lying', 'Seated', 'Prone', 'Kneeling'],
+    },
+    {
+        title: 'Target',
+        key: 'target',
+        options: ['Full Body', 'Arm', 'Back', 'Butt', 'Abs', 'Leg', 'Core'],
+    }
+];

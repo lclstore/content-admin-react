@@ -139,14 +139,10 @@
 
 /* 折叠面板组件样式 */
 .workout-details-collapse {
-    background-color: #fff;
     border: none;
 }
 
-.workout-details-collapse .ant-collapse-item {
-    border-bottom: 1px solid #f0f0f0 !important;
-    /* 使用 !important 需谨慎 */
-}
+
 
 .workout-details-collapse .ant-collapse-item:last-child {
     border-bottom: none !important;

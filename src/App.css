@@ -462,3 +462,8 @@
 .ant-tabs>div>.ant-tabs-nav .ant-tabs-nav-wrap {
   padding: 0 20px;
 }
+
+/* switch开关 */
+.ant-switch.ant-switch-disabled {
+  opacity: 0.85;
+}

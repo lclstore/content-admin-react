@@ -1,5 +1,6 @@
-/* 通用容器样式 */
+/* 容器样式 */
 .commonEditorContainer {
+    padding: 24px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -13,6 +14,28 @@
     width: 100%;
     height: 100%;
 }
+
+/* 基础编辑器表单 */
+.basicEditorForm {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 765px;
+    padding: 24px;
+    flex-grow: 1;
+}
+
+/* 高级编辑器表单 */
+.advancedEditorForm {
+    padding: 16px;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    flex-grow: 1;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
 
 /* 加载状态容器 */
 .loadingContainer {
@@ -601,22 +624,6 @@
     padding-right: 16px;
 }
 
-/* 基础编辑器表单 */
-.basicEditorForm {
-    margin: 0 auto;
-    width: 100%;
-    max-width: 765px;
-    padding: 24px;
-    flex-grow: 1;
-}
-
-/* 高级编辑器表单 */
-.advancedEditorForm {
-    flex-grow: 1;
-    height: 100%;
-    overflow-y: auto;
-    padding: 24px;
-}
 
 /* 带侧边栏的高级编辑器表单 */
 .withSidebar {

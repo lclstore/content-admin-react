@@ -10,7 +10,10 @@
 /* 折叠面板整体样式 */
 .workoutDetailsCollapse {
     border: none;
-    background-color: #fff;
+}
+
+.workoutDetailsCollapse:global(.ant-collapse>.ant-collapse-item .ant-collapse-header) {
+    border-radius: 14px !important;
 }
 
 /* 折叠面板项样式 */
@@ -21,7 +24,7 @@
 
 /* 激活的折叠面板标题样式 */
 .workoutDetailsCollapse :global(.ant-collapse-item.ant-collapse-item-active) :global(.ant-collapse-header) {
-    border-radius: 8px 8px 0 0;
+    border-radius: 16px 16px 0 0 !important;
     border-color: var(--active-color, #11cc88);
     border-width: 1px;
     border-style: solid;

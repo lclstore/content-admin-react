@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
     Input,
     DatePicker,
@@ -56,67 +56,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
 };
 
 
-/**
- * 穿梭框控件组件
- * 用于多选项的双向选择
- */
-const TransferField = React.memo(({ field, disabled, value, onChange }) => {
-    // 值变化处理函数
-    const handleChange = useCallback((newTargetKeys) => {
-        // 直接调用从 Form.Item 注入的 onChange
-        if (onChange) {
-            onChange(newTargetKeys);
-        }
 
-        // 触发自定义onChange
-        if (field.onChange) {
-            field.onChange(newTargetKeys);
-        }
-    }, [field, onChange]);
-
-    // 使用传入的 value 作为 targetKeys
-    const targetKeys = value || [];
-
-    // 安全提取数据源
-    const dataSource = field.dataSource || [];
-    const titles = field.titles || ['来源', '目标'];
-    const render = field.render || (item => item.title);
-    const showSearch = field.showSearch !== false;
-    const filterOption = field.filterOption || ((inputValue, item) =>
-        item.title.indexOf(inputValue) !== -1);
-    const locale = field.locale || {
-        itemUnit: '项',
-        itemsUnit: '项',
-        searchPlaceholder: '在这里搜索',
-        notFoundContent: '无数据'
-    };
-
-    // 安全提取props
-    const transferProps = {};
-    if (field.props) {
-        Object.keys(field.props).forEach(key => {
-            const propValue = field.props[key];
-            if (propValue === null || typeof propValue !== 'object') {
-                transferProps[key] = propValue;
-            }
-        });
-    }
-
-    return (
-        <Transfer
-            dataSource={dataSource}
-            titles={titles}
-            targetKeys={targetKeys}
-            onChange={handleChange}
-            render={render}
-            disabled={disabled}
-            showSearch={showSearch}
-            filterOption={filterOption}
-            locale={locale}
-            {...transferProps}
-        />
-    );
-});
 
 // ==========================
 // 字段渲染逻辑
@@ -237,13 +177,17 @@ export const renderFormControl = (field, options = {}) => {
             );
 
         case 'dateRange':
+            console.log(initialValues);
+
             const { keys = dateRangeKeys } = field;
             const handleChange = (dates, dateStrings) => {
                 // 将日期字符串映射到keys中
-                const mapped = keys.reduce((acc, key, idx) => {
-                    acc[key] = dateStrings[idx];
-                    return acc;
-                }, {});
+                // keys.forEach((key, idx) => {
+                //     form.setFieldValue(key, dateStrings[idx]);
+                // });
+                if (field.onChange) {
+                    field.onChange(dates, dateStrings);
+                }
             };
             return (
                 <DatePicker.RangePicker
@@ -256,7 +200,10 @@ export const renderFormControl = (field, options = {}) => {
         case 'switch':
             field.checkedChildren = field.checkedChildren || 'Enabled';
             field.unCheckedChildren = field.unCheckedChildren || 'Disabled';
-            field.defaultChecked = fieldValue === 1 || fieldValue === true;
+            // 确保初始值为0或1
+            useEffect(() => {
+                form.setFieldValue(name, fieldValue === 1 || fieldValue === true ? 1 : 0);
+            }, []);
 
             // 提取key属性，确保不会传递给Switch组件
             const { key: switchKey, ...switchRest } = field;
@@ -264,7 +211,7 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Switch
                     key={switchKey}
-                    defaultChecked={fieldValue === 1 || fieldValue === true}
+                    defaultChecked={field.defaultChecked || false}
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑
@@ -298,7 +245,6 @@ export const renderFormControl = (field, options = {}) => {
                     }
                 }}
             />;
-
 
         // 文件上传并预览
         case 'upload':
@@ -385,52 +331,6 @@ export const renderFormControl = (field, options = {}) => {
                     {...stepperRest}
                 />
             );
-        case 'transfer':
-            // 优化TransferField调用，提取关键属性
-            const transferProps = {
-                dataSource: field.dataSource || [],
-                titles: field.titles || ['来源', '目标'],
-                render: field.render,
-                showSearch: field.showSearch,
-                filterOption: field.filterOption,
-                locale: field.locale,
-                onChange: field.onChange,
-                props: {}
-            };
-
-            // 安全提取props
-            if (field.props) {
-                Object.keys(field.props).forEach(key => {
-                    const propValue = field.props[key];
-                    if (propValue === null || typeof propValue !== 'object') {
-                        transferProps.props[key] = propValue;
-                    }
-                });
-            }
-
-            return <TransferField
-                field={transferProps}
-                disabled={disabled}
-            />;
-
-        case 'rangeTime':
-            return (
-                <div style={{ width: '100%', display: 'block' }}>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <TimePicker.RangePicker
-                            style={{ width: '100%' }}
-                            className='c-editorform-timepicker'
-                        />
-                    </div>
-                </div>
-            );
-
-        default:
-            return <Input
-                placeholder={placeholder || `Enter ${label || name}`}
-                disabled={disabled}
-                {...field.props}
-            />;
     }
 };
 

@@ -11,7 +11,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        // layoutType: 1,
+        layoutType: 1,
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
         // // 为联动选择器设置默认值 - 使用数字类型
@@ -184,7 +184,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'multiple',
-            disabled: true,
+            disabled: false,
             name: 'status2',
             label: 'Status2',
             options: 'status',

@@ -102,7 +102,7 @@ export default function UserEditorWithCommon() {
                     showCount: true,
                 },
                 {
-                    type: 'textarea ',
+                    type: 'textarea',
                     name: 'description',
                     label: 'Description',
                     required: true,
@@ -120,7 +120,8 @@ export default function UserEditorWithCommon() {
                     type: 'switch',
                     name: 'premium',
                     label: 'Premium',
-                    required: true,
+                    defaultChecked: 0,
+
                 }
             ]
         },

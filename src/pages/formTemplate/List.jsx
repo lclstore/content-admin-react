@@ -257,7 +257,7 @@ export default function UsersList() {
                 text: 'Create User',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate(`/users/editor`),
+                onClick: () => navigate(`/formTemplate/editor`),
             }
         ]);
 

@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { Children, useMemo } from 'react';
 import { Collapse, Form } from 'antd';
+import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
 import styles from './CollapseForm.module.css';
 
@@ -30,19 +31,6 @@ const CollapseForm = ({
     // 渲染单个表单字段
     const renderField = (field) => {
         // 针对字段中声明的校验规则进行处理
-        const rules = field.rules || [];
-
-        // 构建表单项属性 - 不包含key
-        const formItemProps = {
-            name: field.name,
-            label: field.label,
-            rules: rules,
-            labelCol: field.labelCol,
-            wrapperCol: field.wrapperCol,
-            className: `${styles.formItem} ${field.className || ''}`,
-            hidden: field.hidden,
-            valuePropName: field.type === 'switch' ? 'checked' : 'value',
-        };
         // 处理每个子项的验证规则
         const itemRules = processValidationRules(field.rules || [], {
             required: field.required,
@@ -53,10 +41,15 @@ const CollapseForm = ({
 
         // 渲染表单项 - key直接作为属性传递
         return (
-            <Form.Item name={field.name}
-                label={field.label}
+            <Form.Item
+                name={field.name}
+                rules={itemRules}
+                className={styles.formItem}
                 required={field.required}
-                rules={itemRules} >
+                key={field.name}
+                label={field.label}
+
+            >
                 {renderFormControl(field, {
                     form,
                     formConnected,
@@ -80,9 +73,7 @@ const CollapseForm = ({
     const renderFieldGroup = (fieldGroup) => {
         // 确保每个field都有name作为key，如果没有name则使用索引
         return fieldGroup.map((field, index) => {
-            // 使用field.name作为key，如果没有name属性则使用索引
-            const key = field.name || `field-${index}`;
-            return renderField({ ...field, key });
+            return renderField({ ...field });
         });
     };
 
@@ -117,6 +108,8 @@ const CollapseForm = ({
     return (
         <div className={styles.collapseForm}>
             <Collapse
+                expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
+                destroyInactivePanel={false}
                 accordion={true} // 设置为手风琴模式，只允许同时打开一个面板
                 activeKey={activeKey} // 手风琴模式下使用单个值
                 onChange={onCollapseChange} // 父组件处理change事件

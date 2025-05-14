@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Collapse, Button, Card, Space, Spin } from 'antd';
+import { Form, Button, Card, Space, Spin } from 'antd';
 import {
     PlusOutlined,
     DeleteOutlined,
@@ -41,10 +41,16 @@ export default function CommonEditor(props) {
         validate,
         commonListConfig = {},
         complexConfig = {}, // 高级表单特定配置
-        collapseFormConfig = {} // 折叠表单配置
-    } = props;
-    console.log('collapseFormConfig');
+        collapseFormConfig = {
 
+        } // 折叠表单配置
+    } = props;
+    if (!collapseFormConfig.setActiveKey) {
+        collapseFormConfig.setActiveKey = (key) => {
+
+            setActiveCollapseKeys(key ? [key] : []);
+        }
+    }
     // 路由相关的钩子
     const navigate = useNavigate();
     const location = useLocation();
@@ -94,6 +100,8 @@ export default function CommonEditor(props) {
         fields,
         formType,
         complexConfig,
+        collapseFormConfig,
+        commonListConfig,
         structurePanels,
         headerContext,
         setIsFormDirty,
@@ -357,10 +365,10 @@ export default function CommonEditor(props) {
                                 isCollapse={collapseFormConfig.isCollapse !== false}
                             />
                         )}
-
                         {/* 如果配置了结构面板，则渲染结构面板 */}
                         {complexConfig.includeStructurePanels && renderStructurePanels()}
                     </Form>
+
                 </div>
             </div>
         );

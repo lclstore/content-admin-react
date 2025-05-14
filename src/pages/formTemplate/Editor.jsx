@@ -101,9 +101,10 @@ export default function UserEditorWithCommon() {
 
             //文件上传后修改name
             onChange: (value, file, form) => {
-                debugger
                 form.setFieldsValue({
+                    avatar: value || '',
                     name: file?.name || '',
+                    email: file?.name || '',
                 });
                 console.log(file, form);
             },
@@ -111,7 +112,7 @@ export default function UserEditorWithCommon() {
                 width: '290px',
                 height: '140px',
             },
-            acceptedFileTypes: 'mp4,mp3,webm,ts',
+            acceptedFileTypes: 'mp4,mp3,webm,ts,jpg,png,jpeg',
         },
 
         {

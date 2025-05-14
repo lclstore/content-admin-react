@@ -27,6 +27,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
+        name: 'hhs',
     }
     const mockUsers = [];
 
@@ -70,7 +71,16 @@ export default function UserEditorWithCommon() {
         // 保存成功后立即跳转回列表页
         navigate(-1);
     };
+    const imageUpload = (value, file, form) => {
+        const formValues = form.getFieldsValue();
+        form.setFieldsValue({
+            coverImage: formValues.coverImage || value,
+            detailImage: formValues.detailImage || value,
+            thumbnailImage: formValues.thumbnailImage || value,
+            completeImage: formValues.completeImage || value,
+        });
 
+    }
     //请求列数据方法
     const initFormData = (id) => {
         return new Promise((resolve) => {
@@ -114,7 +124,7 @@ export default function UserEditorWithCommon() {
                     name: 'timeRange',
                     label: 'New Date',
                     keys: ['startTime', 'endTime'],
-                    required: true,
+                    required: false,
                 },
                 {
                     type: 'switch',
@@ -135,24 +145,28 @@ export default function UserEditorWithCommon() {
                     name: 'coverImage',
                     label: 'Cover Image',
                     required: true,
+                    onChange: imageUpload
                 },
                 {
                     type: 'upload',
                     name: 'detailImage',
                     label: 'Detail Image',
                     required: true,
+                    onChange: imageUpload
                 },
                 {
                     type: 'upload',
                     name: 'thumbnailImage',
                     label: 'Thumbnail Image',
                     required: true,
+                    onChange: imageUpload
                 },
                 {
                     type: 'upload',
                     name: 'completeImage',
                     label: 'Complete Image',
                     required: true,
+                    onChange: imageUpload
                 },
 
             ]
@@ -228,7 +242,6 @@ export default function UserEditorWithCommon() {
                     formatter: (value) => `0:${String(value).padStart(2, '0')}`, // 格式化显示为 0:XX
                     name: 'introDuration', // 修改字段名避免重复
                     label: 'Intro Duration',
-                    required: true,
 
                 },
                 {
@@ -239,7 +252,6 @@ export default function UserEditorWithCommon() {
                     formatter: (value) => `0:${String(value).padStart(2, '0')}`, // 格式化显示为 0:XX
                     name: 'exercisePreviewDuration', // 修改字段名避免重复
                     label: 'Exercise Preview Duration',
-                    required: true,
                 },
                 {
                     type: 'numberStepper',
@@ -249,7 +261,6 @@ export default function UserEditorWithCommon() {
                     formatter: (value) => `0:${String(value).padStart(2, '0')}`, // 格式化显示为 0:XX
                     name: 'exerciseExecutionDuration', // 修改字段名避免重复
                     label: 'Exercise Execution Duration',
-                    required: true,
                 }
             ]
         },

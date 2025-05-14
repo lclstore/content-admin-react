@@ -47,6 +47,7 @@
 .workoutDetailsCollapse :global(.ant-collapse-item) :global(.ant-collapse-content) {
     border: none;
     border-radius: 0 0 8px 8px;
+    overflow: hidden;
 }
 
 /* 激活的折叠面板内容样式 */

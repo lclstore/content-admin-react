@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table, Switch,Space,Button } from 'antd';
+import { Modal, message, Form, Table, Switch, Space, Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -8,6 +8,7 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
+import { statusIconMap, optionsConstants } from '@/constants';
 // import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
@@ -69,7 +70,7 @@ export default function Temlates() {
      * 导航到训练计划编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/plans/temolatesEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -77,7 +78,7 @@ export default function Temlates() {
      * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
      */
     const handleDuplicate = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/plans/temolatesEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -164,8 +165,11 @@ export default function Temlates() {
                 }
             },
             {
-                title: 'Status', dataIndex: 'status', key: 'status',
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                iconOptions: statusIconMap,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
@@ -176,7 +180,7 @@ export default function Temlates() {
                 width: 120,
                 visibleColumn: 0
             },
-            { title: 'Workout Num',  dataIndex: 'workoutNum', key: 'workoutNum', width: 350, visibleColumn: 1 },
+            { title: 'Workout Num', dataIndex: 'workoutNum', key: 'workoutNum', width: 350, visibleColumn: 1 },
 
             {
                 title: 'Actions',
@@ -324,7 +328,7 @@ export default function Temlates() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/plans/temolatesEditor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     /**
@@ -384,7 +388,7 @@ export default function Temlates() {
                 text: 'Create Workout',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/workouts/editor'),
+                onClick: () => navigate('/plans/temolatesEditor'),
             }
         ]);
 

@@ -140,7 +140,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'List' ,hideBackButton: true }}
+            config={{ formName: 'Info' ,hideBackButton: true}}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

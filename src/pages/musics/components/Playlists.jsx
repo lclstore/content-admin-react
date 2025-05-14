@@ -69,7 +69,7 @@ export default function Playlists() {
      * 导航到训练计划编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/musics/playlistsEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -77,7 +77,7 @@ export default function Playlists() {
      * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
      */
     const handleDuplicate = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/musics/playlistsEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -314,7 +314,7 @@ export default function Playlists() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/musics/playlistsEditor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     /**
@@ -371,10 +371,10 @@ export default function Playlists() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
+                text: 'Create Playlists',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/workouts/editor'),
+                onClick: () => navigate('/musics/playlistsEditor'),
             }
         ]);
 

@@ -13,7 +13,7 @@ const items = [
     },
     {
         key: '2',
-        label: 'Categories',
+        label: 'Playlists',
         children: <Playlists />,
     }
 ];

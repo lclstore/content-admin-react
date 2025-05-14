@@ -267,7 +267,7 @@ export default () => {
                 text: 'Create',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate(`/users/editor`),
+                onClick: () => navigate(`/exercises/editor`),
             }
         ]);
 

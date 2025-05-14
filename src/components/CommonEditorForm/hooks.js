@@ -185,7 +185,7 @@ export const useHeaderConfig = (params) => {
 
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
-        if (!form) return;
+        if (!formConnected) return;
 
         form.validateFields()
             .then(values => {

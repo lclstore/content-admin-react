@@ -57,7 +57,7 @@ export const mockWorkoutsForList = [
         image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         audio: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
-        status: 'Disabled',
+        status: 1,
         generateStatus: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',
@@ -681,4 +681,68 @@ export const MOCK_LANG_OPTIONS = [
     { label: 'ES', value: 'ES' },
     { label: 'FR', value: 'FR' },
     { label: 'DE', value: 'DE' },
-]; 
+];  
+export const mockUsers = [
+    {
+        id: 1,
+        name: 'John Smith',
+        email: 'john.smith@example.com',
+        avatar: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
+        createUser: 'Admin',
+        createTime: '2024-01-15 10:00:00',
+        status: 2, // 'enable' -> 1
+        status1: 1,
+        birthday: '1990-01-15',
+        startDate: '2024-05-01',
+        endDate: '2024-12-31'
+    },
+    {
+        id: 2,
+        name: 'Emma Wilson',
+        email: 'emma.wilson@example.com',
+        avatar: '',  // 空头像测试
+        createUser: 'Admin',
+        createTime: '2024-01-16 14:30:00',
+        status: 1, // 'enable' -> 1
+        birthday: '1992-03-22',
+        startDate: '2024-06-15',
+        endDate: '2025-06-14'
+    },
+    {
+        id: 3,
+        name: 'Michael Brown',
+        email: 'michael.brown@example.com',
+        avatar: null,  // 空头像测试
+        createUser: 'Manager',
+        createTime: '2024-01-17 09:15:00',
+        status: 0, // 'disable' -> 0
+        birthday: '1985-11-08',
+        startDate: '2024-01-01',
+        endDate: '2024-12-31'
+    },
+    {
+        id: 4,
+        name: 'Sarah Davis',
+        displayImage: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
+        email: 'sarah.davis@example.com',
+        avatar: 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png',
+        createUser: 'Manager',
+        createTime: '2024-02-18 16:45:00',
+        birthday: "2001-05-13",
+        status: 1,
+        status1: 'Enabled1',
+        status221: 1,
+        status2: [1, 2],
+        startDate: '2024-07-25',
+        endDate: '2025-09-25',
+        contentStyle: 'style2',
+        layoutType: 2,
+        layoutTypeText: 'saasdadas',
+        soundScript: 'soundScript饿饿饿饿',
+        name23: 'textareaxx soundScript饿饿饿饿 soundScript饿饿饿饿 s  soundScript饿饿饿饿soundScript饿饿饿饿soundScript饿饿饿饿soundScript饿饿饿饿 oundScript饿饿饿饿 soundScript饿饿饿饿 xxx',
+        warmNumber: 30,
+        warmCycles: 4,
+        warmName: 'warmName',
+        userPassword: '1sdf23456',
+    }
+];

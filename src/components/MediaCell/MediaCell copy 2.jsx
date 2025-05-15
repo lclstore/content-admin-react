@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Image, Modal } from 'antd';
 import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
-import styles from './MediaCell.module.css'; // 导入 CSS Modules
+import styles from './MediaCell.module.less'; // 导入 CSS Modules
 // MediaType[] = ['video', 'audio', 'image'];
 // 全局状态标记，用于跟踪是否有图片预览处于激活状态
 // 这样其他组件可以检查这个标记来避免处理点击事件

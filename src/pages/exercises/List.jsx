@@ -3,10 +3,9 @@ import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusOrder, filterSections,listData } from './Data';
-
+import request from "@/request";
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
@@ -158,7 +157,6 @@ export default () => {
                 title: 'Actions',
                 key: 'actions',
                 fixed: 'right',
-                width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
                 actionButtons: ['enable', 'disable','edit','duplicate'],
@@ -252,6 +250,19 @@ export default () => {
         navigate(`/users/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url:"/sound/page",
+                load:true,
+                callback(res){
+                    console.log(res)
+                    resolve()
+                }
+            })
+        })
+    },[])
     // 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮
@@ -259,7 +270,6 @@ export default () => {
     useEffect(() => {
         // 设置自定义页面标题
         setCustomPageTitle && setCustomPageTitle('Exercise List');
-
         // 设置头部按钮
         setButtons([
             {
@@ -282,6 +292,7 @@ export default () => {
      * 重置操作标志
      */
     useEffect(() => {
+        getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);

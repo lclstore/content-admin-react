@@ -474,7 +474,6 @@ export const renderFormItem = (field, options = {}) => {
                     if (field.type === 'displayImage') {
                         newField.content = content ? fileSettings.baseURL + content : null;
                     }
-                    console.log(newField, options);
 
                     // 渲染组件
                     return content ? renderFormItem(newField, options) : null

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, Fragment } from 'react';
-import { Collapse, Form, Button, Typography } from 'antd';
+import React, { useEffect, useMemo, Fragment, useState } from 'react';
+import { Collapse, Form, Button, Typography, notification } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
@@ -15,6 +15,9 @@ import styles from './CollapseForm.module.css';
  * @param {Array} props.activeKeys 当前激活的面板keys
  * @param {Function} props.onCollapseChange 折叠面板变化回调
  * @param {Object} props.selectedItemFromList 左侧列表添加item
+ * @param {Function} props.setActiveKeys 设置激活面板的函数
+ * @param {boolean} props.isCollapse 是否可折叠
+ * @param {Function} props.handleAddCustomPanel 添加自定义面板的回调函数
  */
 const CollapseForm = ({
     fields = [],
@@ -24,8 +27,11 @@ const CollapseForm = ({
     activeKeys = [],
     onCollapseChange,
     setActiveKeys,
-    isCollapse = true
+    isCollapse = true,
+    handleAddCustomPanel
 }) => {
+    const newField = fields.find(item => item.isShowAdd);
+    const [dataList, setDataList] = useState([newField]);//datalist
     // 表单连接状态
     const formConnected = !!form;
     // 挂载状态引用
@@ -87,45 +93,36 @@ const CollapseForm = ({
     if (!fields || fields.length === 0) {
         return null;
     }
-    console.log(122);
 
 
     // 添加新的collapse面板的回调函数
     const onAddCollapsePanel = () => {
-        // 1. 创建新面板的数据结构
-        const newPanelName = `custom-structure-${Date.now()}`; // 生成一个唯一的名称/key
+        // 先确保当前的 newField 是活动的
+        onCollapseChange(newField.name);
+
+        // 创建新面板的数据结构
+        const newPanelName = `${newField.name}${dataList.length}`; // 生成一个唯一的名称/key
         const newCustomPanel = {
+            ...newField,
             name: newPanelName,
-            label: '新的自定义结构', // 新面板的默认标题
-            icon: <PlusOutlined />, // 示例图标，你可以根据需要替换
-            isCustom: true,         // 标记为自定义类型，与 item.isCustom 的面板类似
-            fields: []              // 新面板初始时内部字段为空
+            isShowAdd: false,
         };
 
-        // 2. 【重要】调用父组件传递的回调函数来添加新面板
-        // CollapseForm 组件不能直接修改 'fields' prop。
-        // 父组件需要提供一个函数 (例如 props.handleAddCustomPanel) 来处理 'fields' 状态的更新。
-        //
-        // 示例调用方式 (假设父组件传递了 handleAddCustomPanel prop):
-        // if (props.handleAddCustomPanel) {
-        //     props.handleAddCustomPanel(newCustomPanel);
-        //     // 父组件在更新 fields 数组后，也应该负责更新 activeKeys 来自动展开这个新面板。
-        //     // 例如，父组件可以调用 setActiveKeys([...currentActiveKeys, newPanelName]);
-        //     // 或者，如果 activeKeys 由父组件完全控制，父组件应在其状态中添加 newPanelName。
-        // } else {
-        //     console.warn("CollapseForm: 'handleAddCustomPanel' prop is missing. Cannot add new panel dynamically.");
-        //     alert("添加新面板的功能需要在父组件中通过 prop (例如 handleAddCustomPanel) 实现。");
-        // }
+        // 调用父组件传递的回调函数来添加新面板
+        if (handleAddCustomPanel) {
+            // 添加面板到父组件的 formFields
+            handleAddCustomPanel(newCustomPanel);
 
-        // 由于我们无法在此处直接调用父组件的 prop，以下代码仅为演示和提示：
-        console.log("请求父组件添加新的自定义面板:", newCustomPanel);
-        console.log("父组件需要实现一个回调函数 (例如 'handleAddCustomPanel') 来接收这个 newCustomPanel 对象，更新 'fields' 列表，并更新 'activeKeys' 以包含: ", newPanelName);
-        // 提示用户，实际的添加和激活逻辑需要在父组件中处理。
-        // alert("请在父组件中实现添加面板的逻辑，并通过prop传递给CollapseForm。新面板的数据已打印到控制台。父组件还应负责激活新面板。");
+            // 确保设置新添加的面板为活动面板
+            onCollapseChange(newPanelName);
+
+            // 本地状态更新，用于计数
+            setDataList([...dataList, newCustomPanel]);
+        }
     };
 
     // 找到第一个自定义项的索引
-    const firstCustomItemIndex = fields.findIndex(item => item.isCustom);
+    const firstCustomItemIndex = fields.findIndex(item => item.isShowAdd);
     // 检查是否有自定义项
     const hasCustomItems = firstCustomItemIndex !== -1;
 
@@ -160,7 +157,7 @@ const CollapseForm = ({
                         onChange={onCollapseChange}
                         ghost
                         expandIconPosition="end"
-                        className={`${styles.workoutDetailsCollapse} ${item.isCustom ? styles.structureCollapse : ''}`}
+                        className={`${styles.workoutDetailsCollapse} ${item.isShowAdd ? styles.structureCollapse : ''}`}
                         items={[{
                             key: item.name || `panel-${index}`,
                             label: (
@@ -169,7 +166,7 @@ const CollapseForm = ({
                                     <span>{item.label || item.title}</span>
                                 </div>
                             ),
-                            className: `${styles.collapsePanel} ${item.isCustom ? styles.structureItem : ''}`,
+                            className: `${styles.collapsePanel} ${item.isShowAdd ? styles.structureItem : ''}`,
                             children: (
                                 <div className={styles.collapsePanelContent}>
                                     {renderFieldGroup(item.fields || [])}

@@ -256,6 +256,35 @@ export default function CommonEditor(props) {
         headerContext.setCustomPageTitle
     ]);
 
+    // 从 collapseFormConfig 中获取 activeKeys, onCollapseChange, 和 handleAddCustomPanel
+    const {
+        fields: collapseFields, // 从配置中获取字段
+        initialValues: collapseInitialValues, // 从配置中获取初始值
+        activeKeys: configActiveKeys, // 从父组件接收 activeKeys
+        onCollapseChange: configOnCollapseChange, // 从父组件接收 onCollapseChange
+        handleAddCustomPanel: configHandleAddCustomPanel // 从父组件接收 handleAddCustomPanel
+    } = collapseFormConfig;
+
+    // 当 collapseFormConfig 变化时更新依赖的状态
+    const [extractedConfig, setExtractedConfig] = useState({
+        collapseFields,
+        collapseInitialValues,
+        configActiveKeys,
+        configOnCollapseChange,
+        configHandleAddCustomPanel
+    });
+
+    // 当 collapseFormConfig 变化时更新
+    useEffect(() => {
+        setExtractedConfig({
+            collapseFields: collapseFormConfig.fields,
+            collapseInitialValues: collapseFormConfig.initialValues,
+            configActiveKeys: collapseFormConfig.activeKeys,
+            configOnCollapseChange: collapseFormConfig.onCollapseChange,
+            configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel
+        });
+    }, [collapseFormConfig]);
+
     // 渲染结构面板
     const renderStructurePanels = () => {
         if (!complexConfig.includeStructurePanels || !structurePanels || structurePanels.length === 0) {
@@ -350,6 +379,15 @@ export default function CommonEditor(props) {
     const renderAdvancedContent = () => {
         console.log('collapseFormConfig');
 
+        // 使用最新的提取配置
+        const {
+            collapseFields: fields,
+            collapseInitialValues: initValues,
+            configActiveKeys: activeKeys,
+            configOnCollapseChange: onCollapseChange,
+            configHandleAddCustomPanel: handleAddCustomPanel
+        } = extractedConfig;
+
         return (
             <div className={styles.advancedFormContent}>
                 {/* 渲染左侧列表 */}
@@ -371,12 +409,14 @@ export default function CommonEditor(props) {
                         {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
                         {collapseFormConfig && Object.keys(collapseFormConfig).length > 0 && (
                             <CollapseForm
-                                fields={collapseFormConfig.fields || []}
+                                fields={fields || collapseFormConfig.fields || []}
                                 form={form}
                                 selectedItemFromList={selectedItemFromList}
-                                initialValues={initialValues}
+                                initialValues={initValues || initialValues}
+                                // activeKeys={activeKeys !== undefined ? activeKeys : activeCollapseKeys}
                                 activeKeys={activeCollapseKeys}
                                 onCollapseChange={handleCollapseChange}
+                                handleAddCustomPanel={handleAddCustomPanel}
                                 isCollapse={collapseFormConfig.isCollapse !== false}
                             />
                         )}

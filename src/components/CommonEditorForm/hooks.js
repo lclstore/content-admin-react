@@ -111,6 +111,7 @@ export const useHeaderConfig = (params) => {
         headerContext,
         setIsFormDirty
     } = params;
+
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, row = null) => {
         fields.forEach(field => {
@@ -129,6 +130,10 @@ export const useHeaderConfig = (params) => {
                         if (collapseFormConfig.setActiveKey && row.name) {
                             // 将包含错误字段的面板key设为activeKey
                             collapseFormConfig.setActiveKey(row.name);
+                            // 延迟10ms后验证表单,防止折叠面板没有渲染
+                            setTimeout(() => {
+                                form.validateFields()
+                            }, 10);
                         }
                         throw new Error({
                             errorFields: [{

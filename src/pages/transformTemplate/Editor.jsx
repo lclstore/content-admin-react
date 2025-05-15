@@ -97,7 +97,7 @@ export default function UserEditorWithCommon() {
             }, 1000);
         });
     };
-    const formFields = useMemo(() => [
+    const initialFormFields = useMemo(() => [
         {
             label: 'Basic Information',
             name: 'basicInfo',
@@ -267,9 +267,10 @@ export default function UserEditorWithCommon() {
         {
 
             title: 'Structure',
-            label: 'Structure Name & Reps',
+            label: 'Structure Settings',
             name: 'structure',
-            isCustom: true,
+            isShowAdd: true,
+            isListData: true,//
             icon: <VideoCameraOutlined />,
             fields: [
                 {
@@ -294,6 +295,17 @@ export default function UserEditorWithCommon() {
 
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
+    const [formFields, setFormFields] = useState(initialFormFields);
+    const [activeKeys, setActiveKeys] = useState([]);
+
+    // 添加自定义面板的回调函数
+    const handleAddCustomPanel = (newPanel) => {
+        // 只添加新面板到 formFields
+        setFormFields(prevFields => [...prevFields, newPanel]);
+        // 不再需要设置 activeKeys，因为 CollapseForm 组件中已经直接调用了 onCollapseChange(newPanelName)
+        // setActiveKeys(prevKeys => [...prevKeys, newPanel.name]);
+    };
+
     //请求列表数据方法
     const initCommonListData = (params) => {
         return new Promise((resolve) => {
@@ -330,6 +342,9 @@ export default function UserEditorWithCommon() {
                     fields: formFields, // 表单字段配置
                     initialValues: initialValues, // 默认初始值
                     isCollapse: true, //是否折叠分组
+                    activeKeys: activeKeys, // 传递激活的keys
+                    onCollapseChange: setActiveKeys, // 传递用于更新激活keys的函数
+                    handleAddCustomPanel: handleAddCustomPanel, // 传递添加自定义面板的函数
                 }
             }
             initFormData={initFormData}

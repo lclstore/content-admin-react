@@ -185,7 +185,8 @@ export const useHeaderConfig = (params) => {
 
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
-        if (!formConnected) return;
+
+        if (!form) return;
 
         form.validateFields()
             .then(values => {
@@ -282,7 +283,7 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 头部按钮配置
-    const headerButtons = useMemo(() => {
+    let headerButtons = useMemo(() => {
         return [
             {
                 key: 'save',
@@ -310,7 +311,14 @@ export const useHeaderConfig = (params) => {
         handleSaveChanges,
         handleBackClick
     ]);
-
+    if (config.headerButtons) {
+        config.headerButtons.forEach(button => {
+            if (button.key === 'save') {
+                button.onClick = handleSaveChanges;
+            }
+        });
+        headerButtons = config.headerButtons;
+    }
     return {
         headerButtons,
         handleSaveChanges,

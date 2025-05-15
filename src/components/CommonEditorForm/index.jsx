@@ -231,8 +231,7 @@ export default function CommonEditor(props) {
     useEffect(() => {
         if (headerContext.setCustomPageTitle) {
             // 设置自定义页面标题
-            const formName = config.formName || '';
-            const pageTitle = id ? `Edit ${formName}` : `Add ${formName}`;
+            const pageTitle = config.title ?? `${id ? 'Edit' : 'Add'} ${config.formName}`;
             headerContext.setCustomPageTitle(pageTitle);
         }
 
@@ -318,7 +317,7 @@ export default function CommonEditor(props) {
                         name={config.formName || 'basicForm'}
                         layout={config.layout || 'vertical'}
                         onValuesChange={handleFormValuesChange}
-                        onFinish={headerButtons[0].onClick}
+                        onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
                         initialValues={initialValues}
                         className={styles.form}
                     >
@@ -350,7 +349,7 @@ export default function CommonEditor(props) {
                         name={config.formName || 'advancedForm'}
                         layout={config.layout || 'vertical'}
                         onValuesChange={handleFormValuesChange}
-                        onFinish={headerButtons[0].onClick}
+                        onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
                         initialValues={initialValues}
                         className={styles.form}
                     >

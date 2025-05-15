@@ -289,9 +289,11 @@ export const renderFormControl = (field, options = {}) => {
         //输入框组
         case 'inputGroup':
             const { inputConfig } = field;
+            console.log(222);
+
             return (
                 <Form.Item
-                    label={label}
+
                 >
                     <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {

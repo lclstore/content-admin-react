@@ -90,7 +90,7 @@ export const listData = [
         type: 'video',
         imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
         name: "123",
-        status: "draft",
+        status: 2,
         met: "1",
         structureType: "asd",
         difficulty: "asd",

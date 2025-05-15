@@ -1,13 +1,19 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
 import { useNavigate } from 'react-router';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections,programListData } from './Data';
+import { statusOrder, filterSections, programListData } from './Data';
+import { HeaderContext } from '@/contexts/HeaderContext';
+import { statusIconMap } from '@/constants';
+import {
+    PlusOutlined,
+} from '@ant-design/icons';
 
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
     const navigate = useNavigate();
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const [dataSource, setDataSource] = useState(programListData); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
@@ -94,8 +100,9 @@ export default () => {
             {
                 title: 'Status',
                 dataIndex: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options:"status",
+                key: 'status',
+                iconOptions: statusIconMap,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
@@ -134,7 +141,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable','edit','duplicate'],
+                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数
@@ -143,7 +150,7 @@ export default () => {
         ];
     }, [isButtonVisible, handleActionClick]);
 
-    /**
+    /** 
      * 搜索处理函数
      * 直接执行搜索，根据条件过滤数据
      */
@@ -235,7 +242,27 @@ export default () => {
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
+    useEffect(() => {
+        // 设置自定义页面标题
+        setCustomPageTitle('Programs List');
 
+        // 设置头部按钮
+        setButtons([
+            {
+                key: 'create',
+                text: 'Create Programs',
+                icon: <PlusOutlined />,
+                type: 'primary',
+                onClick: () => navigate('/collections/Editor'),
+            }
+        ]);
+
+        return () => {
+            // 组件卸载时清理
+            setButtons([]);
+            setCustomPageTitle(null);
+        };
+    }, [setButtons, setCustomPageTitle, navigate]);
     // 表格数据和配置
     /**
      * 筛选后的表格数据

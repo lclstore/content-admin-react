@@ -3,12 +3,17 @@ import { Modal, message } from 'antd';
 import { useNavigate } from 'react-router';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusOrder, filterSections, categoryListData } from './Data';
-
+import { HeaderContext } from '@/contexts/HeaderContext';
+import { statusIconMap } from '@/constants';
+import {
+    PlusOutlined,
+} from '@ant-design/icons';
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
     const navigate = useNavigate();
     const [dataSource, setDataSource] = useState(categoryListData); // 表格数据源
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [], createUser: [] }); // 筛选条件
@@ -94,8 +99,9 @@ export default () => {
             {
                 title: 'Status',
                 dataIndex: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options: "status",
+                key: 'status',
+                iconOptions: statusIconMap,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
@@ -135,6 +141,29 @@ export default () => {
             }
         ];
     }, [isButtonVisible, handleActionClick]);
+
+
+    useEffect(() => {
+        // 设置自定义页面标题
+        setCustomPageTitle('Category List');
+
+        // 设置头部按钮
+        setButtons([
+            {
+                key: 'create',
+                text: 'Create Category',
+                icon: <PlusOutlined />,
+                type: 'primary',
+                onClick: () => navigate('/collections/Editor'),
+            }
+        ]);
+
+        return () => {
+            // 组件卸载时清理
+            setButtons([]);
+            setCustomPageTitle(null);
+        };
+    }, [setButtons, setCustomPageTitle, navigate]);
 
     /**
      * 搜索处理函数

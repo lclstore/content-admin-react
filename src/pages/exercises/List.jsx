@@ -4,6 +4,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
+import { statusIconMap, optionsConstants } from '@/constants';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusOrder, filterSections, listData } from './Data';
 
@@ -27,7 +28,7 @@ export default () => {
      * 导航到用户编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/users/editor?id=${record.id}`);
+        navigate(`/exercises/editor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -80,7 +81,7 @@ export default () => {
                 dataIndex: 'id',
                 visibleColumn: 2,
                 width: 50,
-                key:'id'
+                key: 'id'
             },
             {
                 title: 'Image',
@@ -95,17 +96,16 @@ export default () => {
                 dataIndex: 'name',
                 width: 120,
                 visibleColumn: 0,
-                key:'name'
+                key: 'name'
             },
             {
                 title: 'Status',
                 dataIndex: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options: "status",
+                key: 'status',
+                iconOptions: statusIconMap,
+                options: 'displayStatus',
                 width: 120,
-                visibleColumn: 0,
-                key:'status'
-                
+                visibleColumn: 0
             },
             {
                 title: 'MET',
@@ -113,7 +113,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 2,
-                key:'met'
+                key: 'met'
             },
             {
                 title: 'Structure Type',
@@ -121,7 +121,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 2,
-                key:'structureType'
+                key: 'structureType'
             },
             {
                 title: 'Difficulty',
@@ -129,7 +129,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key:'difficulty'
+                key: 'difficulty'
             },
             {
                 title: 'Equipment',
@@ -137,7 +137,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key:'equipment'
+                key: 'equipment'
             },
             {
                 title: 'Position',
@@ -145,7 +145,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key:'position'
+                key: 'position'
             },
             {
                 title: 'Target',
@@ -153,7 +153,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key:'target'
+                key: 'target'
             },
             {
                 title: 'Front Video Status',
@@ -161,7 +161,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 140,
                 visibleColumn: 1,
-                key:'frontVideoStatus'
+                key: 'frontVideoStatus'
             },
             {
                 title: 'Side Video Status',
@@ -169,7 +169,7 @@ export default () => {
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 140,
                 visibleColumn: 1,
-                key:'sideVideoStatus'
+                key: 'sideVideoStatus'
             },
             {
                 title: 'Actions',
@@ -266,7 +266,7 @@ export default () => {
         }
 
         // 正常导航到编辑页面
-        navigate(`/users/editor?id=${record.id}`);
+        navigate(`/exercises/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理

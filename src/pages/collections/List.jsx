@@ -24,26 +24,10 @@ export default function CollectionsList() {
         },
     ];
     const defaultTabItem = tabItems[0] || {};
-    // 页面加载时设置默认标题
-    useEffect(() => {
-        setCustomPageTitle(`${defaultTabItem.label} List`);
-    }, [setCustomPageTitle]);
     function onChange(key) {
         const tabBarName = tabItems.find(item => item.key === key).label;
         setCustomPageTitle(`${tabBarName} List`);
     }
-
-    useEffect(() => {
-        setButtons([
-            {
-                key: 'create',
-                text: 'Create Category',
-                icon: <PlusOutlined />,
-                type: 'primary',
-                onClick: () => navigate('/collections/editor'),
-            }
-        ])
-    }, []);
     const renderTabBar = (props, DefaultTabBar) => (
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
             <DefaultTabBar {...props} />

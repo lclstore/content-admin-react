@@ -43,7 +43,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'duration', 
+            name: 'duration',
             label: 'Duration (Min)',
             options: [
                 { name: '10-15', value: '10-15' },
@@ -56,7 +56,7 @@ export default function UserEditorWithCommon() {
             type: 'inputGroup',
             name: 'warmUp',
             label: 'Warm Up',
-            // required: true,
+            required: true,
             inputConfig: [
                 {
                     type: 'input',
@@ -161,7 +161,7 @@ export default function UserEditorWithCommon() {
                     min: 1,
                     max: 5,
                     step: 1,
-                    
+
                     formatter: (value) => `${value}`,
                 },
 
@@ -179,7 +179,7 @@ export default function UserEditorWithCommon() {
 
 
 
-        
+
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 

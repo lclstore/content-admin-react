@@ -1,13 +1,11 @@
-import React, { useState,useEffect,useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { PlusOutlined } from '@ant-design/icons';
+import { SaveOutlined, LogoutOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import { validateEmail, validatePassword } from '@/utils';
+
 
 export default function UserEditorWithCommon() {
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
 
 
@@ -57,29 +55,23 @@ export default function UserEditorWithCommon() {
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
-    useEffect(() => {
-        // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('User List');
-        console.log('setCustomPageTitle',setCustomPageTitle)
-
-        // 设置头部按钮
-        setButtons([
-            {
-                key: 'create',
-                text: 'Create User',
-                icon: <PlusOutlined />,
-                type: 'primary',
-                onClick: () => navigate(`/users/editor`),
-            }
-        ]);
-
-        return () => {
-            // 组件卸载时清理
-            setButtons([]);
-            setCustomPageTitle && setCustomPageTitle(null);
-        };
-    }, [setButtons, setCustomPageTitle, navigate]);
-
+    const headerButtons = [
+        {
+            key: 'save',
+            text: 'Save',
+            icon: <SaveOutlined />,
+            type: 'primary',
+        },
+        {
+            key: 'logout',
+            text: 'Logout',
+            icon: <LogoutOutlined />,
+            type: 'default',
+            onClick: () => {
+                navigate('/login');
+            },
+        }
+    ]
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
         console.log('保存用户数据:', values, id);
@@ -140,7 +132,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'Info' ,hideBackButton: true}}
+            config={{ formName: 'Info', title: 'Info', headerButtons }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

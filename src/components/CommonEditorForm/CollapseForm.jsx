@@ -1,4 +1,4 @@
-import React, { Children, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Collapse, Form } from 'antd';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
@@ -20,8 +20,10 @@ const CollapseForm = ({
     initialValues = {},
     activeKeys = [],
     onCollapseChange,
+    setActiveKeys,
     isCollapse = true
 }) => {
+
     // 表单连接状态
     const formConnected = !!form;
 
@@ -102,8 +104,6 @@ const CollapseForm = ({
     }));
 
     // 手风琴模式下，activeKey需要是单个值，而不是数组
-    // 从activeKeys数组中取第一个值
-    const activeKey = activeKeys && activeKeys.length > 0 ? activeKeys[0] : undefined;
 
     return (
         <div className={styles.collapseForm}>
@@ -111,7 +111,7 @@ const CollapseForm = ({
                 expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
                 destroyInactivePanel={false}
                 accordion={true} // 设置为手风琴模式，只允许同时打开一个面板
-                activeKey={activeKey} // 手风琴模式下使用单个值
+                activeKey={activeKeys} // 手风琴模式下使用单个值
                 onChange={onCollapseChange} // 父组件处理change事件
                 ghost
                 expandIconPosition="end"

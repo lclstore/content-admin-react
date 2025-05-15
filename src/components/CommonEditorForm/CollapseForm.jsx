@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, Fragment, useState } from 'react';
-import { Collapse, Form, Button, Typography, notification } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Collapse, Form, Button, Typography } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
 import styles from './CollapseForm.module.css';
@@ -18,6 +18,7 @@ import styles from './CollapseForm.module.css';
  * @param {Function} props.setActiveKeys 设置激活面板的函数
  * @param {boolean} props.isCollapse 是否可折叠
  * @param {Function} props.handleAddCustomPanel 添加自定义面板的回调函数
+ * @param {Function} props.handleDeletePanel 删除面板的回调函数
  */
 const CollapseForm = ({
     fields = [],
@@ -28,7 +29,8 @@ const CollapseForm = ({
     onCollapseChange,
     setActiveKeys,
     isCollapse = true,
-    handleAddCustomPanel
+    handleAddCustomPanel,
+    handleDeletePanel
 }) => {
     const newField = fields.find(item => item.isShowAdd);
     const [dataList, setDataList] = useState([newField]);//datalist
@@ -50,6 +52,7 @@ const CollapseForm = ({
             type: field.type,
             requiredMessage: field.requiredMessage
         });
+        console.log(field);
 
         // 渲染表单项 - key直接作为属性传递
         return (
@@ -93,28 +96,56 @@ const CollapseForm = ({
     if (!fields || fields.length === 0) {
         return null;
     }
+    //  添加新的collapse面板的表单验证
+    const validateFields = (fieldGroup) => {
+        if (!fieldGroup || !Array.isArray(fieldGroup.fields) || fieldGroup.fields.length === 0) {
+            return true;
+        }
 
+        const formValues = form.getFieldsValue();
+
+        const hasInvalidField = fieldGroup.fields.some(field => {
+            return field.required && !formValues[field.name];
+        });
+
+        if (hasInvalidField) {
+            // 展开字段所在的面板
+            onCollapseChange(fieldGroup.name);
+
+            // 等待面板展开再校验
+            requestAnimationFrame(() => {
+                form.validateFields();
+            });
+
+            return false;
+        }
+
+        return true;
+    };
 
     // 添加新的collapse面板的回调函数
     const onAddCollapsePanel = () => {
-        // 先确保当前的 newField 是活动的
-        onCollapseChange(newField.name);
-
+        const currentFields = dataList[dataList.length - 1];//最后一个折叠面板数据
+        let valid = validateFields(currentFields);//验证当前折叠面板数据是否填写
+        if (!valid) return;
+        // notification.warning({
+        //     message: `Cannot Add New ${currentFields.label}`,
+        //     description: `Please add exercises to the current last ${currentFields.label} before adding a new one.`,
+        //     placement: 'topRight',
+        // });
         // 创建新面板的数据结构
         const newPanelName = `${newField.name}${dataList.length}`; // 生成一个唯一的名称/key
         const newCustomPanel = {
             ...newField,
             name: newPanelName,
-            isShowAdd: false,
+            isShowAdd: true,
         };
 
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
             // 添加面板到父组件的 formFields
             handleAddCustomPanel(newCustomPanel);
-
-            // 确保设置新添加的面板为活动面板
-            onCollapseChange(newPanelName);
+            onCollapseChange([newPanelName]);
 
             // 本地状态更新，用于计数
             setDataList([...dataList, newCustomPanel]);
@@ -141,6 +172,16 @@ const CollapseForm = ({
         </div>
     ) : null;
 
+    // 处理删除面板
+    const onDeletePanel = (e, panelName) => {
+        e.stopPropagation(); // 阻止事件冒泡，避免触发折叠面板的展开/收起
+        if (handleDeletePanel) {
+            handleDeletePanel(panelName);
+            setDataList(dataList.filter((item) => item.name !== panelName));
+
+        }
+    };
+
     return (
         <div className={styles.collapseForm}>
             {fields.map((item, index) => (
@@ -162,8 +203,13 @@ const CollapseForm = ({
                             key: item.name || `panel-${index}`,
                             label: (
                                 <div className={styles.collapseHeader}>
-                                    <span className={styles.collapseLeftIcon}>{item.icon}</span>
                                     <span>{item.label || item.title}</span>
+                                    {dataList.length > 1 && item.isShowAdd && (
+                                        <DeleteOutlined
+                                            className={styles.deleteIcon}
+                                            onClick={(e) => onDeletePanel(e, item.name)}
+                                        />
+                                    )}
                                 </div>
                             ),
                             className: `${styles.collapsePanel} ${item.isShowAdd ? styles.structureItem : ''}`,

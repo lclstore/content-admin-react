@@ -262,7 +262,8 @@ export default function CommonEditor(props) {
         initialValues: collapseInitialValues, // 从配置中获取初始值
         activeKeys: configActiveKeys, // 从父组件接收 activeKeys
         onCollapseChange: configOnCollapseChange, // 从父组件接收 onCollapseChange
-        handleAddCustomPanel: configHandleAddCustomPanel // 从父组件接收 handleAddCustomPanel
+        handleAddCustomPanel: configHandleAddCustomPanel, // 从父组件接收 handleAddCustomPanel
+        handleDeletePanel: configHandleDeletePanel,
     } = collapseFormConfig;
 
     // 当 collapseFormConfig 变化时更新依赖的状态
@@ -271,7 +272,8 @@ export default function CommonEditor(props) {
         collapseInitialValues,
         configActiveKeys,
         configOnCollapseChange,
-        configHandleAddCustomPanel
+        configHandleAddCustomPanel,
+        configHandleDeletePanel
     });
 
     // 当 collapseFormConfig 变化时更新
@@ -281,7 +283,8 @@ export default function CommonEditor(props) {
             collapseInitialValues: collapseFormConfig.initialValues,
             configActiveKeys: collapseFormConfig.activeKeys,
             configOnCollapseChange: collapseFormConfig.onCollapseChange,
-            configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel
+            configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel,
+            configHandleDeletePanel: collapseFormConfig.handleDeletePanel
         });
     }, [collapseFormConfig]);
 
@@ -385,7 +388,8 @@ export default function CommonEditor(props) {
             collapseInitialValues: initValues,
             configActiveKeys: activeKeys,
             configOnCollapseChange: onCollapseChange,
-            configHandleAddCustomPanel: handleAddCustomPanel
+            configHandleAddCustomPanel: handleAddCustomPanel,
+            configHandleDeletePanel: handleDeletePanel
         } = extractedConfig;
 
         return (
@@ -417,6 +421,7 @@ export default function CommonEditor(props) {
                                 activeKeys={activeCollapseKeys}
                                 onCollapseChange={handleCollapseChange}
                                 handleAddCustomPanel={handleAddCustomPanel}
+                                handleDeletePanel={handleDeletePanel}
                                 isCollapse={collapseFormConfig.isCollapse !== false}
                             />
                         )}

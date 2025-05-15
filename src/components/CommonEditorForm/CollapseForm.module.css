@@ -129,15 +129,24 @@
 }
 
 .structureSectionHeader {
+    padding: 0 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    margin-top: 16px;
-    padding-left: 12px;
-    padding-right: 12px;
+
 }
 
 .structureCollapse {
     margin-top: 8px;
+}
+
+.deleteIcon {
+    margin-left: auto;
+    color: #ff4d4f;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.deleteIcon:hover {
+    color: #ff7875;
 }

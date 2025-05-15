@@ -113,80 +113,70 @@ export const useHeaderConfig = (params) => {
     } = params;
 
     //处理表单字段和自定义表单验证
-    const processFields = (fields = [], dataToSave = {}, row = null) => {
-        fields.forEach(field => {
-            // 如果存在子字段，则递归处理
+    const processFields = (fields = [], dataToSave = {}, parent = null) => {
+
+        for (const field of fields) {
+            const value = dataToSave[field.name];
+            const isRequired = formType === 'advanced' && collapseFormConfig.isCollapse && parent && field.required;
+
+            // 校验必填项
+            if (isRequired && (value === undefined || value === null || value === '')) {
+                if (collapseFormConfig.setActiveKey && parent.name) {
+                    collapseFormConfig.setActiveKey(parent.name);
+
+                    requestAnimationFrame(() => {
+                        form.validateFields();
+                    });
+                }
+
+                // 抛出标准表单校验错误
+                throw new Error(
+                    JSON.stringify({
+                        errorFields: [{
+                            name: [field.name],
+                            errors: [`${field.label} is required`]
+                        }]
+                    })
+                );
+            }
+
+            // 处理日期范围字段（有 keys 时分拆，无 keys 时格式化原字段）
+            if (field.type === 'dateRange') {
+                const date = form.getFieldValue(field.name);
+                const format = field.props?.format || 'YYYY-MM-DD';
+
+                if (date && date.length === 2 && typeof date[0]?.format === 'function') {
+                    if (field.keys && Array.isArray(field.keys)) {
+                        dataToSave[field.keys[0]] = date[0].format(format);
+                        dataToSave[field.keys[1]] = date[1].format(format);
+                        delete dataToSave[field.name];
+                    } else {
+                        dataToSave[field.name] = [
+                            date[0].format(format),
+                            date[1].format(format)
+                        ];
+                    }
+                } else {
+                    if (field.keys && Array.isArray(field.keys)) {
+                        dataToSave[field.keys[0]] = null;
+                        dataToSave[field.keys[1]] = null;
+                        delete dataToSave[field.name];
+                    }
+                }
+            }
+
+            // 处理单个日期字段
+            if ((field.type === 'date' || field.type === 'datepicker') && value?.format) {
+                dataToSave[field.name] = value.format('YYYY-MM-DD');
+            }
+
+            // 递归处理嵌套字段
             if (Array.isArray(field.fields)) {
                 processFields(field.fields, dataToSave, field);
             }
-            //手动验证
-            if (formType === 'advanced' && collapseFormConfig.isCollapse && row) {
-                console.log(row);
+        }
+    };
 
-                if (field.required) {
-                    if (!dataToSave[field.name]) {
-
-                        // 验证失败时，通知折叠栏展开对应面板
-                        if (collapseFormConfig.setActiveKey && row.name) {
-                            // 将包含错误字段的面板key设为activeKey
-                            collapseFormConfig.setActiveKey(row.name);
-                            // 延迟10ms后验证表单,防止折叠面板没有渲染
-                            setTimeout(() => {
-                                form.validateFields()
-                            }, 10);
-                        }
-                        throw new Error({
-                            errorFields: [{
-                                name: [field.name],
-                                errors: [field.label + ' is required']
-                            }]
-                        });
-                        return;
-                    }
-                }
-            }
-            if (field.type === 'dateRange') {
-
-                // 如果使用分离字段模式且字段名在值中，移除原始timeRange字段
-                const fieldNameConfig = field.keys || dateRangeKeys;
-                const date = form.getFieldValue(field.name);
-                if (date && date.length === 2) {
-                    dataToSave[fieldNameConfig[0]] = date[0].format('YYYY-MM-DD');
-                    dataToSave[fieldNameConfig[1]] = date[1].format('YYYY-MM-DD');
-                } else {
-                    dataToSave[fieldNameConfig[0]] = null;
-                    dataToSave[fieldNameConfig[1]] = null;
-                }
-                delete dataToSave[field.name];
-
-            }
-
-            // 确保所有日期值都转换为字符串
-            if ((field.type === 'date' || field.type === 'datepicker') && dataToSave[field.name]) {
-                // 如果值是Moment/Dayjs对象，转换为字符串
-                const dateValue = dataToSave[field.name];
-                if (dateValue && typeof dateValue === 'object' && typeof dateValue.format === 'function') {
-                    dataToSave[field.name] = dateValue.format('YYYY-MM-DD');
-                }
-            }
-
-            // 处理timeRange字段，确保值是字符串数组而不是日期对象数组
-            if (field.type === 'dateRange' && dataToSave[field.name] && Array.isArray(dataToSave[field.name])) {
-                const format = field.props?.format || 'YYYY-MM-DD';
-                const dateRangeValue = dataToSave[field.name];
-
-                // 将数组中的每个日期对象转换为字符串
-                if (dateRangeValue.length === 2) {
-                    if (typeof dateRangeValue[0] === 'object' && typeof dateRangeValue[0].format === 'function') {
-                        dataToSave[field.name] = [
-                            dateRangeValue[0].format(format),
-                            dateRangeValue[1].format(format)
-                        ];
-                    }
-                }
-            }
-        });
-    }
 
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {

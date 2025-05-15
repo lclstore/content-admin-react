@@ -100,9 +100,16 @@ export const renderFormControl = (field, options = {}) => {
     switch (type) {
         // 文本展示字段
         case 'displayText':
-            return <div className={styles.displayText} style={{ ...field.style }}>
-                {fieldValue !== undefined ? fieldValue : ''}
-            </div>;
+            return field.displayFn ? (
+                <div className="displayText" style={field.style}>{field.displayFn(form, initialValues)}</div>
+            ) : (
+                <div className={styles.displayText} style={{ ...field.style }}>
+                    {fieldValue !== undefined ? fieldValue : ''}
+                </div>
+            )
+        // return <div className={styles.displayText} style={{ ...field.style }}>
+        //     {fieldValue !== undefined ? fieldValue : ''}
+        // </div>;
         // 图片展示字段
         case 'displayImage':
             field.style = field.style || { width: '300px', height: '100px' };

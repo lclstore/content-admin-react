@@ -291,20 +291,47 @@ export default function UserEditorWithCommon() {
                 }
             ]
 
+        },
+        {
+            label: 'Workout Data',
+            name: 'workoutData',
+            fields: [
+                {
+                    type: 'displayText',
+                    name: 'dur  ation',
+                    label: 'Duration (Min):',
+                    displayFn: (form, initialValues) => {
+                        const formValues = form.getFieldsValue();
+                        console.log(formValues);
+
+                    },
+
+                },
+                {
+                    type: 'displayText',
+                    name: 'calorie',
+                    label: 'Calorie:',
+
+                },
+            ]
         }
 
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
     const [formFields, setFormFields] = useState(initialFormFields);
-    const [activeKeys, setActiveKeys] = useState([]);
 
     // 添加自定义面板的回调函数
     const handleAddCustomPanel = (newPanel) => {
         // 只添加新面板到 formFields
         setFormFields(prevFields => [...prevFields, newPanel]);
-        // 不再需要设置 activeKeys，因为 CollapseForm 组件中已经直接调用了 onCollapseChange(newPanelName)
-        // setActiveKeys(prevKeys => [...prevKeys, newPanel.name]);
     };
+    const handleDeletePanel = (panelName) => {
+        // 这里实现删除面板的逻辑
+        // 比如从fields数组中移除对应name的面板
+        const updatedFields = formFields.filter(item => item.name !== panelName);
+        setFormFields(updatedFields);
+    };
+
 
     //请求列表数据方法
     const initCommonListData = (params) => {
@@ -342,9 +369,8 @@ export default function UserEditorWithCommon() {
                     fields: formFields, // 表单字段配置
                     initialValues: initialValues, // 默认初始值
                     isCollapse: true, //是否折叠分组
-                    activeKeys: activeKeys, // 传递激活的keys
-                    onCollapseChange: setActiveKeys, // 传递用于更新激活keys的函数
                     handleAddCustomPanel: handleAddCustomPanel, // 传递添加自定义面板的函数
+                    handleDeletePanel: handleDeletePanel
                 }
             }
             initFormData={initFormData}

@@ -5,14 +5,15 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections,listData } from './Data';
-
-
-export default () => {
+import { statusIconMap, optionsConstants } from '@/constants';
+import { statusOrder, filterSections, mockUsers } from './Data';
+import settings from '@/config/settings';
+const { file: fileSettings } = settings;
+export default function UsersList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
-    const [dataSource, setDataSource] = useState(listData); // 表格数据源
+    const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [], createUser: [] }); // 筛选条件
@@ -21,6 +22,16 @@ export default () => {
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
     const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [messageApi, contextHolder] = message.useMessage();
+
+    // 2. 回调函数定义 - 用户交互和事件处理
+    /**
+     * 操作区域点击处理
+     * 设置操作点击标志，阻止事件冒泡以防止触发行点击事件
+     */
+    const handleActionAreaClick = useCallback((e) => {
+        setActionClicked(true);
+        e.stopPropagation();
+    }, []);
 
     /**
      * 编辑按钮处理
@@ -65,9 +76,9 @@ export default () => {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 状态-按钮映射关系
-        if (status === 'enable' && ['disable'].includes(btnName)) return true;
-        if (status === 'disable' && ['enable'].includes(btnName)) return true;
-        if (btnName === 'edit' || btnName === 'duplicate') return true;  // 编辑按钮始终显示
+        if (status === 1 && ['disable'].includes(btnName)) return true;
+        if (status === 0 && ['enable'].includes(btnName)) return true;
+        if (btnName === 'edit') return true;  // 编辑按钮始终显示
 
         return false;
     }, []);
@@ -76,84 +87,64 @@ export default () => {
     const allColumnDefinitions = useMemo(() => {
         return [
             {
-                title: 'ID',
-                dataIndex: 'id',
-            },
-            {
-                title: 'Image',
-                dataIndex: 'imageCoverUrl',
-                mediaType: 'image',
-            },
-            {
-                title: 'Name',
-                dataIndex: 'name',
-                width: 120,
-                visibleColumn: 0
+                title: 'Name & Email',
+                key: 'nameAndEmail',
+                width: 350,
+                visibleColumn: 0,
+                render: (record) => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {record.avatar ? (
+                            <img
+                                src={`${fileSettings.baseURL}${record.avatar}`}
+                                alt={`${record.name}'s avatar`}
+                                className="userAvatar"
+                                style={{ width: 36, height: 36, borderRadius: '50%', marginRight: 12 }}
+                            />
+                        ) : (
+                            <div
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: '50%',
+                                    backgroundColor: '#f0f2f5',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginRight: 12,
+                                    color: '#999'
+                                }}
+                            >
+                                {record?.name?.charAt(0)?.toUpperCase()}
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 'var(--font-weight-medium)', color: 'var(--text-primary)', lineHeight: '1.4' }}>{record.name}</span>
+                            <span style={{ fontSize: 'var(--font-md-sm)', color: 'var( --text-secondary)', lineHeight: '1.4', fontWeight: 400 }}>{record.email}</span>
+                        </div>
+                    </div>
+                )
             },
             {
                 title: 'Status',
                 dataIndex: 'status',
+                key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options:"status",
+                iconOptions: statusIconMap,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'MET',
-                dataIndex: 'met',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
+                title: 'Create Time',
+                dataIndex: 'createTime',
+                key: 'createTime',
+                sorter: (a, b) => new Date(b.createTime) - new Date(a.createTime),
+                showSorterTooltip: false,
+                width: 180,
+                visibleColumn: 0,
+                render: (createTime) => formatDate(createTime, 'YYYY-MM-DD HH:mm:ss')
             },
-            {
-                title: 'Structure Type',
-                dataIndex: 'structureType',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficulty',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Equipment',
-                dataIndex: 'equipment',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Position',
-                dataIndex: 'position',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Target',
-                dataIndex: 'target',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Front Video Status',
-                dataIndex: 'frontVideoStatus',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Side Video Status',
-                dataIndex: 'sideVideoStatus',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
-            },
+            { title: 'Create User', dataIndex: 'createUser', key: 'createUser', width: 350},
             {
                 title: 'Actions',
                 key: 'actions',
@@ -161,7 +152,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable','edit','duplicate'],
+                actionButtons: ['enable', 'disable'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数
@@ -178,7 +169,7 @@ export default () => {
         setLoading(true);
         setTimeout(() => {
             // 复制原始数据
-            let filteredData = [...listData];
+            let filteredData = [...mockUsers];
 
             // 按状态过滤
             const statuses = filters?.status || [];
@@ -258,16 +249,16 @@ export default () => {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('Exercise List');
+        setCustomPageTitle && setCustomPageTitle('User List');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create',
+                text: 'Add',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate(`/exercises/editor`),
+                onClick: () => navigate(`/users/editor`),
             }
         ]);
 
@@ -306,11 +297,12 @@ export default () => {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'exerciseList'}
+                uniqueId={'usersList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"
                 loading={loading}
+                showColumnSettings={false}
                 onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
@@ -318,17 +310,11 @@ export default () => {
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}
-                filterConfig={{
-                    filterSections: filterSections,
-                    activeFilters: selectedFilters,
-                    onUpdate: handleFilterUpdate,
-                    onReset: handleFilterReset,
-                }}
             />
 
             {/* 删除确认弹窗 */}
             <Modal
-                title="Confirm Delete" 
+                title="Confirm Delete"
                 open={isDeleteModalVisible}
                 onOk={() => {
                     setActionInProgress(true);

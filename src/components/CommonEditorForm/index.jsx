@@ -108,7 +108,18 @@ export default function CommonEditor(props) {
         getLatestValues
     });
     // 判断是否是日期
+    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
+    // 左侧列表添加item
+    const handleCommonListItemAdd = (item) => {
+        setSelectedItemFromList(item); // 更新 CommonEditor 中的状态
 
+        // TODO: 在这里根据 item 执行你需要的操作
+        // 例如：
+        // 1. 更新表单的初始值 (如果 CollapseForm 需要基于这个 item 来预填数据)
+        //    form.setFieldsValue({ ... 根据 item 构造的表单值 ... });
+        // 2. 更新传递给 CollapseForm 的 props
+        // 3. 如果有必要，甚至可以触发 CollapseForm 内部的方法 (需要通过 ref 或 props 回调)
+    };
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
         console.log(obj);
@@ -191,6 +202,7 @@ export default function CommonEditor(props) {
             complexConfig.onStructurePanelsChange(newPanels);
         }
     };
+
     const fetchData = async () => {
         console.log('fetchData');
 
@@ -341,7 +353,10 @@ export default function CommonEditor(props) {
         return (
             <div className={styles.advancedFormContent}>
                 {/* 渲染左侧列表 */}
-                <CommonList {...commonListConfig} />
+                <CommonList
+                    {...commonListConfig}
+                    onAddItem={handleCommonListItemAdd}
+                />
                 {/* 渲染右侧表单 */}
                 <div className={`${styles.advancedEditorForm}`}>
                     <Form
@@ -358,6 +373,7 @@ export default function CommonEditor(props) {
                             <CollapseForm
                                 fields={collapseFormConfig.fields || []}
                                 form={form}
+                                selectedItemFromList={selectedItemFromList}
                                 initialValues={initialValues}
                                 activeKeys={activeCollapseKeys}
                                 onCollapseChange={handleCollapseChange}

@@ -1,6 +1,4 @@
-import { generateUUID } from '@/utils';
 import fileApi from '@/api/file';
-import { Tabs } from 'antd';
 
 //文件上传
 const uploadFileFn = async ({ file }) => {
@@ -9,7 +7,14 @@ const uploadFileFn = async ({ file }) => {
 }
 
 const settings = {
-
+  request:{
+    tokenName: 'template-cms-token',
+    interceptors:(config) => { config.headers['token'] = localStorage.getItem(settings.request.tokenName) },
+    resInit:(res) => {
+      res.tokenError = (res.data.errCode && res.data.errCode === "USR001")
+      return res
+    }
+  },
   // 布局设置
   layout: {
     // 侧边栏宽度

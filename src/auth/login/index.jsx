@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { Input, Button, Modal } from 'antd';
 import { UserOutlined, LockOutlined, QuestionCircleOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import loginApi from '@/api/login.js';
 import { validateEmail } from '@/utils/index.js';
-
+import settings from "@/config/settings.js";
 import lionImg from '@/assets/images/lion.png';
 import loginLeftImg from '@/assets/images/login-left.svg';
 import './login.css'; // 将样式移到单独的CSS文件中
 
 const Login = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     // 状态管理
     const [account, setAccount] = useState('');
@@ -33,7 +31,7 @@ const Login = () => {
         // 本地开发环境跳过登录
         if (process.env.NODE_ENV === 'development') {
             const token = "123456789";
-            dispatch({ type: 'modifyData', payload: { name: "token", newdata: token } });
+            localStorage.setItem(settings.request.tokenName, token);
             localDown(token);
             navigate('/exercises/list'); // 假设路由路径
             return;
@@ -73,7 +71,7 @@ const Login = () => {
                 setLoading(false);
                 if (res.data && res.data.token) {
                     const token = res.data.token;
-                    dispatch({ type: 'modifyData', payload: { name: "token", newdata: token } });
+                    localStorage.setItem(settings.request.tokenName, token);
                     localDown(token);
                     navigate('/exercises/list');
                 } else {

@@ -117,3 +117,36 @@
 .formItem :global(.ant-form-item-required)::before {
     color: #ff4d4f;
 }
+
+.addCollapsePanel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: rgb(36, 54, 54);
+}
+
+.structureSectionHeader {
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.structureCollapse {
+    margin-top: 8px;
+}
+
+.deleteIcon {
+    margin-left: auto;
+    color: #ff4d4f;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.deleteIcon:hover {
+    color: #ff7875;
+}

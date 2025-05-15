@@ -1,12 +1,6 @@
-import authReducer from '@/store/slices/authSlice'
-import loadingReducer from '@/store/slices/loadingSlice'
-import themeReducer from '@/store/slices/themeSlice'
-import { configureStore } from '@reduxjs/toolkit'
+import { create } from 'zustand'
 
-export default configureStore({
-  reducer: {
-    auth: authReducer,
-    loading: loadingReducer,
-    theme: themeReducer,
-  },
-}) 
+export const useStore= create((set) => ({
+  loadingGlobal: false,
+  setLoadingGlobal: (data) => set({ loadingGlobal: data }),
+}))

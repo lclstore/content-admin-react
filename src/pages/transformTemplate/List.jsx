@@ -40,7 +40,7 @@ export default function CollectionsList() {
                 text: 'Create Category',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/collections/editor'),
+                onClick: () => navigate('/transformTemplate/editor'),
             }
         ])
     }, []);

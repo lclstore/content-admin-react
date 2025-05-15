@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { Collapse, Form } from 'antd';
+import React, { useEffect, useMemo, Fragment, useState } from 'react';
+import { Collapse, Form, Button, Typography } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
 import styles from './CollapseForm.module.css';
@@ -13,23 +14,34 @@ import styles from './CollapseForm.module.css';
  * @param {Object} props.initialValues 初始值
  * @param {Array} props.activeKeys 当前激活的面板keys
  * @param {Function} props.onCollapseChange 折叠面板变化回调
+ * @param {Object} props.selectedItemFromList 左侧列表添加item
+ * @param {Function} props.setActiveKeys 设置激活面板的函数
+ * @param {boolean} props.isCollapse 是否可折叠
+ * @param {Function} props.handleAddCustomPanel 添加自定义面板的回调函数
+ * @param {Function} props.handleDeletePanel 删除面板的回调函数
  */
 const CollapseForm = ({
     fields = [],
     form,
+    selectedItemFromList = null,
     initialValues = {},
     activeKeys = [],
     onCollapseChange,
     setActiveKeys,
-    isCollapse = true
+    isCollapse = true,
+    handleAddCustomPanel,
+    handleDeletePanel
 }) => {
-
+    const newField = fields.find(item => item.isShowAdd);
+    const [dataList, setDataList] = useState([newField]);//datalist
     // 表单连接状态
     const formConnected = !!form;
-
     // 挂载状态引用
     const mounted = useMemo(() => ({ current: true }), []);
-
+    // 接收左侧列表添加item数据
+    useEffect(() => {
+        console.log('selectedItemFromList', selectedItemFromList);
+    }, [selectedItemFromList]);
     // 渲染单个表单字段
     const renderField = (field) => {
         // 针对字段中声明的校验规则进行处理
@@ -40,6 +52,7 @@ const CollapseForm = ({
             type: field.type,
             requiredMessage: field.requiredMessage
         });
+        console.log(field);
 
         // 渲染表单项 - key直接作为属性传递
         return (
@@ -83,41 +96,132 @@ const CollapseForm = ({
     if (!fields || fields.length === 0) {
         return null;
     }
+    //  添加新的collapse面板的表单验证
+    const validateFields = (fieldGroup) => {
+        if (!fieldGroup || !Array.isArray(fieldGroup.fields) || fieldGroup.fields.length === 0) {
+            return true;
+        }
 
-    // 创建Collapse的items配置
-    // 根据Editor.jsx中的配置，使用name作为key
-    const collapseItems = fields.map((item, index) => ({
-        // 使用name属性作为key，如果没有则使用索引
-        key: item.name || `panel-${index}`,
-        label: (
-            <div className={styles.collapseHeader}>
-                <span className={styles.collapseLeftIcon}>{item.icon}</span>
-                <span>{item.label || item.title}</span>
-            </div>
-        ),
-        children: (
-            <div className={styles.collapsePanelContent}>
-                {renderFieldGroup(item.fields || [])}
-            </div>
-        ),
-        className: styles.collapsePanel
-    }));
+        const formValues = form.getFieldsValue();
 
-    // 手风琴模式下，activeKey需要是单个值，而不是数组
+        const hasInvalidField = fieldGroup.fields.some(field => {
+            return field.required && !formValues[field.name];
+        });
+
+        if (hasInvalidField) {
+            // 展开字段所在的面板
+            onCollapseChange(fieldGroup.name);
+
+            // 等待面板展开再校验
+            requestAnimationFrame(() => {
+                form.validateFields();
+            });
+
+            return false;
+        }
+
+        return true;
+    };
+
+    // 添加新的collapse面板的回调函数
+    const onAddCollapsePanel = () => {
+        const currentFields = dataList[dataList.length - 1];//最后一个折叠面板数据
+        let valid = validateFields(currentFields);//验证当前折叠面板数据是否填写
+        if (!valid) return;
+        // notification.warning({
+        //     message: `Cannot Add New ${currentFields.label}`,
+        //     description: `Please add exercises to the current last ${currentFields.label} before adding a new one.`,
+        //     placement: 'topRight',
+        // });
+        // 创建新面板的数据结构
+        const newPanelName = `${newField.name}${dataList.length}`; // 生成一个唯一的名称/key
+        const newCustomPanel = {
+            ...newField,
+            name: newPanelName,
+            isShowAdd: true,
+        };
+
+        // 调用父组件传递的回调函数来添加新面板
+        if (handleAddCustomPanel) {
+            // 添加面板到父组件的 formFields
+            handleAddCustomPanel(newCustomPanel);
+            onCollapseChange([newPanelName]);
+
+            // 本地状态更新，用于计数
+            setDataList([...dataList, newCustomPanel]);
+        }
+    };
+
+    // 找到第一个自定义项的索引
+    const firstCustomItemIndex = fields.findIndex(item => item.isShowAdd);
+    // 检查是否有自定义项
+    const hasCustomItems = firstCustomItemIndex !== -1;
+
+    // 准备Structure头部
+    const structureHeader = hasCustomItems ? (
+        <div className={styles.structureSectionHeader} key="structure-header-section">
+            <Typography.Title level={5} style={{ marginBottom: '0', fontWeight: '600', color: 'var(--primary-color)' }}>Structure</Typography.Title>
+            <Button
+                type="text"
+                onClick={onAddCollapsePanel}
+                icon={<PlusOutlined />}
+                style={{ color: 'var(--primary-color)', padding: '0 4px', fontSize: '16px' }}
+            >
+                Add
+            </Button>
+        </div>
+    ) : null;
+
+    // 处理删除面板
+    const onDeletePanel = (e, panelName) => {
+        e.stopPropagation(); // 阻止事件冒泡，避免触发折叠面板的展开/收起
+        if (handleDeletePanel) {
+            handleDeletePanel(panelName);
+            setDataList(dataList.filter((item) => item.name !== panelName));
+
+        }
+    };
 
     return (
         <div className={styles.collapseForm}>
-            <Collapse
-                expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
-                destroyInactivePanel={false}
-                accordion={true} // 设置为手风琴模式，只允许同时打开一个面板
-                activeKey={activeKeys} // 手风琴模式下使用单个值
-                onChange={onCollapseChange} // 父组件处理change事件
-                ghost
-                expandIconPosition="end"
-                className={styles.workoutDetailsCollapse}
-                items={collapseItems}
-            />
+            {fields.map((item, index) => (
+                <Fragment key={`fragment-${item.name || index}`}>
+                    {/* 在第一个自定义项之前显示Structure标题 */}
+                    {index === firstCustomItemIndex && structureHeader}
+
+                    {/* 渲染折叠面板项 */}
+                    <Collapse
+                        expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
+                        destroyInactivePanel={false}
+                        accordion={true}
+                        activeKey={activeKeys}
+                        onChange={onCollapseChange}
+                        ghost
+                        expandIconPosition="end"
+                        className={`${styles.workoutDetailsCollapse} ${item.isShowAdd ? styles.structureCollapse : ''}`}
+                        items={[{
+                            key: item.name || `panel-${index}`,
+                            label: (
+                                <div className={styles.collapseHeader}>
+                                    <span>{item.label || item.title}</span>
+                                    {dataList.length > 1 && item.isShowAdd && (
+                                        <DeleteOutlined
+                                            className={styles.deleteIcon}
+                                            onClick={(e) => onDeletePanel(e, item.name)}
+                                        />
+                                    )}
+                                </div>
+                            ),
+                            className: `${styles.collapsePanel} ${item.isShowAdd ? styles.structureItem : ''}`,
+                            children: (
+                                <div className={styles.collapsePanelContent}>
+                                    {renderFieldGroup(item.fields || [])}
+                                </div>
+                            )
+                        }]}
+                    />
+                </Fragment>
+            ))}
         </div>
     );
 };

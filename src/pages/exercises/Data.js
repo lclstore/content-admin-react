@@ -88,17 +88,17 @@ export const listData = [
     {
         id: 1,
         type: 'video',
-        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name: "123",
-        status: 2,
-        met: "1",
-        structureType: "asd",
-        difficulty: "asd",
-        equipment: "asd",
-        position: "asd",
-        target: "asd",
-        frontVideoStatus: "Successful",
-        sideVideoStatus: "Processing"
+        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name:"123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        status:"draft",
+        met:"1",
+        structureType:"asd",
+        difficulty:"asd",
+        equipment:"asd",
+        position:"asd",
+        target:"asd",
+        frontVideoStatus:"Successful",
+        sideVideoStatus:"Processing"
     },
 ]
 // 定义强制显示和默认显示的列键

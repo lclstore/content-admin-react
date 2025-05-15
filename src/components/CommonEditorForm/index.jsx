@@ -108,7 +108,18 @@ export default function CommonEditor(props) {
         getLatestValues
     });
     // 判断是否是日期
+    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
+    // 左侧列表添加item
+    const handleCommonListItemAdd = (item) => {
+        setSelectedItemFromList(item); // 更新 CommonEditor 中的状态
 
+        // TODO: 在这里根据 item 执行你需要的操作
+        // 例如：
+        // 1. 更新表单的初始值 (如果 CollapseForm 需要基于这个 item 来预填数据)
+        //    form.setFieldsValue({ ... 根据 item 构造的表单值 ... });
+        // 2. 更新传递给 CollapseForm 的 props
+        // 3. 如果有必要，甚至可以触发 CollapseForm 内部的方法 (需要通过 ref 或 props 回调)
+    };
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
         console.log(obj);
@@ -191,6 +202,7 @@ export default function CommonEditor(props) {
             complexConfig.onStructurePanelsChange(newPanels);
         }
     };
+
     const fetchData = async () => {
         console.log('fetchData');
 
@@ -243,6 +255,38 @@ export default function CommonEditor(props) {
         headerContext.setButtons,
         headerContext.setCustomPageTitle
     ]);
+
+    // 从 collapseFormConfig 中获取 activeKeys, onCollapseChange, 和 handleAddCustomPanel
+    const {
+        fields: collapseFields, // 从配置中获取字段
+        initialValues: collapseInitialValues, // 从配置中获取初始值
+        activeKeys: configActiveKeys, // 从父组件接收 activeKeys
+        onCollapseChange: configOnCollapseChange, // 从父组件接收 onCollapseChange
+        handleAddCustomPanel: configHandleAddCustomPanel, // 从父组件接收 handleAddCustomPanel
+        handleDeletePanel: configHandleDeletePanel,
+    } = collapseFormConfig;
+
+    // 当 collapseFormConfig 变化时更新依赖的状态
+    const [extractedConfig, setExtractedConfig] = useState({
+        collapseFields,
+        collapseInitialValues,
+        configActiveKeys,
+        configOnCollapseChange,
+        configHandleAddCustomPanel,
+        configHandleDeletePanel
+    });
+
+    // 当 collapseFormConfig 变化时更新
+    useEffect(() => {
+        setExtractedConfig({
+            collapseFields: collapseFormConfig.fields,
+            collapseInitialValues: collapseFormConfig.initialValues,
+            configActiveKeys: collapseFormConfig.activeKeys,
+            configOnCollapseChange: collapseFormConfig.onCollapseChange,
+            configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel,
+            configHandleDeletePanel: collapseFormConfig.handleDeletePanel
+        });
+    }, [collapseFormConfig]);
 
     // 渲染结构面板
     const renderStructurePanels = () => {
@@ -338,10 +382,23 @@ export default function CommonEditor(props) {
     const renderAdvancedContent = () => {
         console.log('collapseFormConfig');
 
+        // 使用最新的提取配置
+        const {
+            collapseFields: fields,
+            collapseInitialValues: initValues,
+            configActiveKeys: activeKeys,
+            configOnCollapseChange: onCollapseChange,
+            configHandleAddCustomPanel: handleAddCustomPanel,
+            configHandleDeletePanel: handleDeletePanel
+        } = extractedConfig;
+
         return (
             <div className={styles.advancedFormContent}>
                 {/* 渲染左侧列表 */}
-                <CommonList {...commonListConfig} />
+                <CommonList
+                    {...commonListConfig}
+                    onAddItem={handleCommonListItemAdd}
+                />
                 {/* 渲染右侧表单 */}
                 <div className={`${styles.advancedEditorForm}`}>
                     <Form
@@ -356,11 +413,15 @@ export default function CommonEditor(props) {
                         {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
                         {collapseFormConfig && Object.keys(collapseFormConfig).length > 0 && (
                             <CollapseForm
-                                fields={collapseFormConfig.fields || []}
+                                fields={fields || collapseFormConfig.fields || []}
                                 form={form}
-                                initialValues={initialValues}
+                                selectedItemFromList={selectedItemFromList}
+                                initialValues={initValues || initialValues}
+                                // activeKeys={activeKeys !== undefined ? activeKeys : activeCollapseKeys}
                                 activeKeys={activeCollapseKeys}
                                 onCollapseChange={handleCollapseChange}
+                                handleAddCustomPanel={handleAddCustomPanel}
+                                handleDeletePanel={handleDeletePanel}
                                 isCollapse={collapseFormConfig.isCollapse !== false}
                             />
                         )}

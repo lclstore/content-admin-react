@@ -1,10 +1,41 @@
-/* 通用容器样式 */
+/* 容器样式 */
 .commonEditorContainer {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.spin,
+.commonEditorContainer,
+:global(.ant-spin-container) {
+    width: 100%;
+    height: 100%;
+}
+
+/* 基础编辑器表单 */
+.basicEditorForm {
     margin: 0 auto;
-    padding: 30px;
     width: 100%;
     max-width: 765px;
+    /* padding: 24px; */
+    flex-grow: 1;
 }
+
+/* 高级编辑器表单 */
+.advancedEditorForm {
+    padding: 16px;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    flex-grow: 1;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
 
 /* 加载状态容器 */
 .loadingContainer {
@@ -14,12 +45,7 @@
     height: 100%;
 }
 
-/* 高级编辑器容器 */
-.advancedEditorContainer {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-}
+
 
 /* 内容库面板 */
 .contentLibraryPanel {
@@ -390,7 +416,9 @@
 
 /* 基础表单容器 */
 .basicFormContainer {
+    padding: 30px;
     width: 100%;
+    height: 100%;
 }
 
 /* 字段组容器 */
@@ -566,4 +594,101 @@
 
 :global(.ant-picker-dropdown .ant-picker-header-view>button:hover) {
     color: var(--primary-color);
+}
+
+.basicEditorContainer {
+    margin: 0 auto;
+    /* padding: 30px; */
+    width: 100%;
+    overflow-y: auto;
+    /* max-width: 765px; */
+}
+
+/* 高级表单内容 */
+.advancedFormContent {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* 左侧列表容器 */
+.commonListContainer {
+    width: 300px;
+    height: 100%;
+    overflow: auto;
+    border-right: 1px solid #f0f0f0;
+    padding-right: 16px;
+}
+
+
+/* 带侧边栏的高级编辑器表单 */
+.withSidebar {
+    margin-left: 16px;
+}
+
+/* 表单样式 */
+.form {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* 折叠面板容器 */
+.formCollapse {
+    width: 100%;
+    background-color: #fff;
+    border: none;
+}
+
+/* 表单面板项 */
+.formPanel {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+/* 结构面板容器 */
+.structurePanelsContainer {
+    margin-top: 24px;
+}
+
+/* 结构面板样式 */
+.structurePanel {
+    margin-bottom: 24px;
+    border-radius: 8px;
+}
+
+/* 项目标题栏 */
+.itemHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* 项目内容区域 */
+.itemFields {
+    padding: 16px 0;
+}
+
+/* 显示文本字段 */
+.displayText {
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+}
+
+/* 显示图片字段 */
+.displayImg {
+    max-width: 100%;
+    border-radius: 4px;
+    object-fit: cover;
 }

@@ -1,18 +1,18 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table, Switch,Space,Button } from 'antd';
+import { Modal, message, Form, Table, Switch, Space, Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
+import { statusIconMap, optionsConstants } from '@/constants';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-// import { statusIconMap, RESULT_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
-    mockWorkoutsForList,
+    mockUsers,
     filterSections,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
@@ -22,7 +22,7 @@ export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
-    const [dataSource, setDataSource] = useState(mockWorkoutsForList); // 表格数据源
+    const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [] }); // 筛选条件
@@ -69,7 +69,7 @@ export default function WorkoutsList() {
      * 导航到训练计划编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/sounds/editor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -77,7 +77,7 @@ export default function WorkoutsList() {
      * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
      */
     const handleDuplicate = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/sounds/editor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -153,15 +153,18 @@ export default function WorkoutsList() {
             { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
-                title: 'Status', dataIndex: 'status', key: 'status',
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                iconOptions: statusIconMap,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'Has a Script',sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
-                    console.log('HasAScript',text,record)
+                title: 'Has a Script', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
+                    console.log('HasAScript', text, record)
                     return (
                         <Space direction="vertical">
                             <Switch disabled={true} checked={text} />
@@ -201,7 +204,7 @@ export default function WorkoutsList() {
     const performSearch = useCallback((searchText, filters, pagination) => {
         setLoading(true);
         setTimeout(() => {
-            let filteredData = mockWorkoutsForList;
+            let filteredData = mockUsers;
             // 按状态过滤
             const statuses = filters?.status || [];
             if (statuses.length > 0) filteredData = filteredData.filter(w => statuses.includes(w.status));
@@ -316,7 +319,7 @@ export default function WorkoutsList() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/sounds/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     /**
@@ -367,16 +370,16 @@ export default function WorkoutsList() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Workout List');
+        setCustomPageTitle('Sounds List');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
+                text: 'Create Sounds',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/workouts/editor'),
+                onClick: () => navigate('/sounds/editor'),
             }
         ]);
 

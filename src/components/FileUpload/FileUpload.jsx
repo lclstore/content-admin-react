@@ -25,6 +25,7 @@ const { Text } = Typography;
  * @param {string} value - 当前文件值 (Form.Item 注入)
  */
 const FileUpload = ({
+    form,
     acceptedFileTypes,  // 接受的文件类型，字符串或数组，如 ['jpg', 'png'] 或 '.jpg,.png'
     maxFileSize,        // 最大文件大小，单位为KB
     disabled = false,   // 是否禁用上传功能
@@ -322,7 +323,7 @@ const FileUpload = ({
 
                 // 更新表单值
                 if (onChange) {
-                    onChange(urlToSet, file);
+                    onChange(urlToSet, file, form);
                 }
 
                 // 显示成功消息 - 在这里处理一次即可

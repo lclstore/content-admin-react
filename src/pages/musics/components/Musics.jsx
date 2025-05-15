@@ -8,7 +8,7 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-// import { STATUS_ICON_MAP, statusIconMap,RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
+import { statusIconMap, optionsConstants } from '@/constants';
 import {
     statusOrder,
     difficultyOrder,
@@ -70,7 +70,7 @@ export default function Musics() {
      * 导航到训练计划编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/musics/musicsEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -78,7 +78,7 @@ export default function Musics() {
      * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
      */
     const handleDuplicate = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/musics/musicsEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -150,12 +150,15 @@ export default function Musics() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'Audio', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'audio', key: 'image' },
+            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 1 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
-                title: 'Status', dataIndex: 'status', key: 'status',
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                iconOptions: statusIconMap,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
@@ -306,7 +309,7 @@ export default function Musics() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/musics/musicsEditor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     /**
@@ -366,7 +369,7 @@ export default function Musics() {
                 text: 'Create Workout',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/workouts/editor'),
+                onClick: () => navigate('/musics/musicsEditor'),
             }
         ]);
 

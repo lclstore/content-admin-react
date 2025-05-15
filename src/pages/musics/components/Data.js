@@ -53,7 +53,7 @@ export const mockWorkoutsForList = [
         image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         audio: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
-        status: 'Disabled',
+        status: 1,
         generateStatus: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',

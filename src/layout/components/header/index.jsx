@@ -32,21 +32,23 @@ export default function Header() {
 
             {/* 动态渲染按钮数组 */}
             <div className="header-actions">
-                {buttons.map((button, index) => (
-                    <Button
-                        key={button.key || index}
-                        type={button.type || 'default'}
-                        icon={button.icon}
-                        onClick={button.onClick}
-                        loading={button.loading}
-                        size={button.size || 'middle'}
-                        disabled={button.disabled}
-                        danger={button.danger}
-                        className={button.className}
-                    >
-                        {button.text}
-                    </Button>
-                ))}
+                {buttons.map((button, index) => {
+                    if (!button.hidden) {
+                        return <Button
+                            key={button.key || index}
+                            type={button.type || 'default'}
+                            icon={button.icon}
+                            onClick={button.onClick}
+                            loading={button.loading}
+                            size={button.size || 'middle'}
+                            disabled={button.disabled}
+                            danger={button.danger}
+                            className={button.className}
+                        >
+                            {button.text}
+                        </Button>
+                    }
+                })}
             </div>
         </div>
     );

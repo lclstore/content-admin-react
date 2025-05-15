@@ -7,9 +7,13 @@
 }
 
 .page-title {
-    margin: 0;
-    font-size: var(--font-xl);
-    font-weight: var(--font-weight-medium);
+    font-size: 22px;
+    line-height: 1.6;
+    font-weight: var(--font-weight-bold);
+    text-align: left;
+    text-transform: initial;
+    overflow-wrap: break-word;
+    text-decoration-line: none;
     color: var(--primary-color);
 }
 

@@ -2,7 +2,7 @@ import { Form, message } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import React from 'react';
-
+import { dateRangeKeys } from '@/constants/app';
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -50,6 +50,7 @@ export const useFormState = (initialValues = {}) => {
 
     // 监控表单实例挂载状态
     useEffect(() => {
+
         if (form && typeof form.getFieldsValue === 'function') {
             setFormConnected(true);
             mounted.current = true;
@@ -105,76 +106,107 @@ export const useHeaderConfig = (params) => {
         formType,
         complexConfig,
         structurePanels,
+        collapseFormConfig,
+        commonListConfig,
         headerContext,
         setIsFormDirty
     } = params;
 
+    //处理表单字段和自定义表单验证
+    const processFields = (fields = [], dataToSave = {}, parent = null) => {
+
+        for (const field of fields) {
+            const value = dataToSave[field.name];
+            const isRequired = formType === 'advanced' && collapseFormConfig.isCollapse && parent && field.required;
+
+            // 校验必填项
+            if (isRequired && (value === undefined || value === null || value === '')) {
+                if (collapseFormConfig.setActiveKey && parent.name) {
+                    collapseFormConfig.setActiveKey(parent.name);
+
+                    requestAnimationFrame(() => {
+                        form.validateFields();
+                    });
+                }
+
+                // 抛出标准表单校验错误
+                throw new Error(
+                    JSON.stringify({
+                        errorFields: [{
+                            name: [field.name],
+                            errors: [`${field.label} is required`]
+                        }]
+                    })
+                );
+            }
+
+            // 处理日期范围字段（有 keys 时分拆，无 keys 时格式化原字段）
+            if (field.type === 'dateRange') {
+                const date = form.getFieldValue(field.name);
+                const format = field.props?.format || 'YYYY-MM-DD';
+
+                if (date && date.length === 2 && typeof date[0]?.format === 'function') {
+                    if (field.keys && Array.isArray(field.keys)) {
+                        dataToSave[field.keys[0]] = date[0].format(format);
+                        dataToSave[field.keys[1]] = date[1].format(format);
+                        delete dataToSave[field.name];
+                    } else {
+                        dataToSave[field.name] = [
+                            date[0].format(format),
+                            date[1].format(format)
+                        ];
+                    }
+                } else {
+                    if (field.keys && Array.isArray(field.keys)) {
+                        dataToSave[field.keys[0]] = null;
+                        dataToSave[field.keys[1]] = null;
+                        delete dataToSave[field.name];
+                    }
+                }
+            }
+
+            // 处理单个日期字段
+            if ((field.type === 'date' || field.type === 'datepicker') && value?.format) {
+                dataToSave[field.name] = value.format('YYYY-MM-DD');
+            }
+
+            // 递归处理嵌套字段
+            if (Array.isArray(field.fields)) {
+                processFields(field.fields, dataToSave, field);
+            }
+        }
+    };
+
+
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
-        if (!formConnected) return;
+
+        if (!form) return;
 
         form.validateFields()
             .then(values => {
                 if (validate && !validate(values, form)) {
                     return;
                 }
-
                 let dataToSave = { ...values };
-
+                const formFields = formType === 'basic' ? fields : collapseFormConfig.fields;
                 // 处理dateRange类型字段 - 确保在分离字段模式下移除原始字段
-                fields.forEach(field => {
-                    if (field.type === 'dateRange' && field.props?.fieldNames) {
-                        const fieldNameConfig = field.props.fieldNames;
-
-                        // 如果使用分离字段模式且字段名在值中，移除原始timeRange字段
-                        if (fieldNameConfig.start && fieldNameConfig.end &&
-                            dataToSave[fieldNameConfig.start] !== undefined &&
-                            dataToSave[fieldNameConfig.end] !== undefined &&
-                            dataToSave[field.name] !== undefined) {
-                            // 移除原始字段，仅保留分离字段值
-                            delete dataToSave[field.name];
-                        }
-                    }
-
-                    // 确保所有日期值都转换为字符串
-                    if ((field.type === 'date' || field.type === 'datepicker') && dataToSave[field.name]) {
-                        // 如果值是Moment/Dayjs对象，转换为字符串
-                        const dateValue = dataToSave[field.name];
-                        if (dateValue && typeof dateValue === 'object' && typeof dateValue.format === 'function') {
-                            dataToSave[field.name] = dateValue.format('YYYY-MM-DD');
-                        }
-                    }
-
-                    // 处理timeRange字段，确保值是字符串数组而不是日期对象数组
-                    if (field.type === 'dateRange' && dataToSave[field.name] && Array.isArray(dataToSave[field.name])) {
-                        const format = field.props?.format || 'YYYY-MM-DD';
-                        const dateRangeValue = dataToSave[field.name];
-
-                        // 将数组中的每个日期对象转换为字符串
-                        if (dateRangeValue.length === 2) {
-                            if (typeof dateRangeValue[0] === 'object' && typeof dateRangeValue[0].format === 'function') {
-                                dataToSave[field.name] = [
-                                    dateRangeValue[0].format(format),
-                                    dateRangeValue[1].format(format)
-                                ];
-                            }
-                        }
-                    }
-                });
+                processFields(formFields, dataToSave);
 
                 // 处理高级表单的结构化数据
-                if (formType === 'advanced' && complexConfig.includeStructurePanels) {
-                    dataToSave.structurePanels = JSON.parse(JSON.stringify(structurePanels));
+                // if (formType === 'advanced' && complexConfig.includeStructurePanels) {
+                //     dataToSave.structurePanels = JSON.parse(JSON.stringify(structurePanels));
 
-                    if (complexConfig.flattenStructurePanels) {
-                        dataToSave.structure = dataToSave.structurePanels.flatMap(
-                            panel => panel.items || []
-                        );
-                    }
-                }
-
+                //     if (complexConfig.flattenStructurePanels) {
+                //         dataToSave.structure = dataToSave.structurePanels.flatMap(
+                //             panel => panel.items || []
+                //         );
+                //     }
+                // }
                 if (onSave) {
-                    const editId = id
+
+
+                    const editId = id;
                     const callbackUtils = {
                         setDirty: setIsFormDirty,
                         messageApi,
@@ -191,7 +223,26 @@ export const useHeaderConfig = (params) => {
                 }
             })
             .catch((error) => {
-                messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
+                // 检查错误对象是否包含 errorFields 属性
+                if (!error.errorFields || !error.errorFields.length) {
+                    messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
+                    return;
+                }
+                // 如果启用了折叠功能且提供了 setActiveKey 方法
+                if (collapseFormConfig.isCollapse && collapseFormConfig.setActiveKey) {
+                    const errorFieldName = error.errorFields[0].name?.[0];
+
+                    const matchedPanel = collapseFormConfig.fields.find(panel =>
+                        Array.isArray(panel.fields) &&
+                        panel.fields.some(field => field.name === errorFieldName)
+                    );
+
+                    if (matchedPanel) {
+                        collapseFormConfig.setActiveKey(matchedPanel.name);
+                    }
+                }
+                // 显示错误信息
+                messageApi.error(error.errorFields[0].errors[0]);
             });
     }, [
         formConnected,
@@ -227,10 +278,11 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 头部按钮配置
-    const headerButtons = useMemo(() => {
+    let headerButtons = useMemo(() => {
         return [
             {
                 key: 'save',
+                hidden: config.hideSaveButton,
                 text: config.saveButtonText || 'Save',
                 icon: React.createElement(SaveOutlined),
                 type: 'primary',
@@ -240,6 +292,7 @@ export const useHeaderConfig = (params) => {
             },
             {
                 key: 'back',
+                hidden: config.hideBackButton,
                 text: config.backButtonText || 'Back',
                 icon: React.createElement(ArrowLeftOutlined),
                 onClick: handleBackClick,
@@ -253,7 +306,14 @@ export const useHeaderConfig = (params) => {
         handleSaveChanges,
         handleBackClick
     ]);
-
+    if (config.headerButtons) {
+        config.headerButtons.forEach(button => {
+            if (button.key === 'save') {
+                button.onClick = handleSaveChanges;
+            }
+        });
+        headerButtons = config.headerButtons;
+    }
     return {
         headerButtons,
         handleSaveChanges,

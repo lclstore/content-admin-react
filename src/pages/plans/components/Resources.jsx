@@ -70,7 +70,7 @@ export default function Resources() {
      * 导航到训练计划编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/plans/resourcesEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -78,7 +78,7 @@ export default function Resources() {
      * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
      */
     const handleDuplicate = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/plans/resourcesEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -322,7 +322,7 @@ export default function Resources() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/workouts/editor?id=${record.id}`);
+        navigate(`/plans/resourcesEditor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     /**
@@ -373,16 +373,16 @@ export default function Resources() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Workout List');
+        setCustomPageTitle('Resources List');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
+                text: 'Create Workout1', 
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/workouts/editor'),
+                onClick: () => navigate('/plans/resourcesEditor'),
             }
         ]);
 

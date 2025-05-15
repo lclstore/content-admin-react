@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
     Input,
     DatePicker,
@@ -56,67 +56,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
 };
 
 
-/**
- * 穿梭框控件组件
- * 用于多选项的双向选择
- */
-const TransferField = React.memo(({ field, disabled, value, onChange }) => {
-    // 值变化处理函数
-    const handleChange = useCallback((newTargetKeys) => {
-        // 直接调用从 Form.Item 注入的 onChange
-        if (onChange) {
-            onChange(newTargetKeys);
-        }
 
-        // 触发自定义onChange
-        if (field.onChange) {
-            field.onChange(newTargetKeys);
-        }
-    }, [field, onChange]);
-
-    // 使用传入的 value 作为 targetKeys
-    const targetKeys = value || [];
-
-    // 安全提取数据源
-    const dataSource = field.dataSource || [];
-    const titles = field.titles || ['来源', '目标'];
-    const render = field.render || (item => item.title);
-    const showSearch = field.showSearch !== false;
-    const filterOption = field.filterOption || ((inputValue, item) =>
-        item.title.indexOf(inputValue) !== -1);
-    const locale = field.locale || {
-        itemUnit: '项',
-        itemsUnit: '项',
-        searchPlaceholder: '在这里搜索',
-        notFoundContent: '无数据'
-    };
-
-    // 安全提取props
-    const transferProps = {};
-    if (field.props) {
-        Object.keys(field.props).forEach(key => {
-            const propValue = field.props[key];
-            if (propValue === null || typeof propValue !== 'object') {
-                transferProps[key] = propValue;
-            }
-        });
-    }
-
-    return (
-        <Transfer
-            dataSource={dataSource}
-            titles={titles}
-            targetKeys={targetKeys}
-            onChange={handleChange}
-            render={render}
-            disabled={disabled}
-            showSearch={showSearch}
-            filterOption={filterOption}
-            locale={locale}
-            {...transferProps}
-        />
-    );
-});
 
 // ==========================
 // 字段渲染逻辑
@@ -129,17 +69,18 @@ const TransferField = React.memo(({ field, disabled, value, onChange }) => {
  * @returns {ReactNode} 渲染的表单控件
  */
 export const renderFormControl = (field, options = {}) => {
-    const {
-        type,
-        name,
-        label,
-        placeholder,
-        options: fieldOptions,
-        disabled,
-        props: fieldProps = {},
-        render,
-    } = field;
+    // 删除不必要的console.log
 
+    // 表单字段的标准属性
+    const {
+        type = 'input',
+        label,
+        name,
+        initialValue,
+        placeholder,
+        disabled = false,
+        width,
+    } = field;
     const { form, formConnected, initialValues, mounted } = options;
 
     // 获取字段值，仅用于显示，不在渲染中更新状态
@@ -151,46 +92,61 @@ export const renderFormControl = (field, options = {}) => {
     }
 
     // 如果提供了自定义渲染函数，使用它
-    if (render) {
-        return render(formConnected ? form : null, field);
+    if (field.render) {
+        return field.render(formConnected ? form : null, field);
     }
 
     // 根据类型渲染不同控件
     switch (type) {
         // 文本展示字段
         case 'displayText':
-            return <div className={styles.displayText} style={{ ...field.style }}>
-                {fieldValue !== undefined ? fieldValue : ''}
-            </div>;
+            return field.displayFn ? (
+                <div className="displayText" style={field.style}>{field.displayFn(form, initialValues)}</div>
+            ) : (
+                <div className={styles.displayText} style={{ ...field.style }}>
+                    {fieldValue !== undefined ? fieldValue : ''}
+                </div>
+            )
+        // return <div className={styles.displayText} style={{ ...field.style }}>
+        //     {fieldValue !== undefined ? fieldValue : ''}
+        // </div>;
         // 图片展示字段
         case 'displayImage':
             field.style = field.style || { width: '300px', height: '100px' };
             return field.content ? <Image className={styles.displayImg} src={field.content} style={{ ...field.style }} /> : '';
         case 'input':
+            const { key: inputKey, style: inputStyle, ...inputRest } = field;
             return <Input
-                style={field.style}
+                key={inputKey}
+                style={inputStyle}
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 allowClear
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
                 autoComplete="off"
-                {...fieldProps}
+                {...field.props}
+                {...inputRest}
             />;
         //文本输入框
         case 'textarea':
+            const { key: textareaKey, ...textareaRest } = field;
             return <Input.TextArea
+                key={textareaKey}
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
                 allowClear
                 autoComplete="off"
-                {...fieldProps}
+                {...field.props}
+                {...textareaRest}
             />;
         //密码输入框
         case 'password':
+            const { key: passwordKey, ...passwordRest } = field;
             return <Input.Password
+                key={passwordKey}
                 placeholder={placeholder || `Enter ${label || name}`}
                 disabled={disabled}
                 iconRender={(visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
@@ -198,7 +154,8 @@ export const renderFormControl = (field, options = {}) => {
                 maxLength={field.maxLength}
                 showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
                 autoComplete="off"
-                {...fieldProps}
+                {...field.props}
+                {...passwordRest}
             />;
 
 
@@ -227,15 +184,17 @@ export const renderFormControl = (field, options = {}) => {
             );
 
         case 'dateRange':
+            console.log(initialValues);
+
             const { keys = dateRangeKeys } = field;
             const handleChange = (dates, dateStrings) => {
                 // 将日期字符串映射到keys中
-                const mapped = keys.reduce((acc, key, idx) => {
-                    acc[key] = dateStrings[idx];
-                    return acc;
-                }, {});
-                console.log(mapped);
-
+                // keys.forEach((key, idx) => {
+                //     form.setFieldValue(key, dateStrings[idx]);
+                // });
+                if (field.onChange) {
+                    field.onChange(dates, dateStrings);
+                }
             };
             return (
                 <DatePicker.RangePicker
@@ -248,29 +207,39 @@ export const renderFormControl = (field, options = {}) => {
         case 'switch':
             field.checkedChildren = field.checkedChildren || 'Enabled';
             field.unCheckedChildren = field.unCheckedChildren || 'Disabled';
-            field.defaultChecked = fieldValue === 1 || fieldValue === true;
-            console.log(fieldValue);
+            // 确保初始值为0或1
+            useEffect(() => {
+                form.setFieldValue(name, fieldValue === 1 || fieldValue === true ? 1 : 0);
+            }, []);
+
+            // 提取key属性，确保不会传递给Switch组件
+            const { key: switchKey, ...switchRest } = field;
 
             return (
                 <Switch
-                    defaultChecked={fieldValue === 1 || fieldValue === true}
+                    key={switchKey}
+                    defaultChecked={field.defaultChecked || false}
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑
                         form.setFieldValue(name, newValue);
                     }}
-                    {...field}
+                    {...switchRest}
                 />
             )
         case 'select':
-            //选项处理使用统一的optins映射
-            const newField = JSON.parse(JSON.stringify(field));
+            //选项处理使用统一的options映射
+            const fieldCopy = JSON.parse(JSON.stringify(field));
             if (field.options && typeof field.options === 'string') {
-                newField.options = optionsConstants[field.options];
+                fieldCopy.options = optionsConstants[field.options];
             }
-            return <TagSelector
-                {...newField}
 
+            // 确保完全移除key属性
+            const { key: selectKey, ...selectRest } = fieldCopy;
+
+            return <TagSelector
+                key={selectKey}
+                {...selectRest}
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
@@ -284,7 +253,6 @@ export const renderFormControl = (field, options = {}) => {
                 }}
             />;
 
-
         // 文件上传并预览
         case 'upload':
             const {
@@ -297,11 +265,15 @@ export const renderFormControl = (field, options = {}) => {
                 dirKey,
                 uploadFn,
                 style,
+                key: uploadKey,
+                ...uploadRest
             } = field;
-
+            // 从options中解构出form对象
             // FileUpload 组件不需要在这里添加 Form.Item，因为 renderFormItem 已经创建了一个
             return (
                 <FileUpload
+                    form={options.form}
+                    key={uploadKey}
                     value={fieldValue}
                     onChange={(value, file) => {
                         if (field.onChange) {
@@ -317,17 +289,20 @@ export const renderFormControl = (field, options = {}) => {
                     dirKey={dirKey}
                     uploadFn={uploadFn}
                     style={style}
-                    {...fieldProps}
+                    {...field.props}
+                    {...uploadRest}
                 />
             );
         //输入框组
         case 'inputGroup':
             const { inputConfig } = field;
+            console.log(222);
+
             return (
                 <Form.Item
-                    label={label}
+
                 >
-                    <div style={{ display: 'flex', gap: '0 40px', maxWidth: '100%', overflowX: 'auto' }}>
+                    <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {
                             // 处理每个子项的验证规则
                             const itemRules = processValidationRules(config.rules || [], {
@@ -338,7 +313,7 @@ export const renderFormControl = (field, options = {}) => {
                             });
 
                             return (
-                                <div style={{ flex: 1, minWidth: config.previewWidth }} key={index}>
+                                <div style={{ flex: 1, minWidth: config.width || '' }} key={index}>
                                     <Form.Item
                                         className='editorform-item'
                                         name={config.name}
@@ -356,58 +331,15 @@ export const renderFormControl = (field, options = {}) => {
             );
         //数字步进器
         case 'numberStepper':
+            // 提取key属性，确保其不会通过展开运算符传递
+            const { key: stepperKey, ...stepperRest } = field;
 
             return (
                 <NumberStepper
-                    {...field}
+                    key={stepperKey}
+                    {...stepperRest}
                 />
             );
-        case 'transfer':
-            // 优化TransferField调用，提取关键属性
-            const transferProps = {
-                dataSource: field.dataSource || [],
-                titles: field.titles || ['来源', '目标'],
-                render: field.render,
-                showSearch: field.showSearch,
-                filterOption: field.filterOption,
-                locale: field.locale,
-                onChange: field.onChange,
-                props: {}
-            };
-
-            // 安全提取props
-            if (field.props) {
-                Object.keys(field.props).forEach(key => {
-                    const propValue = field.props[key];
-                    if (propValue === null || typeof propValue !== 'object') {
-                        transferProps.props[key] = propValue;
-                    }
-                });
-            }
-
-            return <TransferField
-                field={transferProps}
-                disabled={disabled}
-            />;
-
-        case 'rangeTime':
-            return (
-                <div style={{ width: '100%', display: 'block' }}>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <TimePicker.RangePicker
-                            style={{ width: '100%' }}
-                            className='c-editorform-timepicker'
-                        />
-                    </div>
-                </div>
-            );
-
-        default:
-            return <Input
-                placeholder={placeholder || `Enter ${label || name}`}
-                disabled={disabled}
-                {...fieldProps}
-            />;
     }
 };
 
@@ -420,6 +352,11 @@ export const renderFormControl = (field, options = {}) => {
  * @returns {ReactNode} 渲染的表单项
  */
 export const renderFormItem = (field, options = {}) => {
+    // 删除不必要的console.log
+    if (!field) {
+        return null;
+    }
+
     const {
         name, // 字段的标识符
         label,
@@ -436,7 +373,6 @@ export const renderFormItem = (field, options = {}) => {
     } = field;
 
     const { form, formConnected } = options;
-
     // 特殊渲染情况：当 shouldUpdate 为 true 时
     // 这些情况通常自定义渲染逻辑，并且 Form.Item 的 name 属性不用于表单值收集
     if (shouldUpdate) {
@@ -456,7 +392,6 @@ export const renderFormItem = (field, options = {}) => {
     // 特殊渲染情况：当存在 dependencies 时
     // 同上，这些情况的 Form.Item 的 name 属性不用于表单值收集
     if (dependencies) {
-        console.log(field, options);
         const newField = JSON.parse(JSON.stringify(field));
         delete newField.dependencies;
 

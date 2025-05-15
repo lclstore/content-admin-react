@@ -20,24 +20,14 @@ export default () => {
             {
                 title: 'Version',
                 dataIndex: 'version',
-                width: 70,
+                width: 100,
             },
             {
                 title: 'Comment',
                 dataIndex: 'comment',
-                // width: 120,
+                width: 400,
             },
-            {
-                title: 'User',
-                dataIndex: 'user',
-                width: 70,
 
-            },
-            {
-                title: 'Time',
-                dataIndex: 'time',
-                width: 70,
-            },
             {
                 title: 'Result',
                 dataIndex: 'result',
@@ -48,9 +38,20 @@ export default () => {
                     ):(
                         <div><CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>
                     )
-                }
+                },
 
-                // width: 70,
+                width: 100,
+            },
+            {
+                title: 'User',
+                dataIndex: 'user',
+                width: 100,
+
+            },
+            {
+                title: 'Time',
+                dataIndex: 'time',
+                width: 100,
             }
         ].map(i => ({ ...i, key: i.dataIndex }));
     }, []);
@@ -99,7 +100,6 @@ export default () => {
                 <Table dataSource={dataSource.map(i => ({ ...i, key: i.id }))}
                     columns={columns}
                     pagination={false}
-                    scroll={{ x: 'max-content', y: 400 }}
                 />
             </Spin>
         </div>

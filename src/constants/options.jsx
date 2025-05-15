@@ -5,6 +5,10 @@ export const optionsConstants = {
         { name: <div>Enabled <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },
         { name: <div>Disabled <CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>, value: 2 },
     ],
+    resultStatus: [
+        { name: <div>success <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },
+        { name: <div>faild <CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>, value: 2 },
+    ],
     defaultStatus: [
         { name: <div><CheckOutlined style={{ color: "#889e9e", fontSize: '18px' }} /></div>, value: 1 },
         { name: <div><CloseOutlined style={{ color: "#ff4d4f", fontSize: '18px' }} /></div>, value: 0 },

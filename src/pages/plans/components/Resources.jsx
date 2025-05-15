@@ -5,7 +5,6 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
 // import { STATUS_ICON_MAP, statusIconMap,RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
@@ -379,7 +378,7 @@ export default function Resources() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout1', 
+                text: 'Create Resources', 
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/plans/resourcesEditor'),

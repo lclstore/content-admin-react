@@ -378,13 +378,13 @@ export default function Temlates() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Workout List');
+        setCustomPageTitle('Temlates List');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
+                text: 'Create Temlates',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/plans/temolatesEditor'),

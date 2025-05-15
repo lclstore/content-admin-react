@@ -1,6 +1,20 @@
 .publishContainer{
+    margin: 0 auto;
+    width: 800px;
     padding: 20px;
 }
 .publish-commit{
-    width: 600px;
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+}
+.publish-btnBox{
+    padding: 20px 0;
+    justify-content: center;
+    display: flex;
+    border-bottom: 1px solid gainsboro;
+    margin-bottom: 20px;
+}
+.publish-btnBox Button{
+    margin: 0 10px;
 }

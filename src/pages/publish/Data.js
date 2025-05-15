@@ -6,7 +6,7 @@ export const listData = [
         comment:"この王の力、神羅てんせい！！！",
         user:"王の力",
         time:"200s",
-        result:"success",
+        result:1,
         failReason:null,
     },
     {
@@ -15,7 +15,7 @@ export const listData = [
         comment:"この王の力、神羅てんせい！！！",
         user:"王の力",
         time:"200s",
-        result:"success",
+        result:2,
         failReason:null,
     },
     {

@@ -282,7 +282,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'Exercises' }}
+            config={{ formName: 'Exercises',headerButtons:null }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

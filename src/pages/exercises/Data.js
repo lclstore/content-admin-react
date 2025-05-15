@@ -88,17 +88,17 @@ export const listData = [
     {
         id: 1,
         type: 'video',
-        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123",
-        status:"draft",
-        met:"1",
-        structureType:"asd",
-        difficulty:"asd",
-        equipment:"asd",
-        position:"asd",
-        target:"asd",
-        frontVideoStatus:"Successful",
-        sideVideoStatus:"Processing"
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "123",
+        status: "draft",
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
     },
 ]
 // 定义强制显示和默认显示的列键
@@ -120,14 +120,19 @@ export const filterSections = [
         options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
     },
     {
-        title: 'Function Type',
-        key: 'functionType',
+        title: 'Structure Type',
+        key: 'structureType',
         options: ['Warm Up', 'Main', 'Cool Down']
     },
     {
         title: 'Difficulty',
         key: 'difficulty',
         options: ['Beginner', 'Intermediate', 'Advanced']
+    },
+    {
+        title: 'Equipment',
+        key: 'equipment',
+        options: ['Dumbbells', 'Resistance', 'band', 'None']
     },
     {
         title: 'Position',
@@ -598,7 +603,7 @@ export const mockContentLibrary = [
         duration: 50,
     },
     // 可以添加更多音频、组等内容
-]; 
+];
 
 export const mockUsers = [
     {

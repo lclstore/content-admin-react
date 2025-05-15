@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections,listData } from './Data';
+import { statusOrder, filterSections, listData } from './Data';
 
 
 export default () => {
@@ -78,81 +78,98 @@ export default () => {
             {
                 title: 'ID',
                 dataIndex: 'id',
+                visibleColumn: 2,
+                width: 50,
+                key:'id'
             },
             {
                 title: 'Image',
-                dataIndex: 'imageCoverUrl',
+                width: 120,
                 mediaType: 'image',
+                dataIndex: 'imageCoverUrl',
+                key: 'imageCoverUrl',
+                visibleColumn: 0
             },
             {
                 title: 'Name',
                 dataIndex: 'name',
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 0,
+                key:'name'
             },
             {
                 title: 'Status',
                 dataIndex: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options:"status",
+                options: "status",
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 0,
+                key:'status'
+                
             },
             {
                 title: 'MET',
                 dataIndex: 'met',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 2,
+                key:'met'
             },
             {
                 title: 'Structure Type',
                 dataIndex: 'structureType',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 2,
+                key:'structureType'
             },
             {
                 title: 'Difficulty',
                 dataIndex: 'difficulty',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 1,
+                key:'difficulty'
             },
             {
                 title: 'Equipment',
                 dataIndex: 'equipment',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 1,
+                key:'equipment'
             },
             {
                 title: 'Position',
                 dataIndex: 'position',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 1,
+                key:'position'
             },
             {
                 title: 'Target',
                 dataIndex: 'target',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 1,
+                key:'target'
             },
             {
                 title: 'Front Video Status',
                 dataIndex: 'frontVideoStatus',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
+                width: 140,
+                visibleColumn: 1,
+                key:'frontVideoStatus'
             },
             {
                 title: 'Side Video Status',
                 dataIndex: 'sideVideoStatus',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                width: 120,
-                visibleColumn: 0
+                width: 140,
+                visibleColumn: 1,
+                key:'sideVideoStatus'
             },
             {
                 title: 'Actions',
@@ -161,7 +178,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable','edit','duplicate'],
+                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数
@@ -264,10 +281,24 @@ export default () => {
         setButtons([
             {
                 key: 'create',
-                text: 'Create',
+                text: 'Add Exercise',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate(`/exercises/editor`),
+            },
+            {
+                key: 'Import',
+                text: 'Feishu Import',
+                icon: <PlusOutlined />,
+                type: 'primary',
+                // onClick: () => navigate(`/exercises/editor`),
+            },
+            {
+                key: 'Export',
+                text: 'Export Feishu',
+                icon: <PlusOutlined />,
+                type: 'primary',
+                // onClick: () => navigate(`/exercises/editor`),
             }
         ]);
 
@@ -328,7 +359,7 @@ export default () => {
 
             {/* 删除确认弹窗 */}
             <Modal
-                title="Confirm Delete" 
+                title="Confirm Delete"
                 open={isDeleteModalVisible}
                 onOk={() => {
                     setActionInProgress(true);

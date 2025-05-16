@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Button, Modal } from 'antd';
 import { UserOutlined, LockOutlined, QuestionCircleOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import loginApi from '@/api/login.js';
 import { validateEmail } from '@/utils/index.js';
 import settings from "@/config/settings.js";
 import lionImg from '@/assets/images/lion.png';
 import loginLeftImg from '@/assets/images/login-left.svg';
+import md5 from "md5"
 import './login.css'; // 将样式移到单独的CSS文件中
+import request from "@/request/index.js";
+import { useStore } from "@/store/index.js";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -20,78 +22,61 @@ const Login = () => {
     const [passwordError, setPasswordError] = useState('');
     const [loading, setLoading] = useState(false);
     const [dialogVisible, setDialogVisible] = useState(false);
-
+    const setUserInfo = useStore((state) => state.setUserInfo);
     // 本地存储token
     const localDown = (token) => {
-        localStorage.setItem("cms-token", token);
+        localStorage.setItem(settings.request.tokenName, token);
     };
 
     // 登录逻辑
-    const login = () => {
-        // 本地开发环境跳过登录
-        if (process.env.NODE_ENV === 'development') {
-            const token = "123456789";
-            localStorage.setItem(settings.request.tokenName, token);
-            localDown(token);
-            navigate('/exercises/list'); // 假设路由路径
-            return;
+    const login = useCallback( () => {
+        // 本地开发环境跳过登录校验
+        if (import.meta.env.VITE_ENV !== 'development') {
+
+            // 表单验证
+            let hasError = false;
+
+            if (!account) {
+                setAccountError("Email cannot be empty.");
+                hasError = true;
+            } else if (!validateEmail(account)) {
+                setAccountError("email is not valid.");
+                hasError = true;
+            }
+
+            if (!password) {
+                setPasswordError("Password cannot be empty.");
+                hasError = true;
+            }
+
+            if (hasError) {
+                return false;
+            }
+
+            // 清除错误提示
+            setAccountError('');
+            setPasswordError('');
+            setLoading(true);
         }
-
-        // 表单验证
-        let hasError = false;
-
-        if (!account) {
-            setAccountError("Email cannot be empty.");
-            hasError = true;
-        } else if (!validateEmail(account)) {
-            setAccountError("email is not valid.");
-            hasError = true;
-        }
-
-        if (!password) {
-            setPasswordError("Password cannot be empty.");
-            hasError = true;
-        }
-
-        if (hasError) {
-            return false;
-        }
-
-        // 清除错误提示
-        setAccountError('');
-        setPasswordError('');
-        setLoading(true);
-
         // 使用API登录
-        loginApi.login({
-            userName: account,
-            password: password
+        request.post({
+            url: "/user/login",
+            data: {
+                email: account,
+                password: md5(password)
+            },
+            success(res){
+                localDown(res.data.data.token)
+                setUserInfo(res.data.data)
+                navigate(settings.router.homePath);
+            }
         })
-            .then(res => {
-                setLoading(false);
-                if (res.data && res.data.token) {
-                    const token = res.data.token;
-                    localStorage.setItem(settings.request.tokenName, token);
-                    localDown(token);
-                    navigate('/exercises/list');
-                } else {
-                    // 处理登录失败情况
-                    setAccountError("Your email or password seem to be incorrect. Please try again.");
-                }
-            })
-            .catch(error => {
-                setLoading(false);
-                navigate('/exercises/list');
-                console.error('Login error:', error);
-                setAccountError("Your email or password seem to be incorrect. Please try again.");
-            });
-    };
+    },[account,password])
 
     // 处理账号输入变化
     const handleAccountChange = (e) => {
         const value = e.target.value;
         setAccount(value);
-
         // 实时验证
         if (value && !validateEmail(value)) {
             setAccountError("email is not valid.");
@@ -159,7 +144,9 @@ const Login = () => {
                                         prefix={<LockOutlined />}
                                         placeholder="Enter your password"
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onChange={(e) => {
+                                            setPassword(e.target.value)
+                                        }}
                                         onFocus={() => setPasswordError('')}
                                         visibilityToggle={{ visible: passwordVisible, onVisibleChange: setPasswordVisible }}
                                         iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}

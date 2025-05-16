@@ -56,7 +56,6 @@ export default function UserEditorWithCommon() {
             type: 'inputGroup',
             name: 'warmUp',
             label: 'Warm Up',
-            required: true,
             inputConfig: [
                 {
                     type: 'input',

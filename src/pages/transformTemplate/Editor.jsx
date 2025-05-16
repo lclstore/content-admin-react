@@ -29,16 +29,14 @@ export default function UserEditorWithCommon() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
-    const initialValues = {
-        name: 'hhs',
-    }
+    const initialValues = {}
     const mockUsers = [];
 
     // 添加选中项状态管理
     const [selectedItem, setSelectedItem] = useState(null);
 
     // 处理选中项被添加到表单后的回调
-    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId) => {
+    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, form) => {
         // 创建 formFields 的深拷贝
         const updatedFields = formFields.map(field => {
             // 找到匹配的面板
@@ -70,9 +68,10 @@ export default function UserEditorWithCommon() {
             }
             return field; // 返回未修改的其他面板
         });
-
+        const formValues = form.getFieldsValue();
         // 更新状态
         setFormFields(updatedFields);
+
     };
 
     // 清空选中项的回调函数
@@ -184,100 +183,100 @@ export default function UserEditorWithCommon() {
                 }
             ]
         },
-        {
-            label: 'Image',
-            name: 'image',
-            icon: <PictureOutlined />,
-            fields: [
-                {
-                    type: 'upload',
-                    name: 'coverImage',
-                    label: 'Cover Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'detailImage',
-                    label: 'Detail Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'thumbnailImage',
-                    label: 'Thumbnail Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'completeImage',
-                    label: 'Complete Image',
-                    required: true,
-                    onChange: imageUpload
-                },
+        // {
+        //     label: 'Image',
+        //     name: 'image',
+        //     icon: <PictureOutlined />,
+        //     fields: [
+        //         {
+        //             type: 'upload',
+        //             name: 'coverImage',
+        //             label: 'Cover Image',
+        //             required: true,
+        //             onChange: imageUpload
+        //         },
+        //         {
+        //             type: 'upload',
+        //             name: 'detailImage',
+        //             label: 'Detail Image',
+        //             required: true,
+        //             onChange: imageUpload
+        //         },
+        //         {
+        //             type: 'upload',
+        //             name: 'thumbnailImage',
+        //             label: 'Thumbnail Image',
+        //             required: true,
+        //             onChange: imageUpload
+        //         },
+        //         {
+        //             type: 'upload',
+        //             name: 'completeImage',
+        //             label: 'Complete Image',
+        //             required: true,
+        //             onChange: imageUpload
+        //         },
 
-            ]
-        },
-        {
-            label: 'Labels',
-            name: 'labels',
-            icon: <TagsOutlined />,
-            fields: [
-                {
-                    type: 'select',
-                    name: 'difficulty',
-                    label: 'Difficulty',
-                    required: true,
-                    options: [
-                        { label: 'Beginner', value: 1 },
-                        { label: 'Intermediate', value: 2 },
-                        { label: 'Advanced', value: 3 }
-                    ],
-                },
-                {
-                    type: 'select',
-                    name: 'equipment',
-                    label: 'Equipment',
-                    required: true,
-                    options: [
-                        { label: 'Dumbbell', value: 1 },
-                        { label: 'Resistance band', value: 2 },
-                        { label: 'None', value: 3 }
-                    ]
-                },
-                {
-                    type: 'select',
-                    name: 'position',
-                    label: 'Position',
-                    required: true,
-                    options: [
-                        { label: 'Standing', value: 1 },
-                        { label: 'Lying', value: 2 },
-                        { label: 'Seated', value: 3 },
-                        { label: 'Prone', value: 4 },
-                        { label: 'Kneeling', value: 5 }
-                    ]
-                },
-                {
-                    type: 'select',
-                    mode: 'multiple',
-                    name: 'target',
-                    label: 'Target',
-                    required: true,
-                    options: [
-                        { label: 'Full Body', value: 1 },
-                        { label: 'Arm', value: 2 },
-                        { label: 'Back', value: 3 },
-                        { label: 'Butt', value: 4 },
-                        { label: 'Abs', value: 5 },
-                        { label: 'Leg', value: 6 },
-                        { label: 'Core', value: 7 }
-                    ]
-                }
-            ]
-        },
+        //     ]
+        // },
+        // {
+        //     label: 'Labels',
+        //     name: 'labels',
+        //     icon: <TagsOutlined />,
+        //     fields: [
+        //         {
+        //             type: 'select',
+        //             name: 'difficulty',
+        //             label: 'Difficulty',
+        //             required: true,
+        //             options: [
+        //                 { label: 'Beginner', value: 1 },
+        //                 { label: 'Intermediate', value: 2 },
+        //                 { label: 'Advanced', value: 3 }
+        //             ],
+        //         },
+        //         {
+        //             type: 'select',
+        //             name: 'equipment',
+        //             label: 'Equipment',
+        //             required: true,
+        //             options: [
+        //                 { label: 'Dumbbell', value: 1 },
+        //                 { label: 'Resistance band', value: 2 },
+        //                 { label: 'None', value: 3 }
+        //             ]
+        //         },
+        //         {
+        //             type: 'select',
+        //             name: 'position',
+        //             label: 'Position',
+        //             required: true,
+        //             options: [
+        //                 { label: 'Standing', value: 1 },
+        //                 { label: 'Lying', value: 2 },
+        //                 { label: 'Seated', value: 3 },
+        //                 { label: 'Prone', value: 4 },
+        //                 { label: 'Kneeling', value: 5 }
+        //             ]
+        //         },
+        //         {
+        //             type: 'select',
+        //             mode: 'multiple',
+        //             name: 'target',
+        //             label: 'Target',
+        //             required: true,
+        //             options: [
+        //                 { label: 'Full Body', value: 1 },
+        //                 { label: 'Arm', value: 2 },
+        //                 { label: 'Back', value: 3 },
+        //                 { label: 'Butt', value: 4 },
+        //                 { label: 'Abs', value: 5 },
+        //                 { label: 'Leg', value: 6 },
+        //                 { label: 'Core', value: 7 }
+        //             ]
+        //         }
+        //     ]
+        // },
         {
             label: 'Duration Settings',
             name: 'durationSettings',
@@ -371,6 +370,7 @@ export default function UserEditorWithCommon() {
 
     // 添加自定义面板的回调函数
     const handleAddCustomPanel = (newPanel) => {
+        debugger
         setFormFields(prevFields => {
             const lastIndexWithDatalist = [...prevFields]
                 .map((item, index) => item.dataList ? index : -1)
@@ -505,40 +505,40 @@ export default function UserEditorWithCommon() {
 
     return (
         <CommonEditorForm
-            // commonListConfig={
-            //     {
-            //         // renderItemMata: renderItemMata, // 自定义渲染列表项
-            //         initCommonListData: initCommonListData, // 搜索方法
-            //         placeholder: 'Search your content name...', // 搜索框提示
-            //         filterSections: filterSections, // 筛选器
-            //         defaultQueryParams: { // 默认查询参数
-            //             page: 1,
-            //             pageSize: 10,
-            //             status: 1
-            //         },
-            //         activeFilters: {
-            //             target: ["Core", "Leg"]
-            //         },
-            //         // 添加选中项的处理函数
-            //         onSelectItem: (item) => setSelectedItem(item)
-            //     }
-            // }
+            commonListConfig={
+                {
+                    // renderItemMata: renderItemMata, // 自定义渲染列表项
+                    initCommonListData: initCommonListData, // 搜索方法
+                    placeholder: 'Search your content name...', // 搜索框提示
+                    filterSections: filterSections, // 筛选器
+                    defaultQueryParams: { // 默认查询参数
+                        page: 1,
+                        pageSize: 10,
+                        status: 1
+                    },
+                    activeFilters: {
+                        target: ["Core", "Leg"]
+                    },
+                    // 添加选中项的处理函数
+                    onSelectItem: (item) => setSelectedItem(item)
+                }
+            }
             collapseFormConfig={
                 {
                     fields: formFields, // 表单字段配置
                     initialValues: initialValues, // 默认初始值
                     isCollapse: true, //是否折叠分组
                     handleAddCustomPanel: handleAddCustomPanel, // 传递添加自定义面板的函数
-                    handleDeletePanel: handleDeletePanel,
+                    handleDeletePanel: handleDeletePanel,// 删除面板的回调函数
                     // 添加选中项和回调函数
-                    selectedItemFromList: selectedItem,
-                    onItemAdded: handleItemAdded,
-                    onSelectedItemProcessed: handleSelectedItemProcessed,
+                    selectedItemFromList: selectedItem,// 选中项
+                    onItemAdded: handleItemAdded,// 添加项的回调函数
+                    onSelectedItemProcessed: handleSelectedItemProcessed,// 清空选中项的回调函数
                     // 添加处理结构项的功能
-                    onSortItems: handleSortItems,
-                    onDeleteItem: handleDeleteItem,
-                    onCopyItem: handleCopyItem,
-                    onReplaceItem: handleReplaceItem
+                    onSortItems: handleSortItems,// 排序项的回调函数
+                    onDeleteItem: handleDeleteItem,// 删除项的回调函数
+                    onCopyItem: handleCopyItem,// 复制项的回调函数
+                    onReplaceItem: handleReplaceItem// 替换项的回调函数
                 }
             }
             initFormData={initFormData}

@@ -259,14 +259,14 @@ const CollapseForm = ({
     );
 
     // 拖拽开始处理
-    const handleDragStart = (event) => {
-        console.log('拖拽开始:', event);
-        // 记录开始拖拽的元素ID
-        const { active } = event;
-        if (active) {
-            console.log('开始拖拽项:', active.id);
-        }
-    };
+    // const handleDragStart = (event) => {
+    //     console.log('拖拽开始:', event);
+    //     // 记录开始拖拽的元素ID
+    //     const { active } = event;
+    //     if (active) {
+    //         console.log('开始拖拽项:', active.id);
+    //     }
+    // };
 
     // 拖拽结束处理程序
     function handleDragEnd(event, panelId) {
@@ -362,7 +362,7 @@ const CollapseForm = ({
                     currentFormValues[fieldName].push(itemToAdd);
 
                     // 更新表单值
-                    form.setFieldsValue(currentFormValues);
+                    // form.setFieldsValue(currentFormValues);
 
                     // 触发表单的 onValuesChange 回调（如果直接设置值可能不会触发）
                     const changeEvent = {};
@@ -377,7 +377,12 @@ const CollapseForm = ({
                     if (onItemAdded && typeof onItemAdded === 'function') {
                         // 获取当前面板中展开的项的ID
                         const expandedItemId = expandedItems[targetPanel.name] || null;
-                        onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId);
+                        onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId, form);
+                        dataList.forEach(item => {
+                            if (item.name === targetPanel.name) {
+                                item.dataList.push(itemToAdd);
+                            }
+                        })
                     }
 
                     // 通知父组件已处理完选中项，可以清空选中状态
@@ -502,6 +507,11 @@ const CollapseForm = ({
             dataList: [],
             name: newPanelName,
             isShowAdd: true,
+            // 确保fields中的每个字段name也是唯一的
+            fields: newField.fields?.map(field => ({
+                ...field,
+                name: `${field.name}${dataList.length}` // 为每个字段名称添加相同的后缀
+            })) || []
         };
 
         // 调用父组件传递的回调函数来添加新面板

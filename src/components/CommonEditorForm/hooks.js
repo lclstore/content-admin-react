@@ -1,8 +1,9 @@
-import { Form, message } from 'antd';
+import { Form, message, notification } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import React from 'react';
 import { dateRangeKeys } from '@/constants/app';
+import { keys } from 'lodash';
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -140,6 +141,7 @@ export const useHeaderConfig = (params) => {
                 );
             }
 
+
             // 处理日期范围字段（有 keys 时分拆，无 keys 时格式化原字段）
             if (field.type === 'dateRange') {
                 const date = form.getFieldValue(field.name);
@@ -170,9 +172,31 @@ export const useHeaderConfig = (params) => {
                 dataToSave[field.name] = value.format('YYYY-MM-DD');
             }
 
+
             // 递归处理嵌套字段
             if (Array.isArray(field.fields)) {
                 processFields(field.fields, dataToSave, field);
+            }
+            // 处理列表相关数据格式和验证
+            if (Array.isArray(field.dataList)) {
+                // 检查数组是否为空，如果为空则抛出异常
+                if (Array.isArray(field.dataList) && field.dataList.length === 0) {
+                    // 展开当前折叠栏
+                    if (collapseFormConfig.setActiveKey && field.name) {
+                        collapseFormConfig.setActiveKey(field.name);
+                    }
+                    throw new Error(
+                        JSON.stringify({
+                            errorFields: [{
+                                type: 'notification',
+                                message: `Cannot Add New【${field.label}】`,
+                                description: `Please add exercises to the current last ${field.label} before adding a new one.`,
+                            }]
+                        })
+                    );
+                }
+
+
             }
         }
     };
@@ -192,17 +216,39 @@ export const useHeaderConfig = (params) => {
                 const formFields = formType === 'basic' ? fields : collapseFormConfig.fields;
                 // 处理dateRange类型字段 - 确保在分离字段模式下移除原始字段
                 processFields(formFields, dataToSave);
+                const hasDataListFields = formFields.filter(field => Array.isArray(field.dataList) && field.dataList.length > 0);//有dataList的组
 
-                // 处理高级表单的结构化数据
-                // if (formType === 'advanced' && complexConfig.includeStructurePanels) {
-                //     dataToSave.structurePanels = JSON.parse(JSON.stringify(structurePanels));
+                // 处理面板字段数组（选择的列表项和form）
+                if (hasDataListFields.length > 0) {
 
-                //     if (complexConfig.flattenStructurePanels) {
-                //         dataToSave.structure = dataToSave.structurePanels.flatMap(
-                //             panel => panel.items || []
-                //         );
-                //     }
-                // }
+                    // 验证field.fields中所有字段的name属性
+                    if (field.fields && Array.isArray(field.fields)) {
+                        let list = field.dataList.map(item => item.id);
+                        const keys = field.fields.map(item => item.name);
+
+                        for (const nestedField of field.fields) {
+                            if (nestedField.name) {
+                                const nestedOriginalName = nestedField.name.replace(/\d+$/, '');
+                                // 在这里处理嵌套字段的name
+                                if (nestedField.required && (!dataToSave[nestedOriginalName] ||
+                                    (Array.isArray(dataToSave[nestedOriginalName]) && dataToSave[nestedOriginalName].length === 0))) {
+                                    if (collapseFormConfig.setActiveKey && field.name) {
+                                        collapseFormConfig.setActiveKey(field.name);
+                                    }
+
+                                    throw new Error(
+                                        JSON.stringify({
+                                            errorFields: [{
+                                                name: [nestedField.name],
+                                                errors: [`${nestedField.label || nestedOriginalName} 是必填项`]
+                                            }]
+                                        })
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
                 if (onSave) {
 
 
@@ -223,14 +269,42 @@ export const useHeaderConfig = (params) => {
                 }
             })
             .catch((error) => {
+                // 尝试解析错误消息体
+                let errorData = error;
+
+                // 如果错误是字符串格式的JSON，尝试解析它
+                if (typeof error.message === 'string') {
+                    try {
+                        const parsedError = JSON.parse(error.message);
+                        if (parsedError && parsedError.errorFields) {
+                            errorData = parsedError;
+                        }
+                    } catch (e) {
+                        // 解析失败，使用原始错误
+                    }
+                }
+
                 // 检查错误对象是否包含 errorFields 属性
-                if (!error.errorFields || !error.errorFields.length) {
+                if (!errorData.errorFields || !errorData.errorFields.length) {
                     messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
                     return;
                 }
+
+                // 处理notification类型的错误
+                if (errorData.errorFields[0]?.type === 'notification') {
+                    notification.warning({
+                        style: {
+                            minWidth: 400,
+                        },
+                        message: errorData.errorFields[0].message,
+                        description: errorData.errorFields[0].description,
+                    });
+                    return;
+                }
+
                 // 如果启用了折叠功能且提供了 setActiveKey 方法
                 if (collapseFormConfig.isCollapse && collapseFormConfig.setActiveKey) {
-                    const errorFieldName = error.errorFields[0].name?.[0];
+                    const errorFieldName = errorData.errorFields[0].name?.[0];
 
                     const matchedPanel = collapseFormConfig.fields.find(panel =>
                         Array.isArray(panel.fields) &&
@@ -241,8 +315,9 @@ export const useHeaderConfig = (params) => {
                         collapseFormConfig.setActiveKey(matchedPanel.name);
                     }
                 }
+
                 // 显示错误信息
-                messageApi.error(error.errorFields[0].errors[0]);
+                messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
             });
     }, [
         formConnected,

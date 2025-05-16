@@ -40,7 +40,7 @@ const settings = {
   // 路由重定向设置
   router: {
     // 首页路由
-    homePath: '/login',
+    homePath: '/exercises/list',
   },
 
   // 菜单设置

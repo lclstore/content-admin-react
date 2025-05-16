@@ -44,6 +44,7 @@ let message = new MessageC()
  * @param {String} url - 请求地址
  * @param {Object} data - 请求参数
  * @param {Function} callback - 请求成功回调函数
+ * @param {Function} success - 请求成功,且正常回调函数
  * @param {String} method - 请求方法
  * @param {Boolean} load - 是否显示加载框
  * @param {Boolean} point - 是否进行提示
@@ -56,8 +57,7 @@ class Request {
             ...config,
             callback:config.callback || (() => {}),
             warningPoint:config.warningPoint ? config.warningPoint : true,
-            tokenCheck:config.tokenCheck,
-            successCheck:config.successCheck,
+            success:config.success,
             method:config.method || 'post',
             point:config.point ? config.point : false,
             url:(config.baseUrl || baseUrl) + config.url,
@@ -85,6 +85,7 @@ class Request {
             }
             if (res.data.success) {
                 config.point && message.open({content: "success", type: 'success'},'success')
+                config.success && config.success(res)
             }else {
                 // error
                 config.warningPoint && message.open({
@@ -128,3 +129,4 @@ export default {
     put:(config) => new Request(config).put(),
     delete:(config) => new Request(config).delete(),
 }
+export const a = 123

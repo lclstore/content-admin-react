@@ -505,24 +505,24 @@ export default function UserEditorWithCommon() {
 
     return (
         <CommonEditorForm
-            commonListConfig={
-                {
-                    // renderItemMata: renderItemMata, // 自定义渲染列表项
-                    initCommonListData: initCommonListData, // 搜索方法
-                    placeholder: 'Search your content name...', // 搜索框提示
-                    filterSections: filterSections, // 筛选器
-                    defaultQueryParams: { // 默认查询参数
-                        page: 1,
-                        pageSize: 10,
-                        status: 1
-                    },
-                    activeFilters: {
-                        target: ["Core", "Leg"]
-                    },
-                    // 添加选中项的处理函数
-                    onSelectItem: (item) => setSelectedItem(item)
-                }
-            }
+            // commonListConfig={
+            //     {
+            //         // renderItemMata: renderItemMata, // 自定义渲染列表项
+            //         initCommonListData: initCommonListData, // 搜索方法
+            //         placeholder: 'Search your content name...', // 搜索框提示
+            //         filterSections: filterSections, // 筛选器
+            //         defaultQueryParams: { // 默认查询参数
+            //             page: 1,
+            //             pageSize: 10,
+            //             status: 1
+            //         },
+            //         activeFilters: {
+            //             target: ["Core", "Leg"]
+            //         },
+            //         // 添加选中项的处理函数
+            //         onSelectItem: (item) => setSelectedItem(item)
+            //     }
+            // }
             collapseFormConfig={
                 {
                     fields: formFields, // 表单字段配置

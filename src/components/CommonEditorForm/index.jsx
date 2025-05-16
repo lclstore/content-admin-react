@@ -39,7 +39,7 @@ export default function CommonEditor(props) {
         initFormData,
         onSave,
         validate,
-        commonListConfig = {},
+        commonListConfig = null,
         complexConfig = {}, // 高级表单特定配置
         collapseFormConfig = {
 
@@ -434,14 +434,18 @@ export default function CommonEditor(props) {
         };
 
         return (
-            <div className={styles.advancedFormContent}>
+            <div className={`${styles.advancedFormContent} ${commonListConfig ? '' : styles.collapseFormContent}`}>
                 {/* 渲染左侧列表 */}
-                <CommonList
-                    {...commonListConfig}
-                    onAddItem={handleCommonListItemAdd}
-                />
+                {
+                    commonListConfig && (
+                        <CommonList
+                            {...commonListConfig}
+                            onAddItem={handleCommonListItemAdd}
+                        />
+                    )
+                }
                 {/* 渲染右侧表单 */}
-                <div className={`${styles.advancedEditorForm}`}>
+                <div className={`${styles.advancedEditorForm} ${commonListConfig ? '' : styles.withSidebar}`}>
                     <Form
                         form={form}
                         name={config.formName || 'advancedForm'}

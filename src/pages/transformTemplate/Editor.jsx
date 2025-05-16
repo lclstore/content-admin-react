@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { commonListData, filterSections } from '@/pages/Data';
 import { validateEmail, validatePassword } from '@/utils';
+import { arrayMove } from '@dnd-kit/sortable';
 import {
     ThunderboltOutlined,
     TagsOutlined,
@@ -22,6 +23,8 @@ import {
     CaretRightOutlined,
     CopyOutlined
 } from '@ant-design/icons';
+import { isArray } from 'lodash';
+
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -31,6 +34,52 @@ export default function UserEditorWithCommon() {
     }
     const mockUsers = [];
 
+    // 添加选中项状态管理
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    // 处理选中项被添加到表单后的回调
+    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId) => {
+        // 创建 formFields 的深拷贝
+        const updatedFields = formFields.map(field => {
+            // 找到匹配的面板
+            if (field.name === panelName) {
+                // 检查是否有展开的项
+                if (expandedItemId && isArray(field.dataList)) {
+                    // 查找展开项的索引
+                    const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
+
+                    if (expandedItemIndex !== -1) {
+                        // 如果找到展开的项，在其后插入新项
+                        const newDataList = [...field.dataList];
+                        newDataList.splice(expandedItemIndex + 1, 0, itemData);
+
+                        return {
+                            ...field,
+                            dataList: newDataList
+                        };
+                    }
+                }
+
+                // 默认行为：如果没有展开的项或找不到展开的项，添加到末尾
+                return {
+                    ...field,
+                    dataList: isArray(field.dataList)
+                        ? [...field.dataList, itemData] // 如果是数组，创建新数组并添加新项
+                        : [itemData] // 如果不是数组，创建新数组
+                };
+            }
+            return field; // 返回未修改的其他面板
+        });
+
+        // 更新状态
+        setFormFields(updatedFields);
+    };
+
+    // 清空选中项的回调函数
+    const handleSelectedItemProcessed = () => {
+        console.log('清空选中项');
+        setSelectedItem(null);
+    };
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
@@ -270,7 +319,7 @@ export default function UserEditorWithCommon() {
             label: 'Structure Settings',
             name: 'structure',
             isShowAdd: true,
-            isListData: true,//
+            dataList: [],//
             icon: <VideoCameraOutlined />,
             fields: [
                 {
@@ -322,8 +371,21 @@ export default function UserEditorWithCommon() {
 
     // 添加自定义面板的回调函数
     const handleAddCustomPanel = (newPanel) => {
-        // 只添加新面板到 formFields
-        setFormFields(prevFields => [...prevFields, newPanel]);
+        setFormFields(prevFields => {
+            const lastIndexWithDatalist = [...prevFields]
+                .map((item, index) => item.dataList ? index : -1)
+                .filter(index => index !== -1)
+                .pop();
+
+            if (lastIndexWithDatalist !== undefined && lastIndexWithDatalist !== -1) {
+                const newFields = [...prevFields];
+                newFields.splice(lastIndexWithDatalist + 1, 0, newPanel);
+                return newFields;
+            } else {
+                // 如果没有任何项包含 datalist，则默认追加到末尾
+                return [...prevFields, newPanel];
+            }
+        });
     };
     const handleDeletePanel = (panelName) => {
         // 这里实现删除面板的逻辑
@@ -346,6 +408,101 @@ export default function UserEditorWithCommon() {
     const renderItemMata = (item) => {
         return <div>{item.displayName}</div>
     }
+
+    // 处理排序
+    const handleSortItems = (panelName, oldIndex, newIndex) => {
+        console.log(`排序: ${panelName}, 从 ${oldIndex} 到 ${newIndex}`);
+
+        if (oldIndex === newIndex) {
+            console.log('位置未改变，跳过排序');
+            return;
+        }
+
+        try {
+            const updatedFields = formFields.map(field => {
+                if (field.name === panelName && isArray(field.dataList)) {
+                    // 确保数据存在
+                    if (oldIndex < 0 || oldIndex >= field.dataList.length ||
+                        newIndex < 0 || newIndex >= field.dataList.length) {
+                        console.error('索引超出范围:', { oldIndex, newIndex, length: field.dataList.length });
+                        return field;
+                    }
+
+                    // 使用 arrayMove 辅助函数移动数组中的项
+                    const newDataList = arrayMove([...field.dataList], oldIndex, newIndex);
+                    console.log('排序后的数据:', newDataList.map(item => item.id));
+
+                    return {
+                        ...field,
+                        dataList: newDataList
+                    };
+                }
+                return field;
+            });
+
+            // 检查更新是否有效
+            const changedPanel = updatedFields.find(f => f.name === panelName);
+            if (changedPanel && changedPanel.dataList) {
+                console.log('更新状态');
+                setFormFields(updatedFields);
+            } else {
+                console.error('无法找到面板或更新数据:', { panelName });
+            }
+        } catch (error) {
+            console.error('排序处理出错:', error);
+        }
+    };
+
+    // 处理删除
+    const handleDeleteItem = (panelName, itemId) => {
+        const updatedFields = formFields.map(field => {
+            if (field.name === panelName && isArray(field.dataList)) {
+                return {
+                    ...field,
+                    dataList: field.dataList.filter(item => item.id !== itemId)
+                };
+            }
+            return field;
+        });
+
+        setFormFields(updatedFields);
+    };
+
+    // 处理复制
+    const handleCopyItem = (panelName, itemId) => {
+        const updatedFields = formFields.map(field => {
+            if (field.name === panelName && isArray(field.dataList)) {
+                // 找到要复制的项
+                const itemToCopy = field.dataList.find(item => item.id === itemId);
+                if (itemToCopy) {
+                    // 创建一个新的项，包含与原项相同的属性但具有新的ID
+                    const newItem = {
+                        ...itemToCopy,
+                        id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                    };
+
+                    // 返回更新后的字段，包括新项
+                    return {
+                        ...field,
+                        dataList: [...field.dataList, newItem]
+                    };
+                }
+            }
+            return field;
+        });
+
+        setFormFields(updatedFields);
+    };
+
+    // 处理替换（这里可以是打开替换模态框的逻辑）
+    const handleReplaceItem = (panelName, itemId) => {
+        // 这里实现替换逻辑，例如打开模态框等
+        console.log(`替换面板 ${panelName} 中的项 ${itemId}`);
+
+        // 实际替换逻辑通常涉及模态框，这里只是示例
+        // 如果你有内容库或替换面板，可以在这里打开它
+    };
+
     return (
         <CommonEditorForm
             commonListConfig={
@@ -361,7 +518,9 @@ export default function UserEditorWithCommon() {
                     },
                     activeFilters: {
                         target: ["Core", "Leg"]
-                    }
+                    },
+                    // 添加选中项的处理函数
+                    onSelectItem: (item) => setSelectedItem(item)
                 }
             }
             collapseFormConfig={
@@ -370,7 +529,16 @@ export default function UserEditorWithCommon() {
                     initialValues: initialValues, // 默认初始值
                     isCollapse: true, //是否折叠分组
                     handleAddCustomPanel: handleAddCustomPanel, // 传递添加自定义面板的函数
-                    handleDeletePanel: handleDeletePanel
+                    handleDeletePanel: handleDeletePanel,
+                    // 添加选中项和回调函数
+                    selectedItemFromList: selectedItem,
+                    onItemAdded: handleItemAdded,
+                    onSelectedItemProcessed: handleSelectedItemProcessed,
+                    // 添加处理结构项的功能
+                    onSortItems: handleSortItems,
+                    onDeleteItem: handleDeleteItem,
+                    onCopyItem: handleCopyItem,
+                    onReplaceItem: handleReplaceItem
                 }
             }
             initFormData={initFormData}

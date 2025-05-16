@@ -1,0 +1,51 @@
+// 添加或更新拖拽相关样式
+.structureItem {
+    position: relative;
+    background: #fff;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    border: 1px solid #e8e8e8;
+
+    &:hover {
+        border-color: #d9d9d9;
+    }
+}
+
+.dragHandleWrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.dragHandle {
+    cursor: move;
+    color: #999;
+    margin-right: 8px;
+    font-size: 16px;
+
+    &:hover {
+        color: #666;
+    }
+}
+
+.itemTitle {
+    flex: 1;
+    font-weight: 500;
+    user-select: none;
+}
+
+.itemActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.actionButton {
+    color: #1890ff;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}

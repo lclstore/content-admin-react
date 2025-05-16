@@ -117,10 +117,7 @@
     font-size: 20px;
 }
 
-.editor-form-panel .workout-details-collapse .ant-collapse-expand-icon svg {
-    /* 恢复之前的颜色或移除此规则，这里暂时注释掉 */
-    /* color: var(--primary-color); */
-}
+
 
 .ant-form-vertical .ant-form-item:not(.ant-form-item-horizontal) .ant-col-xl-24.ant-form-item-label {
     padding: 0 0 5px;

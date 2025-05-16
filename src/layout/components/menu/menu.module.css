@@ -22,6 +22,7 @@
     border-bottom: 1px solid var(--primary-border);
     transition: color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0s !important;
     cursor: pointer;
+    border-radius: 0;
 }
 
 .menuContainer :global(.ant-menu-item:hover) {

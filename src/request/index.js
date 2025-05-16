@@ -7,13 +7,14 @@ const VITE_ENV = import.meta.env.VITE_ENV;
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 console.log('VITE_ENV =>>>>>>', VITE_ENV)
-
+console.log("Message",Message)
 const axios_default = axios.create({
     timeout: 0,
 })
 // const Loading = useStore(state => state.setLoadingGlobal);
 const { setLoadingGlobal } = useStore.getState();
 const Loading  = setLoadingGlobal;
+
 // message弹窗管理器
 class MessageC {
     constructor() {
@@ -25,7 +26,7 @@ class MessageC {
             return true
         } else {
             this.codeControl[code] = true
-            Message({
+            Message.open({
                 ...messageConfig,
                 onClose: (() => {
                     return () => {
@@ -59,7 +60,6 @@ class Request {
             successCheck:config.successCheck,
             method:config.method || 'post',
             point:config.point ? config.point : false,
-            baseUrl:config.baseUrl || baseUrl,
             url:(config.baseUrl || baseUrl) + config.url,
         }
     }
@@ -81,7 +81,7 @@ class Request {
             // token 校验
             if (res.tokenError) {
                 localStorage.removeItem(settings.request.tokenName)
-                router('/login')
+                useStore.getState().navigate('/login')
             }
             if (res.data.success) {
                 config.point && message.open({content: "success", type: 'success'},'success')
@@ -90,8 +90,7 @@ class Request {
                 config.warningPoint && message.open({
                     content: res.data.errMessage,
                     type: 'warning',
-                    duration: 3000,
-                    showClose: true
+                    duration: 3,
                 }, res.data.errCode)
                 res.error = res.data.errMessage
             }

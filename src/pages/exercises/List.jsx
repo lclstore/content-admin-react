@@ -180,11 +180,9 @@ export default () => {
                 actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
-                // 按钮点击处理函数
-                onActionClick: handleActionClick
             }
         ];
-    }, [isButtonVisible, handleActionClick]);
+    }, [isButtonVisible]);
 
     /**
      * 搜索处理函数
@@ -331,16 +329,6 @@ export default () => {
         return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
 
-    // 表格数据和配置
-    /**
-     * 筛选后的表格数据
-     */
-    const filteredDataForTable = useMemo(() => {
-        setLoading(true);
-        let tempData = [...dataSource];
-        setLoading(false);
-        return tempData;
-    }, [dataSource]);
 
     // 渲染 - 组件UI呈现
     return (
@@ -352,7 +340,7 @@ export default () => {
             <ConfigurableTable
                 uniqueId={'exerciseList'}
                 columns={allColumnDefinitions}
-                dataSource={filteredDataForTable}
+                dataSource={dataSource}
                 rowKey="id"
                 loading={loading}
                 onRowClick={handleRowClick}

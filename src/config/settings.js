@@ -12,6 +12,7 @@ const settings = {
     interceptors:(config) => { config.headers['token'] = localStorage.getItem(settings.request.tokenName) },
     resInit:(res) => {
       res.tokenError = (res.data.errCode && res.data.errCode === "USR001")
+      console.log('res11',res)
       return res
     }
   },

@@ -6,7 +6,6 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusIconMap, optionsConstants } from '@/constants';
-import { statusOrder, filterSections, mockUsers } from './Data';
 import settings from '@/config/settings';
 const { file: fileSettings } = settings;
 import request from "@/request";
@@ -14,6 +13,7 @@ export default function UsersList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
+    var mockUsers = []
     const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
@@ -96,7 +96,7 @@ export default function UsersList() {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         {record.avatar ? (
                             <img
-                                src={`${fileSettings.baseURL}${record.avatar}`}
+                                src={`${record.avatar}`}
                                 alt={`${record.name}'s avatar`}
                                 className="userAvatar"
                                 style={{ width: 36, height: 36, borderRadius: '50%', marginRight: 12 }}
@@ -249,7 +249,8 @@ export default function UsersList() {
                 url: "/user/page",
                 load: true,
                 callback(res) {
-                    console.log('res', res)
+                    setDataSource(res.data.data)
+                    console.log('res', res.data.data)
                     resolve()
                 }
             })
@@ -286,7 +287,7 @@ export default function UsersList() {
      * 重置操作标志
      */
     useEffect(() => {
-        // getData().then()
+        getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);

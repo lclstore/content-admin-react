@@ -323,7 +323,7 @@ export default () => {
      */
     useEffect(() => {
         console.log('111')
-        // getData().then()
+        getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);

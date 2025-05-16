@@ -89,7 +89,7 @@ export const listData = [
         id: 1,
         type: 'video',
         imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123",
+        name:"123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
         status:"draft",
         met:"1",
         structureType:"asd",

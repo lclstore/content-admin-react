@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, memo, useMemo } from 'react';
 import { Image, Modal } from 'antd';
 import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
-import styles from './MediaCell.module.css'; // 导入 CSS Modules
+import styles from './MediaCell.module.less'; // 导入 CSS Modules
 import { getFullUrl } from '@/utils';
 
 // MediaType[] = ['video', 'audio', 'image'];

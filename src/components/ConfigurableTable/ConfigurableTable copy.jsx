@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Table, Input, Button, Spin, Space } from 'antd';
 import { SearchOutlined, FilterOutlined, SettingOutlined } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
-import styles from './ConfigurableTable.module.css';
+import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 
 // 默认分页配置

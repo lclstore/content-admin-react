@@ -1,12 +1,10 @@
-import authReducer from '@/store/slices/authSlice'
-import loadingReducer from '@/store/slices/loadingSlice'
-import themeReducer from '@/store/slices/themeSlice'
-import { configureStore } from '@reduxjs/toolkit'
+import { create } from 'zustand'
 
-export default configureStore({
-  reducer: {
-    auth: authReducer,
-    loading: loadingReducer,
-    theme: themeReducer,
-  },
-}) 
+export const useStore= create((set) => ({
+  // 全局loading
+  loadingGlobal: false,
+  setLoadingGlobal: (data) => set({ loadingGlobal: data }),
+  // 全局的 navigate
+  navigate:null,
+  setNavigate: (data) => set({ navigate: data }),
+}))

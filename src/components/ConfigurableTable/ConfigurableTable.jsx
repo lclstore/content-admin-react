@@ -1,10 +1,22 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Table, Input, Button, Spin, Space, Dropdown } from 'antd';
-import { SearchOutlined, FilterOutlined, SettingOutlined, EditOutlined, CopyOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined, EllipsisOutlined } from '@ant-design/icons';
+import React, {useState, useMemo, useEffect,useCallback} from 'react';
+import { useImmer } from "use-immer"
+import {Table, Input, Button, Spin, Space, Dropdown} from 'antd';
+import {
+    SearchOutlined,
+    FilterOutlined,
+    SettingOutlined,
+    EditOutlined,
+    CopyOutlined,
+    DeleteOutlined,
+    CheckCircleOutlined,
+    StopOutlined,
+    EllipsisOutlined
+} from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
-import styles from './ConfigurableTable.module.css';
+import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
-import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
+import {defaultPagination, actionIconMap, optionsConstants} from '@/constants';
+import { getList as getListPublick } from "@/config/api.js";
 
 /**
  * 可配置表格组件
@@ -28,27 +40,29 @@ import { defaultPagination, actionIconMap, optionsConstants } from '@/constants'
  * @param {boolean} [props.showColumnSettings=true] - 当为true时显示列设置按钮并执行列设置逻辑，当为false时显示所有列且不显示列设置按钮
  * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
+ * @param {function} [props.getList] - 获取表格数据的回调函数
  */
 function ConfigurableTable({
-    uniqueId,
-    columns, // 所有列的定义
-    dataSource,
-    rowKey,
-    loading = false,
-    onRowClick,
-    isInteractionBlockingRowClick, // 接收状态
-    mandatoryColumnKeys = [], // 强制列 Key
-    visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
-    onVisibilityChange, // 更新所有可见列的回调
-    searchConfig,
-    filterConfig,
-    paginationConfig = defaultPagination,
-    scrollX = true,
-    rowSelection,
-    tableProps,
-    showColumnSettings = true,//当为true时显示列设置按钮
-    leftToolbarItems = [], // 左侧工具栏按钮
-}) {
+                               uniqueId,
+                               columns, // 所有列的定义
+                               dataSource,
+                               rowKey,
+                               loading = false,
+                               onRowClick,
+                               isInteractionBlockingRowClick, // 接收状态
+                               mandatoryColumnKeys = [], // 强制列 Key
+                               visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
+                               onVisibilityChange, // 更新所有可见列的回调
+                               searchConfig,
+                               filterConfig,
+                               paginationConfig = defaultPagination,
+                               scrollX = true,
+                               rowSelection,
+                               tableProps,
+                               showColumnSettings = true,//当为true时显示列设置按钮
+                               leftToolbarItems = [], // 左侧工具栏按钮
+                               getList
+                           }) {
     const storageKey = `table_visible_columns_${uniqueId}`;
 
     // 内部维护一个列可见性状态，当外部没有传递时使用
@@ -106,7 +120,7 @@ function ConfigurableTable({
     }, [columns]);
 
     // 基于列分类计算可选列和默认可见列
-    const { disabledKeys, configurableOptionKeys, defaultVisibleKeys } = columnCategories;
+    const {disabledKeys, configurableOptionKeys, defaultVisibleKeys} = columnCategories;
 
     // 计算实际生效的默认可见列（当localStorage没有存储时使用）
     const effectiveDefaultVisibleKeys = useMemo(() => {
@@ -328,14 +342,14 @@ function ConfigurableTable({
                     }
                 }
             },
-            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
+            style: onRowClick ? {cursor: 'pointer'} : {}, // 保持光标样式
         };
     };
 
     // 最终的分页配置
     const finalPaginationConfig = useMemo(() => {
         if (paginationConfig === false) return false;
-        const config = { ...defaultPagination, ...paginationConfig };
+        const config = {...defaultPagination, ...paginationConfig};
         config.total = dataSource?.length || 0;
         return config;
     }, [paginationConfig, dataSource]);
@@ -375,8 +389,8 @@ function ConfigurableTable({
     const processedColumns = useMemo(() => {
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
-            let processedCol = { ...col };
-
+            let processedCol = {...col};
+            // 创建cell容器
             // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
             if (mediaTypes.includes(processedCol.mediaType)) {
                 // 为包含媒体类型的列添加特殊的className
@@ -414,10 +428,9 @@ function ConfigurableTable({
                     if (!optionConfig) {
                         return text;
                     }
-                    console.log(DisplayText);
                     const B = () => DisplayText
                     return (
-                        <B />
+                        <B/>
                     );
                 };
             }
@@ -440,11 +453,11 @@ function ConfigurableTable({
             // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
             if (processedCol.actionButtons &&
                 Array.isArray(processedCol.actionButtons) &&
-                typeof processedCol.isShow === 'function' &&
-                typeof processedCol.onActionClick === 'function') {
+                typeof processedCol.isShow === 'function') {
 
                 processedCol.render = (_, record) => (
-                    <div className="actions-container" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                    <div className="actions-container" onClick={(e) => e.stopPropagation()}
+                         onMouseDown={(e) => e.stopPropagation()}>
                         <Dropdown
                             menu={{
                                 items: processedCol.actionButtons
@@ -454,13 +467,12 @@ function ConfigurableTable({
                                         return {
                                             key: btnName,
                                             label: btnName.charAt(0).toUpperCase() + btnName.slice(1), // 首字母大写
-                                            icon: ActionIcon ? <ActionIcon /> : null,
+                                            icon: ActionIcon ? <ActionIcon/> : null,
                                             // 使用style属性只控制字体颜色
-                                            style: btnName === 'delete' ? { color: '#ff4d4f' } : {},
+                                            style: btnName === 'delete' ? {color: '#ff4d4f'} : {},
                                             // 删除danger属性，避免hover背景色变化
                                             onClick: (e) => {
                                                 if (e.domEvent) e.domEvent.stopPropagation();
-                                                processedCol.onActionClick(btnName, record, e.domEvent);
                                             }
                                         };
                                     })
@@ -470,7 +482,7 @@ function ConfigurableTable({
                         >
                             <Button
                                 type="text"
-                                icon={<EllipsisOutlined />}
+                                icon={<EllipsisOutlined/>}
                                 className="action-button"
                                 onClick={(e) => e.stopPropagation()}
                             />
@@ -483,15 +495,23 @@ function ConfigurableTable({
                     className: 'action-cell', // 为单元格添加action-cell类名
                 });
             }
-
+            // 添加最小宽度
+            processedCol.minWidth = 100;
             return processedCol;
         });
     }, [currentlyVisibleColumns]);
+    // search data
+    const [filterData, uodateFilterData] = useImmer({});
+    // getData 的方法
+    const getData = useCallback(async () => {
+        const res = await (getList ? getList:getListPublick)()
+    }, [currentlyVisibleColumns, dataSource, rowKey]);
 
     return (
         <div className={styles.configurableTableContainer}>
             {/* 工具栏 */}
-            <div className={`${styles.configurableTableToolbar} ${leftToolbarItems.length === 0 && styles.configurableTableNotToolbar}`}>
+            <div className="configurable-table-toolbar"
+                 style={leftToolbarItems.length === 0 && {justifyContent: "flex-end"}}>
                 {/* 左侧按钮区域 */}
                 <Space wrap className={styles.configurableTableToolbarLeft}>
                     {leftToolbarItems.map(item => (
@@ -517,10 +537,10 @@ function ConfigurableTable({
                             showCount
                             placeholder={searchConfig.placeholder || 'Search...'}
                             value={searchConfig.searchValue}
-                            prefix={<SearchOutlined />}
+                            prefix={<SearchOutlined/>}
                             onChange={searchConfig.onSearchChange}
-                            className={styles.configurableTableSearchInput}
-                            suffix={loading ? <Spin size="small" /> : null}
+                            className="configurable-table-search-input"
+                            suffix={loading ? <Spin size="small"/> : null}
                             allowClear
                         />
                     )}
@@ -528,13 +548,16 @@ function ConfigurableTable({
                         <FiltersPopover
                             filterSections={filterConfig.filterSections}
                             activeFilters={filterConfig.activeFilters || {}}
-                            onUpdate={filterConfig.onUpdate}
+                            onUpdate={() => {
+                                getData()
+                                filterConfig.onUpdate()
+                            }}
                             onReset={filterConfig.onReset}
                             showBadgeDot={hasActiveFilters}
                             showClearIcon={hasActiveFilters}
                         >
                             <Button
-                                icon={<FilterOutlined />}
+                                icon={<FilterOutlined/>}
                                 className={styles.configurableTableToolbarBtn}
                             >
                                 Filters
@@ -556,7 +579,7 @@ function ConfigurableTable({
                             isSettingsType
                         >
                             <Button
-                                icon={<SettingOutlined />}
+                                icon={<SettingOutlined/>}
                                 className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
                             >
                                 Table Settings
@@ -567,27 +590,25 @@ function ConfigurableTable({
             </div>
 
             {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
-            <div className={styles.configurableTableBody}>
-                <Table
-                    columns={processedColumns}
-                    dataSource={dataSource}
-                    rowKey={rowKey}
-                    loading={loading}
-                    onRow={handleRow}
-                    pagination={finalPaginationConfig}
-                    scroll={finalScrollConfig}
-                    rowSelection={rowSelection}
-                    virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
-                    onChange={(pagination, filters, sorter) => {
-                        // 调用原有的onChange回调(如果存在)
-                        if (tableProps?.onChange) {
-                            tableProps.onChange(pagination, filters, sorter);
-                        }
-                    }}
-                    {...tableProps}
-                />
-            </div>
-        </div >
+            <Table
+                columns={processedColumns}
+                dataSource={dataSource}
+                rowKey={rowKey}
+                loading={loading}
+                onRow={handleRow}
+                pagination={finalPaginationConfig}
+                scroll={finalScrollConfig}
+                rowSelection={rowSelection}
+                virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
+                onChange={(pagination, filters, sorter) => {
+                    // 调用原有的onChange回调(如果存在)
+                    if (tableProps?.onChange) {
+                        tableProps.onChange(pagination, filters, sorter);
+                    }
+                }}
+                {...tableProps}
+            />
+        </div>
     );
 }
 

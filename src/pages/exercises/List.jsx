@@ -3,10 +3,9 @@ import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusOrder, filterSections,listData } from './Data';
-
+import request from "@/request";
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
@@ -21,45 +20,6 @@ export default () => {
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
     const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [messageApi, contextHolder] = message.useMessage();
-
-    /**
-     * 编辑按钮处理
-     * 导航到用户编辑页面
-     */
-    const handleEdit = useCallback((record) => {
-        navigate(`/users/editor?id=${record.id}`);
-    }, [navigate]);
-
-    /**
-     * 状态变更å处理
-     * 更新用户的状态（启用/禁用）
-     */
-    const handleStatusChange = useCallback((record, newStatus) => {
-        setActionInProgress(true);
-        const updatedRecord = { ...record, status: newStatus };
-        setDataSource(current =>
-            current.map(item =>
-                item.id === record.id ? updatedRecord : item
-            )
-        );
-        setActionInProgress(false);
-        messageApi.success(`Successfully ${newStatus} user "${record.name}"`);
-    }, [messageApi]);
-
-    /**
-     * 处理按钮点击事件
-     */
-    const handleActionClick = useCallback((actionName, record, event) => {
-        if (event) event.stopPropagation();
-        setCurrentRecord(record);
-        // 编辑按钮点击
-        if (actionName === 'edit') {
-            handleEdit(record);
-        } else {
-            // 状态变更按钮点击
-            handleStatusChange(record, actionName);
-        }
-    }, [handleEdit, handleStatusChange]);
 
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
@@ -158,17 +118,14 @@ export default () => {
                 title: 'Actions',
                 key: 'actions',
                 fixed: 'right',
-                width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
                 actionButtons: ['enable', 'disable','edit','duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
-                // 按钮点击处理函数
-                onActionClick: handleActionClick
             }
         ];
-    }, [isButtonVisible, handleActionClick]);
+    }, [isButtonVisible]);
 
     /**
      * 搜索处理函数
@@ -252,6 +209,19 @@ export default () => {
         navigate(`/users/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url:"/sound/page",
+                load:true,
+                callback(res){
+                    console.log(res)
+                    resolve()
+                }
+            })
+        })
+    },[])
     // 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮
@@ -259,7 +229,6 @@ export default () => {
     useEffect(() => {
         // 设置自定义页面标题
         setCustomPageTitle && setCustomPageTitle('Exercise List');
-
         // 设置头部按钮
         setButtons([
             {
@@ -282,21 +251,12 @@ export default () => {
      * 重置操作标志
      */
     useEffect(() => {
+        // getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
 
-    // 表格数据和配置
-    /**
-     * 筛选后的表格数据
-     */
-    const filteredDataForTable = useMemo(() => {
-        setLoading(true);
-        let tempData = [...dataSource];
-        setLoading(false);
-        return tempData;
-    }, [dataSource]);
 
     // 渲染 - 组件UI呈现
     return (
@@ -308,7 +268,7 @@ export default () => {
             <ConfigurableTable
                 uniqueId={'exerciseList'}
                 columns={allColumnDefinitions}
-                dataSource={filteredDataForTable}
+                dataSource={dataSource}
                 rowKey="id"
                 loading={loading}
                 onRowClick={handleRowClick}

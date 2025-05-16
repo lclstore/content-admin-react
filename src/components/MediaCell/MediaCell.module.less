@@ -1,15 +1,10 @@
 .mediaCell {
     position: relative;
-    width: 100%;
-    height: 100%;
-    max-width: 120px;
-    max-height: 100%;
-    height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
     cursor: pointer;
     pointer-events: auto !important;
+    height: 100%;
+    width: 100%;
     /* 确保媒体单元格始终能接收事件 */
 }
 
@@ -17,32 +12,28 @@
 .imageContainer,
 .videoContainer,
 .audioContainer {
-    max-height: 75px;
-    position: relative;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     pointer-events: auto !important;
+    padding: 0 8px;
 }
-
-.mediaCell .ant-image {
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto !important;
-}
-
-.mediaCell .ant-image img {
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    object-fit: cover;
-    pointer-events: auto !important;
-}
-
-/* 保证图片预览遮罩层能够接收点击事件 */
-.mediaCell .ant-image-mask {
-    pointer-events: auto !important;
+.mediaCell {
+    :global{
+        .ant-image {
+            flex: 1;
+            img{
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+        }
+        .ant-image-mask {
+            pointer-events: auto !important;
+        }
+    }
 }
 
 .tabVideo {

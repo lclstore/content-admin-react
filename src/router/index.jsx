@@ -3,7 +3,7 @@
  * 实现两种布局：登录页独立布局和其他页面共用Layout布局
  */
 import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter,Navigate } from "react-router"
+import { createHashRouter,Navigate } from "react-router"
 import menus from '@/config/menu';
 import settings from '@/config/settings';
 import AppLayout from '@/layout';
@@ -104,7 +104,7 @@ const routes = generateRoutes();
 console.log("挂载的路由",routes)
 
 // 创建Router实例
-const router = createBrowserRouter(routes);
+const router = createHashRouter(routes);
 console.log("实例化的的路由",router)
 // 仅使用命名导出
 export { router }; 

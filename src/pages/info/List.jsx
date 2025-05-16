@@ -35,10 +35,10 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'appIcon', // 遵循命名规范，使用Url后缀
             label: 'App Icon',
-            // required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
-            // uploadFn: fileSettings.uploadFile,
+            // style: {
+            //     width: '96px',
+            //     height: '96px'
+            // },
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },

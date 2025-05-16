@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { Form, Button, Card, Space, Spin } from 'antd';
 import {
@@ -273,45 +273,39 @@ export default function CommonEditor(props) {
         onReplaceItem: configOnReplaceItem
     } = collapseFormConfig;
 
-    // 当 collapseFormConfig 变化时更新依赖的状态
-    const [extractedConfig, setExtractedConfig] = useState({
-        collapseFields,
-        collapseInitialValues,
-        configActiveKeys,
-        configOnCollapseChange,
-        configHandleAddCustomPanel,
-        configHandleDeletePanel,
+    // 当 collapseFormConfig 变化时更新依赖的状态 - 使用 useMemo 代替 useState + useEffect 组合
+    const extractedConfig = useMemo(() => ({
+        collapseFields: collapseFormConfig.fields,
+        collapseInitialValues: collapseFormConfig.initialValues,
+        configActiveKeys: collapseFormConfig.activeKeys,
+        configOnCollapseChange: collapseFormConfig.onCollapseChange,
+        configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel,
+        configHandleDeletePanel: collapseFormConfig.handleDeletePanel,
         // 新增提取的配置
-        configSelectedItemFromList,
-        configOnItemAdded,
-        configOnSelectedItemProcessed,
+        configSelectedItemFromList: collapseFormConfig.selectedItemFromList,
+        configOnItemAdded: collapseFormConfig.onItemAdded,
+        configOnSelectedItemProcessed: collapseFormConfig.onSelectedItemProcessed,
         // 添加拖拽排序相关的回调
-        configOnSortItems,
-        configOnDeleteItem,
-        configOnCopyItem,
-        configOnReplaceItem
-    });
-
-    // 当 collapseFormConfig 变化时更新
-    useEffect(() => {
-        setExtractedConfig({
-            collapseFields: collapseFormConfig.fields,
-            collapseInitialValues: collapseFormConfig.initialValues,
-            configActiveKeys: collapseFormConfig.activeKeys,
-            configOnCollapseChange: collapseFormConfig.onCollapseChange,
-            configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel,
-            configHandleDeletePanel: collapseFormConfig.handleDeletePanel,
-            // 新增提取的配置
-            configSelectedItemFromList: collapseFormConfig.selectedItemFromList,
-            configOnItemAdded: collapseFormConfig.onItemAdded,
-            configOnSelectedItemProcessed: collapseFormConfig.onSelectedItemProcessed,
-            // 添加拖拽排序相关的回调
-            configOnSortItems: collapseFormConfig.onSortItems,
-            configOnDeleteItem: collapseFormConfig.onDeleteItem,
-            configOnCopyItem: collapseFormConfig.onCopyItem,
-            configOnReplaceItem: collapseFormConfig.onReplaceItem
-        });
-    }, [collapseFormConfig]);
+        configOnSortItems: collapseFormConfig.onSortItems,
+        configOnDeleteItem: collapseFormConfig.onDeleteItem,
+        configOnCopyItem: collapseFormConfig.onCopyItem,
+        configOnReplaceItem: collapseFormConfig.onReplaceItem
+    }), [
+        // 明确列出所有依赖项，避免依赖整个 collapseFormConfig 对象
+        collapseFormConfig.fields,
+        collapseFormConfig.initialValues,
+        collapseFormConfig.activeKeys,
+        collapseFormConfig.onCollapseChange,
+        collapseFormConfig.handleAddCustomPanel,
+        collapseFormConfig.handleDeletePanel,
+        collapseFormConfig.selectedItemFromList,
+        collapseFormConfig.onItemAdded,
+        collapseFormConfig.onSelectedItemProcessed,
+        collapseFormConfig.onSortItems,
+        collapseFormConfig.onDeleteItem,
+        collapseFormConfig.onCopyItem,
+        collapseFormConfig.onReplaceItem
+    ]);
 
     // 渲染结构面板
     const renderStructurePanels = () => {

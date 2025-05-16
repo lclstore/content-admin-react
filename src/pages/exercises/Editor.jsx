@@ -34,9 +34,6 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'image', // 遵循命名规范，使用Url后缀
             label: 'Image',
-            // required: true,
-            // previewWidth: '96px',//预览宽度
-            previewHeight: '96px',//预览高度
             // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'png,webp',
             maxFileSize: 2 * 1024,
@@ -54,7 +51,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'structureType', 
+            name: 'structureType',
             label: 'Structure Type',
             options: [
                 { name: 'Warm Up', value: 'Warm_Up' },
@@ -66,7 +63,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'difficulty', 
+            name: 'difficulty',
             label: 'Difficulty Type',
             options: [
                 { name: 'Beginner', value: 'Beginner' },
@@ -78,7 +75,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'equipment', 
+            name: 'equipment',
             label: 'Equipment',
             options: [
                 { name: 'Dumbbell', value: 'Dumbbell' },
@@ -90,7 +87,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'position', 
+            name: 'position',
             label: 'Position',
             options: [
                 { name: 'Standing', value: 'Standing' },
@@ -98,14 +95,14 @@ export default function UserEditorWithCommon() {
                 { name: 'Seated', value: 'Seated' },
                 { name: 'Prone', value: 'Prone' },
                 { name: 'Kneeling', value: 'Kneeling' },
-                
+
             ],
             required: true,
         },
         {
             type: 'select',
             mode: 'multiple',
-            name: 'target', 
+            name: 'target',
             label: 'Target',
             options: [
                 { name: 'Full Body', value: 'Full_Body' },
@@ -115,7 +112,7 @@ export default function UserEditorWithCommon() {
                 { name: 'Abs', value: 'Abs' },
                 { name: 'Leg', value: 'Leg' },
                 { name: 'Core', value: 'Core' },
-                
+
             ],
             required: true,
         },

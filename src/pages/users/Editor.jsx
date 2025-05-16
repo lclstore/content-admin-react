@@ -52,7 +52,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'password',
-            name: 'userPassword',
+            name: 'password',
             label: 'Password',
             required: true,
             rules: [
@@ -98,7 +98,7 @@ export default function UserEditorWithCommon() {
             layoutType: values.layoutType,
             contentStyle: values.contentStyle
         };
-
+        console.log('dataToSave',dataToSave)
         // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
         // 实际应用中，这里应该是异步请求
 

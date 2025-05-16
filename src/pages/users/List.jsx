@@ -9,6 +9,7 @@ import { statusIconMap, optionsConstants } from '@/constants';
 import { statusOrder, filterSections, mockUsers } from './Data';
 import settings from '@/config/settings';
 const { file: fileSettings } = settings;
+import request from "@/request";
 export default function UsersList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
@@ -142,7 +143,7 @@ export default function UsersList() {
                 visibleColumn: 0,
                 render: (createTime) => formatDate(createTime, 'YYYY-MM-DD HH:mm:ss')
             },
-            { title: 'Create User', dataIndex: 'createUser', key: 'createUser', width: 350},
+            { title: 'Create User', dataIndex: 'createUser', key: 'createUser', width: 350 },
             {
                 title: 'Actions',
                 key: 'actions',
@@ -241,6 +242,20 @@ export default function UsersList() {
         navigate(`/users/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url: "/user/page",
+                load: true,
+                callback(res) {
+                    console.log('res', res)
+                    resolve()
+                }
+            })
+        })
+    }, [])
+
     // 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮
@@ -271,6 +286,7 @@ export default function UsersList() {
      * 重置操作标志
      */
     useEffect(() => {
+        // getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);

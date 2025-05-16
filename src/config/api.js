@@ -1,4 +1,5 @@
 import request from "@/request"
+import { a } from "@/request"
 export function uploadFile() {
     // 上传
     const func = ({file, dirKey, url}) => {

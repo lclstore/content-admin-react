@@ -3,17 +3,11 @@ import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-<<<<<<< HEAD
-import { formatDate } from '@/utils';
 import { statusIconMap, optionsConstants } from '@/constants';
-import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusOrder, filterSections, listData } from './Data';
 
-=======
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections,listData } from './Data';
 import request from "@/request";
->>>>>>> main
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
@@ -281,7 +275,7 @@ export default () => {
                 url:"/sound/page",
                 load:true,
                 callback(res){
-                    console.log(res)
+                    console.log('res',res)
                     resolve()
                 }
             })
@@ -330,6 +324,7 @@ export default () => {
      * 重置操作标志
      */
     useEffect(() => {
+        console.log('111')
         getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);

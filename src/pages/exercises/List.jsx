@@ -21,45 +21,6 @@ export default () => {
     const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [messageApi, contextHolder] = message.useMessage();
 
-    /**
-     * 编辑按钮处理
-     * 导航到用户编辑页面
-     */
-    const handleEdit = useCallback((record) => {
-        navigate(`/users/editor?id=${record.id}`);
-    }, [navigate]);
-
-    /**
-     * 状态变更å处理
-     * 更新用户的状态（启用/禁用）
-     */
-    const handleStatusChange = useCallback((record, newStatus) => {
-        setActionInProgress(true);
-        const updatedRecord = { ...record, status: newStatus };
-        setDataSource(current =>
-            current.map(item =>
-                item.id === record.id ? updatedRecord : item
-            )
-        );
-        setActionInProgress(false);
-        messageApi.success(`Successfully ${newStatus} user "${record.name}"`);
-    }, [messageApi]);
-
-    /**
-     * 处理按钮点击事件
-     */
-    const handleActionClick = useCallback((actionName, record, event) => {
-        if (event) event.stopPropagation();
-        setCurrentRecord(record);
-        // 编辑按钮点击
-        if (actionName === 'edit') {
-            handleEdit(record);
-        } else {
-            // 状态变更按钮点击
-            handleStatusChange(record, actionName);
-        }
-    }, [handleEdit, handleStatusChange]);
-
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
@@ -162,11 +123,9 @@ export default () => {
                 actionButtons: ['enable', 'disable','edit','duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
-                // 按钮点击处理函数
-                onActionClick: handleActionClick
             }
         ];
-    }, [isButtonVisible, handleActionClick]);
+    }, [isButtonVisible]);
 
     /**
      * 搜索处理函数
@@ -292,22 +251,12 @@ export default () => {
      * 重置操作标志
      */
     useEffect(() => {
-        getData().then()
+        // getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
 
-    // 表格数据和配置
-    /**
-     * 筛选后的表格数据
-     */
-    const filteredDataForTable = useMemo(() => {
-        setLoading(true);
-        let tempData = [...dataSource];
-        setLoading(false);
-        return tempData;
-    }, [dataSource]);
 
     // 渲染 - 组件UI呈现
     return (
@@ -319,7 +268,7 @@ export default () => {
             <ConfigurableTable
                 uniqueId={'exerciseList'}
                 columns={allColumnDefinitions}
-                dataSource={filteredDataForTable}
+                dataSource={dataSource}
                 rowKey="id"
                 loading={loading}
                 onRowClick={handleRowClick}

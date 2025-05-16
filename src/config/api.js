@@ -1,4 +1,5 @@
-function uploadFile() {
+import request from "@/request"
+export function uploadFile() {
     // 上传
     const func = ({file, dirKey, url}) => {
         let formData = new FormData();
@@ -92,4 +93,12 @@ function uploadFile() {
             return await s3Func(config)
         }
     }
+}
+export const getList = async (moduleKey) => {
+    return new Promise(resolve => {
+        request.get({
+            url:`/${moduleKey}/page`,
+            callback: res => resolve(res)
+        });
+    })
 }

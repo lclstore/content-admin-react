@@ -1,4 +1,5 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo, useEffect,useCallback} from 'react';
+import { useImmer } from "use-immer"
 import {Table, Input, Button, Spin, Space, Dropdown} from 'antd';
 import {
     SearchOutlined,
@@ -15,6 +16,7 @@ import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 import {defaultPagination, actionIconMap, optionsConstants} from '@/constants';
+import { getList as getListPublick } from "@/config/api.js";
 
 /**
  * 可配置表格组件
@@ -38,6 +40,7 @@ import {defaultPagination, actionIconMap, optionsConstants} from '@/constants';
  * @param {boolean} [props.showColumnSettings=true] - 当为true时显示列设置按钮并执行列设置逻辑，当为false时显示所有列且不显示列设置按钮
  * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
+ * @param {function} [props.getList] - 获取表格数据的回调函数
  */
 function ConfigurableTable({
                                uniqueId,
@@ -58,6 +61,7 @@ function ConfigurableTable({
                                tableProps,
                                showColumnSettings = true,//当为true时显示列设置按钮
                                leftToolbarItems = [], // 左侧工具栏按钮
+                               getList
                            }) {
     const storageKey = `table_visible_columns_${uniqueId}`;
 
@@ -449,8 +453,7 @@ function ConfigurableTable({
             // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
             if (processedCol.actionButtons &&
                 Array.isArray(processedCol.actionButtons) &&
-                typeof processedCol.isShow === 'function' &&
-                typeof processedCol.onActionClick === 'function') {
+                typeof processedCol.isShow === 'function') {
 
                 processedCol.render = (_, record) => (
                     <div className="actions-container" onClick={(e) => e.stopPropagation()}
@@ -470,7 +473,6 @@ function ConfigurableTable({
                                             // 删除danger属性，避免hover背景色变化
                                             onClick: (e) => {
                                                 if (e.domEvent) e.domEvent.stopPropagation();
-                                                processedCol.onActionClick(btnName, record, e.domEvent);
                                             }
                                         };
                                     })
@@ -498,6 +500,12 @@ function ConfigurableTable({
             return processedCol;
         });
     }, [currentlyVisibleColumns]);
+    // search data
+    const [filterData, uodateFilterData] = useImmer({});
+    // getData 的方法
+    const getData = useCallback(async () => {
+        const res = await (getList ? getList:getListPublick)()
+    }, [currentlyVisibleColumns, dataSource, rowKey]);
 
     return (
         <div className={styles.configurableTableContainer}>
@@ -540,7 +548,10 @@ function ConfigurableTable({
                         <FiltersPopover
                             filterSections={filterConfig.filterSections}
                             activeFilters={filterConfig.activeFilters || {}}
-                            onUpdate={filterConfig.onUpdate}
+                            onUpdate={() => {
+                                getData()
+                                filterConfig.onUpdate()
+                            }}
                             onReset={filterConfig.onReset}
                             showBadgeDot={hasActiveFilters}
                             showClearIcon={hasActiveFilters}

@@ -17,9 +17,11 @@ import {
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
+import request from "@/request";
 
 export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
+    let mockUsers = []
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
@@ -364,6 +366,24 @@ export default function WorkoutsList() {
         }
     }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
 
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url: "/sound/page",
+                load: true,
+                data: {
+                    pageSize: 20
+                },
+                callback(res) {
+                    setDataSource(res.data.data||[])
+                    console.log('res', res.data.data)
+                    resolve()
+                }
+            })
+        })
+    }, [])
+
     // 7. 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮
@@ -394,6 +414,7 @@ export default function WorkoutsList() {
      * 重置操作标志
      */
     useEffect(() => {
+        getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);

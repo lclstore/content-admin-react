@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
+import { data, useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
@@ -130,7 +130,7 @@ export default function UsersList() {
                 dataIndex: 'status',
                 key: 'status',
                 iconOptions: statusIconMap,
-                options: 'displayStatus',
+                options: 'userStatus',
                 width: 120,
                 visibleColumn: 0
             },
@@ -248,6 +248,9 @@ export default function UsersList() {
             request.get({
                 url: "/user/page",
                 load: true,
+                data:{
+                    pageSize:20
+                },
                 callback(res) {
                     setDataSource(res.data.data)
                     console.log('res', res.data.data)

@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
-import { mockUsers } from './Data';
-import { validateEmail, validatePassword } from '@/utils';
+
+
+import request from "@/request";
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
@@ -11,11 +12,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        layoutType: 1,
-        // status2: [1, 2],
-        // status: 1, // 确保status有默认值1
-        // // 为联动选择器设置默认值 - 使用数字类型
-        // contentStyle: 'style1'
+        audioUrl: '1xxxx',
     }
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -97,16 +94,20 @@ export default function UserEditorWithCommon() {
     const initFormData = (id) => {
         return new Promise((resolve) => {
             // 模拟延迟 1 秒
-            setTimeout(() => {
-                if (id) {
-                    // 查找对应用户
-                    const user = mockUsers.find(u => u.id === parseInt(id, 10));
-                    resolve(user || {});  // 找不到也返回空对象，避免 undefined
-                } else {
-                    // 新增场景：直接返回空对象
-                    resolve(initialValues);
-                }
-            }, 1000);
+            if (id) {
+                // 查找对应用户
+                request.get({
+                    url: `/music/detail/${id}`,
+                    load: true,
+                    callback(res) {
+                        console.log('res111', res.data.data)
+                        resolve(res.data.data || {})
+                    }
+                })
+            } else {
+                // 新增场景：直接返回空对象
+                resolve(initialValues);
+            }
         });
     };
     return (

@@ -5,19 +5,17 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
 import { statusIconMap, optionsConstants } from '@/constants';
 import {
     statusOrder,
-    difficultyOrder,
     mockWorkoutsForList,
     filterSections,
-    filterSections1,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
+import request from "@/request";
 
 export default function Musics() {
     // 1. 状态定义 - 组件内部状态管理
@@ -150,7 +148,7 @@ export default function Musics() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 1 },
+            { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80, visibleColumn: 1 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
@@ -354,6 +352,26 @@ export default function Musics() {
         }
     }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
 
+
+
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url: "/music/page",
+                load: true,
+                data: {
+                    pageSize: 20
+                },
+                callback(res) {
+                    setDataSource(res.data.data)
+                    console.log('res', res.data.data)
+                    resolve()
+                }
+            })
+        })
+    }, [])
+
     // 7. 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮
@@ -384,6 +402,7 @@ export default function Musics() {
      * 重置操作标志
      */
     useEffect(() => {
+        getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);

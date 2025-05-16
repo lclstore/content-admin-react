@@ -367,6 +367,8 @@ export default function UserEditorWithCommon() {
 
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
+
+    
     const [formFields, setFormFields] = useState(initialFormFields);
 
     // 添加自定义面板的回调函数

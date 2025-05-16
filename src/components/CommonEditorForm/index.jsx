@@ -113,12 +113,10 @@ export default function CommonEditor(props) {
     const handleCommonListItemAdd = (item) => {
         setSelectedItemFromList(item); // 更新 CommonEditor 中的状态
 
-        // TODO: 在这里根据 item 执行你需要的操作
-        // 例如：
-        // 1. 更新表单的初始值 (如果 CollapseForm 需要基于这个 item 来预填数据)
-        //    form.setFieldsValue({ ... 根据 item 构造的表单值 ... });
-        // 2. 更新传递给 CollapseForm 的 props
-        // 3. 如果有必要，甚至可以触发 CollapseForm 内部的方法 (需要通过 ref 或 props 回调)
+        // 如果 CommonList 配置中提供了 onSelectItem 回调，则调用它
+        if (commonListConfig.onSelectItem && typeof commonListConfig.onSelectItem === 'function') {
+            commonListConfig.onSelectItem(item);
+        }
     };
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
@@ -264,6 +262,15 @@ export default function CommonEditor(props) {
         onCollapseChange: configOnCollapseChange, // 从父组件接收 onCollapseChange
         handleAddCustomPanel: configHandleAddCustomPanel, // 从父组件接收 handleAddCustomPanel
         handleDeletePanel: configHandleDeletePanel,
+        // 选中项和回调函数
+        selectedItemFromList: configSelectedItemFromList,
+        onItemAdded: configOnItemAdded,
+        onSelectedItemProcessed: configOnSelectedItemProcessed,
+        // 添加拖拽排序相关的回调
+        onSortItems: configOnSortItems,
+        onDeleteItem: configOnDeleteItem,
+        onCopyItem: configOnCopyItem,
+        onReplaceItem: configOnReplaceItem
     } = collapseFormConfig;
 
     // 当 collapseFormConfig 变化时更新依赖的状态
@@ -273,7 +280,16 @@ export default function CommonEditor(props) {
         configActiveKeys,
         configOnCollapseChange,
         configHandleAddCustomPanel,
-        configHandleDeletePanel
+        configHandleDeletePanel,
+        // 新增提取的配置
+        configSelectedItemFromList,
+        configOnItemAdded,
+        configOnSelectedItemProcessed,
+        // 添加拖拽排序相关的回调
+        configOnSortItems,
+        configOnDeleteItem,
+        configOnCopyItem,
+        configOnReplaceItem
     });
 
     // 当 collapseFormConfig 变化时更新
@@ -284,7 +300,16 @@ export default function CommonEditor(props) {
             configActiveKeys: collapseFormConfig.activeKeys,
             configOnCollapseChange: collapseFormConfig.onCollapseChange,
             configHandleAddCustomPanel: collapseFormConfig.handleAddCustomPanel,
-            configHandleDeletePanel: collapseFormConfig.handleDeletePanel
+            configHandleDeletePanel: collapseFormConfig.handleDeletePanel,
+            // 新增提取的配置
+            configSelectedItemFromList: collapseFormConfig.selectedItemFromList,
+            configOnItemAdded: collapseFormConfig.onItemAdded,
+            configOnSelectedItemProcessed: collapseFormConfig.onSelectedItemProcessed,
+            // 添加拖拽排序相关的回调
+            configOnSortItems: collapseFormConfig.onSortItems,
+            configOnDeleteItem: collapseFormConfig.onDeleteItem,
+            configOnCopyItem: collapseFormConfig.onCopyItem,
+            configOnReplaceItem: collapseFormConfig.onReplaceItem
         });
     }, [collapseFormConfig]);
 
@@ -389,8 +414,30 @@ export default function CommonEditor(props) {
             configActiveKeys: activeKeys,
             configOnCollapseChange: onCollapseChange,
             configHandleAddCustomPanel: handleAddCustomPanel,
-            configHandleDeletePanel: handleDeletePanel
+            configHandleDeletePanel: handleDeletePanel,
+            // 新增从提取配置中获取选中项和回调函数
+            configSelectedItemFromList: externalSelectedItem,
+            configOnItemAdded: onItemAdded,
+            configOnSelectedItemProcessed: onSelectedItemProcessed,
+            // 添加拖拽排序相关的回调
+            configOnSortItems: onSortItems,
+            configOnDeleteItem: onDeleteItem,
+            configOnCopyItem: onCopyItem,
+            configOnReplaceItem: onReplaceItem
         } = extractedConfig;
+
+        // 优先使用外部传入的选中项，否则使用内部状态
+        const effectiveSelectedItem = externalSelectedItem !== undefined ? externalSelectedItem : selectedItemFromList;
+
+        // 选中项处理完成的回调处理函数
+        const handleSelectedItemProcessed = () => {
+            // 如果提供了外部回调，则调用它
+            if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
+                onSelectedItemProcessed();
+            }
+            // 同时清空内部状态
+            setSelectedItemFromList(null);
+        };
 
         return (
             <div className={styles.advancedFormContent}>
@@ -415,7 +462,7 @@ export default function CommonEditor(props) {
                             <CollapseForm
                                 fields={fields || collapseFormConfig.fields || []}
                                 form={form}
-                                selectedItemFromList={selectedItemFromList}
+                                selectedItemFromList={effectiveSelectedItem}
                                 initialValues={initValues || initialValues}
                                 // activeKeys={activeKeys !== undefined ? activeKeys : activeCollapseKeys}
                                 activeKeys={activeCollapseKeys}
@@ -423,6 +470,14 @@ export default function CommonEditor(props) {
                                 handleAddCustomPanel={handleAddCustomPanel}
                                 handleDeletePanel={handleDeletePanel}
                                 isCollapse={collapseFormConfig.isCollapse !== false}
+                                // 添加回调函数
+                                onItemAdded={onItemAdded}
+                                onSelectedItemProcessed={handleSelectedItemProcessed}
+                                // 添加排序相关的回调函数
+                                onSortItems={onSortItems}
+                                onDeleteItem={onDeleteItem}
+                                onCopyItem={onCopyItem}
+                                onReplaceItem={onReplaceItem}
                             />
                         )}
                         {/* 如果配置了结构面板，则渲染结构面板 */}

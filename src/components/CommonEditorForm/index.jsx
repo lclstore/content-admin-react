@@ -29,6 +29,8 @@ import { dateRangeKeys } from '@/constants/app';
  * @param {Object} props.collapseFormConfig 折叠表单配置
  * @param {string} props.formName 表单名称
  * @param {Object} props.initFormData 初始化表单数据
+ * @param {Function} props.renderItemMata 自定义渲染列表项
+ * @param {string} props.defaultActiveKeys 默认激活的折叠面板key all:所有面板，array:指定面板 null:默认第一个面板
  */
 export default function CommonEditor(props) {
     const {
@@ -38,6 +40,7 @@ export default function CommonEditor(props) {
         initialValues = {},
         initFormData,
         onSave,
+        renderItemMata,
         validate,
         commonListConfig = null,
         complexConfig = {}, // 高级表单特定配置
@@ -73,13 +76,17 @@ export default function CommonEditor(props) {
     const [structurePanels, setStructurePanels] = useState(
         complexConfig.structurePanels || []
     );
-    // 初始化激活的折叠面板key - 使用第一个面板的name
     const [activeCollapseKeys, setActiveCollapseKeys] = useState(() => {
-        if (collapseFormConfig && collapseFormConfig.fields && collapseFormConfig.fields.length > 0) {
-            // 使用第一个面板的name作为默认打开的面板
-            return [collapseFormConfig.fields[0].name];
+        if (!collapseFormConfig || !collapseFormConfig.fields || collapseFormConfig.fields.length === 0) {
+            return [];
         }
-        return [];
+        if (collapseFormConfig.defaultActiveKeys === 'all') {
+            return collapseFormConfig.fields.map(field => field.name);
+        }
+        if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
+            return collapseFormConfig.defaultActiveKeys;
+        }
+        return [collapseFormConfig.fields[0].name]; // 默认使用第一个面板
     });
     const [expandedItems, setExpandedItems] = useState({});
 
@@ -120,9 +127,13 @@ export default function CommonEditor(props) {
     };
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
-        console.log(obj);
+
         fields.forEach(field => {
+            if (field.fields) {
+                transformDatesInObject(obj, field.fields)
+            }
             if (field.type === 'date' || field.type === 'dateRange') {
+
                 obj[field.name] = obj[field.name] ? dayjs(obj[field.name]) : null;
                 if (field.type === 'dateRange') {
                     // 如果是日期范围，则将日期范围转换为dayjs数组
@@ -131,6 +142,51 @@ export default function CommonEditor(props) {
                 }
             }
         });
+        const structure = fields.find(field => field.dataKey);
+        //数组帮定处理
+        if (structure && Array.isArray(obj[structure.dataKey])) {
+            if (structure.dataKey) {
+                obj[structure.dataKey].forEach((entry, index) => {
+                    const suffix = index === 0 ? '' : index + 1;
+
+                    // 处理非 list 的属性，复制到 obj
+                    Object.keys(entry).forEach(key => {
+                        if (key !== structure.dataKey) {
+                            obj[`${key}${suffix}`] = entry[key];
+                        }
+                    });
+
+                    if (index === 0) {
+                        // 第一个默认面板只绑定数据
+                        collapseFormConfig.onItemAdded(
+                            structure.name,
+                            structure.name,
+                            entry[structure.dataKey],
+                            structure.name,
+                            form
+                        );
+                    } else {
+                        // 创建新字段数组
+                        const newFields = structure.fields.map(field => ({
+                            ...field,
+                            name: `${field.name}${suffix}`
+                        }));
+
+                        // 构建新的面板
+                        const newPanel = {
+                            name: `${structure.name}${index}`,
+                            label: structure.label,
+                            fields: newFields,
+                            dataKey: structure.dataKey,
+                            required: structure.required,
+                            dataList: entry[structure.dataKey]
+                        };
+
+                        collapseFormConfig.handleAddCustomPanel(newPanel);
+                    }
+                });
+            }
+        }
         return obj;
     }
     // 表单变更处理函数
@@ -157,6 +213,9 @@ export default function CommonEditor(props) {
     const handleCollapseChange = useCallback((key) => {
         // 手风琴模式下，key是单个字符串而不是数组
         setActiveCollapseKeys(key ? [key] : []);
+        if (collapseFormConfig.collapseChange) {
+            collapseFormConfig.collapseChange(key, form);
+        }
     }, []);
 
     // 处理添加项目的函数
@@ -210,7 +269,9 @@ export default function CommonEditor(props) {
         if (id) {
             response = await initFormData(id) || {};
         }
-        const transformedData = transformDatesInObject(response, fields); // 转换日期
+
+        const transformedData = transformDatesInObject(response, formType === 'basic' ? fields : collapseFormConfig.fields); // 转换日期
+
         form.setFieldsValue(transformedData);
 
         // 确保表单值更新后，设置表单状态为"未修改"
@@ -439,6 +500,7 @@ export default function CommonEditor(props) {
                 {
                     commonListConfig && (
                         <CommonList
+                            renderItemMata={renderItemMata}
                             {...commonListConfig}
                             onAddItem={handleCommonListItemAdd}
                         />
@@ -446,41 +508,46 @@ export default function CommonEditor(props) {
                 }
                 {/* 渲染右侧表单 */}
                 <div className={`${styles.advancedEditorForm} ${commonListConfig ? '' : styles.withSidebar}`}>
-                    <Form
-                        form={form}
-                        name={config.formName || 'advancedForm'}
-                        layout={config.layout || 'vertical'}
-                        onValuesChange={handleFormValuesChange}
-                        onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
-                        initialValues={initialValues}
-                        className={styles.form}
-                    >
-                        {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
-                        {collapseFormConfig && Object.keys(collapseFormConfig).length > 0 && (
-                            <CollapseForm
-                                fields={fields || collapseFormConfig.fields || []}
-                                form={form}
-                                selectedItemFromList={effectiveSelectedItem}
-                                initialValues={initValues || initialValues}
-                                // activeKeys={activeKeys !== undefined ? activeKeys : activeCollapseKeys}
-                                activeKeys={activeCollapseKeys}
-                                onCollapseChange={handleCollapseChange}
-                                handleAddCustomPanel={handleAddCustomPanel}
-                                handleDeletePanel={handleDeletePanel}
-                                isCollapse={collapseFormConfig.isCollapse !== false}
-                                // 添加回调函数
-                                onItemAdded={onItemAdded}
-                                onSelectedItemProcessed={handleSelectedItemProcessed}
-                                // 添加排序相关的回调函数
-                                onSortItems={onSortItems}
-                                onDeleteItem={onDeleteItem}
-                                onCopyItem={onCopyItem}
-                                onReplaceItem={onReplaceItem}
-                            />
-                        )}
-                        {/* 如果配置了结构面板，则渲染结构面板 */}
-                        {complexConfig.includeStructurePanels && renderStructurePanels()}
-                    </Form>
+                    <Spin spinning={loading}>
+                        <Form
+                            form={form}
+
+                            name={config.formName || 'advancedForm'}
+                            layout={config.layout || 'vertical'}
+                            onValuesChange={handleFormValuesChange}
+                            onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
+                            initialValues={initialValues}
+                            className={styles.form}
+                        >
+                            {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
+                            {collapseFormConfig && Object.keys(collapseFormConfig).length > 0 && (
+                                <CollapseForm
+                                    fields={fields || collapseFormConfig.fields || []}
+                                    form={form}
+                                    renderItemMata={renderItemMata}
+                                    commonListConfig={commonListConfig}
+                                    selectedItemFromList={effectiveSelectedItem}
+                                    // initialValues={initValues || initialValues}
+                                    // activeKeys={activeKeys !== undefined ? activeKeys : activeCollapseKeys}
+                                    activeKeys={activeCollapseKeys}
+                                    onCollapseChange={handleCollapseChange}
+                                    handleAddCustomPanel={handleAddCustomPanel}
+                                    handleDeletePanel={handleDeletePanel}
+                                    isCollapse={collapseFormConfig.isCollapse !== false}
+                                    // 添加回调函数
+                                    onItemAdded={onItemAdded}
+                                    onSelectedItemProcessed={handleSelectedItemProcessed}
+                                    // 添加排序相关的回调函数
+                                    onSortItems={onSortItems}
+                                    onDeleteItem={onDeleteItem}
+                                    onCopyItem={onCopyItem}
+                                    onReplaceItem={onReplaceItem}
+                                />
+                            )}
+                            {/* 如果配置了结构面板，则渲染结构面板 */}
+                            {complexConfig.includeStructurePanels && renderStructurePanels()}
+                        </Form>
+                    </Spin>
 
                 </div>
             </div>

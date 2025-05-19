@@ -1,8 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import { PlayCircleOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
+import { Select } from 'antd';
+
+const { Option } = Select;
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
@@ -19,6 +23,28 @@ export default function UserEditorWithCommon() {
     }
     // 表单字段配置
     const formFields = useMemo(() => [
+        {
+            type: 'antdSelect',
+            name: 'customSelect',
+            label: 'customSelect',
+            // style: {
+            //     width: '300px',
+            // },
+            options: [
+                { value: 1, label: 'option1' },
+                { value: 2, label: 'option2' },
+                { value: 3, label: 'option3' }
+            ],
+            renderLabel: (option) => {
+                return (
+                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600 }}>
+                        {option.label}
+                        <PlayCircleOutlined style={{ marginLeft: 16, color: '#1c8' }} />
+                    </span>
+                );
+            },
+            required: true,
+        },
         {
             type: 'select',
             mode: 'single',

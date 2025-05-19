@@ -25,6 +25,10 @@
 }
 
 /* 高级编辑器表单 */
+.advancedEditorContainer {
+    overflow: visible;
+}
+
 .advancedEditorForm {
     padding: 16px;
     width: 100%;

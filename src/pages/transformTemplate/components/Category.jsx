@@ -215,7 +215,7 @@ export default () => {
         }
 
         // 正常导航到编辑页面
-        navigate(`/collections/editor?id=${record.id}`);
+        navigate(`/transformTemplate/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理

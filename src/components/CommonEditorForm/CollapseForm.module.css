@@ -21,7 +21,53 @@
     margin-bottom: 16px;
     border: none;
 }
+ 
+/* 列表项样式 */
+.item :global(.ant-list-item-meta-title) {
+    margin-bottom: 0 !important;
+    font-weight: 500;
+}
 
+.item :global(.ant-list-item-meta-description) {
+    font-size: 12px;
+}
+
+.item :global(.ant-list-item-action>li) {
+    padding-left: 8px;
+}
+.ant-list-item-meta{
+    display: flex;
+    align-items: center;
+}
+/* 头像和播放图标样式 */
+.itemAvatar {
+    position: relative;
+    margin-right: 16px;
+}
+
+.playIcon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
+    color: #fff;
+}
+
+/* 选中状态样式 */
+.itemSelected {
+    background-color: rgba(0, 144, 255, 0.05);
+}
+
+/* 禁用状态样式 */
+.itemDisabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 列表项悬停效果 */
+.item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
 /* 激活的折叠面板标题样式 */
 .workoutDetailsCollapse :global(.ant-collapse-item.ant-collapse-item-active) :global(.ant-collapse-header) {
     border-radius: 16px 16px 0 0 !important;

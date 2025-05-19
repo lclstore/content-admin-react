@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import { Form } from 'antd';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { commonListData, filterSections } from '@/pages/Data';
 import { validateEmail, validatePassword } from '@/utils';
@@ -30,7 +31,34 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {}
-    const mockUsers = [];
+    const mockUsers = [{
+        id: 1,
+        name: 'John Doe',
+        description: 'asasdasa',
+        startTime: '2025-01-26',
+        endTime: '2025-07-26',
+        premium: 1,
+        coverImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
+        detailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
+        thumbnailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
+        completeImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
+        difficulty: 1,
+        equipment: 3,
+        position: 2,
+        target: [1, 5],
+        introDuration: 10,
+        exercisePreviewDuration: 20,
+        exerciseExecutionDuration: 30,
+        list: [{
+            reps: 1,
+            structureName: 'asd1',
+            list: [commonListData[0], commonListData[1]]
+        }, {
+            reps: 2,
+            structureName: 'asd2',
+            list: [commonListData[1]]
+        }]
+    }];
 
     // 添加选中项状态管理
     const [selectedItem, setSelectedItem] = useState(null);
@@ -41,15 +69,18 @@ export default function UserEditorWithCommon() {
         const updatedFields = formFields.map(field => {
             // 找到匹配的面板
             if (field.name === panelName) {
+                // 判断itemData是否为数组
+                const itemsToAdd = isArray(itemData) ? itemData : [itemData];
+
                 // 检查是否有展开的项
                 if (expandedItemId && isArray(field.dataList)) {
                     // 查找展开项的索引
                     const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
 
                     if (expandedItemIndex !== -1) {
-                        // 如果找到展开的项，在其后插入新项
+                        // 如果找到展开的项，在其后插入新项（可能是多个）
                         const newDataList = [...field.dataList];
-                        newDataList.splice(expandedItemIndex + 1, 0, itemData);
+                        newDataList.splice(expandedItemIndex + 1, 0, ...itemsToAdd);
 
                         return {
                             ...field,
@@ -62,8 +93,8 @@ export default function UserEditorWithCommon() {
                 return {
                     ...field,
                     dataList: isArray(field.dataList)
-                        ? [...field.dataList, itemData] // 如果是数组，创建新数组并添加新项
-                        : [itemData] // 如果不是数组，创建新数组
+                        ? [...field.dataList, ...itemsToAdd] // 如果是数组，创建新数组并添加新项（可能是多个）
+                        : itemsToAdd // 如果不是数组，创建新数组
                 };
             }
             return field; // 返回未修改的其他面板
@@ -71,7 +102,6 @@ export default function UserEditorWithCommon() {
         const formValues = form.getFieldsValue();
         // 更新状态
         setFormFields(updatedFields);
-
     };
 
     // 清空选中项的回调函数
@@ -85,24 +115,24 @@ export default function UserEditorWithCommon() {
         console.log('保存用户数据:', values, id);
 
         // 处理数据格式
-        const dataToSave = {
-            ...(id && { id: parseInt(id, 10) }),
-            name: values.name.trim(),
-            email: values.email ? values.email.trim() : '',
-            avatar: values.avatar,
-            status: values.status,
-            userPassword: values.userPassword,
-            birthday: values.birthday,
-            // 如果有timeRange，从中提取startDate和endDate
-            ...(values.timeRange && values.timeRange.length === 2 ? {
-                startDate: values.timeRange[0],
-                endDate: values.timeRange[1]
-            } : {}),
-            selectedRoles: values.selectedRoles || [],
-            // 保存联动选择器的值
-            layoutType: values.layoutType,
-            contentStyle: values.contentStyle
-        };
+        // const dataToSave = {
+        //     ...(id && { id: parseInt(id, 10) }),
+        //     name: values.name.trim(),
+        //     email: values.email ? values.email.trim() : '',
+        //     avatar: values.avatar,
+        //     status: values.status,
+        //     userPassword: values.userPassword,
+        //     birthday: values.birthday,
+        //     // 如果有timeRange，从中提取startDate和endDate
+        //     ...(values.timeRange && values.timeRange.length === 2 ? {
+        //         startDate: values.timeRange[0],
+        //         endDate: values.timeRange[1]
+        //     } : {}),
+        //     selectedRoles: values.selectedRoles || [],
+        //     // 保存联动选择器的值
+        //     layoutType: values.layoutType,
+        //     contentStyle: values.contentStyle
+        // };
 
         // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
         // 实际应用中，这里应该是异步请求
@@ -136,7 +166,8 @@ export default function UserEditorWithCommon() {
             setTimeout(() => {
                 if (id) {
                     // 查找对应用户
-                    const user = mockUsers.find(u => u.id === parseInt(id, 10));
+                    // const user = mockUsers.find(u => u.id === parseInt(id, 10));
+                    const user = mockUsers[0]
                     resolve(user || {});  // 找不到也返回空对象，避免 undefined
                 } else {
                     // 新增场景：直接返回空对象
@@ -183,100 +214,100 @@ export default function UserEditorWithCommon() {
                 }
             ]
         },
-        // {
-        //     label: 'Image',
-        //     name: 'image',
-        //     icon: <PictureOutlined />,
-        //     fields: [
-        //         {
-        //             type: 'upload',
-        //             name: 'coverImage',
-        //             label: 'Cover Image',
-        //             required: true,
-        //             onChange: imageUpload
-        //         },
-        //         {
-        //             type: 'upload',
-        //             name: 'detailImage',
-        //             label: 'Detail Image',
-        //             required: true,
-        //             onChange: imageUpload
-        //         },
-        //         {
-        //             type: 'upload',
-        //             name: 'thumbnailImage',
-        //             label: 'Thumbnail Image',
-        //             required: true,
-        //             onChange: imageUpload
-        //         },
-        //         {
-        //             type: 'upload',
-        //             name: 'completeImage',
-        //             label: 'Complete Image',
-        //             required: true,
-        //             onChange: imageUpload
-        //         },
+        {
+            label: 'Image',
+            name: 'image',
+            icon: <PictureOutlined />,
+            fields: [
+                {
+                    type: 'upload',
+                    name: 'coverImage',
+                    label: 'Cover Image',
+                    required: true,
+                    onChange: imageUpload
+                },
+                {
+                    type: 'upload',
+                    name: 'detailImage',
+                    label: 'Detail Image',
+                    required: true,
+                    onChange: imageUpload
+                },
+                {
+                    type: 'upload',
+                    name: 'thumbnailImage',
+                    label: 'Thumbnail Image',
+                    required: true,
+                    onChange: imageUpload
+                },
+                {
+                    type: 'upload',
+                    name: 'completeImage',
+                    label: 'Complete Image',
+                    required: true,
+                    onChange: imageUpload
+                },
 
-        //     ]
-        // },
-        // {
-        //     label: 'Labels',
-        //     name: 'labels',
-        //     icon: <TagsOutlined />,
-        //     fields: [
-        //         {
-        //             type: 'select',
-        //             name: 'difficulty',
-        //             label: 'Difficulty',
-        //             required: true,
-        //             options: [
-        //                 { label: 'Beginner', value: 1 },
-        //                 { label: 'Intermediate', value: 2 },
-        //                 { label: 'Advanced', value: 3 }
-        //             ],
-        //         },
-        //         {
-        //             type: 'select',
-        //             name: 'equipment',
-        //             label: 'Equipment',
-        //             required: true,
-        //             options: [
-        //                 { label: 'Dumbbell', value: 1 },
-        //                 { label: 'Resistance band', value: 2 },
-        //                 { label: 'None', value: 3 }
-        //             ]
-        //         },
-        //         {
-        //             type: 'select',
-        //             name: 'position',
-        //             label: 'Position',
-        //             required: true,
-        //             options: [
-        //                 { label: 'Standing', value: 1 },
-        //                 { label: 'Lying', value: 2 },
-        //                 { label: 'Seated', value: 3 },
-        //                 { label: 'Prone', value: 4 },
-        //                 { label: 'Kneeling', value: 5 }
-        //             ]
-        //         },
-        //         {
-        //             type: 'select',
-        //             mode: 'multiple',
-        //             name: 'target',
-        //             label: 'Target',
-        //             required: true,
-        //             options: [
-        //                 { label: 'Full Body', value: 1 },
-        //                 { label: 'Arm', value: 2 },
-        //                 { label: 'Back', value: 3 },
-        //                 { label: 'Butt', value: 4 },
-        //                 { label: 'Abs', value: 5 },
-        //                 { label: 'Leg', value: 6 },
-        //                 { label: 'Core', value: 7 }
-        //             ]
-        //         }
-        //     ]
-        // },
+            ]
+        },
+        {
+            label: 'Labels',
+            name: 'labels',
+            icon: <TagsOutlined />,
+            fields: [
+                {
+                    type: 'select',
+                    name: 'difficulty',
+                    label: 'Difficulty',
+                    required: true,
+                    options: [
+                        { label: 'Beginner', value: 1 },
+                        { label: 'Intermediate', value: 2 },
+                        { label: 'Advanced', value: 3 }
+                    ],
+                },
+                {
+                    type: 'select',
+                    name: 'equipment',
+                    label: 'Equipment',
+                    required: true,
+                    options: [
+                        { label: 'Dumbbell', value: 1 },
+                        { label: 'Resistance band', value: 2 },
+                        { label: 'None', value: 3 }
+                    ]
+                },
+                {
+                    type: 'select',
+                    name: 'position',
+                    label: 'Position',
+                    required: true,
+                    options: [
+                        { label: 'Standing', value: 1 },
+                        { label: 'Lying', value: 2 },
+                        { label: 'Seated', value: 3 },
+                        { label: 'Prone', value: 4 },
+                        { label: 'Kneeling', value: 5 }
+                    ]
+                },
+                {
+                    type: 'select',
+                    mode: 'multiple',
+                    name: 'target',
+                    label: 'Target',
+                    required: true,
+                    options: [
+                        { label: 'Full Body', value: 1 },
+                        { label: 'Arm', value: 2 },
+                        { label: 'Back', value: 3 },
+                        { label: 'Butt', value: 4 },
+                        { label: 'Abs', value: 5 },
+                        { label: 'Leg', value: 6 },
+                        { label: 'Core', value: 7 }
+                    ]
+                }
+            ]
+        },
         {
             label: 'Duration Settings',
             name: 'durationSettings',
@@ -318,7 +349,17 @@ export default function UserEditorWithCommon() {
             label: 'Structure Settings',
             name: 'structure',
             isShowAdd: true,
-            dataList: [],//
+            formterList: (dataList) => {
+                return dataList.map(item => {
+                    return {
+                        name: item.name,
+                        id: item.id
+                    }
+                })
+            },
+            dataList: [],
+            dataKey: 'list',
+            required: false,
             icon: <VideoCameraOutlined />,
             fields: [
                 {
@@ -346,13 +387,8 @@ export default function UserEditorWithCommon() {
             fields: [
                 {
                     type: 'displayText',
-                    name: 'dur  ation',
+                    name: 'duration',
                     label: 'Duration (Min):',
-                    displayFn: (form, initialValues) => {
-                        const formValues = form.getFieldsValue();
-                        console.log(formValues);
-
-                    },
 
                 },
                 {
@@ -370,7 +406,6 @@ export default function UserEditorWithCommon() {
 
     // 添加自定义面板的回调函数
     const handleAddCustomPanel = (newPanel) => {
-        debugger
         setFormFields(prevFields => {
             const lastIndexWithDatalist = [...prevFields]
                 .map((item, index) => item.dataList ? index : -1)
@@ -502,12 +537,61 @@ export default function UserEditorWithCommon() {
         // 实际替换逻辑通常涉及模态框，这里只是示例
         // 如果你有内容库或替换面板，可以在这里打开它
     };
+    //折叠面板展开
+    const handleCollapseChange = (activeKeys, form) => {
+
+
+        // 如果在此函数内更新了 formFields，可以在更新回调中获取最新值
+        if (activeKeys[0] === 'workoutData') {
+            setFormFields(prevFields => {
+                const newFields = [...prevFields]; // 进行某些更新操作、
+                const formValues = form.getFieldsValue();//表单数据
+                const preview = formValues.exercisePreviewDuration;
+                const execution = formValues.exerciseExecutionDuration;
+                const introDuration = formValues.introDuration;
+
+                let loopCount = 0;
+                let workoutCalorie = 0;
+                const MET = 1
+
+                const structureList = newFields.filter(item => isArray(item.dataList) && item.dataList.length > 0);
+                if (structureList.length > 0) {
+                    structureList.forEach((item, index) => {
+                        const reps = formValues[`reps${index == 0 ? '' : index}`] | 0;
+                        loopCount = reps * item.dataList.length;
+                        const calories = MET * 75 / 3600 * execution * reps * item.dataList.length;
+                        workoutCalorie += calories
+                    })
+                    const workOutTime = (preview + execution) * loopCount;
+                    const workoutDurationRaw = introDuration + workOutTime;
+                    // 如果时长小于30，则向下取整，否则向上取整
+                    const workoutDuration = workoutDurationRaw < 30
+                        ? Math.floor(workoutDurationRaw)
+                        : Math.ceil(workoutDurationRaw);
+                    form.setFieldsValue({
+                        duration: workoutDuration,
+                        calorie: Math.ceil(workoutCalorie)//向上取整
+                    });
+                } else {
+                    form.setFieldsValue({
+                        duration: 0,
+                        calorie: 0
+                    });
+                }
+                console.log(newFields);
+
+                return newFields;
+            });
+        }
+
+    };
 
     return (
         <CommonEditorForm
+            // renderItemMata={renderItemMata}  // 自定义渲染列表项
             commonListConfig={
                 {
-                    // renderItemMata: renderItemMata, // 自定义渲染列表项
+
                     initCommonListData: initCommonListData, // 搜索方法
                     placeholder: 'Search your content name...', // 搜索框提示
                     filterSections: filterSections, // 筛选器
@@ -525,6 +609,7 @@ export default function UserEditorWithCommon() {
             }
             collapseFormConfig={
                 {
+                    // defaultActiveKeys: 'all',
                     fields: formFields, // 表单字段配置
                     initialValues: initialValues, // 默认初始值
                     isCollapse: true, //是否折叠分组
@@ -538,9 +623,11 @@ export default function UserEditorWithCommon() {
                     onSortItems: handleSortItems,// 排序项的回调函数
                     onDeleteItem: handleDeleteItem,// 删除项的回调函数
                     onCopyItem: handleCopyItem,// 复制项的回调函数
-                    onReplaceItem: handleReplaceItem// 替换项的回调函数
+                    onReplaceItem: handleReplaceItem,// 替换项的回调函数
+                    collapseChange: handleCollapseChange// 折叠面板展开的回调函数
                 }
             }
+
             initFormData={initFormData}
             formType="advanced"
             config={{ formName: 'Collections' }}

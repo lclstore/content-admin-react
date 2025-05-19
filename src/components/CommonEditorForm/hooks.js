@@ -20,6 +20,7 @@ export const useFormState = (initialValues = {}) => {
     // 使用useForm创建表单实例
     const [form] = Form.useForm();
 
+
     // 表单状态管理
     const [formConnected, setFormConnected] = useState(false);
     const [isFormDirty, setIsFormDirty] = useState(false);
@@ -112,13 +113,21 @@ export const useHeaderConfig = (params) => {
         headerContext,
         setIsFormDirty
     } = params;
+    // 创建ref存储最新的collapseFormConfig
+    const collapseFormConfigRef = useRef(collapseFormConfig);
+
+    // 更新ref值确保始终是最新的
+    useEffect(() => {
+        collapseFormConfigRef.current = collapseFormConfig;
+    }, [collapseFormConfig]);
+
+    console.log('fields', collapseFormConfig.fields);
 
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, parent = null) => {
-
         for (const field of fields) {
             const value = dataToSave[field.name];
-            const isRequired = formType === 'advanced' && collapseFormConfig.isCollapse && parent && field.required;
+            const isRequired = formType === 'advanced' && collapseFormConfig.isCollapse && field.required;
 
             // 校验必填项
             if (isRequired && (value === undefined || value === null || value === '')) {
@@ -180,7 +189,7 @@ export const useHeaderConfig = (params) => {
             // 处理列表相关数据格式和验证
             if (Array.isArray(field.dataList)) {
                 // 检查数组是否为空，如果为空则抛出异常
-                if (Array.isArray(field.dataList) && field.dataList.length === 0) {
+                if (field.required && Array.isArray(field.dataList) && field.dataList.length === 0) {
                     // 展开当前折叠栏
                     if (collapseFormConfig.setActiveKey && field.name) {
                         collapseFormConfig.setActiveKey(field.name);
@@ -204,7 +213,6 @@ export const useHeaderConfig = (params) => {
 
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
-
         if (!form) return;
 
         form.validateFields()
@@ -212,46 +220,42 @@ export const useHeaderConfig = (params) => {
                 if (validate && !validate(values, form)) {
                     return;
                 }
-                let dataToSave = { ...values };
-                const formFields = formType === 'basic' ? fields : collapseFormConfig.fields;
-                // 处理dateRange类型字段 - 确保在分离字段模式下移除原始字段
+                const dataToSave = form.getFieldsValue(true);
+
+                // 使用ref获取最新值
+                const currentCollapseFormConfig = collapseFormConfigRef.current;
+                const formFields = formType === 'basic' ? fields : currentCollapseFormConfig.fields;
+
                 processFields(formFields, dataToSave);
-                const hasDataListFields = formFields.filter(field => Array.isArray(field.dataList) && field.dataList.length > 0);//有dataList的组
+                const hasDataListFields = formFields.filter(
+                    formField => Array.isArray(formField.dataList)
+                );
+                // 处理数组列表相关数据格式和验证
 
-                // 处理面板字段数组（选择的列表项和form）
-                if (hasDataListFields.length > 0) {
+                const dataListValues = hasDataListFields.map(formField => {
+                    const dataListObject = {
+                        [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)// 提取 ID 列表
+                    };
 
-                    // 验证field.fields中所有字段的name属性
-                    if (field.fields && Array.isArray(field.fields)) {
-                        let list = field.dataList.map(item => item.id);
-                        const keys = field.fields.map(item => item.name);
-
-                        for (const nestedField of field.fields) {
-                            if (nestedField.name) {
-                                const nestedOriginalName = nestedField.name.replace(/\d+$/, '');
-                                // 在这里处理嵌套字段的name
-                                if (nestedField.required && (!dataToSave[nestedOriginalName] ||
-                                    (Array.isArray(dataToSave[nestedOriginalName]) && dataToSave[nestedOriginalName].length === 0))) {
-                                    if (collapseFormConfig.setActiveKey && field.name) {
-                                        collapseFormConfig.setActiveKey(field.name);
-                                    }
-
-                                    throw new Error(
-                                        JSON.stringify({
-                                            errorFields: [{
-                                                name: [nestedField.name],
-                                                errors: [`${nestedField.label || nestedOriginalName} 是必填项`]
-                                            }]
-                                        })
-                                    );
-                                }
-                            }
+                    formField.fields.forEach(subField => {
+                        const baseName = subField.name.replace(/\d+$/, ''); // 去掉末尾数字
+                        const value = dataToSave[subField.name];
+                        if (value !== undefined) {
+                            dataListObject[baseName] = value;
+                            delete dataToSave[subField.name]; // 清理原始字段
                         }
-                    }
+                    });
+
+                    return dataListObject;
+                });
+
+                if (dataListValues.length > 0) {
+                    const dataKey = hasDataListFields[0].dataKey;// 获取第一个有dataList的field的dataKey
+                    dataToSave[dataKey] = dataListValues;
                 }
+
+                console.log('dataToSave', dataToSave);
                 if (onSave) {
-
-
                     const editId = id;
                     const callbackUtils = {
                         setDirty: setIsFormDirty,
@@ -320,19 +324,9 @@ export const useHeaderConfig = (params) => {
                 messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
             });
     }, [
-        formConnected,
-        form,
-        validate,
-        fields,
-        formType,
-        complexConfig,
-        structurePanels,
-        onSave,
-        id,
-        messageApi,
-        navigate,
-        config,
-        setIsFormDirty
+        form, validate, fields, formType, onSave,
+        id, messageApi, navigate, config, setIsFormDirty
+        // 不再需要collapseFormConfig作为依赖项，因为我们使用ref
     ]);
 
     // 返回按钮处理函数

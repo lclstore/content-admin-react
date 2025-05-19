@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, Fragment, useState, useCallback } from 'react';
-import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, notification } from 'antd';
+import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, notification, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
+import CommonList from './CommonList';
+import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
 import {
     DndContext,
@@ -20,9 +22,10 @@ import {
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+const { Text } = Typography;
 
 // --- 可排序项渲染器组件 ---
-const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpandItem, onOpenReplaceModal, onCopyItem, onDeleteItem, onItemChange }) => {
+const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpandItem, onOpenReplaceModal, renderItemMata, onCopyItem, onDeleteItem, onItemChange }) => {
     const {
         attributes,
         listeners,
@@ -56,7 +59,42 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
     const mins = Math.floor(durationSeconds / 60);
     const secs = durationSeconds % 60;
     const formattedDuration = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    const displayValue = item.executionType === 'duration' ? formattedDuration : `${item.repetitions || 0} reps`;
+    // 默认的列表项渲染函数
+    const defaultRenderItemMeta = useCallback((item) => {
+        return <List.Item.Meta
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+            }}
+            avatar={
+                <div className={styles.itemAvatar}>
+                    <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
+                    <CaretRightOutlined
+                        className={styles.playIcon}
+                    />
+                </div>
+            }
+            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.displayName || item.title || '未命名项目'}</Text>}
+            description={
+                <div>
+                    <div>
+                        <Text
+                            type="secondary"
+                            style={{ fontSize: '12px' }}
+                            ellipsis={{ tooltip: item.status }}
+                        >
+                            {optionsConstants.status.find(status => status.value === item.status)?.name || '-'}
+                        </Text>
+                    </div>
+                    <div>
+                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                            {item.functionType || item.type || '-'}
+                        </Text>
+                    </div>
+                </div>
+            }
+        />
+    }, []);
 
     return (
         // 外层 wrapper 控制透明度/边距
@@ -73,7 +111,8 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
                 onClick={() => toggleExpandItem && toggleExpandItem(panelId, item.id)} // Row 点击切换展开
             >
                 <Col flex="auto">
-                    <List.Item.Meta
+                    {renderItemMata ? renderItemMata(item) : defaultRenderItemMeta(item)}
+                    {/* <List.Item.Meta
                         className="structure-item-meta" // 使用类名代替内联样式
                         avatar={
                             <div className="structure-item-avatar-wrapper">
@@ -84,15 +123,15 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
                         title={item.displayName || item.name}
                         description={
                             <>
-                                <div style={{ fontSize: '13px', color: '#889e9e' }}>{displayValue}</div>
+                                <div style={{ fontSize: '13px', color: '#889e9e' }}>{optionsConstants.status.find(status => status.value === item.status)?.name || '-'}</div>
                                 {item.status && (
                                     <div style={{ fontSize: '13px', color: '#889e9e' }} className={`status-tag status-${item.status}`}>
-                                        {item.status}
+                                        {item.type}
                                     </div>
                                 )}
                             </>
                         }
-                    />
+                    /> */}
                 </Col>
                 <Col flex="none">
                     <Space className="structure-item-actions">
@@ -188,10 +227,13 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
  * @param {Function} props.onDeleteItem 处理删除项的回调函数
  * @param {Function} props.onCopyItem 处理复制项的回调函数
  * @param {Function} props.onReplaceItem 处理替换项的回调函数
+ * @param {Component} props.commonListConfig 替换弹框中显示的commonListConfig组件
  */
 const CollapseForm = ({
     fields = [],
     form,
+    renderItemMata,
+    commonListConfig = {},
     selectedItemFromList = null,
     initialValues = {},
     activeKeys = [],
@@ -206,8 +248,9 @@ const CollapseForm = ({
     onSortItems,
     onDeleteItem,
     onCopyItem,
-    onReplaceItem
+    onReplaceItem,
 }) => {
+
     const newField = fields.find(item => item.isShowAdd);
     const [dataList, setDataList] = useState([newField]);//datalist
     // 表单连接状态
@@ -216,6 +259,13 @@ const CollapseForm = ({
     const mounted = useMemo(() => ({ current: true }), []);
     // 添加展开项的状态
     const [expandedItems, setExpandedItems] = useState({});
+    // 添加替换弹框状态
+    const [replaceModalVisible, setReplaceModalVisible] = useState(false);
+    // 当前选中的panel和item id
+    const [currentReplaceItem, setCurrentReplaceItem] = useState({
+        panelId: null,
+        itemId: null
+    });
 
     // 处理展开/折叠项目的函数
     const toggleExpandItem = useCallback((panelId, itemId) => {
@@ -241,10 +291,23 @@ const CollapseForm = ({
 
     // 处理替换项目
     const handleOpenReplaceModal = useCallback((panelId, itemId) => {
-        if (onReplaceItem) {
-            onReplaceItem(panelId, itemId);
+        // 保存当前选中的panel和item id
+        setCurrentReplaceItem({
+            panelId,
+            itemId
+        });
+        // 打开替换弹框
+        setReplaceModalVisible(true);
+    }, []);
+
+    // 处理替换项目选中后的回调
+    const handleReplaceItemSelected = (selectedItem) => {
+        if (onReplaceItem && currentReplaceItem.panelId && currentReplaceItem.itemId) {
+            onReplaceItem(currentReplaceItem.panelId, currentReplaceItem.itemId, selectedItem);
+            // 关闭弹框
+            setReplaceModalVisible(false);
         }
-    }, [onReplaceItem]);
+    };
 
     // dnd-kit 的传感器
     const sensors = useSensors(
@@ -354,7 +417,6 @@ const CollapseForm = ({
                         // 否则使用默认映射 - 添加原始数据并生成ID
                         itemToAdd = {
                             ...selectedItemFromList,
-                            id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`, // 生成唯一ID
                         };
                     }
 
@@ -415,7 +477,6 @@ const CollapseForm = ({
             type: field.type,
             requiredMessage: field.requiredMessage
         });
-        console.log(field);
 
         // 渲染表单项 - key直接作为属性传递
         return (
@@ -566,7 +627,7 @@ const CollapseForm = ({
                     <Collapse
                         expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
                         destroyInactivePanel={false}
-                        accordion={true}
+                        accordion={activeKeys.length > 1 ? false : true}
                         activeKey={activeKeys}
                         onChange={onCollapseChange}
                         ghost
@@ -609,8 +670,10 @@ const CollapseForm = ({
                                                     {item.dataList.map((listItem) => (
                                                         <SortableItemRenderer
                                                             key={listItem.id}
+                                                            renderItemMata={renderItemMata}
                                                             panelId={item.name}
                                                             item={listItem}
+
                                                             isExpanded={expandedItems[item.name] === listItem.id}
                                                             toggleExpandItem={toggleExpandItem}
                                                             onOpenReplaceModal={handleOpenReplaceModal}
@@ -631,6 +694,33 @@ const CollapseForm = ({
                     />
                 </Fragment>
             ))}
+
+            {/* 替换弹框 */}
+            <Modal
+                title={commonListConfig?.title || 'Replace Item'}
+                open={replaceModalVisible}
+                onCancel={() => setReplaceModalVisible(false)}
+                okText="Confirm Replace" // 确认按钮文字 (更新)
+                cancelText="Cancel" // 取消按钮文字
+                width="90%" // 进一步增加宽度 (从 80% 到 90%)
+                styles={{ body: { height: '60vh', width: '700px' } }} // 允许内容库滚动
+                destroyOnClose={true}
+            >
+                {<div>
+                    id:
+                    {currentReplaceItem.itemId}
+                </div>}
+                {
+                    commonListConfig && (
+                        <CommonList
+                            selectionMode="replace"
+                            selectedItemId={currentReplaceItem.itemId}
+                            {...commonListConfig}
+                        // onAddItem={handleCommonListItemAdd}
+                        />
+                    )
+                }
+            </Modal>
         </div>
     );
 };

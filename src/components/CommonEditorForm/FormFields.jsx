@@ -9,11 +9,12 @@ import {
     Divider,
     Row,
     Col,
-    Image
+    Image,
+    Select
 } from 'antd';
 import {
     EyeOutlined,
-    EyeInvisibleOutlined,
+    EyeInvisibleOutlined
 } from '@ant-design/icons';
 import FileUpload from '@/components/FileUpload/FileUpload';//文件上传组件
 import NumberStepper from '@/components/NumberStepper/NumberStepper';//数字步进器组件
@@ -23,7 +24,7 @@ import { dateRangeKeys } from '@/constants/app';
 import { optionsConstants } from '@/constants';
 import settings from '@/config/settings';
 const { file: fileSettings } = settings;
-
+const { Option } = Select;
 
 /**
  * 统一处理表单验证规则
@@ -42,7 +43,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
     if (required && !finalRules.some(rule => rule.required)) {
         // 根据字段类型确定动词
         const action = type === 'select' || type === 'single' || type === 'multiple' ||
-            type === 'date' || type === 'datepicker' || type === 'dateRange'
+            type === 'date' || type === 'datepicker' || type === 'dateRange' || type === 'antdSelect'
             ? 'select'
             : type === 'upload' ? 'upload' : 'enter';
 
@@ -227,6 +228,23 @@ export const renderFormControl = (field, options = {}) => {
                     {...switchRest}
                 />
             )
+        // antd模式select
+        case 'antdSelect':
+            return (
+                <Select
+                    name={field.name}
+                    mode={field.mode}
+                    style={field.style || {}}
+                    placeholder={field.placeholder || `Please select ${field.label}`}
+                    allowClear
+                >
+                    {field.options.map((option) => (
+                        <Option key={option.value} value={option.value}>
+                            {field.renderLabel ? field.renderLabel(option) : option.label}
+                        </Option>
+                    ))}
+                </Select>
+            )
         case 'select':
             //选项处理使用统一的options映射
             const fieldCopy = JSON.parse(JSON.stringify(field));
@@ -237,6 +255,7 @@ export const renderFormControl = (field, options = {}) => {
             // 确保完全移除key属性
             const { key: selectKey, ...selectRest } = fieldCopy;
 
+            //自定义组件
             return <TagSelector
                 key={selectKey}
                 {...selectRest}

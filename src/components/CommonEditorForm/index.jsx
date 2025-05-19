@@ -72,6 +72,8 @@ export default function CommonEditor(props) {
         mounted,
         getLatestValues
     } = useFormState(initialValues);
+    // 添加选中项状态管理 - 存储从列表中选择的当前项
+    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
     // 复杂表单特定状态
     const [structurePanels, setStructurePanels] = useState(
         complexConfig.structurePanels || []
@@ -115,16 +117,28 @@ export default function CommonEditor(props) {
         getLatestValues
     });
     // 判断是否是日期
-    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
-    // 左侧列表添加item
-    const handleCommonListItemAdd = (item) => {
-        setSelectedItemFromList(item); // 更新 CommonEditor 中的状态
 
-        // 如果 CommonList 配置中提供了 onSelectItem 回调，则调用它
-        if (commonListConfig.onSelectItem && typeof commonListConfig.onSelectItem === 'function') {
+    // 左侧列表添加item - 在组件内部处理选中项
+    const handleCommonListItemAdd = (item) => {
+        setSelectedItemFromList(item); // 更新内部状态
+
+        // 如果传入了外部回调函数，也调用它
+        if (commonListConfig && commonListConfig.onSelectItem && typeof commonListConfig.onSelectItem === 'function') {
             commonListConfig.onSelectItem(item);
         }
     };
+
+    // 清空选中项的回调函数 - 项目添加到表单后调用
+    const handleSelectedItemProcessed = () => {
+        console.log('清空选中项');
+        setSelectedItemFromList(null);
+
+        // 如果传入了外部回调函数，也调用它
+        if (collapseFormConfig.onSelectedItemProcessed && typeof collapseFormConfig.onSelectedItemProcessed === 'function') {
+            collapseFormConfig.onSelectedItemProcessed();
+        }
+    };
+
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
 
@@ -481,18 +495,11 @@ export default function CommonEditor(props) {
             configOnReplaceItem: onReplaceItem
         } = extractedConfig;
 
-        // 优先使用外部传入的选中项，否则使用内部状态
-        const effectiveSelectedItem = externalSelectedItem !== undefined ? externalSelectedItem : selectedItemFromList;
-
-        // 选中项处理完成的回调处理函数
-        const handleSelectedItemProcessed = () => {
-            // 如果提供了外部回调，则调用它
-            if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
-                onSelectedItemProcessed();
-            }
-            // 同时清空内部状态
-            setSelectedItemFromList(null);
-        };
+        // 使用内部状态的选中项，优先于从配置传入的选中项
+        // 这允许组件独立管理选中项状态
+        const effectiveSelectedItem = selectedItemFromList !== null
+            ? selectedItemFromList
+            : (externalSelectedItem !== undefined ? externalSelectedItem : null);
 
         return (
             <div className={`${styles.advancedFormContent} ${commonListConfig ? '' : styles.collapseFormContent}`}>

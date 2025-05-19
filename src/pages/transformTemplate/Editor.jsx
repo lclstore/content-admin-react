@@ -45,9 +45,6 @@ export default function UserEditorWithCommon() {
         }]
     }];
 
-    // 添加选中项状态管理
-    const [selectedItem, setSelectedItem] = useState(null);
-
     // 处理选中项被添加到表单后的回调
     const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, form) => {
         // 创建 formFields 的深拷贝
@@ -87,12 +84,6 @@ export default function UserEditorWithCommon() {
         const formValues = form.getFieldsValue();
         // 更新状态
         setFormFields(updatedFields);
-    };
-
-    // 清空选中项的回调函数
-    const handleSelectedItemProcessed = () => {
-        console.log('清空选中项');
-        setSelectedItem(null);
     };
 
     // 保存用户数据
@@ -593,9 +584,8 @@ export default function UserEditorWithCommon() {
                     },
                     activeFilters: {
                         target: ["Core", "Leg"]
-                    },
-                    // 添加选中项的处理函数
-                    onSelectItem: (item) => setSelectedItem(item)
+                    }
+                    // 已移除选中项处理逻辑到CommonEditorForm中
                 }
             }
             collapseFormConfig={
@@ -606,10 +596,8 @@ export default function UserEditorWithCommon() {
                     isCollapse: true, //是否折叠分组
                     handleAddCustomPanel: handleAddCustomPanel, // 传递添加自定义面板的函数
                     handleDeletePanel: handleDeletePanel,// 删除面板的回调函数
-                    // 添加选中项和回调函数
-                    selectedItemFromList: selectedItem,// 选中项
+                    // 已移除选中项相关配置到CommonEditorForm中
                     onItemAdded: handleItemAdded,// 添加项的回调函数
-                    onSelectedItemProcessed: handleSelectedItemProcessed,// 清空选中项的回调函数
                     // 添加处理结构项的功能
                     onSortItems: handleSortItems,// 排序项的回调函数
                     onDeleteItem: handleDeleteItem,// 删除项的回调函数

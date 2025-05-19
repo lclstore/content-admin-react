@@ -530,25 +530,31 @@ export default function UserEditorWithCommon() {
     };
 
     // 处理替换（这里可以是打开替换模态框的逻辑）
-    const handleReplaceItem = (panelName, itemId) => {
-        // 这里实现替换逻辑，例如打开模态框等
-        console.log(`替换面板 ${panelName} 中的项 ${itemId}`);
+    const handleReplaceItem = (panelName, itemId, newItemId, newItem) => {
+        setFormFields(formFields =>
+            formFields.map(panel => {
+                if (panel.name !== panelName) return panel;
+                const updatedItems = panel.dataList.map(item =>
+                    item.id === itemId ? { ...newItem, id: newItemId } : item
+                );
 
-        // 实际替换逻辑通常涉及模态框，这里只是示例
-        // 如果你有内容库或替换面板，可以在这里打开它
+                return {
+                    ...panel,
+                    dataList: updatedItems,
+                };
+            })
+        );
     };
     //折叠面板展开
     const handleCollapseChange = (activeKeys, form) => {
-
-
         // 如果在此函数内更新了 formFields，可以在更新回调中获取最新值
         if (activeKeys[0] === 'workoutData') {
             setFormFields(prevFields => {
                 const newFields = [...prevFields]; // 进行某些更新操作、
-                const formValues = form.getFieldsValue();//表单数据
-                const preview = formValues.exercisePreviewDuration;
-                const execution = formValues.exerciseExecutionDuration;
-                const introDuration = formValues.introDuration;
+                const formValues = form.getFieldsValue(true);//表单数据
+                const preview = formValues.exercisePreviewDuration || 0;
+                const execution = formValues.exerciseExecutionDuration || 0;
+                const introDuration = formValues.introDuration || 0;
 
                 let loopCount = 0;
                 let workoutCalorie = 0;

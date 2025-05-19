@@ -266,6 +266,8 @@ const CollapseForm = ({
         panelId: null,
         itemId: null
     });
+    // 新增：在替换弹框中临时选中的项
+    const [tempSelectedItem, setTempSelectedItem] = useState(null);
 
     // 处理展开/折叠项目的函数
     const toggleExpandItem = useCallback((panelId, itemId) => {
@@ -296,18 +298,48 @@ const CollapseForm = ({
             panelId,
             itemId
         });
+        // 初始化临时选中项为当前项ID
+        setTempSelectedItem({ id: itemId });
         // 打开替换弹框
         setReplaceModalVisible(true);
     }, []);
 
+    // 处理CommonList中选中项变更
+    const handleCommonListItemSelect = useCallback((selectedItem) => {
+        // 更新临时选中的项
+        setTempSelectedItem(selectedItem);
+    }, []);
+
     // 处理替换项目选中后的回调
-    const handleReplaceItemSelected = (selectedItem) => {
-        if (onReplaceItem && currentReplaceItem.panelId && currentReplaceItem.itemId) {
-            onReplaceItem(currentReplaceItem.panelId, currentReplaceItem.itemId, selectedItem);
-            // 关闭弹框
-            setReplaceModalVisible(false);
+    const handleReplaceItemSelected = useCallback(() => {
+        // 确保所有必要的参数都存在
+        if (!onReplaceItem || !currentReplaceItem.panelId || !currentReplaceItem.itemId || !tempSelectedItem) {
+            console.warn('替换操作缺少必要参数', { currentReplaceItem, tempSelectedItem });
+            return;
         }
-    };
+
+        // 只有当选中项不是当前项时才执行替换
+        if (tempSelectedItem.id !== currentReplaceItem.itemId) {
+            const panelId = currentReplaceItem.panelId; // 面板ID
+            const oldItemId = currentReplaceItem.itemId; // 旧项目ID
+            const newItemId = tempSelectedItem.id;       // 新项目ID
+            const newItem = tempSelectedItem;            // 新项目完整数据
+            // 执行替换操作，传递面板ID、当前旧项目ID、新项目ID和新项目完整数据
+            onReplaceItem(panelId, oldItemId, newItemId, newItem);
+        }
+
+        // 关闭弹框
+        setReplaceModalVisible(false);
+
+        // 清除临时选中项
+        setTempSelectedItem(null);
+    }, [onReplaceItem, currentReplaceItem, tempSelectedItem]);
+
+    // 判断确认按钮是否应该禁用
+    const isConfirmButtonDisabled = useMemo(() => {
+        // 如果没有临时选中项，或者临时选中项的ID与当前项ID相同，则禁用按钮
+        return !tempSelectedItem || tempSelectedItem.id === currentReplaceItem.itemId;
+    }, [tempSelectedItem, currentReplaceItem.itemId]);
 
     // dnd-kit 的传感器
     const sensors = useSensors(
@@ -700,11 +732,13 @@ const CollapseForm = ({
                 title={commonListConfig?.title || 'Replace Item'}
                 open={replaceModalVisible}
                 onCancel={() => setReplaceModalVisible(false)}
-                okText="Confirm Replace" // 确认按钮文字 (更新)
+                okText="Confirm Replace" // 确认按钮文字 (中文注释：确认替换)
                 cancelText="Cancel" // 取消按钮文字
                 width="90%" // 进一步增加宽度 (从 80% 到 90%)
                 styles={{ body: { height: '60vh', width: '700px' } }} // 允许内容库滚动
                 destroyOnClose={true}
+                okButtonProps={{ disabled: isConfirmButtonDisabled }} // 根据条件禁用确认按钮
+                onOk={handleReplaceItemSelected} // 点击确认按钮时执行替换
             >
                 {<div>
                     id:
@@ -714,9 +748,9 @@ const CollapseForm = ({
                     commonListConfig && (
                         <CommonList
                             selectionMode="replace"
-                            selectedItemId={currentReplaceItem.itemId}
+                            selectedItemId={tempSelectedItem?.id || currentReplaceItem.itemId}
+                            onAddItem={handleCommonListItemSelect} // 处理选中项变更
                             {...commonListConfig}
-                        // onAddItem={handleCommonListItemAdd}
                         />
                     )
                 }

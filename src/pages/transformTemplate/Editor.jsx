@@ -1,34 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { Form } from 'antd';
+
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { commonListData, filterSections } from '@/pages/Data';
-import { validateEmail, validatePassword } from '@/utils';
 import { arrayMove } from '@dnd-kit/sortable';
 import {
     ThunderboltOutlined,
     TagsOutlined,
-    ShrinkOutlined,
-    ArrowsAltOutlined,
     PictureOutlined,
-    InfoOutlined,
-    SettingOutlined,
-    SlidersOutlined,
     VideoCameraOutlined,
-    DeleteOutlined,
-    RetweetOutlined,
-    MenuOutlined,
-    InfoCircleOutlined,
-    MinusOutlined,
-    PlusOutlined,
-    CaretRightOutlined,
-    CopyOutlined
+    SettingOutlined
 } from '@ant-design/icons';
-import { isArray } from 'lodash';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {}
     const mockUsers = [{
@@ -70,10 +55,10 @@ export default function UserEditorWithCommon() {
             // 找到匹配的面板
             if (field.name === panelName) {
                 // 判断itemData是否为数组
-                const itemsToAdd = isArray(itemData) ? itemData : [itemData];
+                const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
 
                 // 检查是否有展开的项
-                if (expandedItemId && isArray(field.dataList)) {
+                if (expandedItemId && Array.isArray(field.dataList)) {
                     // 查找展开项的索引
                     const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
 
@@ -92,7 +77,7 @@ export default function UserEditorWithCommon() {
                 // 默认行为：如果没有展开的项或找不到展开的项，添加到末尾
                 return {
                     ...field,
-                    dataList: isArray(field.dataList)
+                    dataList: Array.isArray(field.dataList)
                         ? [...field.dataList, ...itemsToAdd] // 如果是数组，创建新数组并添加新项（可能是多个）
                         : itemsToAdd // 如果不是数组，创建新数组
                 };
@@ -455,7 +440,7 @@ export default function UserEditorWithCommon() {
 
         try {
             const updatedFields = formFields.map(field => {
-                if (field.name === panelName && isArray(field.dataList)) {
+                if (field.name === panelName && Array.isArray(field.dataList)) {
                     // 确保数据存在
                     if (oldIndex < 0 || oldIndex >= field.dataList.length ||
                         newIndex < 0 || newIndex >= field.dataList.length) {
@@ -491,7 +476,7 @@ export default function UserEditorWithCommon() {
     // 处理删除
     const handleDeleteItem = (panelName, itemId) => {
         const updatedFields = formFields.map(field => {
-            if (field.name === panelName && isArray(field.dataList)) {
+            if (field.name === panelName && Array.isArray(field.dataList)) {
                 return {
                     ...field,
                     dataList: field.dataList.filter(item => item.id !== itemId)
@@ -506,7 +491,7 @@ export default function UserEditorWithCommon() {
     // 处理复制
     const handleCopyItem = (panelName, itemId) => {
         const updatedFields = formFields.map(field => {
-            if (field.name === panelName && isArray(field.dataList)) {
+            if (field.name === panelName && Array.isArray(field.dataList)) {
                 // 找到要复制的项
                 const itemToCopy = field.dataList.find(item => item.id === itemId);
                 if (itemToCopy) {
@@ -560,7 +545,7 @@ export default function UserEditorWithCommon() {
                 let workoutCalorie = 0;
                 const MET = 1
 
-                const structureList = newFields.filter(item => isArray(item.dataList) && item.dataList.length > 0);
+                const structureList = newFields.filter(item => Array.isArray(item.dataList) && item.dataList.length > 0);
                 if (structureList.length > 0) {
                     structureList.forEach((item, index) => {
                         const reps = formValues[`reps${index == 0 ? '' : index}`] | 0;

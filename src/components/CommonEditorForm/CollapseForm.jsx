@@ -112,26 +112,6 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
             >
                 <Col flex="auto">
                     {renderItemMata ? renderItemMata(item) : defaultRenderItemMeta(item)}
-                    {/* <List.Item.Meta
-                        className="structure-item-meta" // 使用类名代替内联样式
-                        avatar={
-                            <div className="structure-item-avatar-wrapper">
-                                <Avatar shape="square" size={64} src={item.animationPhoneUrl || item.imageUrl} />
-                                <CaretRightOutlined className="structure-item-play-icon" />
-                            </div>
-                        }
-                        title={item.displayName || item.name}
-                        description={
-                            <>
-                                <div style={{ fontSize: '13px', color: '#889e9e' }}>{optionsConstants.status.find(status => status.value === item.status)?.name || '-'}</div>
-                                {item.status && (
-                                    <div style={{ fontSize: '13px', color: '#889e9e' }} className={`status-tag status-${item.status}`}>
-                                        {item.type}
-                                    </div>
-                                )}
-                            </>
-                        }
-                    /> */}
                 </Col>
                 <Col flex="none">
                     <Space className="structure-item-actions">
@@ -699,13 +679,12 @@ const CollapseForm = ({
                                                     position: 'relative',
                                                     padding: '2px 0'
                                                 }}>
-                                                    {item.dataList.map((listItem) => (
+                                                    {item.dataList.map((listItem, index) => (
                                                         <SortableItemRenderer
-                                                            key={listItem.id}
+                                                            key={listItem.id + index}
                                                             renderItemMata={renderItemMata}
                                                             panelId={item.name}
                                                             item={listItem}
-
                                                             isExpanded={expandedItems[item.name] === listItem.id}
                                                             toggleExpandItem={toggleExpandItem}
                                                             onOpenReplaceModal={handleOpenReplaceModal}

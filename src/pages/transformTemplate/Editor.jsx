@@ -465,12 +465,16 @@ export default function UserEditorWithCommon() {
     };
 
     // 处理删除
-    const handleDeleteItem = (panelName, itemId) => {
+    const handleDeleteItem = (panelName, itemIndex) => {
         const updatedFields = formFields.map(field => {
             if (field.name === panelName && Array.isArray(field.dataList)) {
+                // 使用索引删除数组中的元素，而不是通过ID过滤
+                const newDataList = [...field.dataList];
+                newDataList.splice(itemIndex, 1);
+
                 return {
                     ...field,
-                    dataList: field.dataList.filter(item => item.id !== itemId)
+                    dataList: newDataList
                 };
             }
             return field;

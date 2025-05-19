@@ -25,7 +25,7 @@ import { CSS } from '@dnd-kit/utilities';
 const { Text } = Typography;
 
 // --- 可排序项渲染器组件 ---
-const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpandItem, onOpenReplaceModal, renderItemMata, onCopyItem, onDeleteItem, onItemChange }) => {
+const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded, toggleExpandItem, onOpenReplaceModal, renderItemMata, onCopyItem, onDeleteItem, onItemChange }) => {
     const {
         attributes,
         listeners,
@@ -164,7 +164,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
                                 icon={<DeleteOutlined />}
                                 onClick={(e) => {
                                     e.stopPropagation(); // 阻止事件冒泡
-                                    onDeleteItem(panelId, item.id); // 动作：删除项
+                                    onDeleteItem(panelId, itemIndex); // 修改：传递索引而不是ID
                                 }}
                                 onPointerDown={(e) => e.stopPropagation()} // 保留: 防止拖拽
                                 title="Delete"
@@ -681,10 +681,11 @@ const CollapseForm = ({
                                                 }}>
                                                     {item.dataList.map((listItem, index) => (
                                                         <SortableItemRenderer
-                                                            key={listItem.id + index}
+                                                            key={index}
                                                             renderItemMata={renderItemMata}
                                                             panelId={item.name}
                                                             item={listItem}
+                                                            itemIndex={index}
                                                             isExpanded={expandedItems[item.name] === listItem.id}
                                                             toggleExpandItem={toggleExpandItem}
                                                             onOpenReplaceModal={handleOpenReplaceModal}

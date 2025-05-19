@@ -452,12 +452,10 @@ function ConfigurableTable({
 
             // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
             if (processedCol.actionButtons &&
-                Array.isArray(processedCol.actionButtons) &&
-                typeof processedCol.isShow === 'function') {
+                Array.isArray(processedCol.actionButtons)) {
 
                 processedCol.render = (_, record) => (
-                    <div className="actions-container" onClick={(e) => e.stopPropagation()}
-                         onMouseDown={(e) => e.stopPropagation()}>
+                    <div className="actions-container" onClick={(e) => e.stopPropagation()}>
                         <Dropdown
                             menu={{
                                 items: processedCol.actionButtons

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Input,
     DatePicker,
@@ -230,6 +230,7 @@ export const renderFormControl = (field, options = {}) => {
             )
         // antd模式select
         case 'antdSelect':
+            const [isPlaying, setIsPlaying] = useState(null);
             return (
                 <Select
                     name={field.name}
@@ -240,7 +241,7 @@ export const renderFormControl = (field, options = {}) => {
                 >
                     {field.options.map((option) => (
                         <Option key={option.value} value={option.value}>
-                            {field.renderLabel ? field.renderLabel(option) : option.label}
+                            {field.renderLabel ? field.renderLabel(option, isPlaying, setIsPlaying, form) : option.label}
                         </Option>
                     ))}
                 </Select>

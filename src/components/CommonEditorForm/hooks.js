@@ -2,8 +2,7 @@ import { Form, message, notification } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import React from 'react';
-import { dateRangeKeys } from '@/constants/app';
-import { keys } from 'lodash';
+
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -99,40 +98,44 @@ export const useHeaderConfig = (params) => {
         id,
         isFormDirty,
         form,
+        setActiveCollapseKeys,
+        isCollapse,
         formConnected,
         validate,
         onSave,
         navigate,
         messageApi,
         fields,
+        formFields,
         formType,
         complexConfig,
         structurePanels,
-        collapseFormConfig,
-        commonListConfig,
         headerContext,
-        setIsFormDirty
+        setIsFormDirty,
+        getLatestValues
     } = params;
     // 创建ref存储最新的collapseFormConfig
-    const collapseFormConfigRef = useRef(collapseFormConfig);
-
+    const collapseFormConfigRef = useRef(fields);
     // 更新ref值确保始终是最新的
     useEffect(() => {
-        collapseFormConfigRef.current = collapseFormConfig;
-    }, [collapseFormConfig]);
+        collapseFormConfigRef.current = fields;
+        console.log('fields', fields);
+    }, [fields]);
 
-    console.log('fields', collapseFormConfig.fields);
+
+
+
 
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, parent = null) => {
         for (const field of fields) {
             const value = dataToSave[field.name];
-            const isRequired = formType === 'advanced' && collapseFormConfig.isCollapse && field.required;
+            const isRequired = formType === 'advanced' && isCollapse && field.required;
 
             // 校验必填项
             if (isRequired && (value === undefined || value === null || value === '')) {
-                if (collapseFormConfig.setActiveKey && parent.name) {
-                    collapseFormConfig.setActiveKey(parent.name);
+                if (setActiveCollapseKeys && parent.name) {
+                    setActiveCollapseKeys(parent.name);
 
                     requestAnimationFrame(() => {
                         form.validateFields();
@@ -186,13 +189,15 @@ export const useHeaderConfig = (params) => {
             if (Array.isArray(field.fields)) {
                 processFields(field.fields, dataToSave, field);
             }
+
             // 处理列表相关数据格式和验证
             if (Array.isArray(field.dataList)) {
+
                 // 检查数组是否为空，如果为空则抛出异常
                 if (field.required && Array.isArray(field.dataList) && field.dataList.length === 0) {
                     // 展开当前折叠栏
-                    if (collapseFormConfig.setActiveKey && field.name) {
-                        collapseFormConfig.setActiveKey(field.name);
+                    if (setActiveCollapseKeys && field.name) {
+                        setActiveCollapseKeys(field.name);
                     }
                     throw new Error(
                         JSON.stringify({
@@ -222,12 +227,13 @@ export const useHeaderConfig = (params) => {
                 }
                 const dataToSave = form.getFieldsValue(true);
 
-                // 使用ref获取最新值
-                const currentCollapseFormConfig = collapseFormConfigRef.current;
-                const formFields = formType === 'basic' ? fields : currentCollapseFormConfig.fields;
+                // 获取当前使用的FormFields
+                const currentFormFields = collapseFormConfigRef.current;
+                if (isCollapse) {
+                    processFields(currentFormFields, dataToSave);
+                }
 
-                processFields(formFields, dataToSave);
-                const hasDataListFields = formFields.filter(
+                const hasDataListFields = currentFormFields.filter(
                     formField => Array.isArray(formField.dataList)
                 );
                 // 处理数组列表相关数据格式和验证
@@ -278,13 +284,9 @@ export const useHeaderConfig = (params) => {
 
                 // 如果错误是字符串格式的JSON，尝试解析它
                 if (typeof error.message === 'string') {
-                    try {
-                        const parsedError = JSON.parse(error.message);
-                        if (parsedError && parsedError.errorFields) {
-                            errorData = parsedError;
-                        }
-                    } catch (e) {
-                        // 解析失败，使用原始错误
+                    const parsedError = JSON.parse(error.message);
+                    if (parsedError && parsedError.errorFields) {
+                        errorData = parsedError;
                     }
                 }
 
@@ -306,17 +308,19 @@ export const useHeaderConfig = (params) => {
                     return;
                 }
 
-                // 如果启用了折叠功能且提供了 setActiveKey 方法
-                if (collapseFormConfig.isCollapse && collapseFormConfig.setActiveKey) {
+                // 如果启用了折叠功能且提供了 setActiveCollapseKeys 方法
+                if (isCollapse && setActiveCollapseKeys) {
                     const errorFieldName = errorData.errorFields[0].name?.[0];
 
-                    const matchedPanel = collapseFormConfig.fields.find(panel =>
+                    // 使用当前的formFields查找面板
+                    const currentFormFields = fields;
+                    const matchedPanel = currentFormFields.find(panel =>
                         Array.isArray(panel.fields) &&
                         panel.fields.some(field => field.name === errorFieldName)
                     );
 
                     if (matchedPanel) {
-                        collapseFormConfig.setActiveKey(matchedPanel.name);
+                        setActiveCollapseKeys(matchedPanel.name);
                     }
                 }
 
@@ -324,9 +328,8 @@ export const useHeaderConfig = (params) => {
                 messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
             });
     }, [
-        form, validate, fields, formType, onSave,
+        form, validate, fields, formFields, formType, onSave,
         id, messageApi, navigate, config, setIsFormDirty
-        // 不再需要collapseFormConfig作为依赖项，因为我们使用ref
     ]);
 
     // 返回按钮处理函数

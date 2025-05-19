@@ -37,7 +37,7 @@ export default function UserEditorWithCommon() {
             ],
             renderLabel: (option) => {
                 return (
-                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
                         {option.label}
                         <PlayCircleOutlined style={{ marginLeft: 16, color: '#1c8' }} />
                     </span>

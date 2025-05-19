@@ -33,10 +33,12 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
         transform,
         isDragging
     } = useSortable({
-        id: item.id,
+        id: `${panelId}-item-${itemIndex}`, // 使用面板ID和项目索引组合作为唯一标识符
         data: {
             type: 'item',
-            item
+            item,
+            panelId,
+            itemIndex
         }
     });
 
@@ -135,7 +137,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
                                 icon={<RetweetOutlined />}
                                 onClick={(e) => {
                                     e.stopPropagation(); // 阻止事件冒泡
-                                    onOpenReplaceModal(panelId, item.id); // 动作：打开替换弹框
+                                    onOpenReplaceModal(panelId, item.id, itemIndex); // 添加索引参数
                                 }}
                                 onPointerDown={(e) => e.stopPropagation()} // 保留: 防止拖拽
                                 title="Replace"
@@ -232,7 +234,6 @@ const CollapseForm = ({
 }) => {
 
     const newField = fields.find(item => item.isShowAdd);
-    const [dataList, setDataList] = useState([newField]);//datalist
     // 表单连接状态
     const formConnected = !!form;
     // 挂载状态引用
@@ -272,11 +273,12 @@ const CollapseForm = ({
     }, [onCopyItem]);
 
     // 处理替换项目
-    const handleOpenReplaceModal = useCallback((panelId, itemId) => {
-        // 保存当前选中的panel和item id
+    const handleOpenReplaceModal = useCallback((panelId, itemId, itemIndex) => {
+        // 保存当前选中的panel、item id和索引
         setCurrentReplaceItem({
             panelId,
-            itemId
+            itemId,
+            itemIndex  // 保存项目索引
         });
         // 初始化临时选中项为当前项ID
         setTempSelectedItem({ id: itemId });
@@ -300,12 +302,14 @@ const CollapseForm = ({
 
         // 只有当选中项不是当前项时才执行替换
         if (tempSelectedItem.id !== currentReplaceItem.itemId) {
-            const panelId = currentReplaceItem.panelId; // 面板ID
-            const oldItemId = currentReplaceItem.itemId; // 旧项目ID
-            const newItemId = tempSelectedItem.id;       // 新项目ID
-            const newItem = tempSelectedItem;            // 新项目完整数据
-            // 执行替换操作，传递面板ID、当前旧项目ID、新项目ID和新项目完整数据
-            onReplaceItem(panelId, oldItemId, newItemId, newItem);
+            const panelId = currentReplaceItem.panelId;     // 面板ID
+            const oldItemId = currentReplaceItem.itemId;    // 旧项目ID
+            const newItemId = tempSelectedItem.id;          // 新项目ID
+            const newItem = tempSelectedItem;               // 新项目完整数据
+            const itemIndex = currentReplaceItem.itemIndex; // 项目索引
+
+            // 执行替换操作，传递面板ID、当前旧项目ID、新项目ID、新项目完整数据和项目索引
+            onReplaceItem(panelId, oldItemId, newItemId, newItem, itemIndex);
         }
 
         // 关闭弹框
@@ -333,16 +337,6 @@ const CollapseForm = ({
         })
     );
 
-    // 拖拽开始处理
-    // const handleDragStart = (event) => {
-    //     console.log('拖拽开始:', event);
-    //     // 记录开始拖拽的元素ID
-    //     const { active } = event;
-    //     if (active) {
-    //         console.log('开始拖拽项:', active.id);
-    //     }
-    // };
-
     // 拖拽结束处理程序
     function handleDragEnd(event, panelId) {
         const { active, over } = event;
@@ -350,28 +344,26 @@ const CollapseForm = ({
 
         if (active && over && active.id !== over.id) {
             try {
-                // 查找包含 dataList 的面板
-                const panel = fields.find(f => f.name === panelId);
+                // 从ID中提取索引信息
+                const activeIdParts = active.id.split('-');
+                const overIdParts = over.id.split('-');
 
-                if (panel && Array.isArray(panel.dataList)) {
-                    // 找到要移动的项的索引
-                    const oldIndex = panel.dataList.findIndex(item => item.id === active.id);
-                    const newIndex = panel.dataList.findIndex(item => item.id === over.id);
+                // 获取原始索引和目标索引
+                const oldIndex = parseInt(activeIdParts[activeIdParts.length - 1]);
+                const newIndex = parseInt(overIdParts[overIdParts.length - 1]);
 
-                    console.log('找到索引:', { oldIndex, newIndex, activeId: active.id, overId: over.id });
+                console.log('直接使用索引:', { oldIndex, newIndex });
 
-                    if (oldIndex !== -1 && newIndex !== -1) {
-                        if (onSortItems) {
-                            console.log('调用父组件排序函数:', { panelId, oldIndex, newIndex });
-                            onSortItems(panelId, oldIndex, newIndex);
-                        } else {
-                            console.warn('没有提供 onSortItems 回调函数');
-                        }
+                // 检查索引有效性
+                if (!isNaN(oldIndex) && !isNaN(newIndex) && oldIndex !== newIndex) {
+                    if (onSortItems) {
+                        console.log('调用父组件排序函数:', { panelId, oldIndex, newIndex });
+                        onSortItems(panelId, oldIndex, newIndex);
                     } else {
-                        console.warn('无法找到项目的索引:', { oldIndex, newIndex });
+                        console.warn('没有提供 onSortItems 回调函数');
                     }
                 } else {
-                    console.warn('面板或 dataList 不存在:', { panel });
+                    console.warn('索引无效或相同:', { oldIndex, newIndex });
                 }
             } catch (error) {
                 console.error('排序处理出错:', error);
@@ -452,11 +444,6 @@ const CollapseForm = ({
                         // 获取当前面板中展开的项的ID
                         const expandedItemId = expandedItems[targetPanel.name] || null;
                         onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId, form);
-                        dataList.forEach(item => {
-                            if (item.name === targetPanel.name) {
-                                item.dataList.push(itemToAdd);
-                            }
-                        })
                     }
 
                     // 通知父组件已处理完选中项，可以清空选中状态
@@ -562,39 +549,47 @@ const CollapseForm = ({
 
     // 添加新的collapse面板的回调函数
     const onAddCollapsePanel = () => {
-        const currentFields = dataList[dataList.length - 1];//最后一个折叠面板数据
-        let valid = validateFields(currentFields);//验证当前折叠面板数据是否填写
+        // 找到具有isShowAdd属性的面板
+        const currentFields = fields.find(item => item.isShowAdd);
+        if (!currentFields) return;
+
+        // 验证当前表单数据是否填写
+        let valid = validateFields(currentFields);
         if (!valid) return;
-        if (currentFields.dataList.length === 0) {
+
+        // 检查当前面板是否有数据
+        if (!currentFields.dataList || currentFields.dataList.length === 0) {
             notification.warning({
                 message: `Cannot Add New ${currentFields.label}`,
                 description: `Please add exercises to the current last ${currentFields.label} before adding a new one.`,
                 placement: 'topRight',
             });
-            return
+            return;
         }
+
+        // 计算需要添加的新面板索引
+        // 查找所有带有isShowAdd属性的面板
+        const showAddPanels = fields.filter(item => item.isShowAdd);
+        const newPanelIndex = showAddPanels.length; // 新面板的索引
+
         // 创建新面板的数据结构
-        const newPanelName = `${newField.name}${dataList.length}`; // 生成一个唯一的名称/key
+        const newPanelName = `${currentFields.name}${newPanelIndex}`; // 生成唯一名称
         const newCustomPanel = {
-            ...newField,
-            dataList: [],
+            ...currentFields,
+            dataList: [],  // 新面板初始无数据
             name: newPanelName,
             isShowAdd: true,
             // 确保fields中的每个字段name也是唯一的
-            fields: newField.fields?.map(field => ({
+            fields: currentFields.fields?.map(field => ({
                 ...field,
-                name: `${field.name}${dataList.length}` // 为每个字段名称添加相同的后缀
+                name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
             })) || []
         };
 
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
-            // 添加面板到父组件的 formFields
             handleAddCustomPanel(newCustomPanel);
-            onCollapseChange([newPanelName]);
-
-            // 本地状态更新，用于计数
-            setDataList([...dataList, newCustomPanel]);
+            onCollapseChange(newPanelName); // 自动展开新添加的面板
         }
     };
 
@@ -623,8 +618,6 @@ const CollapseForm = ({
         e.stopPropagation(); // 阻止事件冒泡，避免触发折叠面板的展开/收起
         if (handleDeletePanel) {
             handleDeletePanel(panelName);
-            setDataList(dataList.filter((item) => item.name !== panelName));
-
         }
     };
 
@@ -650,7 +643,7 @@ const CollapseForm = ({
                             label: (
                                 <div className={styles.collapseHeader}>
                                     <span>{item.label || item.title}</span>
-                                    {dataList.length > 1 && item.isShowAdd && (
+                                    {fields.filter(item => item.dataList)?.length > 1 && item.isShowAdd && (
                                         <DeleteOutlined
                                             className={styles.deleteIcon}
                                             onClick={(e) => onDeletePanel(e, item.name)}
@@ -672,7 +665,7 @@ const CollapseForm = ({
                                         >
                                             {/* 拖拽排序上下文 */}
                                             <SortableContext
-                                                items={item.dataList.map(listItem => listItem.id)}
+                                                items={item.dataList.map((_, index) => `${item.name}-item-${index}`)} // 使用索引作为ID
                                                 strategy={verticalListSortingStrategy}
                                             >
                                                 <div className='structure-list' style={{
@@ -720,10 +713,6 @@ const CollapseForm = ({
                 okButtonProps={{ disabled: isConfirmButtonDisabled }} // 根据条件禁用确认按钮
                 onOk={handleReplaceItemSelected} // 点击确认按钮时执行替换
             >
-                {<div>
-                    id:
-                    {currentReplaceItem.itemId}
-                </div>}
                 {
                     commonListConfig && (
                         <CommonList

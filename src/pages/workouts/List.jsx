@@ -14,7 +14,7 @@ import {
     difficultyOrder,
     mockWorkoutsForList,
     filterSections,
-    BATCH_FILE_OPTIONS, 
+    BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
 

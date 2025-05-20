@@ -3,20 +3,12 @@ import {
   EditOutlined,
   StopOutlined,
   CheckCircleOutlined,
-  CheckCircleFilled,
-  CheckOutlined,
-  CloseOutlined,
   CopyOutlined,
   DeleteOutlined,
-  CloseCircleFilled,
-  EditFilled,
-  ThunderboltOutlined,
-  DashboardOutlined,
-  UserOutlined,
-  SettingOutlined,
-  LoginOutlined,
-  AudioOutlined
 } from '@ant-design/icons';
+import {del, disable, enable} from "./api.js"
+import {useStore} from "@/store/index.js";
+import { router } from "@/utils"
 //文件上传
 const uploadFileFn = async ({ file }) => {
   let fileUrl = await fileApi.uploadFile(file, settings.file.dirname)
@@ -39,11 +31,30 @@ const settings = {
       {
         key:"enable",
         icon: CheckCircleOutlined,
-        click({rowData,other}){
-
-        }
+        click:({selectList,moduleKey}) => enable({moduleKey,idList:selectList.map(item => item.id)})
       },
-    ]
+      {
+        key:"disable",
+        icon: StopOutlined,
+        click:({selectList,moduleKey})=> disable({moduleKey,idList:selectList.map(item => item.id)})
+      },
+      {
+        key:"del",
+        icon: DeleteOutlined,
+        click:({selectList,moduleKey}) => del({moduleKey,idList:selectList.map(item => item.id)})
+      },
+        {
+        key:"edit",
+        icon: EditOutlined,
+        click:({selectList,moduleKey}) => router().push(`editor?id=${ selectList[0].id }`)
+      },
+        {
+        key:"duplicate",
+        icon: CopyOutlined,
+        click:({selectList,moduleKey}) => router().push(`editor?id=${ selectList[0].id }&duplicate=true`)
+      },
+    ],
+    rowClickPublic:() => {}
   },
   // 布局设置
   layout: {

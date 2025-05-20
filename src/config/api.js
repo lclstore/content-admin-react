@@ -20,9 +20,13 @@ export const uploadFile = async function ({file, dirKey}) {
         contentType: file.type
     };
     let fileUrl = await new Promise(resolve => {
-        request("/s3/getTempUploadUrl", params, res => {
-            res != "error" ? resolve(res.data.data) : resolve('error')
-        }, "get", false, false)
+        request.get({
+            url: "/s3/getTempUploadUrl",
+            data: params,
+            callback: res => {
+                res.error ? resolve('error') : resolve(res.data.data)
+            }
+        })
     })
 
     // 对fileUrl进行处理,如果返回url路径包含name，把name的值替换为file.name,如果不包含name则在url添加name且值为file.name

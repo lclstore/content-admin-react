@@ -53,8 +53,7 @@ export default () => {
             {
                 title: 'Status',
                 dataIndex: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options:"status",
+                options:"displayStatus",
                 width: 120,
                 visibleColumn: 0
             },
@@ -271,7 +270,6 @@ export default () => {
                 dataSource={dataSource}
                 rowKey="id"
                 loading={loading}
-                onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or email...",

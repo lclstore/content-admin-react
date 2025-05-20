@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useImmer } from "use-immer"
-import { Table, Input, Button, Spin, Space, Dropdown } from 'antd';
+import React, {useState, useMemo, useEffect, useCallback} from 'react';
+import {useLocation} from "react-router"
+import {useImmer} from "use-immer"
+import {Table, Input, Button, Spin, Space, Dropdown} from 'antd';
 import {
     SearchOutlined,
     FilterOutlined,
@@ -15,8 +16,9 @@ import {
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
-import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
-import { getList as getListPublick } from "@/config/api.js";
+import {defaultPagination, actionIconMap, optionsConstants} from '@/constants';
+import {getList as getListPublick} from "@/config/api.js";
+import settings from "@/config/settings.js"
 
 /**
  * 可配置表格组件
@@ -41,28 +43,32 @@ import { getList as getListPublick } from "@/config/api.js";
  * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  * @param {function} [props.getList] - 获取表格数据的回调函数
+ * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
  */
 function ConfigurableTable({
-    uniqueId,
-    columns, // 所有列的定义
-    dataSource,
-    rowKey,
-    loading = false,
-    onRowClick,
-    isInteractionBlockingRowClick, // 接收状态
-    mandatoryColumnKeys = [], // 强制列 Key
-    visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
-    onVisibilityChange, // 更新所有可见列的回调
-    searchConfig,
-    filterConfig,
-    paginationConfig = defaultPagination,
-    scrollX = true,
-    rowSelection,
-    tableProps,
-    showColumnSettings = true,//当为true时显示列设置按钮
-    leftToolbarItems = [], // 左侧工具栏按钮
-    getList
-}) {
+                               uniqueId,
+                               columns, // 所有列的定义
+                               dataSource,
+                               rowKey,
+                               loading = false,
+                               onRowClick,
+                               isInteractionBlockingRowClick, // 接收状态
+                               mandatoryColumnKeys = [], // 强制列 Key
+                               visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
+                               onVisibilityChange, // 更新所有可见列的回调
+                               searchConfig,
+                               filterConfig,
+                               paginationConfig = defaultPagination,
+                               scrollX = true,
+                               rowSelection,
+                               tableProps,
+                               showColumnSettings = true,//当为true时显示列设置按钮
+                               leftToolbarItems = [], // 左侧工具栏按钮
+                               getList,
+                               moduleKey
+                           }) {
+    moduleKey = moduleKey || useLocation().pathname.split('/').at(-2);
+    const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
 
     // 内部维护一个列可见性状态，当外部没有传递时使用
@@ -120,7 +126,7 @@ function ConfigurableTable({
     }, [columns]);
 
     // 基于列分类计算可选列和默认可见列
-    const { disabledKeys, configurableOptionKeys, defaultVisibleKeys } = columnCategories;
+    const {disabledKeys, configurableOptionKeys, defaultVisibleKeys} = columnCategories;
 
     // 计算实际生效的默认可见列（当localStorage没有存储时使用）
     const effectiveDefaultVisibleKeys = useMemo(() => {
@@ -342,14 +348,14 @@ function ConfigurableTable({
                     }
                 }
             },
-            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
+            style: onRowClick ? {cursor: 'pointer'} : {}, // 保持光标样式
         };
     };
 
     // 最终的分页配置
     const finalPaginationConfig = useMemo(() => {
         if (paginationConfig === false) return false;
-        const config = { ...defaultPagination, ...paginationConfig };
+        const config = {...defaultPagination, ...paginationConfig};
         config.total = dataSource?.length || 0;
         return config;
     }, [paginationConfig, dataSource]);
@@ -389,112 +395,100 @@ function ConfigurableTable({
     const processedColumns = useMemo(() => {
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
-            let processedCol = { ...col };
-            // 创建cell容器
-            // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
-            if (mediaTypes.includes(processedCol.mediaType)) {
-                // 为包含媒体类型的列添加特殊的className
-                processedCol.className = styles.mediaCell;
-                // 添加 onCell 方法给单元格添加类名
-                processedCol.onCell = () => ({
-                    className: 'media-cell', // 为单元格添加 media-cell 类名
-                });
+            let processedCol = {...col};
+            if(!col.render){
+                // 创建cell容器
+                // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
+                if (mediaTypes.includes(processedCol.mediaType)) {
+                    // 为包含媒体类型的列添加特殊的className
+                    processedCol.className = styles.mediaCell;
+                    // 添加 onCell 方法给单元格添加类名
+                    processedCol.onCell = () => ({
+                        className: 'media-cell', // 为单元格添加 media-cell 类名
+                    });
 
-                // 只有在没有自定义render函数时才设置默认的MediaCell渲染
-                if (typeof processedCol.render === 'undefined') {
-                    // 设置 render 函数来渲染 MediaCell
+                    // 只有在没有自定义render函数时才设置默认的MediaCell渲染
+                    if (typeof processedCol.render === 'undefined') {
+                        // 设置 render 函数来渲染 MediaCell
+                        processedCol.render = (text, record) => {
+                            // 直接将列定义的 mediaType ('image', 'video', 'audio') 传递给 MediaCell
+                            return (
+                                <MediaCell
+                                    record={record}
+                                    processedCol={processedCol} // 直接使用列定义的配置信息
+                                />
+                            );
+                        };
+                    }
+                }
+
+                // 如果列有  options 属性，设置渲染逻辑
+                if (processedCol.options) {
+                    const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
+
                     processedCol.render = (text, record) => {
-                        // 直接将列定义的 mediaType ('image', 'video', 'audio') 传递给 MediaCell
+                        const key = text;
+                        const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
+                        // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
+                        const DisplayText = optionConfig ? (optionConfig.name ?? text) : text;
+                        // 如果 iconOptions 和 options 都没有为当前 key 提供配置，则返回原始文本
+                        if (!optionConfig) {
+                            return text;
+                        }
+                        const B = () => DisplayText
                         return (
-                            <MediaCell
-                                record={record}
-                                processedCol={processedCol} // 直接使用列定义的配置信息
-                            />
+                            <B/>
                         );
                     };
                 }
+
+                // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
+                if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
+                    processedCol.render = (_, rowData) => {
+                        console.log(listConfig.rowButtonsPublic)
+                        let DropdownItems = listConfig.rowButtonsPublic.filter(i => processedCol.actionButtons.includes(i.key))
+                            .filter(({key}) => processedCol.isShow(rowData, key))
+                            .map(({key, click, icon}) => {
+                                const ItemIcon = icon
+                                return {
+                                    key,
+                                    label: key.charAt(0).toUpperCase() + key.slice(1), // 首字母大写
+                                    icon:<ItemIcon/>,
+                                    // 使用style属性只控制字体颜色
+                                    style: key === 'delete' ? {color: '#ff4d4f'} : {},
+                                    // 删除danger属性，避免hover背景色变化
+                                    onClick: (e) => {
+                                        if (e.domEvent) e.domEvent.stopPropagation();
+                                        click && click({ moduleKey,selectList:[rowData] });
+                                    }
+                                };
+                            })
+                        return (
+                            <div className="actions-container" onClick={(e) => e.stopPropagation()}>
+                                <Dropdown
+                                    menu={{items: DropdownItems}}
+                                    trigger={['click']}
+                                    className="action-dropdown"
+                                >
+                                    <Button
+                                        type="text"
+                                        icon={<EllipsisOutlined/>}
+                                        className="action-button"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </Dropdown>
+                            </div>
+                        )
+                    };
+
+                    // 为操作列添加action-cell类名
+                    processedCol.onCell = () => ({
+                        className: 'action-cell', // 为单元格添加action-cell类名
+                    });
+                }
+                // 添加最小宽度
+                processedCol.minWidth = 100;
             }
-
-            // 如果列有  options 属性，并且没有自定义 render 函数，则设置渲染逻辑
-            if (processedCol.options && !processedCol.render) {
-                const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
-
-                processedCol.render = (text, record) => {
-                    const key = text;
-                    const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
-                    // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
-                    const DisplayText = optionConfig ? (optionConfig.name ?? text) : text;
-                    // 如果 iconOptions 和 options 都没有为当前 key 提供配置，则返回原始文本
-                    if (!optionConfig) {
-                        return text;
-                    }
-                    const B = () => DisplayText
-                    return (
-                        <B />
-                    );
-                };
-            }
-
-            // 为操作列添加标记 (保持不变)
-            if ((processedCol.key || processedCol.dataIndex) === 'actions' && processedCol.render) {
-                const originalRender = processedCol.render;
-                processedCol.render = (...args) => (
-                    <div data-action-key='actions'>
-                        {originalRender(...args)}
-                    </div>
-                );
-
-                // 为操作列的td添加action-cell类名
-                processedCol.onCell = () => ({
-                    className: 'action-cell', // 为单元格添加action-cell类名
-                });
-            }
-
-            // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
-            if (processedCol.actionButtons &&
-                Array.isArray(processedCol.actionButtons)) {
-
-                processedCol.render = (_, record) => (
-                    <div className="actions-container" onClick={(e) => e.stopPropagation()}>
-                        <Dropdown
-                            menu={{
-                                items: processedCol.actionButtons
-                                    .filter(btnName => processedCol.isShow(record, btnName))
-                                    .map(btnName => {
-                                        const ActionIcon = actionIconMap[btnName];
-                                        return {
-                                            key: btnName,
-                                            label: btnName.charAt(0).toUpperCase() + btnName.slice(1), // 首字母大写
-                                            icon: ActionIcon ? <ActionIcon /> : null,
-                                            // 使用style属性只控制字体颜色
-                                            style: btnName === 'delete' ? { color: '#ff4d4f' } : {},
-                                            // 删除danger属性，避免hover背景色变化
-                                            onClick: (e) => {
-                                                if (e.domEvent) e.domEvent.stopPropagation();
-                                            }
-                                        };
-                                    })
-                            }}
-                            trigger={['click']}
-                            className="action-dropdown"
-                        >
-                            <Button
-                                type="text"
-                                icon={<EllipsisOutlined />}
-                                className="action-button"
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                        </Dropdown>
-                    </div>
-                );
-
-                // 为操作列添加action-cell类名
-                processedCol.onCell = () => ({
-                    className: 'action-cell', // 为单元格添加action-cell类名
-                });
-            }
-            // 添加最小宽度
-            processedCol.minWidth = 100;
             return processedCol;
         });
     }, [currentlyVisibleColumns]);
@@ -509,7 +503,7 @@ function ConfigurableTable({
         <div className={styles.configurableTableContainer}>
             {/* 工具栏 */}
             <div className="configurable-table-toolbar"
-                style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
+                 style={leftToolbarItems.length === 0 ? {justifyContent: "flex-end"} : {}}>
                 {/* 左侧按钮区域 */}
                 <Space wrap className={styles.configurableTableToolbarLeft}>
                     {leftToolbarItems.map(item => (
@@ -535,10 +529,10 @@ function ConfigurableTable({
                             showCount
                             placeholder={searchConfig.placeholder || 'Search...'}
                             value={searchConfig.searchValue}
-                            prefix={<SearchOutlined />}
+                            prefix={<SearchOutlined/>}
                             onChange={searchConfig.onSearchChange}
                             className="configurable-table-search-input"
-                            suffix={loading ? <Spin size="small" /> : null}
+                            suffix={loading ? <Spin size="small"/> : null}
                             allowClear
                         />
                     )}
@@ -555,7 +549,7 @@ function ConfigurableTable({
                             showClearIcon={hasActiveFilters}
                         >
                             <Button
-                                icon={<FilterOutlined />}
+                                icon={<FilterOutlined/>}
                                 className={styles.configurableTableToolbarBtn}
                             >
                                 Filters
@@ -577,7 +571,7 @@ function ConfigurableTable({
                             isSettingsType
                         >
                             <Button
-                                icon={<SettingOutlined />}
+                                icon={<SettingOutlined/>}
                                 className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
                             >
                                 Table Settings
@@ -606,7 +600,7 @@ function ConfigurableTable({
                 }}
                 {...tableProps}
             />
-        </div >
+        </div>
     );
 }
 

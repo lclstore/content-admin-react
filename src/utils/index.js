@@ -1,11 +1,24 @@
 import settings from '@/config/settings';
 import { v4 as uuidv4 } from 'uuid';
-
+import { useStore } from "@/store/index.js";
 
 const { file: fileSettings } = settings;
 /**
  * 工具函数集合
  */
+
+export function router() {
+  const state = useStore.getState()
+  const location = state.location;
+  const navigate = state.navigate;
+  const routerList = location.pathname.split('/')
+  return {
+    push(path){
+      routerList[routerList.length - 1] = path
+      navigate(routerList.join("/"))
+    }
+  }
+}
 
 /**
  * 深度克隆对象

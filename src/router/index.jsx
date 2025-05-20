@@ -3,11 +3,11 @@
  * 实现两种布局：登录页独立布局和其他页面共用Layout布局
  */
 import React, { lazy, Suspense } from 'react';
-import { createHashRouter,Navigate } from "react-router"
+import { createHashRouter,Navigate,useLocation } from "react-router"
 import menus from '@/config/menu';
 import settings from '@/config/settings';
 import AppLayout from '@/layout';
-
+import { useStore } from '@/store';
 /**
  * 组件懒加载包装
  */
@@ -16,6 +16,19 @@ const SuspenseWrapper = ({ component }) => (
     {component}
   </Suspense>
 );
+// 路由守卫
+const AuthGuard = ({ children }) => {
+  const location = useLocation();
+  const setLocation = useStore(i => i.setLocation);
+  // 更新当前路由信息
+  setLocation(location)
+  if (!localStorage.getItem(settings.request.tokenName)) {
+    // 如果未登录，重定向到登录页，并记录原路径
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  return children; // 已登录，正常渲染子组件
+}
 
 /**
  * 根据菜单配置动态生成路由
@@ -58,7 +71,7 @@ const generateRoutes = () => {
     }).filter(Boolean);
   // 配置Layout布局路由
   const mainRoute = {
-    element: <AppLayout />,
+    element: <AuthGuard><AppLayout /></AuthGuard>,
     children: layoutRoutes
   };
 

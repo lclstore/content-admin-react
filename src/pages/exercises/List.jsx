@@ -343,7 +343,6 @@ export default () => {
                 dataSource={dataSource}
                 rowKey="id"
                 loading={loading}
-                onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or email...",

@@ -25,7 +25,9 @@
     // 表格
     .ant-table-wrapper {
       background: none;
-
+      .ant-table-cell{
+        min-height: 79px;
+      }
       .ant-table-thead {
         background: #f5f5f5 !important;
         & > tr > th {
@@ -108,14 +110,6 @@
       .ant-checkbox .ant-checkbox-inner {
         border-radius: 3px;
       }
-
-      /* 表格单元格内边距 */
-
-      & > tr .ant-table-cell,
-      .ant-table-tbody > tr > td {
-        padding: 0 8px;
-      }
-
 
       /* 表格checkbox */
 

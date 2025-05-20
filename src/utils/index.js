@@ -1,11 +1,24 @@
 import settings from '@/config/settings';
 import { v4 as uuidv4 } from 'uuid';
-
+import { useStore } from "@/store/index.js";
 
 const { file: fileSettings } = settings;
 /**
  * 工具函数集合
  */
+
+export function router() {
+  const state = useStore.getState()
+  const location = state.location;
+  const navigate = state.navigate;
+  const routerList = location.pathname.split('/')
+  return {
+    push(path){
+      routerList[routerList.length - 1] = path
+      navigate(routerList.join("/"))
+    }
+  }
+}
 
 /**
  * 深度克隆对象
@@ -170,7 +183,20 @@ export const validatePassword = (password) => {
 export const generateUUID = () => {
   return uuidv4();
 };
-
+// uuid 生成
+export const uuid = (is_) => {
+  let str = ''
+  function create16(){
+    return parseInt(Math.random() * 16).toString(16)
+  }
+  for(let i = 0;i < 32;i++ ){
+    if(is_ === '-' && (i === 8 || i === 12 || i === 16 || i === 20)){
+      str += '-'
+    }
+    str += create16()
+  }
+  return str
+}
 /**
  * 睡眠函数
  * @param {number} ms 睡眠时间，单位毫秒

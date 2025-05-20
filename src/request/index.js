@@ -63,52 +63,55 @@ class Request {
             url:(config.baseUrl || baseUrl) + config.url,
         }
     }
-    async send(){
-        let loading = Loading,config = this.config;
-        if (config.load) {
-            loading(true)
-        }
-        // resInit init
-        const resInit = config.resInit || settings.request.resInit;
-        await axios_default({
-            ...config,
-            [config.method === 'get' ? 'params' : 'data']: config.data,
-        }).then((res) => {
+    send(){
+        return new Promise((resolve, reject) => {
+            let loading = Loading,config = this.config;
             if (config.load) {
-                loading(false)
+                loading(true)
             }
-            res = resInit(res)
-            // token 校验
-            if (res.tokenError) {
-                localStorage.removeItem(settings.request.tokenName)
-                useStore.getState().navigate('/login')
-            }
-            if (res.data.success) {
-                config.point && message.open({content: "success", type: 'success'},'success')
-                config.success && config.success(res)
-            }else {
-                // error
-                config.warningPoint && message.open({
-                    content: res.data.errMessage,
-                    type: 'warning',
-                    duration: 3,
-                }, res.data.errCode)
-                res.error = res.data.errMessage
-            }
-            config.callback(res)
-        }).catch((err) => {
-            if (config.load) {
-                loading(false)
-            }
-            message.open({content: err, type: 'error'}, 'error')
-            config.callback({error: err})
-            console.log(err)
+            // resInit init
+            const resInit = config.resInit || settings.request.resInit;
+            axios_default({
+                ...config,
+                [config.method === 'get' ? 'params' : 'data']: config.data,
+            }).then((res) => {
+                if (config.load) {
+                    loading(false)
+                }
+                res = resInit(res)
+                // token 校验
+                if (res.tokenError) {
+                    localStorage.removeItem(settings.request.tokenName)
+                    useStore.getState().navigate('/login')
+                }
+                if (res.data.success) {
+                    config.point && message.open({content: "success", type: 'success'},'success')
+                    config.success && config.success(res)
+                }else {
+                    // error
+                    config.warningPoint && message.open({
+                        content: res.data.errMessage,
+                        type: 'warning',
+                        duration: 3,
+                    }, res.data.errCode)
+                    res.error = res.data.errMessage
+                }
+                config.callback(res)
+                resolve(res)
+            }).catch((err) => {
+                if (config.load) {
+                    loading(false)
+                }
+                message.open({content: err, type: 'error'}, 'error')
+                config.callback({error: err})
+                console.log(err)
+            })
         })
     }
-    post(){ this.config.method = "post"; this.send() }
-    get(){ this.config.method = "get"; this.send() }
-    put(){ this.config.method = "put"; this.send() }
-    delete(){ this.config.method = "post"; this.send() }
+    async post(){ this.config.method = "post";await this.send() }
+    async get(){ this.config.method = "get";await this.send() }
+    async put(){ this.config.method = "put";await this.send() }
+    async delete(){ this.config.method = "post";await this.send() }
 }
 
 axios_default.interceptors.request.use(config => {
@@ -129,4 +132,3 @@ export default {
     put:(config) => new Request(config).put(),
     delete:(config) => new Request(config).delete(),
 }
-export const a = 123

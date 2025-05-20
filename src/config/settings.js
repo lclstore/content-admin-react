@@ -1,5 +1,14 @@
 import fileApi from '@/api/file';
-
+import {
+  EditOutlined,
+  StopOutlined,
+  CheckCircleOutlined,
+  CopyOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
+import {del, disable, enable} from "./api.js"
+import {useStore} from "@/store/index.js";
+import { router } from "@/utils"
 //文件上传
 const uploadFileFn = async ({ file }) => {
   let fileUrl = await fileApi.uploadFile(file, settings.file.dirname)
@@ -7,6 +16,7 @@ const uploadFileFn = async ({ file }) => {
 }
 
 const settings = {
+  // 请求设置
   request:{
     tokenName: 'template-cms-token',
     interceptors:(config) => { config.headers['token'] = localStorage.getItem(settings.request.tokenName) },
@@ -14,6 +24,37 @@ const settings = {
       res.tokenError = (res.data.errCode && res.data.errCode === "USR001")
       return res
     }
+  },
+  // List page
+  listConfig:{
+    rowButtonsPublic:[
+      {
+        key:"enable",
+        icon: CheckCircleOutlined,
+        click:({selectList,moduleKey}) => enable({moduleKey,idList:selectList.map(item => item.id)})
+      },
+      {
+        key:"disable",
+        icon: StopOutlined,
+        click:({selectList,moduleKey})=> disable({moduleKey,idList:selectList.map(item => item.id)})
+      },
+      {
+        key:"del",
+        icon: DeleteOutlined,
+        click:({selectList,moduleKey}) => del({moduleKey,idList:selectList.map(item => item.id)})
+      },
+        {
+        key:"edit",
+        icon: EditOutlined,
+        click:({selectList,moduleKey}) => router().push(`editor?id=${ selectList[0].id }`)
+      },
+        {
+        key:"duplicate",
+        icon: CopyOutlined,
+        click:({selectList,moduleKey}) => router().push(`editor?id=${ selectList[0].id }&duplicate=true`)
+      },
+    ],
+    rowClickPublic:() => {}
   },
   // 布局设置
   layout: {
@@ -54,13 +95,6 @@ const settings = {
     },
   },
 
-  // 存储设置
-  storage: {
-    // token键名
-    tokenKey: 'admin_token',
-    // 用户信息键名
-    userKey: 'admin_user',
-  },
   // 自定义主题配置
   themeConfig: {
     token: {

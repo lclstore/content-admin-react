@@ -155,7 +155,6 @@ export default function Musics() {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 iconOptions: statusIconMap,
                 options: 'displayStatus',
                 width: 120,
@@ -384,7 +383,7 @@ export default function Musics() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
+                text: 'Add Music',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/musics/musicsEditor'),
@@ -482,7 +481,7 @@ export default function Musics() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
+                // leftToolbarItems={leftToolbarItems}
                 rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange
@@ -496,7 +495,7 @@ export default function Musics() {
                 onOk={() => {
                     setActionInProgress(true);
                     setDataSource(current => current.filter(item => item.id !== currentRecord.id));
-                    setActionInProgress(false);
+                     setActionInProgress(false);
                     setIsDeleteModalVisible(false);
                     messageApi.success(`Successfully deleted "${currentRecord.name}"`);
                 }}

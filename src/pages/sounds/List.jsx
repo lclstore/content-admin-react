@@ -494,7 +494,6 @@ export default function WorkoutsList() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
                 rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange

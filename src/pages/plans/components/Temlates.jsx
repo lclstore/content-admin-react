@@ -481,7 +481,6 @@ export default function Temlates() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
                 rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange

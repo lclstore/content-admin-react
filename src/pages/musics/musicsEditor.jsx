@@ -41,7 +41,7 @@ export default function UserEditorWithCommon() {
             label: 'Name',
             maxLength: 100,
             required: true,
-            placeholder: 'Enter user name',
+            placeholder: 'Music name',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
@@ -114,7 +114,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'User', hideSaveButton: false, hideBackButton: false }}
+            config={{ formName: 'Music', title: 'Music', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

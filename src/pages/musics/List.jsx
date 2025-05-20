@@ -13,7 +13,7 @@ const items = [
     },
     {
         key: '2',
-        label: 'Playlists',
+        label: 'Playlists', 
         children: <Playlists />,
     }
 ];
@@ -28,7 +28,7 @@ export default function CollectionsList() {
 
     const onChange = (key) => {
         const tabBarName = items.find(item => item.key == key).label;
-        setCustomPageTitle(`${tabBarName} List`);
+        setCustomPageTitle(`${tabBarName}`);
     };
     const renderTabBar = (props, DefaultTabBar) => ( 
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>

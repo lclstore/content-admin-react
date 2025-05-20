@@ -151,18 +151,18 @@ export default function Resources() {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
-            {
-                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
-                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
-                width: 150,
-                visibleColumn: 2,
-                render: (duration) => {
-                    if (!duration) return '-';
-                    const minutes = Math.floor(duration / 60);
-                    const seconds = duration % 60;
-                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }
-            },
+            // {
+            //     title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
+            //     sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
+            //     width: 150,
+            //     visibleColumn: 2,
+            //     render: (duration) => {
+            //         if (!duration) return '-';
+            //         const minutes = Math.floor(duration / 60);
+            //         const seconds = duration % 60;
+            //         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            //     }
+            // },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
@@ -372,7 +372,7 @@ export default function Resources() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Resources List');
+        setCustomPageTitle('Resources');
 
         // 设置头部按钮
         setButtons([

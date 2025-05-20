@@ -49,7 +49,7 @@ export default function CollectionsList() {
     );
     // 页面加载时设置默认标题
     useEffect(() => {
-        setCustomPageTitle(`${defaultTabItem.label} List`);
+        setCustomPageTitle(`${defaultTabItem.label}`);
     }, []);
 
     return <Tabs defaultActiveKey={defaultTabItem.label} onChange={onChange} renderTabBar={renderTabBar} items={items} />;

@@ -378,7 +378,7 @@ export default function Temlates() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Temlates List');
+        setCustomPageTitle('Temlates');
 
         // 设置头部按钮
         setButtons([

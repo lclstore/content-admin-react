@@ -266,7 +266,7 @@ export default function UsersList() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('User List');
+        setCustomPageTitle && setCustomPageTitle('User');
 
         // 设置头部按钮
         setButtons([

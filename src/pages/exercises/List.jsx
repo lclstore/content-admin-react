@@ -285,7 +285,7 @@ export default () => {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('Exercise List');
+        setCustomPageTitle && setCustomPageTitle('Exercise');
         // 设置头部按钮
         setButtons([
             {

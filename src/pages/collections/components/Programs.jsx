@@ -244,7 +244,7 @@ export default () => {
     }, []);
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Programs List');
+        setCustomPageTitle('Programs');
 
         // 设置头部按钮
         setButtons([

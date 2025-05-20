@@ -26,9 +26,9 @@ export default function UserEditorWithCommon() {
             label: 'Name',
             maxLength: 100,
             required: true,
-            placeholder: 'Enter user name',
+            placeholder: 'Enter name...',
             rules: [
-                { max: 100, message: 'Name cannot exceed 100 characters' }
+                { max: 100, message: 'Please input your name' }
             ]
         },
         {
@@ -37,6 +37,7 @@ export default function UserEditorWithCommon() {
             maxLength: 100,
             label: 'Email',
             required: true,
+            placeholder: 'Enter email...',
             rules: [
                 { required: true, message: 'Please input Email.' },
                 { max: 100, message: 'Email cannot exceed 100 characters' },
@@ -56,6 +57,7 @@ export default function UserEditorWithCommon() {
             name: 'password',
             label: 'Password',
             required: true,
+            placeholder: 'Enter password...',
             rules: [
                 { required: true, message: 'Please input passowrd.' },
                 {

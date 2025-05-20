@@ -378,7 +378,7 @@ export default function Musics() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Workout List');
+        setCustomPageTitle('Musics');
 
         // 设置头部按钮
         setButtons([

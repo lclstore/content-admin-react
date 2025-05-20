@@ -145,7 +145,7 @@ export default () => {
 
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Category List');
+        setCustomPageTitle('Category');
 
         // 设置头部按钮
         setButtons([

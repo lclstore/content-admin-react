@@ -27,18 +27,18 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'profilePicture', // 遵循命名规范，使用Url后缀
             label: 'Profile Picture',
-
+            uploadButtonText: "Change",
             // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },
         {
             type: 'input',
-            name: 'appCode', // 遵循命名规范，使用驼峰命名
-            label: 'App Code',
+            name: 'name', // 遵循命名规范，使用驼峰命名
+            label: 'Name',
             maxLength: 100,
             required: true,
-            placeholder: 'Enter App Code',
+            placeholder: 'Enter name...',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
@@ -47,8 +47,9 @@ export default function UserEditorWithCommon() {
             type: 'input',
             name: 'emailAddress',
             maxLength: 100,
-            label: 'Email Address',
+            label: 'Email',
             required: true,
+            placeholder: 'Enter email...',
             rules: [
                 { required: true, message: 'Please input Email.' },
                 { max: 100, message: 'Email cannot exceed 100 characters' },
@@ -68,6 +69,7 @@ export default function UserEditorWithCommon() {
             name: 'userPassword',
             label: 'Password',
             required: true,
+            placeholder: 'Enter password...',
             rules: [
                 { required: true, message: 'Please input passowrd.' },
                 {
@@ -109,7 +111,22 @@ export default function UserEditorWithCommon() {
             layoutType: values.layoutType,
             contentStyle: values.contentStyle
         };
+        //  if (!account) {
+        //     setAccountError("Email cannot be empty.");
+        //     hasError = true;
+        // } else if (!validateEmail(account)) {
+        //     setAccountError("Email is not valid.");
+        //     hasError = true;
+        // }
 
+        // if (!password) {
+        //     setPasswordError("Password cannot be empty.");
+        //     hasError = true;
+        // }
+
+        // if (hasError) {
+        //     return false;
+        // }
         // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
         // 实际应用中，这里应该是异步请求
 
@@ -123,7 +140,7 @@ export default function UserEditorWithCommon() {
         setDirty(false);
 
         // 保存成功后立即跳转回列表页
-        navigate(-1);
+        navigate('/profile/list');
     };
     const headerButtons = [
         {
@@ -131,10 +148,13 @@ export default function UserEditorWithCommon() {
             text: 'Save',
             icon: <SaveOutlined />,
             type: 'primary',
+            onClick: () => {
+                
+            },
         },
         {
             key: 'logout',
-            text: 'Logout',
+            text: 'SIGN OUT',
             icon: <LogoutOutlined />,
             type: 'default',
             onClick: () => {
@@ -162,7 +182,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'Profile', title: 'Add profile', headerButtons }}
+            config={{ formName: 'Profile', title: 'Profile', headerButtons }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

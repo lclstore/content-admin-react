@@ -22,6 +22,8 @@ export default function UserEditorWithCommon() {
         // 如果点击的是当前正在播放的音频，则暂停
         if (playingUrl === option.url && audioPlayer) {
             audioPlayer.pause();
+
+
             audioPlayer.src = '';
             playingUrl = null;
             return;
@@ -37,6 +39,7 @@ export default function UserEditorWithCommon() {
         const audio = new Audio(option.url);
         audio.play();
         audioPlayer = audio;
+
         playingUrl = option.url;
 
         // 监听音频播放结束事件

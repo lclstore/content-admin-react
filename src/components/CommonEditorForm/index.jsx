@@ -789,7 +789,7 @@ export default function CommonEditor(props) {
     // 渲染基础表单
     const renderBasicContent = () => {
         return (
-            <div className={styles.basicEditorForm}>
+            <div className={`${styles.basicEditorForm} ${!isCollapse && formType == 'advanced' && styles.advancedBasicForm}`}>
                 <Spin spinning={loading}>
                     <Form
                         form={form}
@@ -854,46 +854,54 @@ export default function CommonEditor(props) {
                         />
                     )
                 }
-                {/* 渲染右侧表单 */}
-                <div className={`${styles.advancedEditorForm} ${commonListConfig ? '' : styles.withSidebar}`}>
-                    <Spin spinning={loading}>
-                        <Form
-                            form={form}
-                            name={config.formName || 'advancedForm'}
-                            layout={config.layout || 'vertical'}
-                            onValuesChange={handleFormValuesChange}
-                            onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
-                            initialValues={initialValues}
-                            className={styles.form}
-                        >
-                            {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
-                            {(internalFormFields && internalFormFields.length > 0) && (
-                                <CollapseForm
-                                    fields={internalFormFields}
-                                    form={form}
-                                    renderItemMata={renderItemMata}
-                                    commonListConfig={commonListConfig}
-                                    selectedItemFromList={effectiveSelectedItem}
-                                    activeKeys={activeCollapseKeys}
-                                    onCollapseChange={handleCollapseChange}
-                                    handleAddCustomPanel={handleAddCustomPanel} // 使用组件自己定义的方法，而不是从extractedConfig中获取的
-                                    handleDeletePanel={handleDeletePanel}
-                                    isCollapse={isCollapse !== false}
-                                    // 添加回调函数 - 使用内部实现的方法
-                                    onItemAdded={handleItemAdded}
-                                    onSelectedItemProcessed={handleSelectedItemProcessed}
-                                    // 添加排序相关的回调函数 - 使用内部实现的方法
-                                    onSortItems={handleSortItems}
-                                    onDeleteItem={handleDeleteItem}
-                                    onCopyItem={handleCopyItem}
-                                    onReplaceItem={handleReplaceItem}
-                                />
-                            )}
-                            {/* 如果配置了结构面板，则渲染结构面板 */}
-                            {complexConfig.includeStructurePanels && renderStructurePanels()}
-                        </Form>
-                    </Spin>
-                </div>
+                {/* 渲染右侧表单 isCollapse 是否按照折叠方式展示 */}
+                {
+                    isCollapse && <div className={`${styles.advancedEditorForm} ${commonListConfig ? '' : styles.withSidebar}`}>
+                        <Spin spinning={loading}>
+                            <Form
+                                form={form}
+                                name={config.formName || 'advancedForm'}
+                                layout={config.layout || 'vertical'}
+                                onValuesChange={handleFormValuesChange}
+                                onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
+                                initialValues={initialValues}
+                                className={styles.form}
+                            >
+                                {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
+                                {(internalFormFields && internalFormFields.length > 0) && (
+                                    <CollapseForm
+                                        fields={internalFormFields}
+                                        form={form}
+                                        renderItemMata={renderItemMata}
+                                        commonListConfig={commonListConfig}
+                                        selectedItemFromList={effectiveSelectedItem}
+                                        activeKeys={activeCollapseKeys}
+                                        onCollapseChange={handleCollapseChange}
+                                        handleAddCustomPanel={handleAddCustomPanel} // 使用组件自己定义的方法，而不是从extractedConfig中获取的
+                                        handleDeletePanel={handleDeletePanel}
+                                        isCollapse={isCollapse !== false}
+                                        // 添加回调函数 - 使用内部实现的方法
+                                        onItemAdded={handleItemAdded}
+                                        onSelectedItemProcessed={handleSelectedItemProcessed}
+                                        // 添加排序相关的回调函数 - 使用内部实现的方法
+                                        onSortItems={handleSortItems}
+                                        onDeleteItem={handleDeleteItem}
+                                        onCopyItem={handleCopyItem}
+                                        onReplaceItem={handleReplaceItem}
+                                    />
+                                )}
+                                {/* 如果配置了结构面板，则渲染结构面板 */}
+                                {complexConfig.includeStructurePanels && renderStructurePanels()}
+                            </Form>
+                        </Spin>
+                    </div>
+                }
+                {
+                    !isCollapse && <div className={styles.advancedBasicBox}>
+                        {renderBasicContent()}
+                    </div>
+                }
+
             </div>
         );
     };

@@ -72,7 +72,6 @@ export default function UserEditorWithCommon() {
                 return (
                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
                         {option.label}
-                        {isPlaying}
                         <span
                             onClick={(e) => {
                                 playAudio(option, e, isPlaying, setIsPlaying);

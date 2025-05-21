@@ -19,6 +19,7 @@ import {
 import FileUpload from '@/components/FileUpload/FileUpload';//文件上传组件
 import NumberStepper from '@/components/NumberStepper/NumberStepper';//数字步进器组件
 import TagSelector from '@/components/TagSelector/TagSelector';//标签选择器组件
+import StructureList from '@/components/StructureList/StructureList';//结构化排序列表组件
 import styles from './style.module.css';
 import { dateRangeKeys } from '@/constants/app';
 import { optionsConstants } from '@/constants';
@@ -361,6 +362,17 @@ export const renderFormControl = (field, options = {}) => {
                     {...stepperRest}
                 />
             );
+        //结构化排序列表
+        case 'structureList':
+
+            return (
+                <StructureList
+                    onItemAdded={options.onItemAdded}
+                    selectedItemFromList={options.selectedItemFromList}
+                    {...field}
+                />
+            );
+
     }
 };
 
@@ -507,6 +519,10 @@ export const renderFormItem = (field, options = {}) => {
  * 渲染一组表单字段
  */
 export const renderBasicForm = (fields, options) => {
+
+
+
+
     const { oneColumnKeys = [] } = options || {};
 
     if (!fields || fields.length === 0) {

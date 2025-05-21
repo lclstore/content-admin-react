@@ -54,7 +54,8 @@ export default function CommonEditor(props) {
         onFormFieldsChange = null, // 字段变更回调
         onCollapseChange = null // 折叠面板变化回调
     } = props;
-
+    // 添加选中项状态管理 - 存储从列表中选择的当前项
+    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
     // 内部维护一份formFields状态，优先使用父组件传入的
     const [internalFormFields, setInternalFormFields] = useState(
         collapseFormConfig.fields || formFields || fields || []
@@ -111,8 +112,6 @@ export default function CommonEditor(props) {
         getLatestValues
     } = useFormState(initialValues);
 
-    // 添加选中项状态管理 - 存储从列表中选择的当前项
-    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
 
     // 复杂表单特定状态
     const [structurePanels, setStructurePanels] = useState(
@@ -802,6 +801,8 @@ export default function CommonEditor(props) {
                     >
                         {renderBasicForm(fields, {
                             form,
+                            selectedItemFromList: selectedItemFromList,
+                            onItemAdded: handleItemAdded,
                             formConnected,
                             initialValues,
                             oneColumnKeys: config.oneColumnKeys || [],

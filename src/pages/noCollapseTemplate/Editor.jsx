@@ -340,6 +340,19 @@ export default function UserEditorWithCommon() {
                     },
                 }
             ]
+        },
+        {
+            type: 'structureList',
+            name: 'data',
+            // renderItemMata: (item) => {
+            //     return <div>{item.displayName}</div>
+            // },
+            label: 'test workout list',
+            required: true,
+            dataList: [],
+            rules: [
+                { required: true, message: 'Please add  workout list' },
+            ]
         }
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建

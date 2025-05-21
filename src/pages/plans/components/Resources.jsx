@@ -379,7 +379,7 @@ export default function Resources() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout1', 
+                text: 'Create Workout1',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/plans/resourcesEditor'),

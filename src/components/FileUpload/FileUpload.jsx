@@ -43,6 +43,7 @@ const FileUpload = ({
     uploadPlaceholder,    // 上传区域占位文本
     changeButtonText,     // 更改按钮文本
     uploadButtonText,     // 上传按钮文本
+    field,                // 字段配置
     style = {
         width: '96px',
         height: '96px'
@@ -931,6 +932,9 @@ const FileUpload = ({
 
                         {/* 文件信息 */}
                         <div className={styles.uploadInfo} style={{ flex: '1', minWidth: 0 }}>
+                            <div className={`${styles.uploadLabel} ${field.required ? styles.uploadLabelRequired : ''}`}>
+                                {field.label}
+                            </div>
                             <div className={styles.uploadTitle}
                                 title={hasFile ? getFileName(displayValue) : ""}
                                 style={{

@@ -308,6 +308,7 @@ export const renderFormControl = (field, options = {}) => {
                     uploadErrorMessage={uploadErrorMessage}
                     dirKey={dirKey}
                     uploadFn={uploadFn}
+                    field={field}
                     style={style}
                     {...field.props}
                     {...uploadRest}
@@ -320,7 +321,7 @@ export const renderFormControl = (field, options = {}) => {
 
             return (
                 <Form.Item
-
+                    className='inputGroup'
                 >
                     <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {
@@ -482,8 +483,15 @@ export const renderFormItem = (field, options = {}) => {
 
         return (
             <Form.Item
+
                 key={name} // React key 直接传递
                 {...formItemRestProps} // 其余布局 props 展开
+                //上传控件隐藏label
+                label={
+                    field.type === 'upload'
+                        ? null
+                        : label
+                }
                 name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
                 rules={finalRules}
                 valuePropName={finalValuePropName}

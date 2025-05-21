@@ -204,7 +204,7 @@ export default function UserEditorWithCommon() {
                     label: 'warmName',
                     required: true,
                     maxLength: 100,
-                    width: '340px',
+                    width: '320px',
                     showCount: true,
                 },
                 {
@@ -244,6 +244,7 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'avatar', // 遵循命名规范，使用Url后缀
             label: 'Avatar',
+            required: true,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },

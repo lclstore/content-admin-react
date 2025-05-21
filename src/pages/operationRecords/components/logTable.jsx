@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import {statusOrder, filterSections, listData} from './Data';
+import { statusOrder, filterSections, listData } from './Data';
+import request from "@/request";
+// import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 
-
-export default () => {
+export default ({bizType}) => {
+    
     // 1. 状态定义 - 组件内部状态管理
     const [dataSource, setDataSource] = useState(listData); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
@@ -32,7 +34,7 @@ export default () => {
             {
                 title: 'Operation Type',
                 dataIndex: 'operationType',
-                options:[{ name:"Add",value:"ADD" }],
+                options: [{ name: "Add", value: "ADD" }],
                 width: 120,
                 visibleColumn: 0
             },
@@ -54,7 +56,7 @@ export default () => {
                 width: 120,
                 visibleColumn: 0
             },
-            
+
         ];
     }, []);
 
@@ -144,11 +146,33 @@ export default () => {
 
     // 副作用 - 组件生命周期相关处理
 
+
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url: "/opLogs/page",
+                load: true,
+                data: {
+                    bizType:"biz-music",
+                    pageSize: 20
+                },
+                callback(res) {
+                    // setDataSource(res.data.data)
+                    console.log('res', res.data.data)
+                    resolve()
+                }
+            })
+        })
+    }, [])
     /**
      * 重置操作标志
      */
     useEffect(() => {
-    }, []);
+        console.log('1111')
+        console.log(bizType)
+        // getData().then()
+    },[bizType]);
 
     // 表格数据和配置
     // 渲染 - 组件UI呈现

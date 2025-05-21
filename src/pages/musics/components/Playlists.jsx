@@ -161,9 +161,19 @@ export default function Playlists() {
                 width: 120,
                 visibleColumn: 0
             },
-            { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
-            { title: 'Music Num', dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
+            {
+                title: 'Premium', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'left', dataIndex: 'premium', key: 'premium', width: 120, visibleColumn: 2, render: (text, record) => {
+                    return (
+                        <Space direction="vertical">
+                            <Switch disabled={true} checked={text} />
+                        </Space>
+                    );
+                }
+            },
             { title: 'Type', dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
+
+            { title: 'Music Num', dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
+            
 
             {
                 title: 'Actions',
@@ -465,7 +475,6 @@ export default function Playlists() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange
                 }}

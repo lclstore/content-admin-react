@@ -29,7 +29,7 @@ export const filterSections = [
     {
         title: 'Status',
         key: 'status',
-        options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
+        options: ['Draft', 'Enabled', 'Disabled'],
     }
 ];
 

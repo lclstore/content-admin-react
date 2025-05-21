@@ -12,7 +12,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        audioUrl: '1xxxx',
+        status: "DRAFT"
     }
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -21,7 +21,6 @@ export default function UserEditorWithCommon() {
             // required: true,
             name: 'audioUrl', // 视频文件
             label: 'Audio',
-            // maxFileSize: 1024 * 1024 * 10,
 
             //文件上传后修改name
             onChange: (value, file, form) => {
@@ -52,8 +51,9 @@ export default function UserEditorWithCommon() {
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
-        console.log('保存用户数据:', values, id);
-
+       
+        values.status = "DRAFT"
+         console.log('保存用户数据:', values, id);
         // 处理数据格式
         const dataToSave = {
             ...(id && { id: parseInt(id, 10) }),
@@ -78,6 +78,19 @@ export default function UserEditorWithCommon() {
         // 实际应用中，这里应该是异步请求
 
         // 成功处理
+        new Promise(resolve => {
+            request.post({
+                url: "/music/save",
+                load: true,
+                data: values,
+                callback(res) {
+                    console.log('res', res)
+                    // 保存成功后立即跳转回列表页
+                    // navigate(-1);
+                    resolve()
+                }
+            })
+        })
         messageApi.success('用户数据保存成功！');
 
         // 检查 setLoading 是否为函数再调用，防止 CommonEditorForm 未传递该函数导致报错
@@ -86,8 +99,7 @@ export default function UserEditorWithCommon() {
         }
         setDirty(false);
 
-        // 保存成功后立即跳转回列表页
-        navigate(-1);
+
     };
 
     //请求列数据方法
@@ -100,7 +112,6 @@ export default function UserEditorWithCommon() {
                     url: `/music/detail/${id}`,
                     load: true,
                     callback(res) {
-                        console.log('res111', res.data.data)
                         resolve(res.data.data || {})
                     }
                 })

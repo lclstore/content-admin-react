@@ -105,9 +105,10 @@ export default function Musics() {
      * 处理按钮点击事件
      */
     const handleActionClick = useCallback((actionName, record, event) => {
+         console.log(actionName)
         if (event) event.stopPropagation();
         setCurrentRecord(record);
-
+       
         switch (actionName) {
             case 'edit':
                 handleEdit(record);
@@ -134,11 +135,13 @@ export default function Musics() {
 
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
+       
         const status = record.status;
+        //  console.log(status)
         // 简单的状态-按钮映射关系
-        if (status === 'Draft' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 'Disabled' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 'Enabled' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
 
@@ -482,7 +485,7 @@ export default function Musics() {
                     onReset: handleFilterReset,
                 }}
                 // leftToolbarItems={leftToolbarItems}
-                rowSelection={rowSelection}
+                // rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange
                 }}

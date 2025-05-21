@@ -30,8 +30,8 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Update Type',
-                dataIndex: 'updateType',
+                title: 'Operation Type',
+                dataIndex: 'operationType',
                 options:[{ name:"Add",value:"ADD" }],
                 width: 120,
                 visibleColumn: 0
@@ -43,14 +43,14 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Update User',
-                dataIndex: 'updateUser',
+                title: 'Operation User',
+                dataIndex: 'operationUser',
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'Update Time',
-                dataIndex: 'updateTime',
+                title: 'Operation Time',
+                dataIndex: 'operationTime',
                 width: 120,
                 visibleColumn: 0
             },

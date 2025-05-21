@@ -139,9 +139,9 @@ export default function WorkoutsList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 简单的状态-按钮映射关系
-        if (status === 'Draft' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 'Disabled' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 'Enabled' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
 
@@ -151,9 +151,18 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
+            
+            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', width: 80, visibleColumn: 0 },
+            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', width: 80, visibleColumn: 0 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
-            { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            {
+                title: 'Name',
+                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                dataIndex: 'name',
+                key: 'name',
+                width: 350,
+                visibleColumn: 1
+            },
             {
                 title: 'Status',
                 dataIndex: 'status',
@@ -165,7 +174,7 @@ export default function WorkoutsList() {
                 visibleColumn: 0
             },
             {
-                title: 'Has a Script', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
+                title: 'Has a Script', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'translation', key: 'translation', width: 120, visibleColumn: 2, render: (text, record) => {
                     console.log('HasAScript', text, record)
                     return (
                         <Space direction="vertical">
@@ -376,7 +385,7 @@ export default function WorkoutsList() {
                     pageSize: 20
                 },
                 callback(res) {
-                    setDataSource(res.data.data||[])
+                    setDataSource(res.data.data || [])
                     console.log('res', res.data.data)
                     resolve()
                 }
@@ -396,7 +405,7 @@ export default function WorkoutsList() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Sounds',
+                text: 'Add Sound',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/sounds/editor'),
@@ -494,7 +503,6 @@ export default function WorkoutsList() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange
                 }}

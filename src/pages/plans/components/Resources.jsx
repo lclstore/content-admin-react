@@ -38,6 +38,9 @@ export default function Resources() {
     const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
     const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
 
+
+    
+
     // 在Modal打开时重置表单
     useEffect(() => {
         if (isBatchCreateModalVisible) {
@@ -378,7 +381,7 @@ export default function Resources() {
         setButtons([
             {
                 key: 'create',
-                text: 'Create Resources', 
+                text: 'Create Resources',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/plans/resourcesEditor'),

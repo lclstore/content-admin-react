@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import LogTable from './components/logTable.jsx';
 import StickyBox from 'react-sticky-box';
 import { HeaderContext } from '@/contexts/HeaderContext';
+import request from "@/request";
 
 const tabItemsList = [
     {
@@ -32,6 +33,9 @@ const tabItemsList = [
     {
         label: 'Templates',
     },
+    {
+        label:'Audio & Video default settings'
+    }
 ].map(i => ({...i, children: <div style={{padding: '20px'}}><LogTable tabData={i}/></div>,key: i.label}))
 
 export default function CollectionsList() {

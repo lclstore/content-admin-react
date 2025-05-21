@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
-
+import request from "@/request";
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
 
@@ -11,6 +11,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
+        translation:1
         // layoutType: 1,
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
@@ -22,20 +23,30 @@ export default function UserEditorWithCommon() {
         {
             type: 'upload',
             // required: true,
-            name: 'audioUrl', // 视频文件
+            name: 'femaleAudioUrl', // 视频文件
             label: 'Audio',
             // maxFileSize: 1024 * 1024 * 10,
 
-            //文件上传后修改name
-            onChange: (value, file, form) => {
-                form.setFieldsValue({
-                    name: file?.name || '',
-                });
-            },
             style: {
                 width: '290px',
                 height: '140px',
             },
+            // required: true,
+            acceptedFileTypes: 'mp3',
+        },
+        {
+            type: 'upload',
+            // required: true,
+            name: 'maleAudioUrl', // 视频文件
+            label: 'Male Audio',
+            // maxFileSize: 1024 * 1024 * 10,
+
+            //文件上传后修改name
+            style: {
+                width: '290px',
+                height: '140px',
+            },
+            // required: true,
             acceptedFileTypes: 'mp3',
         },
         {
@@ -44,52 +55,42 @@ export default function UserEditorWithCommon() {
             label: 'Name',
             maxLength: 100,
             required: true,
-            placeholder: 'Enter user name',
+            placeholder: 'Enter name...',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
         },
         {
             type: 'switch',
-            name: 'hasAScript',
+            name: 'translation',
             label: 'Has a Script',
+            required: true,
+            checkedChildren:'Yes',
+            unCheckedChildren:'No',
         },
         {
-            type: 'input',
-            name: 'soundScript',
-            label: 'Sound Script',
+            type: 'textarea',
+            name: 'Script',
+            label: 'Script',
             required: true,
-            maxLength: 100,
+            maxLength: 1000,
             showCount: true,
-            style: {
-                width: '300px',
-            },
-            dependencies: ['hasAScript'],           // 声明依赖
+            dependencies: ['translation'],           // 声明依赖
             content: ({ getFieldValue }) => {      // content 支持函数
-                const layoutType = getFieldValue('hasAScript');
-                console.log('layoutType',layoutType)
+                const layoutType = getFieldValue('translation');
+                console.log('layoutType', layoutType)
                 return layoutType === 1
                     ? true
                     : false;
             },
-        },
-        {
-            type: 'textarea',
-            name: 'script', // 遵循命名规范，使用驼峰命名
-            label: 'Script',
-            maxLength: 1000,
-            placeholder: 'Enter user name',
-            rules: [
-                { max: 100, message: 'Name cannot exceed 100 characters' }
-            ]
-        },
+        }
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
         console.log('保存用户数据:', values, id);
-
+        values.audioUrl = "url"
         // 处理数据格式
         const dataToSave = {
             ...(id && { id: parseInt(id, 10) }),
@@ -109,7 +110,17 @@ export default function UserEditorWithCommon() {
             layoutType: values.layoutType,
             contentStyle: values.contentStyle
         };
-
+        new Promise(resolve => {
+            request.post({
+                url: "/sound/save", 
+                load: true,
+                data: values,
+                callback(res) {
+                    console.log('res', res)
+                    resolve()
+                }
+            })
+        })
         // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
         // 实际应用中，这里应该是异步请求
 
@@ -123,7 +134,7 @@ export default function UserEditorWithCommon() {
         setDirty(false);
 
         // 保存成功后立即跳转回列表页
-        navigate(-1);
+        // navigate(-1);
     };
 
     //请求列数据方法
@@ -146,7 +157,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'Sounds' }}
+            config={{ formName: 'Sound' }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

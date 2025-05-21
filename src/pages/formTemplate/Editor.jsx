@@ -78,7 +78,8 @@ export default function UserEditorWithCommon() {
                                 playAudio(option, e, isPlaying, setIsPlaying);
                             }}
                             onMouseDown={(e) => {
-                                // e.stopPropagation();
+                                e.stopPropagation();
+                                playAudio(option, e, isPlaying, setIsPlaying);
 
                             }}>
                             {isPlaying && isPlaying === option.value ? (

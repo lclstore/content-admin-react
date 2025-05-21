@@ -18,6 +18,7 @@ import {
 import request from "@/request";
 
 export default function Musics() {
+    const mockWorkoutsForList = []
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -105,10 +106,10 @@ export default function Musics() {
      * 处理按钮点击事件
      */
     const handleActionClick = useCallback((actionName, record, event) => {
-         console.log(actionName)
+        console.log(actionName)
         if (event) event.stopPropagation();
         setCurrentRecord(record);
-       
+
         switch (actionName) {
             case 'edit':
                 handleEdit(record);
@@ -135,7 +136,7 @@ export default function Musics() {
 
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
-       
+
         const status = record.status;
         //  console.log(status)
         // 简单的状态-按钮映射关系
@@ -152,13 +153,24 @@ export default function Musics() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80, visibleColumn: 1 },
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            {
+                title: 'ID', dataIndex: 'id',
+                key: 'id',
+                width: 60,
+                visibleColumn: 1,
+                sorter: true
+            },
+            {
+                title: 'Name',
+                sorter: true,
+                dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1
+            },
             {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
                 iconOptions: statusIconMap,
+                sorter: true,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
@@ -194,7 +206,8 @@ export default function Musics() {
     const performSearch = useCallback((searchText, filters, pagination) => {
         setLoading(true);
         setTimeout(() => {
-            let filteredData = mockWorkoutsForList;
+            let filteredData = dataSource;
+            console.log('filteredData', filteredData)
             // 按状态过滤
             const statuses = filters?.status || [];
             if (statuses.length > 0) filteredData = filteredData.filter(w => statuses.includes(w.status));
@@ -354,7 +367,25 @@ export default function Musics() {
         }
     }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
 
-
+    // 排序
+    const sortGetData = (orderBy,orderDirection) => {
+        return new Promise(resolve => {
+            request.get({
+                url: "/music/page",
+                load: true,
+                data: {
+                    orderBy,
+                    orderDirection,
+                    pageSize: 20
+                },
+                callback(res) {
+                    setDataSource(res.data.data)
+                    // console.log('res', res.data.data)
+                    resolve()
+                }
+            })
+        })
+    };
 
     // 获取数据
     const getData = useCallback(() => {
@@ -450,11 +481,26 @@ export default function Musics() {
 
     // 处理表格变更（排序、筛选、分页）
     const handleTableChange = useCallback((pagination, filters, sorter) => {
-        console.log('【List组件】分页已变化:', pagination);
-        console.log('【List组件】当前页:', pagination.current);
-        console.log('【List组件】每页记录数:', pagination.pageSize);
+        if (sorter.order) {
+            
+            const isAscending = sorter.order === 'ascend';
+            console.log(isAscending)
+            console.log(`当前排序：字段=${sorter.field}，方向=${isAscending ? '升序' : '降序'}`);
+            sortGetData(sorter.field,`${isAscending ? 'ASC' : 'DESC'}`)
+
+            // 根据排序信息执行其他操作
+            if (sorter.field === 'age' && !isAscending) {
+                console.log('按年龄降序排列');
+            }
+        } else {
+            console.log('未进行排序');
+            sortGetData()
+        }
+        // console.log('【List组件】分页已变化:', pagination, filters, sorter);
+        // console.log('【List组件】当前页:', pagination.current);
+        // console.log('【List组件】每页记录数:', pagination.pageSize);
         // 将分页信息传递给 performSearch 函数
-        performSearch(searchValue, filters, pagination);
+        // performSearch(searchValue, filters, pagination);
     }, [performSearch, searchValue]);
 
     // 9. 渲染 - 组件UI呈现
@@ -498,7 +544,7 @@ export default function Musics() {
                 onOk={() => {
                     setActionInProgress(true);
                     setDataSource(current => current.filter(item => item.id !== currentRecord.id));
-                     setActionInProgress(false);
+                    setActionInProgress(false);
                     setIsDeleteModalVisible(false);
                     messageApi.success(`Successfully deleted "${currentRecord.name}"`);
                 }}

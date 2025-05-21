@@ -43,17 +43,18 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Operation User',
-                dataIndex: 'operationUser',
-                width: 120,
-                visibleColumn: 0
-            },
-            {
                 title: 'Operation Time',
                 dataIndex: 'operationTime',
                 width: 120,
                 visibleColumn: 0
             },
+            {
+                title: 'Operation User',
+                dataIndex: 'operationUser',
+                width: 120,
+                visibleColumn: 0
+            },
+            
         ];
     }, []);
 

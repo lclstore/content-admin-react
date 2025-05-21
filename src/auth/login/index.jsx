@@ -90,10 +90,17 @@ const Login = () => {
                 email: account,
                 password: md5(password)
             },
-            success(res) {
-                localDown(res.data.data.token)
-                setUserInfo(res.data.data)
-                navigate(settings.router.homePath);
+            callback(res) {
+                console.log(res)
+                if (res.data.success) {
+                    localDown(res.data.data.token)
+                    setUserInfo(res.data.data)
+                    navigate(settings.router.homePath);
+                } else {
+                    setLoading(false)
+                }
+
+
             }
         })
     }, [account, password])

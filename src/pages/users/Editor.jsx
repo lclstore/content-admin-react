@@ -5,6 +5,7 @@ import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
 import request from "@/request";
 import Password from 'antd/es/input/Password';
+import md5 from "md5"
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
 
@@ -81,7 +82,7 @@ export default function UserEditorWithCommon() {
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
         console.log('保存用户数据:', values, id);
-
+        values.password = md5(values.password)
         // 处理数据格式
         const dataToSave = {
             ...(id && { id: parseInt(id, 10) }),

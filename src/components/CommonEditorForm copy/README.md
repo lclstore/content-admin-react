@@ -89,7 +89,7 @@ function UserEditPage() {
     
     // 模拟API请求
     setTimeout(() => {
-      messageApi.success('用户数据保存成功！');
+      messageApi.success('Saved successfully!');
       setLoading(false);
       setDirty(false);
       navigate('/users');

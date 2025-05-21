@@ -43,8 +43,9 @@ export default function CollectionsList() {
     const items = useMemo(() => tabItemsList,[])
     const defaultTabItem = items[0] || {};
     const onChange = (key) => {
+        console.log(key)
         const tabBarName = items.find(item => item.key === key).label;
-        setCustomPageTitle(`${tabBarName} List`);
+        setCustomPageTitle(`${tabBarName}`);
     };
     const renderTabBar = (props, DefaultTabBar) => (
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>

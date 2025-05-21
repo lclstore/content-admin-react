@@ -8,7 +8,11 @@ import request from "@/request";
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
 
-
+    //去掉后缀名
+    const delSuffix = (filename) => {
+        const parts = filename.split('.');
+        return parts.length > 1 ? parts.slice(0, -1).join('.') : filename;
+    };
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
@@ -21,16 +25,16 @@ export default function UserEditorWithCommon() {
             // required: true,
             name: 'audioUrl', // 视频文件
             label: 'Audio',
-
+            // style: {
+            //     width: '290px',
+            //     height: '140px',
+            // },
             //文件上传后修改name
             onChange: (value, file, form) => {
+                console.log('delSuffix', delSuffix(file.name))
                 form.setFieldsValue({
-                    name: file?.name || '',
+                    name: delSuffix(file.name) || '',
                 });
-            },
-            style: {
-                width: '290px',
-                height: '140px',
             },
             acceptedFileTypes: 'mp3',
         },
@@ -51,9 +55,9 @@ export default function UserEditorWithCommon() {
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
-       
+
         values.status = "DRAFT"
-         console.log('保存用户数据:', values, id);
+        console.log('保存用户数据:', values, id);
         // 处理数据格式
         const dataToSave = {
             ...(id && { id: parseInt(id, 10) }),
@@ -83,15 +87,18 @@ export default function UserEditorWithCommon() {
                 url: "/music/save",
                 load: true,
                 data: values,
-                callback(res) {
+                success(res) {
                     console.log('res', res)
-                    // 保存成功后立即跳转回列表页
-                    // navigate(-1);
+                    messageApi.success('Saved successfully!');
+                    setTimeout(() => {
+                        navigate(-1)
+                    }, 1500) 
+
                     resolve()
                 }
             })
         })
-        messageApi.success('用户数据保存成功！');
+
 
         // 检查 setLoading 是否为函数再调用，防止 CommonEditorForm 未传递该函数导致报错
         if (typeof setLoading === 'function') {

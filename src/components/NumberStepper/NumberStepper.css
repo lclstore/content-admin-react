@@ -3,7 +3,7 @@
     display: inline-flex;
     /* Use inline-flex to keep it compact */
     align-items: center;
-    gap: 12px;
+    /* gap: 12px; */
     /* Gap between buttons and value */
     border: 1px solid transparent;
     /* Add transparent border for alignment within Form.Item */
@@ -51,7 +51,8 @@
     /* Bolder font */
     color: #262626;
     /* Darker color */
-    min-width: 50px;
+    /* min-width: 50px; */
+    padding: 0 16px;
     /* Ensure some space for the value */
     text-align: center;
     line-height: 32px;

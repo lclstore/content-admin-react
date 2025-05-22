@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Button, Modal } from 'antd';
 import { UserOutlined, LockOutlined, QuestionCircleOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
@@ -29,10 +29,11 @@ const Login = () => {
     };
 
     // 登录逻辑
-    const login = useCallback( () => {
+    const login = useCallback(() => {
         // 本地开发环境跳过登录校验
+        console.log(account)
         if (import.meta.env.VITE_ENV !== 'development') {
-
+            console.log(account)
             // 表单验证
             let hasError = false;
 
@@ -40,7 +41,7 @@ const Login = () => {
                 setAccountError("Email cannot be empty.");
                 hasError = true;
             } else if (!validateEmail(account)) {
-                setAccountError("email is not valid.");
+                setAccountError("Email is not valid.");
                 hasError = true;
             }
 
@@ -58,6 +59,30 @@ const Login = () => {
             setPasswordError('');
             setLoading(true);
         }
+        // 表单验证
+        // let hasError = false;
+
+        // if (!account) {
+        //     setAccountError("Email cannot be empty.");
+        //     hasError = true;
+        // } else if (!validateEmail(account)) {
+        //     setAccountError("Email is not valid.");
+        //     hasError = true;
+        // }
+
+        // if (!password) {
+        //     setPasswordError("Password cannot be empty.");
+        //     hasError = true;
+        // }
+
+        // if (hasError) {
+        //     return false;
+        // }
+
+        // 清除错误提示
+        setAccountError('');
+        setPasswordError('');
+        setLoading(true);
         // 使用API登录
         request.post({
             url: "/user/login",
@@ -65,13 +90,20 @@ const Login = () => {
                 email: account,
                 password: md5(password)
             },
-            success(res){
-                localDown(res.data.data.token)
-                setUserInfo(res.data.data)
-                navigate(settings.router.homePath);
+            callback(res) {
+                console.log(res)
+                if (res.data.success) {
+                    localDown(res.data.data.token)
+                    setUserInfo(res.data.data)
+                    navigate(settings.router.homePath);
+                } else {
+                    setLoading(false)
+                }
+
+
             }
         })
-    },[account,password])
+    }, [account, password])
 
     // 处理账号输入变化
     const handleAccountChange = (e) => {
@@ -79,9 +111,21 @@ const Login = () => {
         setAccount(value);
         // 实时验证
         if (value && !validateEmail(value)) {
-            setAccountError("email is not valid.");
+            setAccountError("Email is not valid.");
         } else {
             setAccountError('');
+        }
+    };
+    // 处理账号输入变化
+    const handlePaswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+        // 实时验证
+        console.log(value)
+        if (value) {
+            setPasswordError('');
+        } else {
+            setPasswordError('Password cannot be empty.');
         }
     };
 
@@ -108,20 +152,20 @@ const Login = () => {
                             <div className="highlight">Management</div>
                             <div className="title-line last-line">System</div>
                         </div>
-                        <div className="login-description">Streamline your workflow with our powerful CMS</div>
+                        <div className="login-description">Power your work with our powerful CMS</div>
 
                         <img className="login-img" src={loginLeftImg} alt="" />
-                        <div className="login-company-info">成都莱嗯信息技术有限公司</div>
+                        {/* <div className="login-company-info">成都莱嗯信息技术有限公司</div> */}
                     </div>
 
                     <div className="login-right-panel login-panel">
                         <div className="login-form">
-                            <div className="login-header">
+                            {/* <div className="login-header">
                                 <img src={lionImg} alt="Logo" />
                                 <div>CMS</div>
-                            </div>
-                            <div className="login-title">Welcome Back</div>
-                            <div className="login-subtitle">Please sign in to continue</div>
+                            </div> */}
+                            <div className="login-title">Hey, Welcome back!</div>
+                            <div className="login-subtitle"> </div>
 
                             <form onKeyDown={(e) => e.key === 'Enter' && login()}>
                                 <div className="input-label">Email Address</div>
@@ -129,7 +173,7 @@ const Login = () => {
                                     <Input
                                         prefix={<UserOutlined />}
                                         className={accountError ? 'errorInput' : ''}
-                                        placeholder="Enter email address..."
+                                        placeholder="Enter email..."
                                         value={account}
                                         onChange={handleAccountChange}
                                         onFocus={() => setAccountError('')}
@@ -142,11 +186,9 @@ const Login = () => {
                                     <Input.Password
                                         className={passwordError ? 'errorInput' : ''}
                                         prefix={<LockOutlined />}
-                                        placeholder="Enter your password"
+                                        placeholder="Enter password..."
                                         value={password}
-                                        onChange={(e) => {
-                                            setPassword(e.target.value)
-                                        }}
+                                        onChange={handlePaswordChange}
                                         onFocus={() => setPasswordError('')}
                                         visibilityToggle={{ visible: passwordVisible, onVisibleChange: setPasswordVisible }}
                                         iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
@@ -163,7 +205,9 @@ const Login = () => {
                                 >
                                     <span className="btn-text">SIGN IN</span>
                                 </Button>
+
                             </form>
+                            <div className="login-description1">Don't have an account? Contact the system administrator</div>
                         </div>
                     </div>
                 </div>

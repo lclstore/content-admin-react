@@ -20,12 +20,12 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true, // 监听所有地址，包括本地和网络地址
       // port: 3000, // 设置端口号
-      proxy: {
-        '/templateCms': {
-          target:'https://backend-test.7mfitness.com',
-          changeOrigin: true,
-        },
-      }
+      // proxy: {
+      //   '/templateCms': {
+      //     target:'https://backend-test.7mfitness.com',
+      //     changeOrigin: true,
+      //   },
+      // }
     },
     resolve: {
       alias: {

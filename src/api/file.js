@@ -5,7 +5,7 @@ export const uploadFile = async (file, dir, bucketType = 'MKTPROMO_7M') => {
         contentType: file.type,
         dir,
         fileName: file.name,
-        bucketType
+        bucketType 
     }
 
 

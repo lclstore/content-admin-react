@@ -9,11 +9,12 @@ import {
 import {del, disable, enable} from "./api.js"
 import {useStore} from "@/store/index.js";
 import { router } from "@/utils"
+import {uploadFile} from "@/config/api.js"
 //文件上传
-const uploadFileFn = async ({ file }) => {
-  let fileUrl = await fileApi.uploadFile(file, settings.file.dirname)
-  return fileUrl
-}
+// const uploadFileFn = async ({ file }) => {
+//   let fileUrl = await fileApi.uploadFile(file, settings.file.dirname)
+//   return fileUrl
+// }
 
 const settings = {
   // 请求设置
@@ -80,8 +81,9 @@ const settings = {
     baseURL: import.meta.env.VITE_FILE_PREVIEW_URL,
     // 文件目录
     dirname: 'test',
-    uploadFile: async ({ file }) => {
-      return await uploadFileFn({
+    uploadFile:   ({ file }) => {
+      
+      return   uploadFile({
         file,
       });
     }

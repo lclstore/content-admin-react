@@ -5,7 +5,6 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
 // import { STATUS_ICON_MAP, statusIconMap,RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
@@ -38,6 +37,9 @@ export default function Resources() {
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
     const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
     const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
+
+
+
 
     // 在Modal打开时重置表单
     useEffect(() => {
@@ -152,18 +154,18 @@ export default function Resources() {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
-            {
-                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
-                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
-                width: 150,
-                visibleColumn: 2,
-                render: (duration) => {
-                    if (!duration) return '-';
-                    const minutes = Math.floor(duration / 60);
-                    const seconds = duration % 60;
-                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }
-            },
+            // {
+            //     title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
+            //     sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
+            //     width: 150,
+            //     visibleColumn: 2,
+            //     render: (duration) => {
+            //         if (!duration) return '-';
+            //         const minutes = Math.floor(duration / 60);
+            //         const seconds = duration % 60;
+            //         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            //     }
+            // },
             {
                 title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
@@ -373,13 +375,13 @@ export default function Resources() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Resources List');
+        setCustomPageTitle('Resources');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout1', 
+                text: 'Create Resources',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/plans/resourcesEditor'),
@@ -476,7 +478,6 @@ export default function Resources() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
                 rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange

@@ -14,7 +14,9 @@ import {
     UserOutlined,
     SettingOutlined,
     LoginOutlined,
-    AudioOutlined
+    AudioOutlined,
+    FileOutlined,
+    SyncOutlined,
 } from '@ant-design/icons';
 // 状态图标
 export const statusIconMap = {
@@ -38,7 +40,14 @@ export const menuIconMap = {
     users: UserOutlined,
     'profile-settings': SettingOutlined,
     login: LoginOutlined,
-    musics: AudioOutlined
+    musics: AudioOutlined,
+    collections: CopyOutlined,
+    info: EditOutlined,
+    operationRecords: FileOutlined,
+    plans: FileOutlined,
+    profile: EditOutlined,
+    publish:SyncOutlined,
+    sounds:AudioOutlined
 
 };
 

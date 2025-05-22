@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Input,
     DatePicker,
@@ -9,21 +9,23 @@ import {
     Divider,
     Row,
     Col,
-    Image
+    Image,
+    Select
 } from 'antd';
 import {
     EyeOutlined,
-    EyeInvisibleOutlined,
+    EyeInvisibleOutlined
 } from '@ant-design/icons';
 import FileUpload from '@/components/FileUpload/FileUpload';//文件上传组件
 import NumberStepper from '@/components/NumberStepper/NumberStepper';//数字步进器组件
 import TagSelector from '@/components/TagSelector/TagSelector';//标签选择器组件
+import StructureList from '@/components/StructureList/StructureList';//结构化排序列表组件
 import styles from './style.module.css';
 import { dateRangeKeys } from '@/constants/app';
 import { optionsConstants } from '@/constants';
 import settings from '@/config/settings';
 const { file: fileSettings } = settings;
-
+const { Option } = Select;
 
 /**
  * 统一处理表单验证规则
@@ -42,7 +44,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
     if (required && !finalRules.some(rule => rule.required)) {
         // 根据字段类型确定动词
         const action = type === 'select' || type === 'single' || type === 'multiple' ||
-            type === 'date' || type === 'datepicker' || type === 'dateRange'
+            type === 'date' || type === 'datepicker' || type === 'dateRange' || type === 'antdSelect'
             ? 'select'
             : type === 'upload' ? 'upload' : 'enter';
 
@@ -227,6 +229,24 @@ export const renderFormControl = (field, options = {}) => {
                     {...switchRest}
                 />
             )
+        // antd模式select
+        case 'antdSelect':
+            const [isPlaying, setIsPlaying] = useState(null);
+            return (
+                <Select
+                    name={field.name}
+                    mode={field.mode}
+                    style={field.style || {}}
+                    placeholder={field.placeholder || `Please select ${field.label}`}
+                    allowClear
+                >
+                    {field.options.map((option) => (
+                        <Option key={option.value} value={option.value}>
+                            {field.renderLabel ? field.renderLabel(option, isPlaying, setIsPlaying, form) : option.label}
+                        </Option>
+                    ))}
+                </Select>
+            )
         case 'select':
             //选项处理使用统一的options映射
             const fieldCopy = JSON.parse(JSON.stringify(field));
@@ -237,6 +257,7 @@ export const renderFormControl = (field, options = {}) => {
             // 确保完全移除key属性
             const { key: selectKey, ...selectRest } = fieldCopy;
 
+            //自定义组件
             return <TagSelector
                 key={selectKey}
                 {...selectRest}
@@ -288,6 +309,7 @@ export const renderFormControl = (field, options = {}) => {
                     uploadErrorMessage={uploadErrorMessage}
                     dirKey={dirKey}
                     uploadFn={uploadFn}
+                    field={field}
                     style={style}
                     {...field.props}
                     {...uploadRest}
@@ -300,7 +322,7 @@ export const renderFormControl = (field, options = {}) => {
 
             return (
                 <Form.Item
-
+                    className='inputGroup'
                 >
                     <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {
@@ -340,6 +362,17 @@ export const renderFormControl = (field, options = {}) => {
                     {...stepperRest}
                 />
             );
+        //结构化排序列表
+        case 'structureList':
+
+            return (
+                <StructureList
+                    onItemAdded={options.onItemAdded}
+                    selectedItemFromList={options.selectedItemFromList}
+                    {...field}
+                />
+            );
+
     }
 };
 
@@ -462,8 +495,15 @@ export const renderFormItem = (field, options = {}) => {
 
         return (
             <Form.Item
+
                 key={name} // React key 直接传递
                 {...formItemRestProps} // 其余布局 props 展开
+                //上传控件隐藏label
+                label={
+                    field.type === 'upload'
+                        ? null
+                        : label
+                }
                 name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
                 rules={finalRules}
                 valuePropName={finalValuePropName}
@@ -479,6 +519,10 @@ export const renderFormItem = (field, options = {}) => {
  * 渲染一组表单字段
  */
 export const renderBasicForm = (fields, options) => {
+
+
+
+
     const { oneColumnKeys = [] } = options || {};
 
     if (!fields || fields.length === 0) {

@@ -179,14 +179,19 @@ export const filterSections = [
         options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
     },
     {
-        title: 'Function Type',
-        key: 'functionType',
+        title: 'Structure Type',
+        key: 'structureType',
         options: ['Warm Up', 'Main', 'Cool Down']
     },
     {
         title: 'Difficulty',
         key: 'difficulty',
         options: ['Beginner', 'Intermediate', 'Advanced']
+    },
+    {
+        title: 'Equipment',
+        key: 'equipment',
+        options: ['Dumbbells', 'Resistance', 'band', 'None']
     },
     {
         title: 'Position',

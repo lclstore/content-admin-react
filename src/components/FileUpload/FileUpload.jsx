@@ -6,6 +6,7 @@ import {
     DownloadOutlined,
     CloseCircleFilled,
     FileOutlined,
+    CaretRightOutlined,
     ReloadOutlined,
 } from '@ant-design/icons';
 import { getFullUrl } from '@/utils';
@@ -43,6 +44,7 @@ const FileUpload = ({
     uploadPlaceholder,    // 上传区域占位文本
     changeButtonText,     // 更改按钮文本
     uploadButtonText,     // 上传按钮文本
+    field,                // 字段配置
     style = {
         width: '96px',
         height: '96px'
@@ -197,7 +199,7 @@ const FileUpload = ({
                 .map(t => t.trim().toUpperCase().replace(/^\./, '')) // 提取并大写类型/扩展名
                 .filter(Boolean)
                 .join('/');
-            if (typesText) parts.push(`${typesText} format`);
+            if (typesText) parts.push(`Only .${typesText} file are accepted.`);
         } else {
             parts.push("Supports common formats");
         }
@@ -327,7 +329,7 @@ const FileUpload = ({
                 }
 
                 // 显示成功消息 - 在这里处理一次即可
-                const successMsg = uploadSuccessMessage || 'Upload successful!';
+                const successMsg = uploadSuccessMessage || 'Upload successfully!';
                 messageApi.success(successMsg);
             } else {
                 console.error('Upload did not return valid URL:', result);
@@ -741,12 +743,9 @@ const FileUpload = ({
             case 'audio':
                 return (
                     <div className={styles.audioPreview}>
-                        <audio
-                            src={displayValue}
-                            controls
-                            className={styles.audioPlayer}
-                            style={mediaElementStyle}
-                        />
+                        <div className={styles.audioPreview_box}>
+                            <CaretRightOutlined />
+                        </div>
                     </div>
                 );
 
@@ -931,6 +930,9 @@ const FileUpload = ({
 
                         {/* 文件信息 */}
                         <div className={styles.uploadInfo} style={{ flex: '1', minWidth: 0 }}>
+                            <div className={`${styles.uploadLabel} ${field.required ? styles.uploadLabelRequired : ''}`}>
+                                {field.label}
+                            </div>
                             <div className={styles.uploadTitle}
                                 title={hasFile ? getFileName(displayValue) : ""}
                                 style={{

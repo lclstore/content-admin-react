@@ -10,6 +10,7 @@ import {uuid} from "@/utils/index.js";
  *  @returns {String} returnData.localUrl - 返回的文件的本地读取路径
  */
 export const uploadFile = async function ({file, dirKey}) {
+    // debugger
     let returnData = {
         localUrl: URL.createObjectURL(file)
     }
@@ -26,7 +27,7 @@ export const uploadFile = async function ({file, dirKey}) {
             callback: res => {
                 res.error ? resolve('error') : resolve(res.data.data)
             }
-        })
+        })  
     })
 
     // 对fileUrl进行处理,如果返回url路径包含name，把name的值替换为file.name,如果不包含name则在url添加name且值为file.name

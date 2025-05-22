@@ -17,9 +17,11 @@ import {
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
+import request from "@/request";
 
 export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
+    let mockUsers = []
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
@@ -137,9 +139,9 @@ export default function WorkoutsList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 简单的状态-按钮映射关系
-        if (status === 'Draft' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 'Disabled' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 'Enabled' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
 
@@ -149,9 +151,18 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
+            
+            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', width: 80, visibleColumn: 0 },
+            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', width: 80, visibleColumn: 0 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audio', key: 'audio', width: 80, visibleColumn: 0 },
-            { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            {
+                title: 'Name',
+                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                dataIndex: 'name',
+                key: 'name',
+                width: 350,
+                visibleColumn: 1
+            },
             {
                 title: 'Status',
                 dataIndex: 'status',
@@ -163,7 +174,7 @@ export default function WorkoutsList() {
                 visibleColumn: 0
             },
             {
-                title: 'Has a Script', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'HasAScript', key: 'HasAScript', width: 120, visibleColumn: 2, render: (text, record) => {
+                title: 'Has a Script', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'center', dataIndex: 'translation', key: 'translation', width: 120, visibleColumn: 2, render: (text, record) => {
                     console.log('HasAScript', text, record)
                     return (
                         <Space direction="vertical">
@@ -364,19 +375,37 @@ export default function WorkoutsList() {
         }
     }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
 
+    // 获取数据
+    const getData = useCallback(() => {
+        return new Promise(resolve => {
+            request.get({
+                url: "/sound/page",
+                load: true,
+                data: {
+                    pageSize: 20
+                },
+                callback(res) {
+                    setDataSource(res.data.data || [])
+                    console.log('res', res.data.data)
+                    resolve()
+                }
+            })
+        })
+    }, [])
+
     // 7. 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Sounds List');
+        setCustomPageTitle('Sounds');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Sounds',
+                text: 'Add Sound',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/sounds/editor'),
@@ -394,6 +423,7 @@ export default function WorkoutsList() {
      * 重置操作标志
      */
     useEffect(() => {
+        getData().then()
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);
@@ -473,8 +503,6 @@ export default function WorkoutsList() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
-                rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange
                 }}

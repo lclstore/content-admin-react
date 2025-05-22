@@ -136,7 +136,6 @@ export default function UserEditorWithCommon() {
                 form.setFieldsValue({
                     name: file?.name || '',
                 });
-                console.log(file, form);
             },
             style: {
                 width: '290px',
@@ -278,7 +277,6 @@ export default function UserEditorWithCommon() {
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
-        console.log('保存用户数据:', values, id);
 
         // 处理数据格式
         const dataToSave = {

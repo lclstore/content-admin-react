@@ -24,29 +24,9 @@ export const listData = [
 // 定义筛选器配置
 export const filterSections = [
     {
-        title: 'Operation Date',
-        key: 'status',
-        options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
-    },
-    {
         title: 'Operation Type',
         key: 'functionType',
         options: ['CRUD', 'Generate Workout', 'Generate File']
-    },
-    {
-        title: 'Difficulty',
-        key: 'difficulty',
-        options: ['Beginner', 'Intermediate', 'Advanced']
-    },
-    {
-        title: 'Position',
-        key: 'position',
-        options: ['Standing', 'Lying', 'Seated', 'Prone', 'Kneeling'],
-    },
-    {
-        title: 'Target',
-        key: 'target',
-        options: ['Full Body', 'Arm', 'Back', 'Butt', 'Abs', 'Leg', 'Core'],
     }
 ];
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, Fragment, useState, useCallback } from 'react';
-import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, notification } from 'antd';
+import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, notification, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules } from './FormFields';
+import CommonList from './CommonList';
+import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
 import {
     DndContext,
@@ -20,9 +22,10 @@ import {
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+const { Text } = Typography;
 
 // --- 可排序项渲染器组件 ---
-const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpandItem, onOpenReplaceModal, onCopyItem, onDeleteItem, onItemChange }) => {
+const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded, toggleExpandItem, onOpenReplaceModal, renderItemMata, onCopyItem, onDeleteItem, onItemChange }) => {
     const {
         attributes,
         listeners,
@@ -30,10 +33,12 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
         transform,
         isDragging
     } = useSortable({
-        id: item.id,
+        id: `${panelId}-item-${itemIndex}`, // 使用面板ID和项目索引组合作为唯一标识符
         data: {
             type: 'item',
-            item
+            item,
+            panelId,
+            itemIndex
         }
     });
 
@@ -56,7 +61,42 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
     const mins = Math.floor(durationSeconds / 60);
     const secs = durationSeconds % 60;
     const formattedDuration = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    const displayValue = item.executionType === 'duration' ? formattedDuration : `${item.repetitions || 0} reps`;
+    // 默认的列表项渲染函数
+    const defaultRenderItemMeta = useCallback((item) => {
+        return <List.Item.Meta
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+            }}
+            avatar={
+                <div className={styles.itemAvatar}>
+                    <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
+                    <CaretRightOutlined
+                        className={styles.playIcon}
+                    />
+                </div>
+            }
+            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.displayName || item.title || '未命名项目'}</Text>}
+            description={
+                <div>
+                    <div>
+                        <Text
+                            type="secondary"
+                            style={{ fontSize: '12px' }}
+                            ellipsis={{ tooltip: item.status }}
+                        >
+                            {optionsConstants.status.find(status => status.value === item.status)?.name || '-'}
+                        </Text>
+                    </div>
+                    <div>
+                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                            {item.functionType || item.type || '-'}
+                        </Text>
+                    </div>
+                </div>
+            }
+        />
+    }, []);
 
     return (
         // 外层 wrapper 控制透明度/边距
@@ -73,26 +113,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
                 onClick={() => toggleExpandItem && toggleExpandItem(panelId, item.id)} // Row 点击切换展开
             >
                 <Col flex="auto">
-                    <List.Item.Meta
-                        className="structure-item-meta" // 使用类名代替内联样式
-                        avatar={
-                            <div className="structure-item-avatar-wrapper">
-                                <Avatar shape="square" size={64} src={item.animationPhoneUrl || item.imageUrl} />
-                                <CaretRightOutlined className="structure-item-play-icon" />
-                            </div>
-                        }
-                        title={item.displayName || item.name}
-                        description={
-                            <>
-                                <div style={{ fontSize: '13px', color: '#889e9e' }}>{displayValue}</div>
-                                {item.status && (
-                                    <div style={{ fontSize: '13px', color: '#889e9e' }} className={`status-tag status-${item.status}`}>
-                                        {item.status}
-                                    </div>
-                                )}
-                            </>
-                        }
-                    />
+                    {renderItemMata ? renderItemMata(item) : defaultRenderItemMeta(item)}
                 </Col>
                 <Col flex="none">
                     <Space className="structure-item-actions">
@@ -116,7 +137,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
                                 icon={<RetweetOutlined />}
                                 onClick={(e) => {
                                     e.stopPropagation(); // 阻止事件冒泡
-                                    onOpenReplaceModal(panelId, item.id); // 动作：打开替换弹框
+                                    onOpenReplaceModal(panelId, item.id, itemIndex); // 添加索引参数
                                 }}
                                 onPointerDown={(e) => e.stopPropagation()} // 保留: 防止拖拽
                                 title="Replace"
@@ -145,7 +166,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
                                 icon={<DeleteOutlined />}
                                 onClick={(e) => {
                                     e.stopPropagation(); // 阻止事件冒泡
-                                    onDeleteItem(panelId, item.id); // 动作：删除项
+                                    onDeleteItem(panelId, itemIndex); // 修改：传递索引而不是ID
                                 }}
                                 onPointerDown={(e) => e.stopPropagation()} // 保留: 防止拖拽
                                 title="Delete"
@@ -188,10 +209,13 @@ const SortableItemRenderer = React.memo(({ panelId, item, isExpanded, toggleExpa
  * @param {Function} props.onDeleteItem 处理删除项的回调函数
  * @param {Function} props.onCopyItem 处理复制项的回调函数
  * @param {Function} props.onReplaceItem 处理替换项的回调函数
+ * @param {Component} props.commonListConfig 替换弹框中显示的commonListConfig组件
  */
 const CollapseForm = ({
     fields = [],
     form,
+    renderItemMata,
+    commonListConfig = {},
     selectedItemFromList = null,
     initialValues = {},
     activeKeys = [],
@@ -206,16 +230,25 @@ const CollapseForm = ({
     onSortItems,
     onDeleteItem,
     onCopyItem,
-    onReplaceItem
+    onReplaceItem,
 }) => {
+
     const newField = fields.find(item => item.isShowAdd);
-    const [dataList, setDataList] = useState([newField]);//datalist
     // 表单连接状态
     const formConnected = !!form;
     // 挂载状态引用
     const mounted = useMemo(() => ({ current: true }), []);
     // 添加展开项的状态
     const [expandedItems, setExpandedItems] = useState({});
+    // 添加替换弹框状态
+    const [replaceModalVisible, setReplaceModalVisible] = useState(false);
+    // 当前选中的panel和item id
+    const [currentReplaceItem, setCurrentReplaceItem] = useState({
+        panelId: null,
+        itemId: null
+    });
+    // 新增：在替换弹框中临时选中的项
+    const [tempSelectedItem, setTempSelectedItem] = useState(null);
 
     // 处理展开/折叠项目的函数
     const toggleExpandItem = useCallback((panelId, itemId) => {
@@ -240,11 +273,57 @@ const CollapseForm = ({
     }, [onCopyItem]);
 
     // 处理替换项目
-    const handleOpenReplaceModal = useCallback((panelId, itemId) => {
-        if (onReplaceItem) {
-            onReplaceItem(panelId, itemId);
+    const handleOpenReplaceModal = useCallback((panelId, itemId, itemIndex) => {
+        // 保存当前选中的panel、item id和索引
+        setCurrentReplaceItem({
+            panelId,
+            itemId,
+            itemIndex  // 保存项目索引
+        });
+        // 初始化临时选中项为当前项ID
+        setTempSelectedItem({ id: itemId });
+        // 打开替换弹框
+        setReplaceModalVisible(true);
+    }, []);
+
+    // 处理CommonList中选中项变更
+    const handleCommonListItemSelect = useCallback((selectedItem) => {
+        // 更新临时选中的项
+        setTempSelectedItem(selectedItem);
+    }, []);
+
+    // 处理替换项目选中后的回调
+    const handleReplaceItemSelected = useCallback(() => {
+        // 确保所有必要的参数都存在
+        if (!onReplaceItem || !currentReplaceItem.panelId || !currentReplaceItem.itemId || !tempSelectedItem) {
+            console.warn('替换操作缺少必要参数', { currentReplaceItem, tempSelectedItem });
+            return;
         }
-    }, [onReplaceItem]);
+
+        // 只有当选中项不是当前项时才执行替换
+        if (tempSelectedItem.id !== currentReplaceItem.itemId) {
+            const panelId = currentReplaceItem.panelId;     // 面板ID
+            const oldItemId = currentReplaceItem.itemId;    // 旧项目ID
+            const newItemId = tempSelectedItem.id;          // 新项目ID
+            const newItem = tempSelectedItem;               // 新项目完整数据
+            const itemIndex = currentReplaceItem.itemIndex; // 项目索引
+
+            // 执行替换操作，传递面板ID、当前旧项目ID、新项目ID、新项目完整数据和项目索引
+            onReplaceItem(panelId, oldItemId, newItemId, newItem, itemIndex);
+        }
+
+        // 关闭弹框
+        setReplaceModalVisible(false);
+
+        // 清除临时选中项
+        setTempSelectedItem(null);
+    }, [onReplaceItem, currentReplaceItem, tempSelectedItem]);
+
+    // 判断确认按钮是否应该禁用
+    const isConfirmButtonDisabled = useMemo(() => {
+        // 如果没有临时选中项，或者临时选中项的ID与当前项ID相同，则禁用按钮
+        return !tempSelectedItem || tempSelectedItem.id === currentReplaceItem.itemId;
+    }, [tempSelectedItem, currentReplaceItem.itemId]);
 
     // dnd-kit 的传感器
     const sensors = useSensors(
@@ -258,16 +337,6 @@ const CollapseForm = ({
         })
     );
 
-    // 拖拽开始处理
-    const handleDragStart = (event) => {
-        console.log('拖拽开始:', event);
-        // 记录开始拖拽的元素ID
-        const { active } = event;
-        if (active) {
-            console.log('开始拖拽项:', active.id);
-        }
-    };
-
     // 拖拽结束处理程序
     function handleDragEnd(event, panelId) {
         const { active, over } = event;
@@ -275,28 +344,26 @@ const CollapseForm = ({
 
         if (active && over && active.id !== over.id) {
             try {
-                // 查找包含 dataList 的面板
-                const panel = fields.find(f => f.name === panelId);
+                // 从ID中提取索引信息
+                const activeIdParts = active.id.split('-');
+                const overIdParts = over.id.split('-');
 
-                if (panel && Array.isArray(panel.dataList)) {
-                    // 找到要移动的项的索引
-                    const oldIndex = panel.dataList.findIndex(item => item.id === active.id);
-                    const newIndex = panel.dataList.findIndex(item => item.id === over.id);
+                // 获取原始索引和目标索引
+                const oldIndex = parseInt(activeIdParts[activeIdParts.length - 1]);
+                const newIndex = parseInt(overIdParts[overIdParts.length - 1]);
 
-                    console.log('找到索引:', { oldIndex, newIndex, activeId: active.id, overId: over.id });
+                console.log('直接使用索引:', { oldIndex, newIndex });
 
-                    if (oldIndex !== -1 && newIndex !== -1) {
-                        if (onSortItems) {
-                            console.log('调用父组件排序函数:', { panelId, oldIndex, newIndex });
-                            onSortItems(panelId, oldIndex, newIndex);
-                        } else {
-                            console.warn('没有提供 onSortItems 回调函数');
-                        }
+                // 检查索引有效性
+                if (!isNaN(oldIndex) && !isNaN(newIndex) && oldIndex !== newIndex) {
+                    if (onSortItems) {
+                        console.log('调用父组件排序函数:', { panelId, oldIndex, newIndex });
+                        onSortItems(panelId, oldIndex, newIndex);
                     } else {
-                        console.warn('无法找到项目的索引:', { oldIndex, newIndex });
+                        console.warn('没有提供 onSortItems 回调函数');
                     }
                 } else {
-                    console.warn('面板或 dataList 不存在:', { panel });
+                    console.warn('索引无效或相同:', { oldIndex, newIndex });
                 }
             } catch (error) {
                 console.error('排序处理出错:', error);
@@ -354,7 +421,6 @@ const CollapseForm = ({
                         // 否则使用默认映射 - 添加原始数据并生成ID
                         itemToAdd = {
                             ...selectedItemFromList,
-                            id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`, // 生成唯一ID
                         };
                     }
 
@@ -362,7 +428,7 @@ const CollapseForm = ({
                     currentFormValues[fieldName].push(itemToAdd);
 
                     // 更新表单值
-                    form.setFieldsValue(currentFormValues);
+                    // form.setFieldsValue(currentFormValues);
 
                     // 触发表单的 onValuesChange 回调（如果直接设置值可能不会触发）
                     const changeEvent = {};
@@ -377,7 +443,7 @@ const CollapseForm = ({
                     if (onItemAdded && typeof onItemAdded === 'function') {
                         // 获取当前面板中展开的项的ID
                         const expandedItemId = expandedItems[targetPanel.name] || null;
-                        onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId);
+                        onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId, form);
                     }
 
                     // 通知父组件已处理完选中项，可以清空选中状态
@@ -410,7 +476,6 @@ const CollapseForm = ({
             type: field.type,
             requiredMessage: field.requiredMessage
         });
-        console.log(field);
 
         // 渲染表单项 - key直接作为属性传递
         return (
@@ -484,34 +549,47 @@ const CollapseForm = ({
 
     // 添加新的collapse面板的回调函数
     const onAddCollapsePanel = () => {
-        const currentFields = dataList[dataList.length - 1];//最后一个折叠面板数据
-        let valid = validateFields(currentFields);//验证当前折叠面板数据是否填写
+        // 找到具有isShowAdd属性的面板
+        const currentFields = fields.find(item => item.isShowAdd);
+        if (!currentFields) return;
+
+        // 验证当前表单数据是否填写
+        let valid = validateFields(currentFields);
         if (!valid) return;
-        if (currentFields.dataList.length === 0) {
+
+        // 检查当前面板是否有数据
+        if (!currentFields.dataList || currentFields.dataList.length === 0) {
             notification.warning({
                 message: `Cannot Add New ${currentFields.label}`,
                 description: `Please add exercises to the current last ${currentFields.label} before adding a new one.`,
                 placement: 'topRight',
             });
-            return
+            return;
         }
+
+        // 计算需要添加的新面板索引
+        // 查找所有带有isShowAdd属性的面板
+        const showAddPanels = fields.filter(item => item.isShowAdd);
+        const newPanelIndex = showAddPanels.length; // 新面板的索引
+
         // 创建新面板的数据结构
-        const newPanelName = `${newField.name}${dataList.length}`; // 生成一个唯一的名称/key
+        const newPanelName = `${currentFields.name}${newPanelIndex}`; // 生成唯一名称
         const newCustomPanel = {
-            ...newField,
-            dataList: [],
+            ...currentFields,
+            dataList: [],  // 新面板初始无数据
             name: newPanelName,
             isShowAdd: true,
+            // 确保fields中的每个字段name也是唯一的
+            fields: currentFields.fields?.map(field => ({
+                ...field,
+                name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
+            })) || []
         };
 
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
-            // 添加面板到父组件的 formFields
             handleAddCustomPanel(newCustomPanel);
-            onCollapseChange([newPanelName]);
-
-            // 本地状态更新，用于计数
-            setDataList([...dataList, newCustomPanel]);
+            onCollapseChange(newPanelName); // 自动展开新添加的面板
         }
     };
 
@@ -540,8 +618,6 @@ const CollapseForm = ({
         e.stopPropagation(); // 阻止事件冒泡，避免触发折叠面板的展开/收起
         if (handleDeletePanel) {
             handleDeletePanel(panelName);
-            setDataList(dataList.filter((item) => item.name !== panelName));
-
         }
     };
 
@@ -556,7 +632,7 @@ const CollapseForm = ({
                     <Collapse
                         expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
                         destroyInactivePanel={false}
-                        accordion={true}
+                        accordion={activeKeys.length > 1 ? false : true}
                         activeKey={activeKeys}
                         onChange={onCollapseChange}
                         ghost
@@ -567,7 +643,7 @@ const CollapseForm = ({
                             label: (
                                 <div className={styles.collapseHeader}>
                                     <span>{item.label || item.title}</span>
-                                    {dataList.length > 1 && item.isShowAdd && (
+                                    {fields.filter(item => item.dataList)?.length > 1 && item.isShowAdd && (
                                         <DeleteOutlined
                                             className={styles.deleteIcon}
                                             onClick={(e) => onDeletePanel(e, item.name)}
@@ -589,18 +665,20 @@ const CollapseForm = ({
                                         >
                                             {/* 拖拽排序上下文 */}
                                             <SortableContext
-                                                items={item.dataList.map(listItem => listItem.id)}
+                                                items={item.dataList.map((_, index) => `${item.name}-item-${index}`)} // 使用索引作为ID
                                                 strategy={verticalListSortingStrategy}
                                             >
                                                 <div className='structure-list' style={{
                                                     position: 'relative',
                                                     padding: '2px 0'
                                                 }}>
-                                                    {item.dataList.map((listItem) => (
+                                                    {item.dataList.map((listItem, index) => (
                                                         <SortableItemRenderer
-                                                            key={listItem.id}
+                                                            key={index}
+                                                            renderItemMata={renderItemMata}
                                                             panelId={item.name}
                                                             item={listItem}
+                                                            itemIndex={index}
                                                             isExpanded={expandedItems[item.name] === listItem.id}
                                                             toggleExpandItem={toggleExpandItem}
                                                             onOpenReplaceModal={handleOpenReplaceModal}
@@ -621,6 +699,31 @@ const CollapseForm = ({
                     />
                 </Fragment>
             ))}
+
+            {/* 替换弹框 */}
+            <Modal
+                title={commonListConfig?.title || 'Replace Item'}
+                open={replaceModalVisible}
+                onCancel={() => setReplaceModalVisible(false)}
+                okText="Confirm Replace" // 确认按钮文字 (中文注释：确认替换)
+                cancelText="Cancel" // 取消按钮文字
+                width="90%" // 进一步增加宽度 (从 80% 到 90%)
+                styles={{ body: { height: '60vh', width: '700px' } }} // 允许内容库滚动
+                destroyOnClose={true}
+                okButtonProps={{ disabled: isConfirmButtonDisabled }} // 根据条件禁用确认按钮
+                onOk={handleReplaceItemSelected} // 点击确认按钮时执行替换
+            >
+                {
+                    commonListConfig && (
+                        <CommonList
+                            selectionMode="replace"
+                            selectedItemId={tempSelectedItem?.id || currentReplaceItem.itemId}
+                            onAddItem={handleCommonListItemSelect} // 处理选中项变更
+                            {...commonListConfig}
+                        />
+                    )
+                }
+            </Modal>
         </div>
     );
 };

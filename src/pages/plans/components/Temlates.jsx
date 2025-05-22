@@ -5,10 +5,9 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
-import { statusIconMap, optionsConstants } from '@/constants';
+import { statusIconMap } from '@/constants';
 // import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
@@ -379,13 +378,13 @@ export default function Temlates() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Workout List');
+        setCustomPageTitle('Temlates');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Workout',
+                text: 'Create Temlates',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/plans/temolatesEditor'),
@@ -482,7 +481,6 @@ export default function Temlates() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
                 rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange

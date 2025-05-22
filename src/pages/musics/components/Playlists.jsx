@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table, Switch,Space,Button } from 'antd';
+import { Modal, message, Form, Table, Switch, Space, Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -8,6 +8,7 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
+import { statusIconMap, optionsConstants } from '@/constants';
 // import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
@@ -150,23 +151,29 @@ export default function Playlists() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
             {
-                title: 'Status', dataIndex: 'status', key: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
+                iconOptions: statusIconMap,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
-            // { title: 'subscription', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
             {
-                title: 'Generate Status', dataIndex: 'generateStatus', key: 'generateStatus',
-                options: 'displayStatus',
-                width: 120,
-                visibleColumn: 0
+                title: 'Premium', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], align: 'left', dataIndex: 'premium', key: 'premium', width: 120, visibleColumn: 2, render: (text, record) => {
+                    return (
+                        <Space direction="vertical">
+                            <Switch disabled={true} checked={text} />
+                        </Space>
+                    );
+                }
             },
-            { title: 'Music Num',  dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
-            { title: 'Type',  dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
+            { title: 'Type', dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
+
+            { title: 'Music Num', dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
+            
 
             {
                 title: 'Actions',
@@ -365,13 +372,13 @@ export default function Playlists() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Workout List');
+        setCustomPageTitle('Playlists');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Playlists',
+                text: 'Create Playlist',
                 icon: <PlusOutlined />,
                 type: 'primary',
                 onClick: () => navigate('/musics/playlistsEditor'),
@@ -468,8 +475,6 @@ export default function Playlists() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
-                rowSelection={rowSelection}
                 tableProps={{
                     onChange: handleTableChange
                 }}

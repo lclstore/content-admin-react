@@ -14,6 +14,7 @@ import CommonList from './CommonList'; //左侧列表数据
 import CollapseForm from './CollapseForm'; //右侧折叠表单
 import dayjs from 'dayjs';
 import { dateRangeKeys } from '@/constants/app';
+import { arrayMove } from '@dnd-kit/sortable';
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -29,28 +30,69 @@ import { dateRangeKeys } from '@/constants/app';
  * @param {Object} props.collapseFormConfig 折叠表单配置
  * @param {string} props.formName 表单名称
  * @param {Object} props.initFormData 初始化表单数据
+ * @param {Function} props.renderItemMata 自定义渲染列表项
+ * @param {string} props.defaultActiveKeys 默认激活的折叠面板key all:所有面板，array:指定面板 null:默认第一个面板
+ * @param {Array} props.formFields 表单字段配置（从Editor传入的完整formFields）
+ * @param {Function} props.onFormFieldsChange 表单字段变更回调函数
+ * @param {Function} props.onCollapseChange 折叠面板变化回调函数
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
         fields = [],
+        isCollapse = false,
         initialValues = {},
         initFormData,
         onSave,
+        renderItemMata,
         validate,
-        commonListConfig = {},
+        commonListConfig = null,
         complexConfig = {}, // 高级表单特定配置
-        collapseFormConfig = {
-
-        } // 折叠表单配置
+        collapseFormConfig = {},  // 折叠表单配置
+        formFields, // 向后兼容：支持旧的formFields属性
+        onFormFieldsChange = null, // 字段变更回调
+        onCollapseChange = null // 折叠面板变化回调
     } = props;
-    if (!collapseFormConfig.setActiveKey) {
-        collapseFormConfig.setActiveKey = (key) => {
+    // 添加选中项状态管理 - 存储从列表中选择的当前项
+    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
+    // 内部维护一份formFields状态，优先使用父组件传入的
+    const [internalFormFields, setInternalFormFields] = useState(
+        collapseFormConfig.fields || formFields || fields || []
+    );
 
-            setActiveCollapseKeys(key ? [key] : []);
+    // 每当外部formFields/fields变化时，更新内部状态
+    useEffect(() => {
+        // 优先使用fields，然后是formFields，最后是collapseFormConfig.fields
+        if (fields && fields.length > 0) {
+            setInternalFormFields(fields);
+        } else if (formFields && formFields.length > 0) {
+            setInternalFormFields(formFields);
+        } else if (collapseFormConfig.fields && collapseFormConfig.fields.length > 0) {
+            setInternalFormFields(collapseFormConfig.fields);
         }
-    }
+    }, [fields, formFields, collapseFormConfig.fields]);
+
+    // 找到第一个有isShowAdd属性的面板（用于生成新面板）
+    const newField = useMemo(() =>
+        internalFormFields.find(item => item.isShowAdd),
+        [internalFormFields]
+    );
+
+    // 计算有dataList的面板数量
+    const [dataListPanels, setDataListPanels] = useState([]);
+    useEffect(() => {
+        const panels = internalFormFields.filter(
+            item => item.isShowAdd && Array.isArray(item.dataList)
+        );
+        setDataListPanels(panels);
+    }, [internalFormFields]);
+
+    // if (!setActiveKey) {
+    //     setActiveKey = (key) => {
+
+    //     }
+    // }
     // 路由相关的钩子
     const navigate = useNavigate();
     const location = useLocation();
@@ -69,17 +111,23 @@ export default function CommonEditor(props) {
         mounted,
         getLatestValues
     } = useFormState(initialValues);
+
+
     // 复杂表单特定状态
     const [structurePanels, setStructurePanels] = useState(
         complexConfig.structurePanels || []
     );
-    // 初始化激活的折叠面板key - 使用第一个面板的name
     const [activeCollapseKeys, setActiveCollapseKeys] = useState(() => {
-        if (collapseFormConfig && collapseFormConfig.fields && collapseFormConfig.fields.length > 0) {
-            // 使用第一个面板的name作为默认打开的面板
-            return [collapseFormConfig.fields[0].name];
+        if (!collapseFormConfig || !internalFormFields || internalFormFields.length === 0) {
+            return [];
         }
-        return [];
+        if (collapseFormConfig.defaultActiveKeys === 'all') {
+            return internalFormFields.map(field => field.name);
+        }
+        if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
+            return collapseFormConfig.defaultActiveKeys;
+        }
+        return [internalFormFields[0].name]; // 默认使用第一个面板
     });
     const [expandedItems, setExpandedItems] = useState({});
 
@@ -96,8 +144,11 @@ export default function CommonEditor(props) {
         validate,
         onSave,
         navigate,
+        setActiveCollapseKeys,
+        isCollapse,
         messageApi,
         fields,
+        formFields,
         formType,
         complexConfig,
         collapseFormConfig,
@@ -107,22 +158,325 @@ export default function CommonEditor(props) {
         setIsFormDirty,
         getLatestValues
     });
-    // 判断是否是日期
-    const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
-    // 左侧列表添加item
-    const handleCommonListItemAdd = (item) => {
-        setSelectedItemFromList(item); // 更新 CommonEditor 中的状态
 
-        // 如果 CommonList 配置中提供了 onSelectItem 回调，则调用它
-        if (commonListConfig.onSelectItem && typeof commonListConfig.onSelectItem === 'function') {
+    // 左侧列表添加item - 在组件内部处理选中项
+    const handleCommonListItemAdd = (item) => {
+        setSelectedItemFromList(item); // 更新内部状态
+
+        // 如果传入了外部回调函数，也调用它
+        if (commonListConfig && commonListConfig.onSelectItem && typeof commonListConfig.onSelectItem === 'function') {
             commonListConfig.onSelectItem(item);
         }
     };
+
+    // 清空选中项的回调函数 - 项目添加到表单后调用
+    const handleSelectedItemProcessed = () => {
+        console.log('清空选中项');
+        setSelectedItemFromList(null);
+
+        // 如果传入了外部回调函数，也调用它
+        if (collapseFormConfig.onSelectedItemProcessed && typeof collapseFormConfig.onSelectedItemProcessed === 'function') {
+            collapseFormConfig.onSelectedItemProcessed();
+        }
+    };
+
+    // ==================== FormFields 操作方法（重构） ====================
+
+    // 添加自定义面板的回调函数
+    const handleAddCustomPanel = (newPanel) => {
+        // 内部面板有isShowAdd的数量
+        if (!newField) return;
+
+        const lastIndexWithDatalist = [...internalFormFields]
+            .map((item, index) => item.dataList ? index : -1)
+            .filter(index => index !== -1)
+            .pop();
+
+        let updatedFields;
+        if (lastIndexWithDatalist !== undefined && lastIndexWithDatalist !== -1) {
+            updatedFields = [...internalFormFields];
+            updatedFields.splice(lastIndexWithDatalist + 1, 0, newPanel);
+        } else {
+            // 如果没有任何项包含 datalist，则默认追加到末尾
+            updatedFields = [...internalFormFields, newPanel];
+        }
+
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了handleAddCustomPanel，也调用它（向后兼容）
+        if (collapseFormConfig.handleAddCustomPanel) {
+            collapseFormConfig.handleAddCustomPanel(newPanel);
+        }
+    };
+
+    // 删除面板的回调函数
+    const handleDeletePanel = (panelName) => {
+        const updatedFields = internalFormFields.filter(item => item.name !== panelName);
+
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了handleDeletePanel，也调用它（向后兼容）
+        if (collapseFormConfig.handleDeletePanel) {
+            collapseFormConfig.handleDeletePanel(panelName);
+        }
+    };
+
+    // 处理选中项被添加到表单后的回调
+    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance) => {
+        // 创建 formFields 的深拷贝
+        const updatedFields = internalFormFields.map(field => {
+            // 找到匹配的面板
+            if (field.name === panelName) {
+                // 判断itemData是否为数组
+                const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
+
+                // 检查是否有展开的项
+                if (expandedItemId && Array.isArray(field.dataList)) {
+                    // 查找展开项的索引
+                    const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
+
+                    if (expandedItemIndex !== -1) {
+                        // 如果找到展开的项，在其后插入新项（可能是多个）
+                        const newDataList = [...field.dataList];
+                        newDataList.splice(expandedItemIndex + 1, 0, ...itemsToAdd);
+
+                        return {
+                            ...field,
+                            dataList: newDataList
+                        };
+                    }
+                }
+                const newDataList = Array.isArray(field.dataList)
+                    ? [...field.dataList, ...itemsToAdd] // 如果是数组，创建新数组并添加新项（可能是多个）
+                    : itemsToAdd;
+
+
+                // 默认行为：如果没有展开的项或找不到展开的项，添加到末尾
+                return {
+                    ...field,
+                    dataList: newDataList // 如果不是数组，创建新数组
+                };
+            }
+            return field; // 返回未修改的其他面板
+        });
+
+        const formValues = formInstance.getFieldsValue();
+
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了onItemAdded，也调用它（向后兼容）
+        if (collapseFormConfig.onItemAdded) {
+            collapseFormConfig.onItemAdded(panelName, fieldName, itemData, expandedItemId, formInstance);
+        }
+    };
+
+    // 处理排序的回调函数
+    const handleSortItems = (panelName, oldIndex, newIndex) => {
+        console.log(`排序: ${panelName}, 从 ${oldIndex} 到 ${newIndex}`);
+
+        if (oldIndex === newIndex) {
+            console.log('位置未改变，跳过排序');
+            return;
+        }
+
+        try {
+            const updatedFields = internalFormFields.map(field => {
+                if (field.name === panelName && Array.isArray(field.dataList)) {
+                    // 确保数据存在
+                    if (oldIndex < 0 || oldIndex >= field.dataList.length ||
+                        newIndex < 0 || newIndex >= field.dataList.length) {
+                        console.error('索引超出范围:', { oldIndex, newIndex, length: field.dataList.length });
+                        return field;
+                    }
+
+                    // 使用 arrayMove 辅助函数移动数组中的项
+                    const newDataList = arrayMove([...field.dataList], oldIndex, newIndex);
+                    console.log('排序后的数据:', newDataList.map(item => item.id));
+
+                    return {
+                        ...field,
+                        dataList: newDataList
+                    };
+                }
+                return field;
+            });
+
+            // 检查更新是否有效
+            const changedPanel = updatedFields.find(f => f.name === panelName);
+            if (changedPanel && changedPanel.dataList) {
+                console.log('更新状态');
+                // 更新内部状态
+                setInternalFormFields(updatedFields);
+
+                // 通知父组件
+                if (onFormFieldsChange) {
+                    onFormFieldsChange(updatedFields);
+                }
+
+                // 如果父组件提供了onSortItems，也调用它（向后兼容）
+                if (collapseFormConfig.onSortItems) {
+                    collapseFormConfig.onSortItems(panelName, oldIndex, newIndex);
+                }
+            } else {
+                console.error('无法找到面板或更新数据:', { panelName });
+            }
+        } catch (error) {
+            console.error('排序处理出错:', error);
+        }
+    };
+
+    // 处理删除项的回调函数
+    const handleDeleteItem = (panelName, itemIndex) => {
+        const updatedFields = internalFormFields.map(field => {
+            if (field.name === panelName && Array.isArray(field.dataList)) {
+                // 使用索引删除数组中的元素，而不是通过ID过滤
+                const newDataList = [...field.dataList];
+                newDataList.splice(itemIndex, 1);
+
+                return {
+                    ...field,
+                    dataList: newDataList
+                };
+            }
+            return field;
+        });
+
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了onDeleteItem，也调用它（向后兼容）
+        if (collapseFormConfig.onDeleteItem) {
+            collapseFormConfig.onDeleteItem(panelName, itemIndex);
+        }
+    };
+
+    // 处理复制项的回调函数
+    const handleCopyItem = (panelName, itemId) => {
+        const updatedFields = internalFormFields.map(field => {
+            if (field.name === panelName && Array.isArray(field.dataList)) {
+                // 找到要复制的项
+                const itemToCopy = field.dataList.find(item => item.id === itemId);
+                if (itemToCopy) {
+                    // 创建一个新的项，包含与原项相同的属性但具有新的ID
+                    const newItem = {
+                        ...itemToCopy,
+                        id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                    };
+
+                    // 返回更新后的字段，包括新项
+                    return {
+                        ...field,
+                        dataList: [...field.dataList, newItem]
+                    };
+                }
+            }
+            return field;
+        });
+
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了onCopyItem，也调用它（向后兼容）
+        if (collapseFormConfig.onCopyItem) {
+            collapseFormConfig.onCopyItem(panelName, itemId);
+        }
+    };
+
+    // 处理替换项的回调函数
+    const handleReplaceItem = (panelName, itemId, newItemId, newItem, itemIndex) => {
+        const updatedFields = internalFormFields.map(panel => {
+            if (panel.name !== panelName) return panel;
+
+            // 如果提供了索引参数，则使用索引定位具体项目
+            if (itemIndex !== undefined) {
+                const updatedItems = [...panel.dataList];
+                // 确保索引有效
+                if (itemIndex >= 0 && itemIndex < updatedItems.length) {
+                    updatedItems[itemIndex] = { ...newItem, id: newItemId };
+                }
+                return {
+                    ...panel,
+                    dataList: updatedItems,
+                };
+            } else {
+                // 向后兼容：如果没有提供索引，则使用ID匹配（可能替换多个）
+                const updatedItems = panel.dataList.map(item =>
+                    item.id === itemId ? { ...newItem, id: newItemId } : item
+                );
+                return {
+                    ...panel,
+                    dataList: updatedItems,
+                };
+            }
+        });
+
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了onReplaceItem，也调用它（向后兼容）
+        if (collapseFormConfig.onReplaceItem) {
+            collapseFormConfig.onReplaceItem(panelName, itemId, newItemId, newItem, itemIndex);
+        }
+    };
+
+    // 处理折叠面板展开的回调函数
+    const handleCollapseChange = useCallback((key) => {
+        // 手风琴模式下，key是单个字符串而不是数组
+        const keysArray = key ? [key] : [];
+        setActiveCollapseKeys(keysArray);
+
+        // 如果父组件提供了onCollapseChange，优先调用它
+        if (onCollapseChange) {
+            onCollapseChange(keysArray, form);
+        }
+        // 如果collapseFormConfig中也提供了collapseChange回调，也调用它（向后兼容）
+        else if (collapseFormConfig.collapseChange) {
+            collapseFormConfig.collapseChange(key, form);
+        }
+    }, [collapseFormConfig, form, onCollapseChange]);
+
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {
-        console.log(obj);
+
         fields.forEach(field => {
+            if (field.fields) {
+                transformDatesInObject(obj, field.fields)
+            }
             if (field.type === 'date' || field.type === 'dateRange') {
+
                 obj[field.name] = obj[field.name] ? dayjs(obj[field.name]) : null;
                 if (field.type === 'dateRange') {
                     // 如果是日期范围，则将日期范围转换为dayjs数组
@@ -131,6 +485,75 @@ export default function CommonEditor(props) {
                 }
             }
         });
+        const structure = fields.find(field => field.dataKey);
+        //数组帮定处理
+        if (structure && Array.isArray(obj[structure.dataKey])) {
+            console.log(1213123);
+
+            if (structure.dataKey) {
+                obj[structure.dataKey].forEach((entry, index) => {
+                    const suffix = index === 0 ? '' : index + 1;
+
+                    // 处理非 list 的属性，复制到 obj
+                    Object.keys(entry).forEach(key => {
+                        if (key !== structure.dataKey) {
+                            obj[`${key}${suffix}`] = entry[key];
+                        }
+                    });
+
+                    if (index === 0) {
+                        // 第一个默认面板只绑定数据
+                        // 在internalFormFields中找到与structure.name匹配的字段，并更新它的dataList
+                        fields = fields.map(field => {
+                            if (field.name === structure.name) {
+                                return {
+                                    ...field,
+                                    dataList: entry[structure.dataKey]
+                                };
+                            }
+                            return field;
+                        });
+                    } else {
+                        // 创建新字段数组
+                        const newFields = structure.fields.map(field => ({
+                            ...field,
+                            name: `${field.name}${suffix}`
+                        }));
+
+                        // 构建新的面板
+                        const newPanel = {
+                            name: `${structure.name}${index}`,
+                            label: structure.label,
+                            fields: newFields,
+                            dataKey: structure.dataKey,
+                            required: structure.required,
+                            dataList: entry[structure.dataKey]
+                        };
+
+                        // 找到最后一个name为structure.name的面板的索引
+                        const lastIndex = fields.map(field => Array.isArray(field.dataList))
+                            .lastIndexOf(true);
+
+                        // 在该索引后插入新面板
+                        if (lastIndex !== -1) {
+                            fields = [
+                                ...fields.slice(0, lastIndex + 1),
+                                newPanel,
+                                ...fields.slice(lastIndex + 1)
+                            ];
+                        } else {
+                            // 如果没找到，直接添加到末尾
+                            fields.push(newPanel);
+                        }
+
+                        // handleAddCustomPanel(newPanel);
+                    }
+                });
+            }
+            if (onFormFieldsChange) {
+                onFormFieldsChange(fields);
+            }
+        }
         return obj;
     }
     // 表单变更处理函数
@@ -151,12 +574,6 @@ export default function CommonEditor(props) {
             ...prev,
             [itemId]: !prev[itemId]
         }));
-    }, []);
-
-    // 处理折叠面板变更的函数
-    const handleCollapseChange = useCallback((key) => {
-        // 手风琴模式下，key是单个字符串而不是数组
-        setActiveCollapseKeys(key ? [key] : []);
     }, []);
 
     // 处理添加项目的函数
@@ -210,7 +627,9 @@ export default function CommonEditor(props) {
         if (id) {
             response = await initFormData(id) || {};
         }
-        const transformedData = transformDatesInObject(response, fields); // 转换日期
+
+        const transformedData = transformDatesInObject(response, formType === 'basic' ? fields : internalFormFields); // 转换日期
+
         form.setFieldsValue(transformedData);
 
         // 确保表单值更新后，设置表单状态为"未修改"
@@ -232,8 +651,6 @@ export default function CommonEditor(props) {
     };
     // 初始化表单数据
     useEffect(() => {
-
-
         fetchData();
     }, [id]);
 
@@ -244,8 +661,6 @@ export default function CommonEditor(props) {
             const pageTitle = config.title ?? `${id ? 'Edit' : 'Add'} ${config.formName}`;
             headerContext.setCustomPageTitle(pageTitle);
         }
-
-
     }, [
         config.formName,
         id,
@@ -373,7 +788,7 @@ export default function CommonEditor(props) {
     // 渲染基础表单
     const renderBasicContent = () => {
         return (
-            <div className={styles.basicEditorForm}>
+            <div className={`${styles.basicEditorForm} ${!isCollapse && formType == 'advanced' && styles.advancedBasicForm}`}>
                 <Spin spinning={loading}>
                     <Form
                         form={form}
@@ -386,6 +801,8 @@ export default function CommonEditor(props) {
                     >
                         {renderBasicForm(fields, {
                             form,
+                            selectedItemFromList: selectedItemFromList,
+                            onItemAdded: handleItemAdded,
                             formConnected,
                             initialValues,
                             oneColumnKeys: config.oneColumnKeys || [],
@@ -406,79 +823,86 @@ export default function CommonEditor(props) {
             collapseFields: fields,
             collapseInitialValues: initValues,
             configActiveKeys: activeKeys,
-            configOnCollapseChange: onCollapseChange,
-            configHandleAddCustomPanel: handleAddCustomPanel,
-            configHandleDeletePanel: handleDeletePanel,
+            configOnCollapseChange: configOnCollapseChange,
+            configHandleAddCustomPanel, // 不再重命名
+            configHandleDeletePanel: configHandleDeletePanel,
             // 新增从提取配置中获取选中项和回调函数
             configSelectedItemFromList: externalSelectedItem,
-            configOnItemAdded: onItemAdded,
-            configOnSelectedItemProcessed: onSelectedItemProcessed,
+            configOnItemAdded: configOnItemAdded,
+            configOnSelectedItemProcessed: configOnSelectedItemProcessed,
             // 添加拖拽排序相关的回调
-            configOnSortItems: onSortItems,
-            configOnDeleteItem: onDeleteItem,
-            configOnCopyItem: onCopyItem,
-            configOnReplaceItem: onReplaceItem
+            configOnSortItems: configOnSortItems,
+            configOnDeleteItem: configOnDeleteItem,
+            configOnCopyItem: configOnCopyItem,
+            configOnReplaceItem: configOnReplaceItem
         } = extractedConfig;
 
-        // 优先使用外部传入的选中项，否则使用内部状态
-        const effectiveSelectedItem = externalSelectedItem !== undefined ? externalSelectedItem : selectedItemFromList;
-
-        // 选中项处理完成的回调处理函数
-        const handleSelectedItemProcessed = () => {
-            // 如果提供了外部回调，则调用它
-            if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
-                onSelectedItemProcessed();
-            }
-            // 同时清空内部状态
-            setSelectedItemFromList(null);
-        };
+        // 使用内部状态的选中项，优先于从配置传入的选中项
+        // 这允许组件独立管理选中项状态
+        const effectiveSelectedItem = selectedItemFromList !== null
+            ? selectedItemFromList
+            : (externalSelectedItem !== undefined ? externalSelectedItem : null);
 
         return (
-            <div className={styles.advancedFormContent}>
+            <div className={`${styles.advancedFormContent} ${commonListConfig ? '' : styles.collapseFormContent}`}>
                 {/* 渲染左侧列表 */}
-                <CommonList
-                    {...commonListConfig}
-                    onAddItem={handleCommonListItemAdd}
-                />
-                {/* 渲染右侧表单 */}
-                <div className={`${styles.advancedEditorForm}`}>
-                    <Form
-                        form={form}
-                        name={config.formName || 'advancedForm'}
-                        layout={config.layout || 'vertical'}
-                        onValuesChange={handleFormValuesChange}
-                        onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
-                        initialValues={initialValues}
-                        className={styles.form}
-                    >
-                        {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
-                        {collapseFormConfig && Object.keys(collapseFormConfig).length > 0 && (
-                            <CollapseForm
-                                fields={fields || collapseFormConfig.fields || []}
+                {
+                    commonListConfig && (
+                        <CommonList
+                            renderItemMata={renderItemMata}
+                            {...commonListConfig}
+                            onAddItem={handleCommonListItemAdd}
+                        />
+                    )
+                }
+                {/* 渲染右侧表单 isCollapse 是否按照折叠方式展示 */}
+                {
+                    isCollapse && <div className={`${styles.advancedEditorForm} ${commonListConfig ? '' : styles.withSidebar}`}>
+                        <Spin spinning={loading}>
+                            <Form
                                 form={form}
-                                selectedItemFromList={effectiveSelectedItem}
-                                initialValues={initValues || initialValues}
-                                // activeKeys={activeKeys !== undefined ? activeKeys : activeCollapseKeys}
-                                activeKeys={activeCollapseKeys}
-                                onCollapseChange={handleCollapseChange}
-                                handleAddCustomPanel={handleAddCustomPanel}
-                                handleDeletePanel={handleDeletePanel}
-                                isCollapse={collapseFormConfig.isCollapse !== false}
-                                // 添加回调函数
-                                onItemAdded={onItemAdded}
-                                onSelectedItemProcessed={handleSelectedItemProcessed}
-                                // 添加排序相关的回调函数
-                                onSortItems={onSortItems}
-                                onDeleteItem={onDeleteItem}
-                                onCopyItem={onCopyItem}
-                                onReplaceItem={onReplaceItem}
-                            />
-                        )}
-                        {/* 如果配置了结构面板，则渲染结构面板 */}
-                        {complexConfig.includeStructurePanels && renderStructurePanels()}
-                    </Form>
+                                name={config.formName || 'advancedForm'}
+                                layout={config.layout || 'vertical'}
+                                onValuesChange={handleFormValuesChange}
+                                onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
+                                initialValues={initialValues}
+                                className={styles.form}
+                            >
+                                {/* 如果提供了折叠表单配置，则渲染CollapseForm组件 */}
+                                {(internalFormFields && internalFormFields.length > 0) && (
+                                    <CollapseForm
+                                        fields={internalFormFields}
+                                        form={form}
+                                        renderItemMata={renderItemMata}
+                                        commonListConfig={commonListConfig}
+                                        selectedItemFromList={effectiveSelectedItem}
+                                        activeKeys={activeCollapseKeys}
+                                        onCollapseChange={handleCollapseChange}
+                                        handleAddCustomPanel={handleAddCustomPanel} // 使用组件自己定义的方法，而不是从extractedConfig中获取的
+                                        handleDeletePanel={handleDeletePanel}
+                                        isCollapse={isCollapse !== false}
+                                        // 添加回调函数 - 使用内部实现的方法
+                                        onItemAdded={handleItemAdded}
+                                        onSelectedItemProcessed={handleSelectedItemProcessed}
+                                        // 添加排序相关的回调函数 - 使用内部实现的方法
+                                        onSortItems={handleSortItems}
+                                        onDeleteItem={handleDeleteItem}
+                                        onCopyItem={handleCopyItem}
+                                        onReplaceItem={handleReplaceItem}
+                                    />
+                                )}
+                                {/* 如果配置了结构面板，则渲染结构面板 */}
+                                {complexConfig.includeStructurePanels && renderStructurePanels()}
+                            </Form>
+                        </Spin>
+                    </div>
+                }
+                {
+                    !isCollapse && <div className={styles.advancedBasicBox}>
+                        {renderBasicContent()}
+                    </div>
+                }
 
-                </div>
             </div>
         );
     };

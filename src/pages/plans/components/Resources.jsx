@@ -39,7 +39,7 @@ export default function Resources() {
     const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
 
 
-    
+
 
     // 在Modal打开时重置表单
     useEffect(() => {

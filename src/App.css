@@ -100,6 +100,7 @@
 .ant-btn:not(:disabled):focus-visible {
   outline: none;
 }
+
 .ant-select-selector {
   box-shadow: none !important;
 }
@@ -264,4 +265,22 @@
 /* switch开关 */
 .ant-switch.ant-switch-disabled {
   opacity: 0.85;
+}
+
+/* form公共样式 */
+.ant-form-vertical .ant-form-item:not(.ant-form-item-horizontal) .ant-form-item-label,
+.ant-form-item-control {
+  padding-left: 20px;
+
+
+}
+
+.inputGroup {
+  margin-left: -40px;
+}
+
+.ant-form-item .ant-form-item-label>label.ant-form-item-required::before {
+  position: relative;
+  margin-left: -12px;
+  /* margin-left: -12px; */
 }

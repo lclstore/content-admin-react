@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import { PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
@@ -7,6 +8,45 @@ import { validateEmail, validatePassword } from '@/utils';
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
 
+    // 创建音频播放器的引用
+    let audioPlayer = null;
+    // 当前播放的音频URL
+    let playingUrl = null;
+
+    // 播放或暂停音频的函数
+    const playAudio = (option, e, isPlaying, setIsPlaying) => {
+        // 阻止事件冒泡和默认行为
+        e.preventDefault();
+        e.stopPropagation();
+        setIsPlaying(isPlaying === option.value ? null : option.value);
+        // 如果点击的是当前正在播放的音频，则暂停
+        if (playingUrl === option.url && audioPlayer) {
+            audioPlayer.pause();
+
+
+            audioPlayer.src = '';
+            playingUrl = null;
+            return;
+        }
+
+        // 如果有正在播放的音频，先停止它
+        if (audioPlayer) {
+            audioPlayer.pause();
+            audioPlayer.src = '';
+        }
+
+        // 创建新的音频对象并播放
+        const audio = new Audio(option.url);
+        audio.play();
+        audioPlayer = audio;
+
+        playingUrl = option.url;
+
+        // 监听音频播放结束事件
+        audio.onended = () => {
+            playingUrl = null;
+        };
+    };
 
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
@@ -19,6 +59,46 @@ export default function UserEditorWithCommon() {
     }
     // 表单字段配置
     const formFields = useMemo(() => [
+        {
+            type: 'antdSelect',
+            name: 'customSelect',
+            label: 'customSelect',
+            // style: {
+            //     width: '300px',
+            // },
+            options: [
+                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
+                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
+                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
+            ],
+            renderLabel: (option, isPlaying, setIsPlaying, form) => {
+                return (
+                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
+                        {option.label}
+                        <span
+                            onClick={(e) => {
+                                playAudio(option, e, isPlaying, setIsPlaying);
+                            }}
+                            onMouseDown={(e) => {
+                                e.stopPropagation();
+                                playAudio(option, e, isPlaying, setIsPlaying);
+
+                            }}>
+                            {isPlaying && isPlaying === option.value ? (
+                                <PauseCircleOutlined
+                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                />
+                            ) : (
+                                <PlayCircleOutlined
+                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                />
+                            )}
+                        </span>
+                    </span >
+                );
+            },
+            required: true,
+        },
         {
             type: 'select',
             mode: 'single',
@@ -127,7 +207,7 @@ export default function UserEditorWithCommon() {
                     label: 'warmName',
                     required: true,
                     maxLength: 100,
-                    width: '340px',
+                    width: '320px',
                     showCount: true,
                 },
                 {
@@ -167,6 +247,7 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'avatar', // 遵循命名规范，使用Url后缀
             label: 'Avatar',
+            required: true,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },

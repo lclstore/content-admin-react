@@ -23,7 +23,7 @@
 /* 上传区域 - 尺寸通过行内样式控制 */
 .uploadArea {
     position: relative;
-    margin-right: 16px;
+    margin-right: 30px;
     /* 宽度和高度通过行内样式设置 */
 }
 
@@ -72,6 +72,26 @@
 /* 上传信息区域 */
 .uploadInfo {
     flex-grow: 1;
+}
+
+.uploadLabel {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+
+
+.uploadLabelRequired::before {
+    position: relative;
+    margin-left: -12px;
+    display: inline-block;
+    margin-inline-end: 4px;
+    color: #ff4d4f;
+    font-size: 14px;
+    font-family: SimSun, sans-serif;
+    line-height: 1;
+    content: "*";
 }
 
 /* 上传标题 */

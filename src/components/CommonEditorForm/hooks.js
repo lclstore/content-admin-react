@@ -1,8 +1,8 @@
-import { Form, message } from 'antd';
+import { Form, message, notification } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import React from 'react';
-import { dateRangeKeys } from '@/constants/app';
+
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -18,6 +18,7 @@ import { dateRangeKeys } from '@/constants/app';
 export const useFormState = (initialValues = {}) => {
     // 使用useForm创建表单实例
     const [form] = Form.useForm();
+
 
     // 表单状态管理
     const [formConnected, setFormConnected] = useState(false);
@@ -97,32 +98,44 @@ export const useHeaderConfig = (params) => {
         id,
         isFormDirty,
         form,
+        setActiveCollapseKeys,
+        isCollapse,
         formConnected,
         validate,
         onSave,
         navigate,
         messageApi,
         fields,
+        formFields,
         formType,
         complexConfig,
         structurePanels,
-        collapseFormConfig,
-        commonListConfig,
         headerContext,
-        setIsFormDirty
+        setIsFormDirty,
+        getLatestValues
     } = params;
+    // 创建ref存储最新的collapseFormConfig
+    const collapseFormConfigRef = useRef(fields);
+    // 更新ref值确保始终是最新的
+    useEffect(() => {
+        collapseFormConfigRef.current = fields;
+        console.log('fields', fields);
+    }, [fields]);
+
+
+
+
 
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, parent = null) => {
-
         for (const field of fields) {
             const value = dataToSave[field.name];
-            const isRequired = formType === 'advanced' && collapseFormConfig.isCollapse && parent && field.required;
+            const isRequired = formType === 'advanced' && isCollapse && field.required;
 
             // 校验必填项
             if (isRequired && (value === undefined || value === null || value === '')) {
-                if (collapseFormConfig.setActiveKey && parent.name) {
-                    collapseFormConfig.setActiveKey(parent.name);
+                if (setActiveCollapseKeys && parent.name) {
+                    setActiveCollapseKeys(parent.name);
 
                     requestAnimationFrame(() => {
                         form.validateFields();
@@ -139,6 +152,7 @@ export const useHeaderConfig = (params) => {
                     })
                 );
             }
+
 
             // 处理日期范围字段（有 keys 时分拆，无 keys 时格式化原字段）
             if (field.type === 'dateRange') {
@@ -170,9 +184,33 @@ export const useHeaderConfig = (params) => {
                 dataToSave[field.name] = value.format('YYYY-MM-DD');
             }
 
+
             // 递归处理嵌套字段
             if (Array.isArray(field.fields)) {
                 processFields(field.fields, dataToSave, field);
+            }
+
+            // 处理列表相关数据格式和验证
+            if (Array.isArray(field.dataList)) {
+
+                // 检查数组是否为空，如果为空则抛出异常
+                if (field.required && Array.isArray(field.dataList) && field.dataList.length === 0) {
+                    // 展开当前折叠栏
+                    if (setActiveCollapseKeys && field.name) {
+                        setActiveCollapseKeys(field.name);
+                    }
+                    throw new Error(
+                        JSON.stringify({
+                            errorFields: [{
+                                type: 'notification',
+                                message: `Cannot Add New【${field.label}】`,
+                                description: `Please add exercises to the current last ${field.label} before adding a new one.`,
+                            }]
+                        })
+                    );
+                }
+
+
             }
         }
     };
@@ -180,7 +218,6 @@ export const useHeaderConfig = (params) => {
 
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
-
         if (!form) return;
 
         form.validateFields()
@@ -188,24 +225,43 @@ export const useHeaderConfig = (params) => {
                 if (validate && !validate(values, form)) {
                     return;
                 }
-                let dataToSave = { ...values };
-                const formFields = formType === 'basic' ? fields : collapseFormConfig.fields;
-                // 处理dateRange类型字段 - 确保在分离字段模式下移除原始字段
-                processFields(formFields, dataToSave);
+                const dataToSave = form.getFieldsValue(true);
 
-                // 处理高级表单的结构化数据
-                // if (formType === 'advanced' && complexConfig.includeStructurePanels) {
-                //     dataToSave.structurePanels = JSON.parse(JSON.stringify(structurePanels));
+                // 获取当前使用的FormFields
+                const currentFormFields = collapseFormConfigRef.current;
+                if (isCollapse) {
+                    processFields(currentFormFields, dataToSave);
+                }
 
-                //     if (complexConfig.flattenStructurePanels) {
-                //         dataToSave.structure = dataToSave.structurePanels.flatMap(
-                //             panel => panel.items || []
-                //         );
-                //     }
-                // }
+                const hasDataListFields = currentFormFields.filter(
+                    formField => Array.isArray(formField.dataList)
+                );
+                // 处理数组列表相关数据格式和验证
+
+                const dataListValues = hasDataListFields.map(formField => {
+                    const dataListObject = {
+                        [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)// 提取 ID 列表
+                    };
+
+                    formField.fields.forEach(subField => {
+                        const baseName = subField.name.replace(/\d+$/, ''); // 去掉末尾数字
+                        const value = dataToSave[subField.name];
+                        if (value !== undefined) {
+                            dataListObject[baseName] = value;
+                            delete dataToSave[subField.name]; // 清理原始字段
+                        }
+                    });
+
+                    return dataListObject;
+                });
+
+                if (dataListValues.length > 0) {
+                    const dataKey = hasDataListFields[0].dataKey;// 获取第一个有dataList的field的dataKey
+                    dataToSave[dataKey] = dataListValues;
+                }
+
+                console.log('dataToSave', dataToSave);
                 if (onSave) {
-
-
                     const editId = id;
                     const callbackUtils = {
                         setDirty: setIsFormDirty,
@@ -223,41 +279,57 @@ export const useHeaderConfig = (params) => {
                 }
             })
             .catch((error) => {
+                // 尝试解析错误消息体
+                let errorData = error;
+
+                // 如果错误是字符串格式的JSON，尝试解析它
+                if (typeof error.message === 'string') {
+                    const parsedError = JSON.parse(error.message);
+                    if (parsedError && parsedError.errorFields) {
+                        errorData = parsedError;
+                    }
+                }
+
                 // 检查错误对象是否包含 errorFields 属性
-                if (!error.errorFields || !error.errorFields.length) {
+                if (!errorData.errorFields || !errorData.errorFields.length) {
                     messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
                     return;
                 }
-                // 如果启用了折叠功能且提供了 setActiveKey 方法
-                if (collapseFormConfig.isCollapse && collapseFormConfig.setActiveKey) {
-                    const errorFieldName = error.errorFields[0].name?.[0];
 
-                    const matchedPanel = collapseFormConfig.fields.find(panel =>
+                // 处理notification类型的错误
+                if (errorData.errorFields[0]?.type === 'notification') {
+                    notification.warning({
+                        style: {
+                            minWidth: 400,
+                        },
+                        message: errorData.errorFields[0].message,
+                        description: errorData.errorFields[0].description,
+                    });
+                    return;
+                }
+
+                // 如果启用了折叠功能且提供了 setActiveCollapseKeys 方法
+                if (isCollapse && setActiveCollapseKeys) {
+                    const errorFieldName = errorData.errorFields[0].name?.[0];
+
+                    // 使用当前的formFields查找面板
+                    const currentFormFields = fields;
+                    const matchedPanel = currentFormFields.find(panel =>
                         Array.isArray(panel.fields) &&
                         panel.fields.some(field => field.name === errorFieldName)
                     );
 
                     if (matchedPanel) {
-                        collapseFormConfig.setActiveKey(matchedPanel.name);
+                        setActiveCollapseKeys(matchedPanel.name);
                     }
                 }
+
                 // 显示错误信息
-                messageApi.error(error.errorFields[0].errors[0]);
+                messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
             });
     }, [
-        formConnected,
-        form,
-        validate,
-        fields,
-        formType,
-        complexConfig,
-        structurePanels,
-        onSave,
-        id,
-        messageApi,
-        navigate,
-        config,
-        setIsFormDirty
+        form, validate, fields, formFields, formType, onSave,
+        id, messageApi, navigate, config, setIsFormDirty
     ]);
 
     // 返回按钮处理函数

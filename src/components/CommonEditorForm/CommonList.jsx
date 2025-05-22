@@ -287,7 +287,8 @@ const CommonList = ({
     }, [renderListItem]);
 
     return (
-        <div className={styles.commonList}>
+      
+             <div className={styles.commonList}>
             <div className={styles.search}>
                 <Input
                     prefix={<SearchOutlined />}
@@ -335,20 +336,19 @@ const CommonList = ({
                     }
                     scrollableTarget={scrollableId}
                 >
-                    <List
+                  <Spin spinning={loading}>
+                  <List
                         itemLayout="horizontal"
                         dataSource={displayedItems}
                         className="common-list"
                         renderItem={renderListItem}
                     />
-                    {loading && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255, 255, 255, 0.5)', display: 'flex', justifyContent: 'center', paddingTop: '50px' }}>
-                            <Spin />
-                        </div>
-                    )}
+                  </Spin>
+                  
                 </InfiniteScroll>
             </div>
         </div>
+
     );
 };
 

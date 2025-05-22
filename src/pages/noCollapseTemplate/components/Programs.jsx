@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
 import { useNavigate } from 'react-router';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusOrder, filterSections, categoryListData } from './Data';
+import { statusOrder, filterSections,programListData } from './Data';
 
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
     const navigate = useNavigate();
-    const [dataSource, setDataSource] = useState(categoryListData); // 表格数据源
+    const [dataSource, setDataSource] = useState(programListData); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [], createUser: [] }); // 筛选条件
@@ -95,7 +95,7 @@ export default () => {
                 title: 'Status',
                 dataIndex: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options: "status",
+                options:"status",
                 width: 120,
                 visibleColumn: 0
             },
@@ -107,15 +107,22 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'New Start Time',
-                dataIndex: 'structureType',
+                title: 'Duration(Week)',
+                dataIndex: 'met',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'New End Time',
-                dataIndex: 'difficulty',
+                title: 'Equipment',
+                dataIndex: 'equipment',
+                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                width: 120,
+                visibleColumn: 0
+            },
+            {
+                title: 'New Date',
+                dataIndex: 'equipment',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 0
@@ -127,7 +134,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
+                actionButtons: ['enable', 'disable','edit','duplicate'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数
@@ -144,7 +151,7 @@ export default () => {
         setLoading(true);
         setTimeout(() => {
             // 复制原始数据
-            let filteredData = [...categoryListData];
+            let filteredData = [...programListData];
 
             // 按状态过滤
             const statuses = filters?.status || [];
@@ -215,7 +222,7 @@ export default () => {
         }
 
         // 正常导航到编辑页面
-        navigate(`/transformTemplate/editor?id=${record.id}`);
+        navigate(`/users/editor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理
@@ -248,7 +255,7 @@ export default () => {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'categoryList'}
+                uniqueId={'programsList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"

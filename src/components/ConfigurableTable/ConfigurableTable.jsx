@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect, useCallback} from 'react';
+import React, {useState, useMemo, useEffect, useCallback, useRef} from 'react';
 import {useLocation} from "react-router"
 import {useImmer} from "use-immer"
 import {Table, Input, Button, Spin, Space, Dropdown} from 'antd';
@@ -16,7 +16,7 @@ import {
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
-import {defaultPagination, actionIconMap, optionsConstants} from '@/constants';
+import {defaultPagination, optionsConstants} from '@/constants';
 import {getList as getListPublick} from "@/config/api.js";
 import settings from "@/config/settings.js"
 
@@ -60,6 +60,7 @@ function ConfigurableTable({
                                filterConfig,
                                paginationConfig = defaultPagination,
                                scrollX = true,
+                               scrollY = true,
                                rowSelection,
                                tableProps,
                                showColumnSettings = true,//当为true时显示列设置按钮
@@ -71,6 +72,19 @@ function ConfigurableTable({
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
 
+    const data = initVal(useState(0))
+    function initVal(hookList){
+        return {
+            get:hookList[0],
+            set:hookList[1]
+        }
+    }
+    const dataObj = useImmer({})
+    console.log(dataObj)
+    // table ref
+    const tableRef = useRef(null)
+    // filter data
+    const filterDataHook= useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
     const [internalVisibleColumnKeys, setInternalVisibleColumnKeys] = useState(() => {
         // 尝试从localStorage读取
@@ -274,7 +288,8 @@ function ConfigurableTable({
             return acc + (width > 0 ? width : 150);
         }, 0);
     }, [currentlyVisibleColumns, scrollX]);
-
+    // 计算可见列的总高度
+    const [tableHeight, setTableHeight] = useState(0)
     // 处理行事件 (根据 isInteractionBlockingRowClick 决定是否绑定 onClick)
     const handleRow = (record) => {
         // 如果交互状态阻止点击，则不为行附加 onClick 处理器
@@ -384,12 +399,17 @@ function ConfigurableTable({
         }
 
         // 如果外部传入了明确的scroll.y数值，则使用它
+        // config.y = tableHeight
         if (tableProps?.scroll?.y && typeof tableProps.scroll.y === 'number') {
             config.y = tableProps.scroll.y;
         }
-
         return config;
-    }, [scrollX, totalVisibleWidth, tableProps?.scroll?.y]);
+    }, [scrollX, totalVisibleWidth,tableHeight, tableProps?.scroll?.y]);
+
+    // getData 的方法
+    const getData = useCallback(async () => {
+        const res = await (getList ? getList : getListPublick)()
+    }, [currentlyVisibleColumns, dataSource, rowKey]);
 
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
     const processedColumns = useMemo(() => {
@@ -445,7 +465,6 @@ function ConfigurableTable({
                 // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
                 if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
                     processedCol.render = (_, rowData) => {
-                        console.log(listConfig.rowButtonsPublic)
                         let DropdownItems = listConfig.rowButtonsPublic.filter(i => processedCol.actionButtons.includes(i.key))
                             .filter(({key}) => processedCol.isShow(rowData, key))
                             .map(({key, click, icon}) => {
@@ -459,7 +478,7 @@ function ConfigurableTable({
                                     // 删除danger属性，避免hover背景色变化
                                     onClick: (e) => {
                                         if (e.domEvent) e.domEvent.stopPropagation();
-                                        click && click({ moduleKey,selectList:[rowData] });
+                                        click && click({ moduleKey,selectList:[rowData],getData });
                                     }
                                 };
                             })
@@ -480,7 +499,8 @@ function ConfigurableTable({
                             </div>
                         )
                     };
-
+                    // 固定action宽度
+                    processedCol.width = 56
                     // 为操作列添加action-cell类名
                     processedCol.onCell = () => ({
                         className: 'action-cell', // 为单元格添加action-cell类名
@@ -492,13 +512,10 @@ function ConfigurableTable({
             return processedCol;
         });
     }, [currentlyVisibleColumns]);
-    // search data
-    const [filterData, uodateFilterData] = useImmer({});
-    // getData 的方法
-    const getData = useCallback(async () => {
-        const res = await (getList ? getList : getListPublick)()
-    }, [currentlyVisibleColumns, dataSource, rowKey]);
 
+    useEffect(() => {
+        // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
+    }, []);
     return (
         <div className={styles.configurableTableContainer}>
             {/* 工具栏 */}
@@ -539,6 +556,7 @@ function ConfigurableTable({
                     {filterConfig && filterConfig.filterSections?.length > 0 && (
                         <FiltersPopover
                             filterSections={filterConfig.filterSections}
+                            dataHook={filterDataHook}
                             activeFilters={filterConfig.activeFilters || {}}
                             onUpdate={() => {
                                 getData()
@@ -550,7 +568,6 @@ function ConfigurableTable({
                         >
                             <Button
                                 icon={<FilterOutlined/>}
-                                className={styles.configurableTableToolbarBtn}
                             >
                                 Filters
                             </Button>
@@ -588,6 +605,7 @@ function ConfigurableTable({
                 rowKey={rowKey}
                 loading={loading}
                 onRow={handleRow}
+                ref={tableRef}
                 pagination={finalPaginationConfig}
                 scroll={finalScrollConfig}
                 rowSelection={rowSelection}

@@ -9,6 +9,9 @@
     height: 100%;
     background-color: var(--primary-color);
     overflow-y: auto;
+        &::-webkit-scrollbar {
+            width: 0.01px;
+        }
     /* 侧边栏内容过多时单独滚动 */
 }
 
@@ -26,6 +29,5 @@
     /* margin: 16px 24px; */
     /* padding: 24px; */
     /* background-color: var(--bg-white) !important; */
-    overflow-y: auto;
 
 }

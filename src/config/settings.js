@@ -32,27 +32,36 @@ const settings = {
       {
         key:"enable",
         icon: CheckCircleOutlined,
-        click:({selectList,moduleKey}) => enable({moduleKey,idList:selectList.map(item => item.id)})
+        click:async ({selectList,moduleKey,getData}) => {
+          await enable({moduleKey, idList: selectList.map(item => item.id)})
+          await getData()
+        }
       },
       {
         key:"disable",
         icon: StopOutlined,
-        click:({selectList,moduleKey})=> disable({moduleKey,idList:selectList.map(item => item.id)})
+        click:async ({selectList,moduleKey,getData})=> {
+          await disable({moduleKey, idList: selectList.map(item => item.id)})
+          await getData()
+        }
       },
       {
-        key:"del",
+        key:"delete",
         icon: DeleteOutlined,
-        click:({selectList,moduleKey}) => del({moduleKey,idList:selectList.map(item => item.id)})
+        click:async ({selectList,moduleKey,getData}) => {
+          await del({moduleKey, idList: selectList.map(item => item.id)})
+          await getData()
+        }
       },
         {
         key:"edit",
         icon: EditOutlined,
-        click:({selectList,moduleKey}) => router().push(`editor?id=${ selectList[0].id }`)
+        click:({selectList}) => router().push(`editor?id=${ selectList[0].id }`)
       },
         {
         key:"duplicate",
         icon: CopyOutlined,
-        click:({selectList,moduleKey}) => router().push(`editor?id=${ selectList[0].id }&duplicate=true`)
+        click:({selectList}) => router().push(`editor?id=${ selectList[0].id }&duplicate=true`)
       },
     ],
     rowClickPublic:() => {}

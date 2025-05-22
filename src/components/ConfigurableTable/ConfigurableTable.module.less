@@ -1,6 +1,14 @@
 
 .configurableTableContainer {
   width: 100%;
+  padding: 20px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display:flex;
+  flex-direction:column;
   :global{
     // 基础类
     .flex{
@@ -22,11 +30,14 @@
         /* 按钮之间的间隙 */
       }
     }
-    // 表格
+    // 表格整体
     .ant-table-wrapper {
       background: none;
+      display: flex;
+      flex-direction: column;
       .ant-table-cell{
         min-height: 79px;
+        padding: 16px 8px;
       }
       .ant-table-thead {
         background: #f5f5f5 !important;
@@ -39,6 +50,7 @@
           border: none;
           height: 30px;
           .ant-table-column-sorters{
+            justify-content: flex-start;
             .ant-table-column-title{
               white-space: nowrap;
               overflow: hidden;
@@ -46,6 +58,19 @@
               flex: none;
             }
           }
+        }
+        & > tr > th.ant-table-column-sort {
+
+          background: #f5f5f5 !important;
+        }
+        & > tr > th.ant-table-column-sort:hover {
+          background: #f5f5f5 !important;
+        }
+        & > tr > th.ant-table-column-sort {
+          background: #f5f5f5 !important;
+        }
+        & > tr > th.ant-table-column-sort:hover {
+          background: #f5f5f5 !important;
         }
       }
 
@@ -103,6 +128,22 @@
             }
           }
         }
+        & > tr > td:first-child .userAvatar {
+          margin-right: 12px;
+        }
+        & > tr > td:first-child .userInfoText {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          line-height: normal;
+        }
+        & > tr > td:first-child .userInfoText span {
+          line-height: 1.5;
+        }
+        /* 表格排序列悬停样式 */
+        & > tr:hover > td {
+          background-color: #fafafa !important;
+        }
       }
 
       /* 多选表格选择框的圆角 */
@@ -124,21 +165,6 @@
         align-items: center;
       } */
 
-      .ant-table-tbody > tr > td:first-child .userAvatar {
-        margin-right: 12px;
-      }
-
-      .ant-table-tbody > tr > td:first-child .userInfoText {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        line-height: normal;
-      }
-
-      .ant-table-tbody > tr > td:first-child .userInfoText span {
-        line-height: 1.5;
-      }
-
       /*
        * 表格行悬停效果
        * 1. 使用 !important 确保样式优先级高于 antd 默认样式
@@ -147,50 +173,13 @@
        * 4. 背景色值为 #fafafa，接近白色，提供轻微的区分度
        */
 
-      .ant-table-tbody > tr:hover > td {
-        background-color: #fafafa !important;
-      }
-
-      /* 表格排序列样式 */
-
-      .ant-table-thead > tr > th.ant-table-column-sort {
-
-        background: #f5f5f5 !important;
-      }
-
       td.ant-table-column-sort {
         background: #ffff !important;
       }
 
-      /* 表格排序列悬停样式 */
-
-      .ant-table-thead > tr > th.ant-table-column-sort:hover {
-        background: #f5f5f5 !important;
-      }
-
-      /* 表格排序列样式 */
-
-      .ant-table-thead > tr > th.ant-table-column-sort {
-
-        background: #f5f5f5 !important;
-      }
 
       td.ant-table-column-sort {
         background: #ffff !important;
-      }
-
-      /*  .ant-table-column-sorters {
-        justify-content: flex-start;
-      }
-
-       .ant-table-column-title {
-        flex: initial;
-      } */
-
-      /* 表格排序列悬停样式 */
-
-      .ant-table-thead > tr > th.ant-table-column-sort:hover {
-        background: #f5f5f5 !important;
       }
 
     }

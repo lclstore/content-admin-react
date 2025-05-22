@@ -51,7 +51,7 @@ export default () => {
      * 处理按钮点击事件
      */
     const handleActionClick = useCallback((actionName, record, event) => {
-        
+
         if (event) event.stopPropagation();
         setCurrentRecord(record);
         // 编辑按钮点击
@@ -66,12 +66,16 @@ export default () => {
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
-        // 状态-按钮映射关系
-        if (status === 'enable' && ['disable'].includes(btnName)) return true;
-        if (status === 'disable' && ['enable'].includes(btnName)) return true;
-        if (btnName === 'edit' || btnName === 'duplicate') return true;  // 编辑按钮始终显示
-
-        return false;
+        let state = false
+        if(btnName === 'edit'){ state = true }
+        if (
+            (status === 0 && (btnName === "enable" || btnName === "delete" || btnName === "duplication")) ||
+            (status === 1 && (btnName === "disabled" || btnName === "duplication")) ||
+            (status === 2 && (btnName === "enable" || btnName === "duplication"))
+        ) {
+            state = true
+        }
+        return state
     }, []);
 
     // 3. 表格渲染配置项
@@ -178,7 +182,7 @@ export default () => {
                 fixed: 'right',
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
+                actionButtons: ['enable', 'disable','edit','duplicate','delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
             }
@@ -333,7 +337,7 @@ export default () => {
 
     // 渲染 - 组件UI呈现
     return (
-        <div className="usersContainer page-list">
+        <div>
             {/* 消息上下文提供器 */}
             {contextHolder}
 

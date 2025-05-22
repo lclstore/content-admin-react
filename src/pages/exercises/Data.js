@@ -1,95 +1,14 @@
 // 定义状态排序逻辑
 export const statusOrder = { 'Enabled': 1, 'Draft': 2, 'Disabled': 3, 'Deprecated': 4 };
 
-// 定义难度排序逻辑
-export const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
-
 // 模拟 Workout 数据
-export const mockWorkouts = [
-    {
-        id: 1,
-        type: 'video',
-        image: 'https://hhcontent.s3.eu-central-1.amazonaws.com/t/none/u/undefined/w/67f5dfa1916d1900124391ea/x/video_720p.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KU4XQXHZETDYO3V%2F20250415%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250415T085513Z&X-Amz-Expires=604800&X-Amz-Signature=5aaf8d86a1deccfda9931d29ab10753adc3aaba5e0b4588015aac99a2640cd58&X-Amz-SignedHeaders=host&x-amz-request-payer=requester&x-id=GetObject',
-        name: 'Morning RunMorning RunMorning RunMorning RunMorning RunMorning RunMorning Run',
-        status: 'Enabled',
-        difficulty: 'Medium',
-        equipment: 'Running Shoes',
-        position: 1,
-        target: 'Cardio',
-        newStartTime: '2025-01-26 06:00:00',
-        newEndTime: '2025-07-26 07:00:00',
-        category: 'Cardio',
-        duration: 185,
-        isSubscription: false,
-    },
-    {
-        id: 2,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting',
-        status: 'Disabled',
-        difficulty: 'Hard',
-        equipment: 'Dumbbells, Barbell',
-        position: 3,
-        target: 'Strength',
-        newStartTime: '2025-02-27 18:00:00',
-        newEndTime: '2025-07-27 19:30:00',
-        category: 'Strength',
-        isSubscription: false,
-    },
-    {
-        id: 3,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Yoga Session',
-        status: 'Enabled',
-        difficulty: 'Easy',
-        equipment: 'Yoga Mat',
-        position: 2,
-        target: 'Flexibility',
-        newStartTime: '2025-07-28 08:00:00',
-        newEndTime: '2025-07-28 09:00:00',
-        category: 'Yoga',
-        isSubscription: false,
-    },
-    {
-        id: 4,
-        type: 'image',
-        image: null,
-        name: 'Cycling',
-        status: 'Draft',
-        difficulty: 'Medium',
-        equipment: 'Bicycle, Helmet',
-        position: 5,
-        target: 'Cardio, Endurance',
-        newStartTime: '2025-07-29 17:00:00',
-        newEndTime: '2025-07-29 18:30:00',
-        category: 'Cardio',
-        isSubscription: false,
-    },
-    {
-        id: 5,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'HIIT Workout',
-        status: 'Deprecated',
-        difficulty: 'Hard',
-        equipment: 'None',
-        position: 4,
-        target: 'Fat Loss, Fitness',
-        newStartTime: '2025-07-30 12:00:00',
-        newEndTime: '2025-07-30 12:30:00',
-        category: 'HIIT',
-        isSubscription: false,
-    },
-];
 
 export const listData = [
     {
         id: 1,
         type: 'video',
         imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        name:"123",
         status:0,
         met:"1",
         structureType:"asd",
@@ -99,11 +18,12 @@ export const listData = [
         target:"asd",
         frontVideoStatus:"Successful",
         sideVideoStatus:"Processing"
-    },    {
+    },
+    {
         id: 2,
         type: 'video',
         imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        name:"123123",
         status:1,
         met:"1",
         structureType:"asd",
@@ -118,7 +38,7 @@ export const listData = [
         id: 3,
         type: 'video',
         imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        name:"12312312",
         status:2,
         met:"1",
         structureType:"asd",
@@ -129,17 +49,127 @@ export const listData = [
         frontVideoStatus:"Successful",
         sideVideoStatus:"Processing"
     },
+    {
+        id: 4,
+        type: 'video',
+        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name:"12312312",
+        status:2,
+        met:"1",
+        structureType:"asd",
+        difficulty:"asd",
+        equipment:"asd",
+        position:"asd",
+        target:"asd",
+        frontVideoStatus:"Successful",
+        sideVideoStatus:"Processing"
+    },
+    // {
+    //     id: 5,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
+    // {
+    //     id: 6,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
+    // {
+    //     id: 7,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
+    // {
+    //     id: 8,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
+    // {
+    //     id: 9,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
+    // {
+    //     id: 11,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
+    // {
+    //     id: 12,
+    //     type: 'video',
+    //     imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+    //     name:"12312312",
+    //     status:2,
+    //     met:"1",
+    //     structureType:"asd",
+    //     difficulty:"asd",
+    //     equipment:"asd",
+    //     position:"asd",
+    //     target:"asd",
+    //     frontVideoStatus:"Successful",
+    //     sideVideoStatus:"Processing"
+    // },
 ]
-// 定义强制显示和默认显示的列键
-export const MANDATORY_COLUMN_KEYS = ['image', 'id', 'name', 'actions'];
-
-// 默认可见列的键
-export const DEFAULT_VISIBLE_COLUMN_KEYS = [
-    'image', 'id', 'name', 'status', 'subscription', 'difficulty', 'equipment', 'target', 'actions'
-];
-
-// 定义 Equipment 选项 (用于编辑器)
-export const equipmentOptions = ['Dumbbell', 'Resistance band', 'None', 'Bodyweight', 'Kettlebells', 'Yoga mat', 'Chair', 'Bed', 'Cycling Bike']; // Added more based on mock data, adjust as needed
 
 // 定义筛选器配置
 export const filterSections = [
@@ -169,106 +199,6 @@ export const filterSections = [
         options: ['Full Body', 'Arm', 'Back', 'Butt', 'Abs', 'Leg', 'Core'],
     }
 ];
-
-// --- 从 WorkoutsEditor.jsx 移动过来的数据 ---
-
-// 用于 Workout 列表页面的模拟数据 (保留原名以防列表页使用)
-export const mockWorkoutsForList = [
-    {
-        id: 1,
-        type: 'video',
-        image: 'https://hhcontent.s3.eu-central-1.amazonaws.com/t/none/u/undefined/w/67f5dfa1916d1900124391ea/x/video_720p.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KU4XQXHZETDYO3V%2F20250415%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250415T085513Z&X-Amz-Expires=604800&X-Amz-Signature=5aaf8d86a1deccfda9931d29ab10753adc3aaba5e0b4588015aac99a2640cd58&X-Amz-SignedHeaders=host&x-amz-request-payer=requester&x-id=GetObject',
-        name: 'Morning RunMorning RunMorning RunMorning RunMorning RunMorning RunMorning Run',
-        status: 'Enabled',
-        difficulty: 'Medium',
-        equipment: 'Running Shoes',
-        position: 1,
-        target: 'Cardio',
-        newStartTime: '2025-01-26 06:00:00',
-        newEndTime: '2025-07-26 07:00:00',
-        category: 'Cardio',
-        duration: 185,
-        isSubscription: false,
-    },
-    {
-        id: 2,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Weight Lifting',
-        status: 'Disabled',
-        difficulty: 'Hard',
-        equipment: 'Dumbbells, Barbell',
-        position: 3,
-        target: 'Strength',
-        newStartTime: '2025-02-27 18:00:00',
-        newEndTime: '2025-07-27 19:30:00',
-        category: 'Strength',
-        isSubscription: false,
-    },
-    {
-        id: 3,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'Yoga Session',
-        status: 'Enabled',
-        difficulty: 'Easy',
-        equipment: 'Yoga Mat',
-        position: 2,
-        target: 'Flexibility',
-        newStartTime: '2025-07-28 08:00:00',
-        newEndTime: '2025-07-28 09:00:00',
-        category: 'Yoga',
-        isSubscription: false,
-    },
-    {
-        id: 4,
-        type: 'image',
-        image: null,
-        name: 'Cycling',
-        status: 'Draft',
-        difficulty: 'Medium',
-        equipment: 'Bicycle, Helmet',
-        position: 5,
-        target: 'Cardio, Endurance',
-        newStartTime: '2025-07-29 17:00:00',
-        newEndTime: '2025-07-29 18:30:00',
-        category: 'Cardio',
-        isSubscription: false,
-    },
-    {
-        id: 5,
-        type: 'image',
-        image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
-        name: 'HIIT Workout',
-        status: 'Deprecated',
-        difficulty: 'Hard',
-        equipment: 'None',
-        position: 4,
-        target: 'Fat Loss, Fitness',
-        newStartTime: '2025-07-30 12:00:00',
-        newEndTime: '2025-07-30 12:30:00',
-        category: 'HIIT',
-        isSubscription: false,
-    },
-];
-
-
-// 新 Workout 的初始数据结构
-export const initialWorkoutData = {
-    id: null,
-    name: '',
-    status: 'Draft', // 新 workouts 的默认状态
-    difficulty: 'Medium',
-    equipment: '',
-    position: null,
-    target: '',
-    image: null, // 注意：这个 image 可能是 Workout 的封面图，与结构中的 exercise 图片不同
-    newStartTime: null,
-    newEndTime: null,
-    structure: [], // 添加空的结构数组
-    videoPreferences: {}, // 添加空的视频偏好
-    musicLinks: [], // 添加空的音乐链接
-};
 
 // 用于编辑器"结构(Structure)"部分的模拟数据
 // 恢复为直接的数组结构
@@ -575,59 +505,6 @@ export const mockEditorStructureData = [
         "intensity": "level 1"
     }
 ];
-
-// 用于左侧内容库的模拟数据 (简化版)
-export const mockContentLibrary = [
-    {
-        id: 'lib-ex-1',
-        type: 'exercise',
-        displayName: 'Alternate Front & Lateral Raise',
-        animationPhoneUrl: 'https://via.placeholder.com/100/771796',
-        equipment: 'Dumbbells',
-        duration: 30,
-    },
-    {
-        id: 'lib-ex-2',
-        type: 'exercise',
-        displayName: 'Alternating Arm & Leg Extension',
-        animationPhoneUrl: 'https://via.placeholder.com/100/24f355',
-        equipment: 'Bodyweight',
-        duration: 45,
-    },
-    {
-        id: 'lib-ex-3',
-        type: 'exercise',
-        displayName: 'Alternating Forward Lunges',
-        animationPhoneUrl: 'https://via.placeholder.com/100/d32776',
-        equipment: 'Bodyweight',
-        duration: 40,
-    },
-    {
-        id: 'lib-ex-4',
-        type: 'exercise',
-        displayName: 'Alternating Hammer Biceps Curl',
-        animationPhoneUrl: 'https://via.placeholder.com/100/f66b97',
-        equipment: 'Dumbbells',
-        duration: 35,
-    },
-    {
-        id: 'lib-ex-5',
-        type: 'exercise',
-        displayName: 'Alternating Lateral Raise',
-        animationPhoneUrl: 'https://via.placeholder.com/100/56a8c2',
-        equipment: 'Dumbbells',
-        duration: 30,
-    },
-    {
-        id: 'lib-ex-6',
-        type: 'exercise',
-        displayName: 'Alternating One Leg Shoulder Bridge',
-        animationPhoneUrl: 'https://via.placeholder.com/100/b0f7cc',
-        equipment: 'Bodyweight',
-        duration: 50,
-    },
-    // 可以添加更多音频、组等内容
-]; 
 
 export const mockUsers = [
     {

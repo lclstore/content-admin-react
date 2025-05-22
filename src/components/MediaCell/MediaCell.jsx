@@ -105,12 +105,7 @@ const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) =>
                 alt={`${name || 'Media'}'s image`}
                 preview={{
                     onVisibleChange: onPreviewVisibleChange,
-                    mask: (
-                        <div>
-                            <EyeOutlined />
-                            <span>Preview</span>
-                        </div>
-                    )
+                    maskClassName:"no-mask"
                 }}
                 onError={onImageError}
                 loading="lazy"
@@ -337,7 +332,7 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
             case 'audio':
                 return (
                     <>
-                        <AudioMedia
+                        <VideoMedia
                             src={mediaSrc}
                             onPreview={handleAudioPreview}
                         />

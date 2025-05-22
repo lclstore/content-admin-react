@@ -40,7 +40,6 @@ export default function AppLayout() {
                     style={{
                         background: 'none',
                         position: 'relative',
-                        overflow: 'auto'
                     }}
                 >
                     <Outlet/>

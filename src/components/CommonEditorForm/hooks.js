@@ -184,38 +184,42 @@ export const useHeaderConfig = (params) => {
                 dataToSave[field.name] = value.format('YYYY-MM-DD');
             }
 
-
             // 递归处理嵌套字段
             if (Array.isArray(field.fields)) {
                 processFields(field.fields, dataToSave, field);
             }
-
-            // 处理列表相关数据格式和验证
-            if (Array.isArray(field.dataList)) {
-
-                // 检查数组是否为空，如果为空则抛出异常
-                if (field.required && Array.isArray(field.dataList) && field.dataList.length === 0) {
-                    // 展开当前折叠栏
-                    if (setActiveCollapseKeys && field.name) {
-                        setActiveCollapseKeys(field.name);
-                    }
-                    throw new Error(
-                        JSON.stringify({
-                            errorFields: [{
-                                type: 'notification',
-                                message: `Cannot Add New【${field.label}】`,
-                                description: `Please add exercises to the current last ${field.label} before adding a new one.`,
-                            }]
-                        })
-                    );
-                }
-
-
-            }
+            //手动验证dataList
+            dataListValidate(field, setActiveCollapseKeys);
         }
     };
+    //手动验证dataList
+    const dataListValidate = (field, setActiveCollapseKeys) => {
+        const isStructureList = field.type === 'structureList';
+        const isArray = Array.isArray(field.dataList);
+        const isRequired = field.required || field.rules?.some(rule => rule?.required);
+        const isEmptyList = isArray && field.dataList.length === 0;
 
+        // 只对需要校验的结构化列表或数组字段生效
+        if ((isStructureList || isArray) && isRequired && isEmptyList) {
+            // 如果配置了折叠面板开关，尝试展开当前折叠项
+            if (typeof setActiveCollapseKeys === 'function' && field.name) {
+                setActiveCollapseKeys(field.name);
+            }
 
+            const ruleMessage = field.rules?.find(rule => !!rule?.required)?.message;
+            const fallbackMessage = `Please add at least one ${field.label || 'item'}`;
+
+            throw new Error(
+                JSON.stringify({
+                    errorFields: [{
+                        type: 'notification',
+                        message: `Cannot Add New【${field.label || 'Unnamed'}】`,
+                        description: ruleMessage || fallbackMessage,
+                    }]
+                })
+            );
+        }
+    };
     // 保存按钮处理函数
     const handleSaveChanges = useCallback(() => {
         if (!form) return;
@@ -232,6 +236,14 @@ export const useHeaderConfig = (params) => {
                 if (isCollapse) {
                     processFields(currentFormFields, dataToSave);
                 }
+                const hasStructureListFields = currentFormFields.filter(
+                    formField => formField.type === 'structureList'
+                );
+                //手动验证structureList
+                hasStructureListFields.forEach(formField => {
+                    dataListValidate(formField, setActiveCollapseKeys);
+                });
+
 
                 const hasDataListFields = currentFormFields.filter(
                     formField => Array.isArray(formField.dataList)
@@ -243,14 +255,16 @@ export const useHeaderConfig = (params) => {
                         [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)// 提取 ID 列表
                     };
 
-                    formField.fields.forEach(subField => {
-                        const baseName = subField.name.replace(/\d+$/, ''); // 去掉末尾数字
-                        const value = dataToSave[subField.name];
-                        if (value !== undefined) {
-                            dataListObject[baseName] = value;
-                            delete dataToSave[subField.name]; // 清理原始字段
-                        }
-                    });
+                    if (formField.length > 0) {
+                        formField.fields.forEach(subField => {
+                            const baseName = subField.name.replace(/\d+$/, ''); // 去掉末尾数字
+                            const value = dataToSave[subField.name];
+                            if (value !== undefined) {
+                                dataListObject[baseName] = value;
+                                delete dataToSave[subField.name]; // 清理原始字段
+                            }
+                        });
+                    }
 
                     return dataListObject;
                 });
@@ -298,10 +312,12 @@ export const useHeaderConfig = (params) => {
 
                 // 处理notification类型的错误
                 if (errorData.errorFields[0]?.type === 'notification') {
-                    notification.warning({
+                    notification.error({
                         style: {
                             minWidth: 400,
                         },
+                        duration: 4000,
+                        placement: 'bottomRight',
                         message: errorData.errorFields[0].message,
                         description: errorData.errorFields[0].description,
                     });

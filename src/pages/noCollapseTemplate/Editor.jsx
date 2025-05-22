@@ -10,7 +10,7 @@ import {
     VideoCameraOutlined,
     SettingOutlined
 } from '@ant-design/icons';
-
+import { validateEmail, validatePassword } from '@/utils/index';
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
     // 初始用户数据状态--可设默认值
@@ -90,15 +90,6 @@ export default function UserEditorWithCommon() {
         navigate(-1);
     };
 
-    const imageUpload = (value, file, form) => {
-        const formValues = form.getFieldsValue();
-        form.setFieldsValue({
-            coverImage: formValues.coverImage || value,
-            detailImage: formValues.detailImage || value,
-            thumbnailImage: formValues.thumbnailImage || value,
-            completeImage: formValues.completeImage || value,
-        });
-    }
 
     //请求列数据方法
     const initFormData = (id) => {
@@ -169,7 +160,7 @@ export default function UserEditorWithCommon() {
             name: 'timeRange',
             label: 'New Time',
             // keys: ['startDate', 'endDate'],//默认可不设置
-            required: true,
+            // required: true,
         },
         // {
         //     type: 'displayImage',
@@ -191,7 +182,7 @@ export default function UserEditorWithCommon() {
             type: 'date',
             name: 'birthday', // 遵循命名规范，使用Url后缀
             label: 'Birthday',
-            required: true,
+            // required: true,
         },
         {
             type: 'upload',
@@ -307,39 +298,39 @@ export default function UserEditorWithCommon() {
             name: 'email',
             maxLength: 100,
             label: 'Email',
-            required: true,
-            rules: [
-                { required: true, message: 'Please input Email.' },
-                { max: 100, message: 'Email cannot exceed 100 characters' },
-                // 邮箱格式验证
-                {
-                    validator: async (_, value) => {
-                        if (value && !validateEmail(value)) {
-                            return Promise.reject('Email is not valid.');
-                        }
-                        return Promise.resolve();
-                    },
-                },
-            ]
+            // required: true,
+            // rules: [
+            //     { required: true, message: 'Please input Email.' },
+            //     { max: 100, message: 'Email cannot exceed 100 characters' },
+            //     // 邮箱格式验证
+            //     {
+            //         validator: async (_, value) => {
+            //             if (value && !validateEmail(value)) {
+            //                 return Promise.reject('Email is not valid.');
+            //             }
+            //             return Promise.resolve();
+            //         },
+            //     },
+            // ]
         },
         {
             type: 'password',
             name: 'userPassword',
             label: 'Password',
-            required: true,
-            rules: [
-                { required: true, message: 'Please input passowrd.' },
-                {
-                    validator: async (_, value) => {
-                        if (value && !validatePassword(value)) {
-                            return Promise.reject(
-                                'The password must contain letters (uppercase or lowercase) and numbers (0-9) and be 8-12 characters long.'
-                            );
-                        }
-                        return Promise.resolve();
-                    },
-                }
-            ]
+            // required: true,
+            // rules: [
+            //     { required: true, message: 'Please input passowrd.' },
+            //     {
+            //         validator: async (_, value) => {
+            //             if (value && !validatePassword(value)) {
+            //                 return Promise.reject(
+            //                     'The password must contain letters (uppercase or lowercase) and numbers (0-9) and be 8-12 characters long.'
+            //                 );
+            //             }
+            //             return Promise.resolve();
+            //         },
+            //     }
+            // ]
         },
         {
             type: 'structureList',
@@ -347,11 +338,10 @@ export default function UserEditorWithCommon() {
             // renderItemMata: (item) => {
             //     return <div>{item.displayName}</div>
             // },
-            label: 'test workout list',
-            required: true,
+            label: 'workouts',
             dataList: [],
             rules: [
-                { required: true, message: 'Please add  workout list' },
+                { required: true, message: 'Please add at least one workout' },
             ]
         }
 
@@ -362,6 +352,8 @@ export default function UserEditorWithCommon() {
 
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields) => {
+        // console.log('updatedFields', updatedFields);
+
         setFormFields(updatedFields);
     };
 
@@ -379,53 +371,7 @@ export default function UserEditorWithCommon() {
     const renderItemMata = (item) => {
         return <div>{item.displayName}</div>
     }
-    //折叠面板展开
-    const handleCollapseChange = (activeKeys, form) => {
-        // 如果在此函数内更新了 formFields，可以在更新回调中获取最新值
-        if (activeKeys[0] == 'workoutData') {
-            setFormFields(prevFields => {
-                const newFields = [...prevFields]; // 进行某些更新操作、
-                const formValues = form.getFieldsValue(true);//表单数据
-                const preview = formValues.exercisePreviewDuration || 0;
-                const execution = formValues.exerciseExecutionDuration || 0;
-                const introDuration = formValues.introDuration || 0;
 
-                let loopCount = 0;
-                let workoutCalorie = 0;
-                const MET = 1
-
-                const structureList = newFields.filter(item => Array.isArray(item.dataList) && item.dataList.length > 0);
-                if (structureList.length > 0) {
-                    structureList.forEach((item, index) => {
-                        const reps = formValues[`reps${index == 0 ? '' : index}`] | 0;
-                        loopCount = reps * item.dataList.length;
-                        const calories = MET * 75 / 3600 * execution * reps * item.dataList.length;
-                        workoutCalorie += calories
-                    })
-                    const workOutTime = (preview + execution) * loopCount;
-                    const workoutDurationRaw = introDuration + workOutTime;
-                    // 如果时长小于30，则向下取整，否则向上取整
-                    const workoutDuration = workoutDurationRaw < 30
-                        ? Math.floor(workoutDurationRaw)
-                        : Math.ceil(workoutDurationRaw);
-                    form.setFieldsValue({
-                        duration: workoutDuration,
-                        calorie: Math.ceil(workoutCalorie)//向上取整
-                    });
-                } else {
-                    form.setFieldsValue({
-                        duration: 0,
-                        calorie: 0
-                    });
-                }
-                console.log(newFields);
-
-                return newFields;
-            });
-        }
-
-
-    };
 
     return (
         <CommonEditorForm
@@ -434,7 +380,6 @@ export default function UserEditorWithCommon() {
             // 提供更新配置项回调
             onFormFieldsChange={handleFormFieldsChange}
             // 提供折叠面板展开回调
-            onCollapseChange={handleCollapseChange}
             // 其他基本配置
             // renderItemMata={renderItemMata}
             commonListConfig={{

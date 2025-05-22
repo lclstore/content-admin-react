@@ -269,10 +269,20 @@ export default function CommonEditor(props) {
                     dataList: newDataList // 如果不是数组，创建新数组
                 };
             }
+
+            if (panelName === 'basic' && field.type === 'structureList') {
+                const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
+                return {
+                    ...field,
+                    dataList: [...(field.dataList || []), ...itemsToAdd]
+
+                };
+            }
+
             return field; // 返回未修改的其他面板
         });
+        console.log('updatedFields', updatedFields);
 
-        const formValues = formInstance.getFieldsValue();
 
         // 更新内部状态
         setInternalFormFields(updatedFields);
@@ -412,9 +422,9 @@ export default function CommonEditor(props) {
 
     // 处理替换项的回调函数
     const handleReplaceItem = (panelName, itemId, newItemId, newItem, itemIndex) => {
+        //折叠面板
         const updatedFields = internalFormFields.map(panel => {
             if (panel.name !== panelName) return panel;
-
             // 如果提供了索引参数，则使用索引定位具体项目
             if (itemIndex !== undefined) {
                 const updatedItems = [...panel.dataList];
@@ -437,6 +447,7 @@ export default function CommonEditor(props) {
                 };
             }
         });
+        console.log('updatedFields', updatedFields);
 
         // 更新内部状态
         setInternalFormFields(updatedFields);
@@ -802,7 +813,13 @@ export default function CommonEditor(props) {
                         {renderBasicForm(fields, {
                             form,
                             selectedItemFromList: selectedItemFromList,
+                            onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
+                            onReplaceItem: handleReplaceItem,
+                            onCopyItem: handleCopyItem,
+                            onSortItems: handleSortItems,
+                            onDeleteItem: handleDeleteItem,
+                            commonListConfig: commonListConfig,
                             formConnected,
                             initialValues,
                             oneColumnKeys: config.oneColumnKeys || [],

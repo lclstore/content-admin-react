@@ -257,6 +257,12 @@
     margin-bottom: 24px !important;
 }
 
+:global(.structureList-title) {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 16px 0;
+}
+
 .avatarUploader :global(.ant-upload-drag-hover) {
     border-color: var(--primary-color);
     background: rgba(24, 144, 255, 0.05);

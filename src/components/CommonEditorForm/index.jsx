@@ -35,6 +35,7 @@ import { arrayMove } from '@dnd-kit/sortable';
  * @param {Array} props.formFields 表单字段配置（从Editor传入的完整formFields）
  * @param {Function} props.onFormFieldsChange 表单字段变更回调函数
  * @param {Function} props.onCollapseChange 折叠面板变化回调函数
+ * @param {boolean} props.enableDraft 是否启用草稿功能
  */
 export default function CommonEditor(props) {
     const {
@@ -43,6 +44,7 @@ export default function CommonEditor(props) {
         fields = [],
         isCollapse = false,
         initialValues = {},
+        enableDraft = false,
         initFormData,
         onSave,
         renderItemMata,
@@ -138,6 +140,7 @@ export default function CommonEditor(props) {
     const { headerButtons } = useHeaderConfig({
         config,
         id,
+        enableDraft,
         isFormDirty,
         form,
         formConnected,

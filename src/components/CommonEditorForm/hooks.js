@@ -2,6 +2,7 @@ import { Form, message, notification } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import React from 'react';
+import { optionsConstants } from '@/constants';
 
 /**
  * 通用编辑器组件
@@ -94,6 +95,8 @@ export const useFormState = (initialValues = {}) => {
  */
 export const useHeaderConfig = (params) => {
     const {
+        enableDraft,
+        statusList = optionsConstants.displayStatus,//状态列表
         config,
         id,
         isFormDirty,

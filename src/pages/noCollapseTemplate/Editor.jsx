@@ -390,6 +390,7 @@ export default function UserEditorWithCommon() {
             // isCollapse={true}
             initFormData={initFormData}
             formType="advanced"
+            enableDraft={true}
             config={{ formName: 'Collections' }}
             initialValues={initialValues}
             onSave={handleSaveUser}

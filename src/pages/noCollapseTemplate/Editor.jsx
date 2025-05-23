@@ -49,7 +49,10 @@ export default function UserEditorWithCommon() {
         }
         ]
     }];
-
+    // 自定义渲染列表项展示
+    const renderItemMata = (item) => {
+        return <div>{item.displayName}</div>
+    }
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
         console.log('保存用户数据:', values, id);
@@ -110,6 +113,15 @@ export default function UserEditorWithCommon() {
     };
 
     const initialFormFields = useMemo(() => [
+        {
+            type: 'input',
+            name: 'name',
+            label: 'Name',
+            required: true,
+            maxLength: 100,
+            placeholder: 'Enter name...',
+
+        },
 
         // {
         //     type: 'select',
@@ -182,11 +194,11 @@ export default function UserEditorWithCommon() {
             type: 'date',
             name: 'birthday', // 遵循命名规范，使用Url后缀
             label: 'Birthday',
-            // required: true,
+            required: true,
         },
         {
             type: 'upload',
-            // required: true,
+            required: true,
             name: 'videoUrl', // 视频文件
             label: 'Introduction Video',
             // maxFileSize: 1024 * 1024 * 10,
@@ -335,9 +347,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'structureList',
             name: 'data',
-            // renderItemMata: (item) => {
-            //     return <div>{item.displayName}</div>
-            // },
+            renderItemMata: renderItemMata,
             label: 'workouts',
             dataList: [],
             rules: [
@@ -367,10 +377,6 @@ export default function UserEditorWithCommon() {
         });
     }
 
-    // 自定义渲染列表项展示
-    const renderItemMata = (item) => {
-        return <div>{item.displayName}</div>
-    }
 
 
     return (
@@ -391,6 +397,7 @@ export default function UserEditorWithCommon() {
             initFormData={initFormData}
             formType="advanced"
             enableDraft={true}
+            fieldsToValidate={['name', 'birthday']}
             config={{ formName: 'Collections' }}
             initialValues={initialValues}
             onSave={handleSaveUser}

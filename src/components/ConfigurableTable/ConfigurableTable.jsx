@@ -1,7 +1,7 @@
-import React, {useState, useMemo, useEffect, useCallback, useRef} from 'react';
-import {useLocation} from "react-router"
-import {useImmer} from "use-immer"
-import {Table, Input, Button, Spin, Space, Dropdown} from 'antd';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { useLocation } from "react-router"
+import { useImmer } from "use-immer"
+import { Table, Input, Button, Spin, Space, Dropdown } from 'antd';
 import {
     SearchOutlined,
     FilterOutlined,
@@ -16,8 +16,8 @@ import {
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
-import {defaultPagination, optionsConstants} from '@/constants';
-import {getList as getListPublick} from "@/config/api.js";
+import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
+import { getList as getListPublick } from "@/config/api.js";
 import settings from "@/config/settings.js"
 
 /**
@@ -46,28 +46,27 @@ import settings from "@/config/settings.js"
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
  */
 function ConfigurableTable({
-                               uniqueId,
-                               columns, // 所有列的定义
-                               dataSource,
-                               rowKey,
-                               loading = false,
-                               onRowClick,
-                               isInteractionBlockingRowClick, // 接收状态
-                               mandatoryColumnKeys = [], // 强制列 Key
-                               visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
-                               onVisibilityChange, // 更新所有可见列的回调
-                               searchConfig,
-                               filterConfig,
-                               paginationConfig = defaultPagination,
-                               scrollX = true,
-                               scrollY = true,
-                               rowSelection,
-                               tableProps,
-                               showColumnSettings = true,//当为true时显示列设置按钮
-                               leftToolbarItems = [], // 左侧工具栏按钮
-                               getList,
-                               moduleKey
-                           }) {
+    uniqueId,
+    columns, // 所有列的定义
+    dataSource,
+    rowKey,
+    loading = false,
+    onRowClick,
+    isInteractionBlockingRowClick, // 接收状态
+    mandatoryColumnKeys = [], // 强制列 Key
+    visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
+    onVisibilityChange, // 更新所有可见列的回调
+    searchConfig,
+    filterConfig,
+    paginationConfig = defaultPagination,
+    scrollX = true,
+    rowSelection,
+    tableProps,
+    showColumnSettings = true,//当为true时显示列设置按钮
+    leftToolbarItems = [], // 左侧工具栏按钮
+    getList,
+    moduleKey
+}) {
     moduleKey = moduleKey || useLocation().pathname.split('/').at(-2);
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
@@ -79,7 +78,7 @@ function ConfigurableTable({
     // table ref
     const tableRef = useRef(null)
     // filter data
-    const filterDataHook= useImmer({});
+    const filterDataHook = useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
     const [internalVisibleColumnKeys, setInternalVisibleColumnKeys] = useState(() => {
         // 尝试从localStorage读取
@@ -135,7 +134,7 @@ function ConfigurableTable({
     }, [columns]);
 
     // 基于列分类计算可选列和默认可见列
-    const {disabledKeys, configurableOptionKeys, defaultVisibleKeys} = columnCategories;
+    const { disabledKeys, configurableOptionKeys, defaultVisibleKeys } = columnCategories;
 
     // 计算实际生效的默认可见列（当localStorage没有存储时使用）
     const effectiveDefaultVisibleKeys = useMemo(() => {
@@ -168,7 +167,7 @@ function ConfigurableTable({
         return {
             title: 'Visible Columns',
             key: 'visibleColumns',
-            options: options, // 使用包含key和label的对象数组
+            options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [optionalColumnsForSetting]);
 
@@ -360,14 +359,14 @@ function ConfigurableTable({
                     listConfig.rowClickPublic && listConfig.rowClickPublic({rowData:record})
                 }
             },
-            style: onRowClick ? {cursor: 'pointer'} : {}, // 保持光标样式
+            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
         };
     };
 
     // 最终的分页配置
     const finalPaginationConfig = useMemo(() => {
         if (paginationConfig === false) return false;
-        const config = {...defaultPagination, ...paginationConfig};
+        const config = { ...defaultPagination, ...paginationConfig };
         config.total = dataSource?.length || 0;
         return config;
     }, [paginationConfig, dataSource]);
@@ -401,7 +400,7 @@ function ConfigurableTable({
             config.y = tableProps.scroll.y;
         }
         return config;
-    }, [scrollX, totalVisibleWidth,tableHeight, tableProps?.scroll?.y]);
+    }, [scrollX, totalVisibleWidth, tableHeight, tableProps?.scroll?.y]);
 
     // getData 的方法
     const getData = useCallback(async () => {
@@ -417,8 +416,8 @@ function ConfigurableTable({
     const processedColumns = useMemo(() => {
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
-            let processedCol = {...col};
-            if(!col.render){
+            let processedCol = { ...col };
+            if (!col.render) {
                 // 创建cell容器
                 // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
                 if (mediaTypes.includes(processedCol.mediaType)) {
@@ -461,7 +460,7 @@ function ConfigurableTable({
                         console.log("DisplayText",DisplayText)
                         const B = () => DisplayText
                         return (
-                            <B/>
+                            <B />
                         );
                     };
                 }
@@ -470,15 +469,15 @@ function ConfigurableTable({
                 else if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
                     processedCol.render = (_, rowData) => {
                         let DropdownItems = listConfig.rowButtonsPublic.filter(i => processedCol.actionButtons.includes(i.key))
-                            .filter(({key}) => processedCol.isShow(rowData, key))
-                            .map(({key, click, icon}) => {
+                            .filter(({ key }) => processedCol.isShow(rowData, key))
+                            .map(({ key, click, icon }) => {
                                 const ItemIcon = icon
                                 return {
                                     key,
                                     label: key.charAt(0).toUpperCase() + key.slice(1), // 首字母大写
-                                    icon:<ItemIcon/>,
+                                    icon: <ItemIcon />,
                                     // 使用style属性只控制字体颜色
-                                    style: key === 'delete' ? {color: '#ff4d4f'} : {},
+                                    style: key === 'delete' ? { color: '#ff4d4f' } : {},
                                     // 删除danger属性，避免hover背景色变化
                                     onClick: (e) => {
                                         if (e.domEvent) e.domEvent.stopPropagation();
@@ -494,13 +493,13 @@ function ConfigurableTable({
                         return (
                             <div className="actions-container" onClick={(e) => e.stopPropagation()}>
                                 <Dropdown
-                                    menu={{items: DropdownItems}}
+                                    menu={{ items: DropdownItems }}
                                     trigger={['click']}
                                     className="action-dropdown"
                                 >
                                     <Button
                                         type="text"
-                                        icon={<EllipsisOutlined/>}
+                                        icon={<EllipsisOutlined />}
                                         className="action-button"
                                         onClick={(e) => e.stopPropagation()}
                                     />
@@ -545,7 +544,7 @@ function ConfigurableTable({
         <div className={styles.configurableTableContainer}>
             {/* 工具栏 */}
             <div className="configurable-table-toolbar"
-                 style={leftToolbarItems.length === 0 ? {justifyContent: "flex-end"} : {}}>
+                style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
                 {/* 左侧按钮区域 */}
                 <Space wrap className={styles.configurableTableToolbarLeft}>
                     {leftToolbarItems.map(item => (
@@ -571,7 +570,7 @@ function ConfigurableTable({
                             showCount
                             placeholder={searchConfig.placeholder || 'Search...'}
                             value={searchConfig.searchValue}
-                            prefix={<SearchOutlined/>}
+                            prefix={<SearchOutlined />}
                             onChange={searchConfig.onSearchChange}
                             className="configurable-table-search-input"
                             suffix={loadingLocal ? <Spin size="small"/> : null}
@@ -591,7 +590,8 @@ function ConfigurableTable({
                             showClearIcon={hasActiveFilters}
                         >
                             <Button
-                                icon={<FilterOutlined/>}
+                                icon={<FilterOutlined />}
+                                className={styles.configurableTableToolbarBtn}
                             >
                                 Filters
                             </Button>
@@ -612,7 +612,7 @@ function ConfigurableTable({
                             isSettingsType
                         >
                             <Button
-                                icon={<SettingOutlined/>}
+                                icon={<SettingOutlined />}
                                 className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
                             >
                                 Table Settings

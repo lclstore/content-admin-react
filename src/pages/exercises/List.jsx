@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined,ArrowDownOutlined,ArrowUpOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { statusIconMap, optionsConstants } from '@/constants';
@@ -154,12 +154,12 @@ export default () => {
                 key: 'position'
             },
             {
-                title: 'Target',
-                dataIndex: 'target',
+                title: 'Injured',
+                dataIndex: 'injured',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key: 'target'
+                key: 'injured'
             },
             {
                 title: 'Front Video Status',
@@ -247,6 +247,7 @@ export default () => {
      * 重置筛选器处理
      */
     const handleFilterReset = useCallback(() => {
+        console.log('1111')
         setSelectedFilters({});
         setSearchValue('');
         performSearch('', {});
@@ -291,7 +292,7 @@ export default () => {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle && setCustomPageTitle('Exercise');
+        setCustomPageTitle && setCustomPageTitle('Exercises');
         // 设置头部按钮
         setButtons([
             {
@@ -304,14 +305,14 @@ export default () => {
             {
                 key: 'Import',
                 text: 'Feishu Import',
-                icon: <PlusOutlined />,
+                icon: <ArrowDownOutlined />,
                 type: 'primary',
                 // onClick: () => navigate(`/exercises/editor`),
             },
             {
                 key: 'Export',
                 text: 'Export Feishu',
-                icon: <PlusOutlined />,
+                icon: <ArrowUpOutlined />,
                 type: 'primary',
                 // onClick: () => navigate(`/exercises/editor`),
             }
@@ -351,7 +352,7 @@ export default () => {
                 loading={loading}
                 actionColumnKey="actions"
                 searchConfig={{
-                    placeholder: "Search name or email...",
+                    placeholder: "Search name or id...",
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Button, Card, Space, Spin } from 'antd';
+import { Form, Button, Card, Space, Spin, Modal } from 'antd';
 import {
     PlusOutlined,
     DeleteOutlined,
@@ -15,6 +15,41 @@ import CollapseForm from './CollapseForm'; //右侧折叠表单
 import dayjs from 'dayjs';
 import { dateRangeKeys } from '@/constants/app';
 import { arrayMove } from '@dnd-kit/sortable';
+
+/**
+ * Status selection modal component
+ */
+const StatusSelectModal = ({ visible, statusList, onConfirm, onCancel }) => {
+    return (
+        <Modal
+            title="Select Status"
+            open={visible}
+            onCancel={onCancel}
+            maskClosable={false}
+            keyboard={false}
+            centered={true}
+            footer={null} // 移除底部按钮区域
+
+        >
+            <div style={{ margin: '20px 60px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 500 }}>Please select content status:</div>
+                <div style={{ margin: '20px 0 40px 0', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                    {statusList.map(status => (
+                        <Button
+                            style={{ padding: '10px 20px' }}
+                            key={status.value}
+                            type="default"
+                            onClick={() => onConfirm(status.value)}
+                        >
+                            {status.name}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -35,14 +70,18 @@ import { arrayMove } from '@dnd-kit/sortable';
  * @param {Array} props.formFields 表单字段配置（从Editor传入的完整formFields）
  * @param {Function} props.onFormFieldsChange 表单字段变更回调函数
  * @param {Function} props.onCollapseChange 折叠面板变化回调函数
+ * @param {boolean} props.enableDraft 是否启用草稿功能
+ * @param {Array} props.fieldsToValidate 需要验证的表单字段
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
         fields = [],
+        fieldsToValidate = ['name'],
         isCollapse = false,
         initialValues = {},
+        enableDraft = false,
         initFormData,
         onSave,
         renderItemMata,
@@ -135,9 +174,11 @@ export default function CommonEditor(props) {
     const headerContext = useContext(HeaderContext);
 
     // 使用自定义钩子管理头部配置
-    const { headerButtons } = useHeaderConfig({
+    const { headerButtons, handleSaveChanges, handleBackClick, statusModalProps } = useHeaderConfig({
         config,
         id,
+        fieldsToValidate,
+        enableDraft,
         isFormDirty,
         form,
         formConnected,
@@ -269,10 +310,20 @@ export default function CommonEditor(props) {
                     dataList: newDataList // 如果不是数组，创建新数组
                 };
             }
+
+            if (panelName === 'basic' && field.type === 'structureList') {
+                const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
+                return {
+                    ...field,
+                    dataList: [...(field.dataList || []), ...itemsToAdd]
+
+                };
+            }
+
             return field; // 返回未修改的其他面板
         });
+        console.log('updatedFields', updatedFields);
 
-        const formValues = formInstance.getFieldsValue();
 
         // 更新内部状态
         setInternalFormFields(updatedFields);
@@ -412,9 +463,9 @@ export default function CommonEditor(props) {
 
     // 处理替换项的回调函数
     const handleReplaceItem = (panelName, itemId, newItemId, newItem, itemIndex) => {
+        //折叠面板
         const updatedFields = internalFormFields.map(panel => {
             if (panel.name !== panelName) return panel;
-
             // 如果提供了索引参数，则使用索引定位具体项目
             if (itemIndex !== undefined) {
                 const updatedItems = [...panel.dataList];
@@ -437,6 +488,7 @@ export default function CommonEditor(props) {
                 };
             }
         });
+        console.log('updatedFields', updatedFields);
 
         // 更新内部状态
         setInternalFormFields(updatedFields);
@@ -802,7 +854,13 @@ export default function CommonEditor(props) {
                         {renderBasicForm(fields, {
                             form,
                             selectedItemFromList: selectedItemFromList,
+                            onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
+                            onReplaceItem: handleReplaceItem,
+                            onCopyItem: handleCopyItem,
+                            onSortItems: handleSortItems,
+                            onDeleteItem: handleDeleteItem,
+                            commonListConfig: commonListConfig,
                             formConnected,
                             initialValues,
                             oneColumnKeys: config.oneColumnKeys || [],
@@ -911,6 +969,7 @@ export default function CommonEditor(props) {
         <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer}`}>
             {contextHolder}
             {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
+            <StatusSelectModal {...statusModalProps} />
         </div>
     );
 }

@@ -737,6 +737,7 @@ const FileUpload = ({
                         src={displayValue}
                         alt={getFileName(displayValue)}
                         className={styles.avatarImg}
+                        preview={{ mask: null }}
                     />
                 );
 
@@ -932,21 +933,6 @@ const FileUpload = ({
                         <div className={styles.uploadInfo} style={{ flex: '1', minWidth: 0 }}>
                             <div className={`${styles.uploadLabel} ${field.required ? styles.uploadLabelRequired : ''}`}>
                                 {field.label}
-                            </div>
-                            <div className={styles.uploadTitle}
-                                title={hasFile ? getFileName(displayValue) : ""}
-                                style={{
-                                    wordBreak: 'break-word',
-                                    whiteSpace: 'normal',
-                                    overflow: 'hidden',
-                                    maxWidth: '100%'
-                                }}>
-                                {uploading
-                                    ? "Uploading..."
-                                    : hasFile
-                                        ? getFileName(displayValue)
-                                        : uploadPlaceholder || "Click or drag file to upload"
-                                }
                             </div>
                             <Text type="secondary" className={styles.uploadDescription}>
                                 {uploadDescription || generatedUploadDescription}

@@ -364,13 +364,46 @@ export const renderFormControl = (field, options = {}) => {
             );
         //结构化排序列表
         case 'structureList':
+            // 使用ref保存dataList的引用，避免直接依赖field对象
+            const dataListRef = React.useRef(field.dataList);
+
+            // 当field.dataList改变时更新ref
+            if (field.dataList !== dataListRef.current) {
+                dataListRef.current = field.dataList;
+            }
+
+            // 使用空依赖数组执行一次，通过ref访问最新值
+            useEffect(() => {
+                // 使用函数来确保每次都能获取最新的值
+                const updateFormValue = () => {
+                    const currentDataList = field.formterList ? field.formterList(field.dataList) : field.dataList.map(item => item.id)// 提取 ID 列表
+                };
+
+                // 立即执行一次
+                updateFormValue();
+
+                // 设置定时器检查变化
+                const timer = setInterval(updateFormValue, 300);
+
+                return () => clearInterval(timer);
+            }, []);
 
             return (
-                <StructureList
-                    onItemAdded={options.onItemAdded}
-                    selectedItemFromList={options.selectedItemFromList}
-                    {...field}
-                />
+                <div>
+                    <div className='structureList-title'>{`${field.dataList.length} ${field?.label}`}</div>
+                    <StructureList
+                        form={form}
+                        onItemAdded={options.onItemAdded}
+                        onReplaceItem={options.onReplaceItem}
+                        onDeleteItem={options.onDeleteItem}
+                        onCopyItem={options.onCopyItem}
+                        onSortItems={options.onSortItems}
+                        onSelectedItemProcessed={options.onSelectedItemProcessed}
+                        commonListConfig={options.commonListConfig}
+                        selectedItemFromList={options.selectedItemFromList}
+                        {...field}
+                    />
+                </div>
             );
 
     }
@@ -500,12 +533,12 @@ export const renderFormItem = (field, options = {}) => {
                 {...formItemRestProps} // 其余布局 props 展开
                 //上传控件隐藏label
                 label={
-                    field.type === 'upload'
+                    field.type === 'upload' || field.type === 'structureList'
                         ? null
                         : label
                 }
                 name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
-                rules={finalRules}
+                rules={field.type === 'structureList' ? [] : finalRules}
                 valuePropName={finalValuePropName}
             >
                 {renderFormControl(field, options)}
@@ -519,9 +552,6 @@ export const renderFormItem = (field, options = {}) => {
  * 渲染一组表单字段
  */
 export const renderBasicForm = (fields, options) => {
-
-
-
 
     const { oneColumnKeys = [] } = options || {};
 

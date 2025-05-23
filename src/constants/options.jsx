@@ -1,13 +1,13 @@
 import { EditFilled, CheckCircleFilled, CloseCircleFilled, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 export const optionsConstants = {
     displayStatus: [
-        { name: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Draft</div>, value: "DRAFT" },
-        { name: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Enabled</div>, value: "ENABLE" },
-        { name: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Disabled</div>, value: "DISABLE" },
+        { name: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Draft</div>, value: 0 },
+        { name: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Enabled</div>, value: 1 },
+        { name: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Disabled</div>, value: 2 },
     ],
-    userStatus:[
-        { name: <div>Enabled <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 'ENABLED' },
-        { name: <div>Disabled <CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>, value: 'DISABLED' },
+    userStatus: [
+        { name: <div>Enabled <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },
+        { name: <div>Disabled <CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>, value: 2 },
     ],
     resultStatus: [
         { name: <div>success <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },

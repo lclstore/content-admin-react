@@ -256,7 +256,7 @@ export const useHeaderConfig = (params) => {
         if (!form) return;
 
         // 获取当前表单值中的状态，如果没有则使用初始状态
-        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLED';
+        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLE';
         // 如果启用草稿功能，先弹出状态选择框，否则直接使用当前状态
         if (enableDraft) {
             setPendingSaveData({});
@@ -270,7 +270,8 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 处理状态选择确认
-    const handleStatusModalConfirm = (statusValue = 'ENABLED') => {
+    const handleStatusModalConfirm = (statusValue = 'ENABLE') => {
+        debugger
         setIsStatusModalVisible(false);
 
         // 在表单中设置选择的状态

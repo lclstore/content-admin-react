@@ -78,10 +78,8 @@ export default function UsersList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 状态-按钮映射关系
-        if (status === 1 && ['disable'].includes(btnName)) return true;
-        if (status === 0 && ['enable'].includes(btnName)) return true;
-        if (btnName === 'edit') return true;  // 编辑按钮始终显示
-
+        if (status === 'ENABLE' && ['DISABLE'].includes(btnName)) return true;
+        if (status === 'DISABLE' && ['ENABLE'].includes(btnName)) return true;
         return false;
     }, []);
     // 渲染用户Name & Email
@@ -160,7 +158,7 @@ export default function UsersList() {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable'],
+                actionButtons: ['ENABLE', 'DISABLE'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数

@@ -72,15 +72,10 @@ function ConfigurableTable({
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
 
-    const data = initVal(useState(0))
-    function initVal(hookList){
-        return {
-            get:hookList[0],
-            set:hookList[1]
-        }
-    }
-    const dataObj = useImmer({})
-    console.log(dataObj)
+    // 声明内部 loading，也可以接受外部传入
+    const [loadingLocal,  setLoadingLocal] = useState(loading)
+    useEffect(() => { setLoadingLocal(loading) }, [loading]);
+
     // table ref
     const tableRef = useRef(null)
     // filter data
@@ -361,6 +356,8 @@ function ConfigurableTable({
                             isActionColumnClick ? 'Action column clicked' :
                                 isMediaCellClick ? 'Media cell clicked' : 'Checkbox clicked');
                     }
+                }else{
+                    listConfig.rowClickPublic && listConfig.rowClickPublic({rowData:record})
                 }
             },
             style: onRowClick ? {cursor: 'pointer'} : {}, // 保持光标样式
@@ -408,7 +405,12 @@ function ConfigurableTable({
 
     // getData 的方法
     const getData = useCallback(async () => {
-        const res = await (getList ? getList : getListPublick)()
+        // getList 存在 自动调用内置g etListPublick 查询，getList 如果类型为Function 则调用外部传入的getList
+        if(getList){
+            setLoadingLocal(true)
+            const res = await (getList.constructor === Function ? getList : getListPublick)()
+            setLoadingLocal(false)
+        }
     }, [currentlyVisibleColumns, dataSource, rowKey]);
 
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
@@ -422,6 +424,7 @@ function ConfigurableTable({
                 if (mediaTypes.includes(processedCol.mediaType)) {
                     // 为包含媒体类型的列添加特殊的className
                     processedCol.className = styles.mediaCell;
+                    processedCol.width = 95
                     // 添加 onCell 方法给单元格添加类名
                     processedCol.onCell = () => ({
                         className: 'media-cell', // 为单元格添加 media-cell 类名
@@ -443,7 +446,7 @@ function ConfigurableTable({
                 }
 
                 // 如果列有  options 属性，设置渲染逻辑
-                if (processedCol.options) {
+                else if (processedCol.options) {
                     const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
 
                     processedCol.render = (text, record) => {
@@ -455,6 +458,7 @@ function ConfigurableTable({
                         if (!optionConfig) {
                             return text;
                         }
+                        console.log("DisplayText",DisplayText)
                         const B = () => DisplayText
                         return (
                             <B/>
@@ -463,7 +467,7 @@ function ConfigurableTable({
                 }
 
                 // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
-                if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
+                else if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
                     processedCol.render = (_, rowData) => {
                         let DropdownItems = listConfig.rowButtonsPublic.filter(i => processedCol.actionButtons.includes(i.key))
                             .filter(({key}) => processedCol.isShow(rowData, key))
@@ -478,7 +482,12 @@ function ConfigurableTable({
                                     // 删除danger属性，避免hover背景色变化
                                     onClick: (e) => {
                                         if (e.domEvent) e.domEvent.stopPropagation();
-                                        click && click({ moduleKey,selectList:[rowData],getData });
+                                        // 有自定义就执行自定义方法
+                                        if(processedCol.onActionClick){
+                                            processedCol.onActionClick(key,rowData,e,click)
+                                        }else {
+                                            click && click({ moduleKey,selectList:[rowData],getData });
+                                        }
                                     }
                                 };
                             })
@@ -506,8 +515,24 @@ function ConfigurableTable({
                         className: 'action-cell', // 为单元格添加action-cell类名
                     });
                 }
+                // default
+                else {
+                    processedCol.render = (text, record) => {
+                        return (<div style={{display: 'flex',  alignItems: 'center'}}>{text}</div>)
+                    };
+                }
                 // 添加最小宽度
                 processedCol.minWidth = 100;
+            }
+            const childrenRender = processedCol.render
+            // 给所有渲染添加一个 class td-cell 的容器
+            processedCol.render = (text, record) => {
+                const C = childrenRender(text, record)
+                return (
+                    <div className="td-cell">
+                        {C}
+                    </div>
+                )
             }
             return processedCol;
         });
@@ -549,7 +574,7 @@ function ConfigurableTable({
                             prefix={<SearchOutlined/>}
                             onChange={searchConfig.onSearchChange}
                             className="configurable-table-search-input"
-                            suffix={loading ? <Spin size="small"/> : null}
+                            suffix={loadingLocal ? <Spin size="small"/> : null}
                             allowClear
                         />
                     )}
@@ -559,7 +584,6 @@ function ConfigurableTable({
                             dataHook={filterDataHook}
                             activeFilters={filterConfig.activeFilters || {}}
                             onUpdate={() => {
-                                getData()
                                 filterConfig.onUpdate()
                             }}
                             onReset={filterConfig.onReset}
@@ -603,7 +627,7 @@ function ConfigurableTable({
                 columns={processedColumns}
                 dataSource={dataSource}
                 rowKey={rowKey}
-                loading={loading}
+                loading={loadingLocal}
                 onRow={handleRow}
                 ref={tableRef}
                 pagination={finalPaginationConfig}

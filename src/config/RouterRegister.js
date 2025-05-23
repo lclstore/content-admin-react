@@ -37,6 +37,7 @@ class RouterRegister {
             let dirArry = this.registerArray
             // pathArray长度 大于2，说明是一个有父子层级的节点
             if (pathArray.length > 2) {
+                console.log(pathArray)
                 const fatherList = pathArray.slice(0, -2)
                 let dirAddress = []
                 fatherList.some(dirName => {

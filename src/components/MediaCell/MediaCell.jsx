@@ -4,7 +4,9 @@ import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRi
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
 import styles from './MediaCell.module.less'; // 导入 CSS Modules
 import { getFullUrl } from '@/utils';
-
+import imageError from "@/assets/images/imageError.svg"
+import audioError from "@/assets/images/audioError.svg"
+import videoError from "@/assets/images/videoError.svg"
 // MediaType[] = ['video', 'audio', 'image'];
 // 全局状态标记，用于跟踪是否有预览处于激活状态
 window.MEDIA_PREVIEW = {
@@ -32,9 +34,11 @@ const MediaTags = memo(({ showNewTag, showLockIcon }) => {
 });
 
 // 视频媒体组件
-const VideoMedia = memo(({ src, posterImage, duration, onPreview }) => {
+const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) => {
     if (!src) {
-        return <div className={`${styles.videoContainer} ${styles.mediaCell}`}></div>;
+        return <div className={`${styles.videoContainer} ${styles.mediaCell}`}>
+            <img style={{width:"100%",height:"100%"}} src={mediaType === 'video' ? videoError : audioError} alt=""/>
+        </div>;
     }
 
     const fullSrc = getFullUrl(src);
@@ -45,16 +49,16 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview }) => {
             className={`${styles.videoContainer} ${styles.mediaCell}`}
             onClick={(e) => onPreview(e, fullSrc)}
         >
-            <video
-                poster={fullPosterImage || undefined}
-                src={fullSrc}
-                className={styles.tabVideo}
-                preload="none"
-                loading="lazy"
-                muted
-                playsInline
-                onClick={(e) => e.stopPropagation()}
-            />
+            {/*<video*/}
+            {/*    poster={fullPosterImage || undefined}*/}
+            {/*    src={fullSrc}*/}
+            {/*    className={styles.tabVideo}*/}
+            {/*    preload="none"*/}
+            {/*    loading="lazy"*/}
+            {/*    muted*/}
+            {/*    playsInline*/}
+            {/*    onClick={(e) => e.stopPropagation()}*/}
+            {/*/>*/}
             <div className={`${styles.videoOverlay} ${styles.videoPlayIconOverlay}`}>
                 <PlayCircleOutlined />
             </div>
@@ -63,10 +67,10 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview }) => {
                     {formatDuration(duration)}
                 </div>
             )}
-            <div className={`${styles.videoOverlay} ${styles.videoPreviewHintOverlay}`}>
-                <EyeOutlined />
-                <span style={{ marginLeft: '5px' }}>Preview</span>
-            </div>
+            {/*<div className={`${styles.videoOverlay} ${styles.videoPreviewHintOverlay}`}>*/}
+            {/*    <EyeOutlined />*/}
+            {/*    <span style={{ marginLeft: '5px' }}>Preview</span>*/}
+            {/*</div>*/}
         </div>
     );
 });
@@ -91,9 +95,6 @@ const AudioMedia = memo(({ src, onPreview }) => {
 
 // 图片媒体组件
 const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) => {
-    if (!src) {
-        return <div className={`${styles.imageContainer} ${styles.mediaCell}`}></div>;
-    }
 
     const fullSrc = getFullUrl(src);
 
@@ -109,6 +110,7 @@ const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) =>
                 }}
                 onError={onImageError}
                 loading="lazy"
+                fallback={imageError}
                 placeholder={
                     <div className={styles.imagePlaceholder}>
                         <FileImageOutlined style={{ fontSize: '20px', opacity: 0.5 }} />
@@ -313,19 +315,20 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                     <>
                         <VideoMedia
                             src={mediaSrc}
+                            mediaType={mediaType}
                             posterImage={posterImage}
                             duration={duration}
                             onPreview={handleVideoPreview}
                         />
-                        {tags}
-                        {previewState.visible && (
-                            <MediaPreviewModal
-                                type={previewState.type}
-                                url={previewState.url}
-                                visible={previewState.visible}
-                                onCancel={handleMediaPreviewClose}
-                            />
-                        )}
+                        {/*{tags}*/}
+                        {/*{previewState.visible && (*/}
+                        {/*    <MediaPreviewModal*/}
+                        {/*        type={previewState.type}*/}
+                        {/*        url={previewState.url}*/}
+                        {/*        visible={previewState.visible}*/}
+                        {/*        onCancel={handleMediaPreviewClose}*/}
+                        {/*    />*/}
+                        {/*)}*/}
                     </>
                 );
 
@@ -334,29 +337,22 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                     <>
                         <VideoMedia
                             src={mediaSrc}
+                            mediaType={mediaType}
                             onPreview={handleAudioPreview}
                         />
                         {tags}
-                        {previewState.visible && (
-                            <MediaPreviewModal
-                                type={previewState.type}
-                                url={previewState.url}
-                                visible={previewState.visible}
-                                onCancel={handleMediaPreviewClose}
-                            />
-                        )}
+                        {/*{previewState.visible && (*/}
+                        {/*    <MediaPreviewModal*/}
+                        {/*        type={previewState.type}*/}
+                        {/*        url={previewState.url}*/}
+                        {/*        visible={previewState.visible}*/}
+                        {/*        onCancel={handleMediaPreviewClose}*/}
+                        {/*    />*/}
+                        {/*)}*/}
                     </>
                 );
 
             default: // 默认作为图片处理
-                // 图片加载错误或没有图片源
-                if (imgError || !mediaSrc) {
-                    return (
-                        <div className={`${styles.imageContainer} ${styles.mediaCell}`}>
-                            {tags}
-                        </div>
-                    );
-                }
 
                 return (
                     <div className={`${styles.imageContainer} ${styles.mediaCell}`}>

@@ -58,5 +58,5 @@ export default function CollectionsList() {
         </StickyBox>
     );
 
-    return <Tabs activeKey={defaultTabItem.key} onChange={onChange} renderTabBar={renderTabBar} items={items} />;
+    return <Tabs style={{ flex:1 }} activeKey={defaultTabItem.key} onChange={onChange} renderTabBar={renderTabBar} items={items} />;
 }

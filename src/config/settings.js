@@ -64,7 +64,9 @@ const settings = {
         click:({selectList}) => router().push(`editor?id=${ selectList[0].id }&duplicate=true`)
       },
     ],
-    rowClickPublic:() => {}
+    rowClickPublic:({rowData}) => {
+      router().push(`editor?id=${ rowData.id }`)
+    }
   },
   // 布局设置
   layout: {

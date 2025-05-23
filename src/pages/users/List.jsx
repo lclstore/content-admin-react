@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Modal, message, Avatar } from 'antd';
+import { PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { data, useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
@@ -23,6 +23,7 @@ export default function UsersList() {
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
     const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [messageApi, contextHolder] = message.useMessage();
+    const [loadError, setLoadError] = useState(false);
 
     // 2. 回调函数定义 - 用户交互和事件处理
     /**
@@ -83,7 +84,46 @@ export default function UsersList() {
 
         return false;
     }, []);
+    // 渲染用户Name & Email
+    const renderUser = (record) => {
 
+        return (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                {record.avatar && !loadError ? (
+                    <Avatar
+                        src={record.avatar}
+                        size={36}
+                        onError={() => {
+                            setLoadError(true);
+                            return false; // 阻止默认 fallback
+                        }}
+                        style={{ marginRight: 12 }}
+                    />
+                ) : (
+                    <Avatar
+                        icon={<UserOutlined />}
+                        size={36}
+                        style={{ marginRight: 12, backgroundColor: '#f0f2f5', color: '#999' }}
+                    >
+                        {!record.avatar && record?.name?.charAt(0)?.toUpperCase()}
+                    </Avatar>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{
+                        fontWeight: 'var(--font-weight-medium)',
+                        color: 'var(--text-primary)',
+                        lineHeight: '1.4'
+                    }}>{record.name}</span>
+                    <span style={{
+                        fontSize: 'var(--font-md-sm)',
+                        color: 'var(--text-secondary)',
+                        lineHeight: '1.4',
+                        fontWeight: 400
+                    }}>{record.email}</span>
+                </div>
+            </div>
+        );
+    };
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
@@ -92,38 +132,7 @@ export default function UsersList() {
                 key: 'nameAndEmail',
                 width: 350,
                 visibleColumn: 0,
-                render: (record) => (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {record.avatar ? (
-                            <img
-                                src={`${record.avatar}`}
-                                alt={`${record.name}'s avatar`}
-                                className="userAvatar"
-                                style={{ width: 36, height: 36, borderRadius: '50%', marginRight: 12 }}
-                            />
-                        ) : (
-                            <div
-                                style={{
-                                    width: 36,
-                                    height: 36,
-                                    borderRadius: '50%',
-                                    backgroundColor: '#f0f2f5',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    marginRight: 12,
-                                    color: '#999'
-                                }}
-                            >
-                                {record?.name?.charAt(0)?.toUpperCase()}
-                            </div>
-                        )}
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontWeight: 'var(--font-weight-medium)', color: 'var(--text-primary)', lineHeight: '1.4' }}>{record.name}</span>
-                            <span style={{ fontSize: 'var(--font-md-sm)', color: 'var( --text-secondary)', lineHeight: '1.4', fontWeight: 400 }}>{record.email}</span>
-                        </div>
-                    </div>
-                )
+                render: renderUser
             },
             {
                 title: 'Status',
@@ -248,8 +257,8 @@ export default function UsersList() {
             request.get({
                 url: "/user/page",
                 load: true,
-                data:{
-                    pageSize:20
+                data: {
+                    pageSize: 20
                 },
                 callback(res) {
                     setDataSource(res.data.data)

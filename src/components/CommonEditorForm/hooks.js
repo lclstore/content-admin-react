@@ -271,7 +271,6 @@ export const useHeaderConfig = (params) => {
 
     // 处理状态选择确认
     const handleStatusModalConfirm = (statusValue = 'ENABLE') => {
-        debugger
         setIsStatusModalVisible(false);
 
         // 在表单中设置选择的状态

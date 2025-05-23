@@ -96,6 +96,8 @@ export default () => {
                 key: 'imageCoverUrl',
                 visibleColumn: 0
             },
+            { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80},
+
             {
                 title: 'Name',
                 dataIndex: 'name',

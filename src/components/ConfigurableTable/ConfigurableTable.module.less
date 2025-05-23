@@ -35,10 +35,27 @@
     .ant-table-wrapper {
       background: none;
       display: flex;
+      overflow: auto;
       flex-direction: column;
+      &::-webkit-scrollbar {
+        width: 0.01px;
+      }
       .ant-table-cell{
-        min-height: 79px;
-        padding: 16px 8px;
+        //padding: 16px 8px;
+        padding: 0;
+        .td-cell{
+          min-height: 79px;
+          box-sizing: border-box;
+          margin: 0 8px;
+          display: flex;
+          align-items: center;
+          position: relative;
+          .actions-container{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
       }
       .ant-table-thead {
         background: #f5f5f5 !important;

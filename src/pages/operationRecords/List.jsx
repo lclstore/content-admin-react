@@ -52,6 +52,7 @@ export default function CollectionsList() {
 
     return (
         <Tabs
+            style={{flex:1}}
             items={tabItems}
             activeKey={bizType}
             onChange={onChange}

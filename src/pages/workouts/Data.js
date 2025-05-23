@@ -67,7 +67,7 @@ export const mockWorkoutsForList = [
         id: 1,
         type: 'image',
         image: 'internal/test/ccdfcc51d1d4419c9a9d3ecce9bbebf4.png',
-        coverImage: 'internal/test/ccdfcc51d1d4419c9a9d3ecce9bbebf4.png',
+        coverImage: '',
         name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
         status: 'enabled',
         difficulty: 'Hard',

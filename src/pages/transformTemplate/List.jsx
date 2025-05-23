@@ -49,7 +49,7 @@ export default function CollectionsList() {
             <DefaultTabBar {...props} />
         </StickyBox>
     );
-    return <Tabs style={{ backgroundColor: 'white' }} defaultActiveKey="1"
+    return <Tabs style={{ backgroundColor: 'white',flex:1 }} defaultActiveKey="1"
         renderTabBar={renderTabBar}
         items={tabItems.map(i => ({ ...i, children: <div style={{ padding: '20px' }}>{i.children}</div> }))}
         onChange={onChange} />

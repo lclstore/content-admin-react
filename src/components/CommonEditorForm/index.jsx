@@ -37,12 +37,16 @@ import { arrayMove } from '@dnd-kit/sortable';
  * @param {Function} props.onCollapseChange 折叠面板变化回调函数
  * @param {boolean} props.enableDraft 是否启用草稿功能
  * @param {Array} props.fieldsToValidate 需要验证的表单字段
+ * @param {boolean} props.changeHeader 是否改变头部
+ * @param {Function} props.onSubmit 提交函数
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
+        onSubmit,
         fields = [],
+        changeHeader = true,
         fieldsToValidate = ['name'],
         isCollapse = false,
         initialValues = {},
@@ -142,6 +146,7 @@ export default function CommonEditor(props) {
     const { headerButtons } = useHeaderConfig({
         config,
         id,
+        onSubmit,
         fieldsToValidate,
         enableDraft,
         isFormDirty,
@@ -657,7 +662,7 @@ export default function CommonEditor(props) {
             config.onDataLoaded(transformedData);
         }
         // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
-        if (headerContext.setButtons) {
+        if (headerContext.setButtons && changeHeader) {
             const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 0 && transformedData.status !== 2;
             headerButtons[0].disabled = isNonZeroStatus;
             const saveButton = headerButtons.find(button => button.key === 'save');

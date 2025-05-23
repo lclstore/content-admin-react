@@ -95,6 +95,7 @@ export const useFormState = (initialValues = {}) => {
  */
 export const useHeaderConfig = (params) => {
     const {
+        onSubmit,
         enableDraft = false,
         statusList = optionsConstants.displayStatus,//状态列表
         config,
@@ -130,6 +131,14 @@ export const useHeaderConfig = (params) => {
     // 状态选择弹框状态
     const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
     const [pendingSaveData, setPendingSaveData] = useState(null);
+
+    // 监听onSubmit属性变化
+    useEffect(() => {
+        if (onSubmit && typeof onSubmit === 'function') {
+            // 调用handleStatusModalConfirm并传入onSubmit作为回调
+            handleStatusModalConfirm();
+        }
+    }, [onSubmit]);
 
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, parent = null) => {

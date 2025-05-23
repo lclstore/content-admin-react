@@ -10,7 +10,8 @@ import {
     Row,
     Col,
     Image,
-    Select
+    Select,
+    Button
 } from 'antd';
 import {
     EyeOutlined,
@@ -118,16 +119,12 @@ export const renderFormControl = (field, options = {}) => {
             return field.content ? <Image className={styles.displayImg} src={field.content} style={{ ...field.style }} /> : '';
         case 'input':
             const { key: inputKey, style: inputStyle, ...inputRest } = field;
-            return <Input
-                key={inputKey}
-                style={inputStyle}
-                placeholder={placeholder || `Enter ${label || name}`}
+            return <ControlledInput
+                field={field}
+                name={name}
+                label={label}
                 disabled={disabled}
-                allowClear
-                maxLength={field.maxLength}
-                showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
-                autoComplete="off"
-                {...field.props}
+                placeholder={placeholder}
                 {...inputRest}
             />;
         //文本输入框
@@ -147,16 +144,13 @@ export const renderFormControl = (field, options = {}) => {
         //密码输入框
         case 'password':
             const { key: passwordKey, ...passwordRest } = field;
-            return <Input.Password
-                key={passwordKey}
-                placeholder={placeholder || `Enter ${label || name}`}
+            return <ControlledInput
+                field={field}
+                name={name}
+                label={label}
                 disabled={disabled}
-                iconRender={(visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                allowClear
-                maxLength={field.maxLength}
-                showCount={field.showCount !== undefined ? field.showCount : field.maxLength}
-                autoComplete="off"
-                {...field.props}
+                placeholder={placeholder}
+                type="password"
                 {...passwordRest}
             />;
 
@@ -406,6 +400,47 @@ export const renderFormControl = (field, options = {}) => {
             );
 
     }
+};
+
+// 创建一个独立的输入框组件
+const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', ...rest }) => {
+    const [inputDisabled, setInputDisabled] = useState(initialDisabled);
+    const InputComponent = type === 'password' ? Input.Password : Input;
+
+    // 根据类型准备不同的属性
+    const inputProps = {
+        style: field.style,
+        placeholder: placeholder || `Enter ${label || name}`,
+        disabled: inputDisabled,
+        allowClear: true,
+        maxLength: field.maxLength,
+        showCount: field.showCount !== undefined ? field.showCount : field.maxLength,
+        autoComplete: "off",
+        ...field.props,
+        ...rest
+    };
+
+    // 只有在密码输入框时才添加 iconRender 属性
+    if (type === 'password') {
+        inputProps.iconRender = (visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />;
+    }
+
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <InputComponent {...inputProps} />
+            {
+                field.buttons && field.buttons.length > 1 && (
+                    <Button
+                        className='btn'
+                        type={inputDisabled ? "primary" : "default"}
+                        onClick={() => setInputDisabled(!inputDisabled)}
+                    >
+                        {inputDisabled ? field.buttons[0] : field.buttons[1]}
+                    </Button>
+                )
+            }
+        </div>
+    );
 };
 
 /**

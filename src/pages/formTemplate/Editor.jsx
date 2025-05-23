@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router';
-import { PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
+import { useNavigate, useLocation } from 'react-router';
+import { PlayCircleOutlined, PauseCircleOutlined, MailOutlined, LockOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
-
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
     // 创建音频播放器的引用
     let audioPlayer = null;
     // 当前播放的音频URL
@@ -280,8 +282,10 @@ export default function UserEditorWithCommon() {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
             label: 'Name',
-            width: '50%',
+            buttons: ['Edit', 'Save'],
+            disabled: !!id,
             maxLength: 100,
+            prefix: <MailOutlined />,
             required: true,
             placeholder: 'Enter user name',
             rules: [
@@ -291,7 +295,6 @@ export default function UserEditorWithCommon() {
         {
             type: 'input',
             name: 'email',
-            width: '50%',
             maxLength: 100,
             label: 'Email',
             required: true,
@@ -313,6 +316,9 @@ export default function UserEditorWithCommon() {
             type: 'password',
             name: 'userPassword',
             label: 'Password',
+            prefix: <LockOutlined />,
+            buttons: ['Edit', 'Save'],
+            disabled: !!id,
             required: true,
             rules: [
                 { required: true, message: 'Please input passowrd.' },

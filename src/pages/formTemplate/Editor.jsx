@@ -259,6 +259,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'status1',
             label: 'Status1',
+            width: '50%',
             options: 'testStatus',
             required: true,
 
@@ -266,6 +267,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'multiple',
+            width: '50%',
             disabled: false,
             name: 'status2',
             label: 'Status2',
@@ -278,6 +280,7 @@ export default function UserEditorWithCommon() {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
             label: 'Name',
+            width: '50%',
             maxLength: 100,
             required: true,
             placeholder: 'Enter user name',
@@ -288,6 +291,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'input',
             name: 'email',
+            width: '50%',
             maxLength: 100,
             label: 'Email',
             required: true,

@@ -203,7 +203,7 @@ export const renderFormControl = (field, options = {}) => {
                     placeholder={placeholder}
                     disabled={disabled}
                     onChange={handleChange}
-                    style={{ width: '100%' }}
+                    style={{ width: field.width || '100%' }}
                 />
             );
         case 'switch':
@@ -630,7 +630,7 @@ export const renderBasicForm = (fields, options) => {
                         <Col
                             key={field.name || `field-${Math.random()}`}
                             className={styles.formCol}
-                            style={{ width: `${colSpan === 24 ? '100%' : '50%'}` }}
+                            style={{ width: field.width || '100%' }}
                         >
                             {renderFormItem(field, options)}
                         </Col>
@@ -669,7 +669,7 @@ export const renderPanelFields = (panel, panelIndex, item, itemIndex, options) =
                     <div
                         key={`field-${fieldIndex}`}
                         className={styles.panelItemField}
-                        style={{ width: `${span === 24 ? '100%' : '50%'}` }}
+                        style={{ width: field.width || '100%' }}
                     >
                         {renderFormItem(modifiedField, options)}
                     </div>

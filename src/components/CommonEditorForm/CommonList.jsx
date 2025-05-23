@@ -70,7 +70,7 @@ const CommonList = ({
     defaultQueryParams = {
         page: 1,
         pageSize: 10,
-        status: 1
+        status: 'ENABLED'
     }
 }) => {
     const [scrollableId] = useState(() => `commonListScrollableDiv-${Math.random().toString(36).substring(2, 9)}`);
@@ -287,8 +287,8 @@ const CommonList = ({
     }, [renderListItem]);
 
     return (
-      
-             <div className={styles.commonList}>
+
+        <div className={styles.commonList}>
             <div className={styles.search}>
                 <Input
                     prefix={<SearchOutlined />}
@@ -336,15 +336,15 @@ const CommonList = ({
                     }
                     scrollableTarget={scrollableId}
                 >
-                  <Spin spinning={loading}>
-                  <List
-                        itemLayout="horizontal"
-                        dataSource={displayedItems}
-                        className="common-list"
-                        renderItem={renderListItem}
-                    />
-                  </Spin>
-                  
+                    <Spin spinning={loading}>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={displayedItems}
+                            className="common-list"
+                            renderItem={renderListItem}
+                        />
+                    </Spin>
+
                 </InfiniteScroll>
             </div>
         </div>

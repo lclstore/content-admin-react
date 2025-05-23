@@ -11,11 +11,11 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        structureType:'Main',
-        gender:'Male',
-        difficulty:'Beginner',
-        equipment:'Chair',
-        position:"Seated"
+        structureType: 'Main',
+        gender: 'Male',
+        difficulty: 'Beginner',
+        equipment: 'Chair',
+        position: "Seated"
         // layoutType: 1,
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
@@ -58,6 +58,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'structureType',
             label: 'Structure Type',
+            disabled: true,
             options: [
                 { name: 'Warm Up', value: 'Warm_Up' },
                 { name: 'Main', value: 'Main' },
@@ -115,6 +116,7 @@ export default function UserEditorWithCommon() {
             type: 'select',
             mode: 'multiple',
             name: 'injured',
+            disabled: true,
             label: 'Injured',
             options: [
                 { name: 'Shoulder', value: 'Shoulder' },
@@ -126,7 +128,7 @@ export default function UserEditorWithCommon() {
 
             ]
         },
-         {
+        {
             type: 'textarea',
             name: 'howtodoScript', // 遵循命名规范，使用驼峰命名
             label: 'Howtodo Script',
@@ -147,7 +149,7 @@ export default function UserEditorWithCommon() {
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
         },
-       
+
         {
             type: 'upload',
             // required: true,
@@ -291,7 +293,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'Exercise',headerButtons:null }}
+            config={{ formName: 'Exercise', headerButtons: null }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

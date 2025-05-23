@@ -21,7 +21,7 @@
     margin-bottom: 16px;
     border: none;
 }
- 
+
 /* 列表项样式 */
 .item :global(.ant-list-item-meta-title) {
     margin-bottom: 0 !important;
@@ -35,10 +35,12 @@
 .item :global(.ant-list-item-action>li) {
     padding-left: 8px;
 }
-.ant-list-item-meta{
+
+.ant-list-item-meta {
     display: flex;
     align-items: center;
 }
+
 /* 头像和播放图标样式 */
 .itemAvatar {
     position: relative;
@@ -68,6 +70,7 @@
 .item:hover {
     background-color: rgba(0, 0, 0, 0.02);
 }
+
 /* 激活的折叠面板标题样式 */
 .workoutDetailsCollapse :global(.ant-collapse-item.ant-collapse-item-active) :global(.ant-collapse-header) {
     border-radius: 16px 16px 0 0 !important;
@@ -148,7 +151,7 @@
 
 /* 表单项标签样式 */
 .formItem :global(.ant-form-item-label)>label {
-    font-weight: 500;
+    font-weight: 600;
     color: #333;
 }
 

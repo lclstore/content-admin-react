@@ -248,6 +248,7 @@ export const renderFormControl = (field, options = {}) => {
                 </Select>
             )
         case 'select':
+
             //选项处理使用统一的options映射
             const fieldCopy = JSON.parse(JSON.stringify(field));
             if (field.options && typeof field.options === 'string') {
@@ -318,8 +319,6 @@ export const renderFormControl = (field, options = {}) => {
         //输入框组
         case 'inputGroup':
             const { inputConfig } = field;
-            console.log(222);
-
             return (
                 <Form.Item
                     className='inputGroup'

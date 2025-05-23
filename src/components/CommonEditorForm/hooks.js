@@ -119,20 +119,17 @@ export const useHeaderConfig = (params) => {
         getLatestValues,
         initialValues = {} // 确保初始值可用
     } = params;
+
     // 创建ref存储最新的collapseFormConfig
     const collapseFormConfigRef = useRef(fields);
     // 更新ref值确保始终是最新的
     useEffect(() => {
         collapseFormConfigRef.current = fields;
-        console.log('fields', fields);
     }, [fields]);
 
     // 状态选择弹框状态
     const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
     const [pendingSaveData, setPendingSaveData] = useState(null);
-
-
-
 
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, parent = null) => {
@@ -259,7 +256,7 @@ export const useHeaderConfig = (params) => {
         if (!form) return;
 
         // 获取当前表单值中的状态，如果没有则使用初始状态
-        const currentStatus = form.getFieldValue('status') || initialValues.status || 1;
+        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLED';
         // 如果启用草稿功能，先弹出状态选择框，否则直接使用当前状态
         if (enableDraft) {
             setPendingSaveData({});
@@ -273,14 +270,14 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 处理状态选择确认
-    const handleStatusModalConfirm = (statusValue = 1) => {
+    const handleStatusModalConfirm = (statusValue = 'ENABLED') => {
         setIsStatusModalVisible(false);
 
         // 在表单中设置选择的状态
         form.setFieldValue('status', statusValue);
 
         // 根据状态值确定验证规则
-        if (enableDraft && statusValue === 0) {
+        if (enableDraft && statusValue === 'DRAFT') {
             // 状态为0，只验证name字段
             form.validateFields(fieldsToValidate)
                 .then(() => {
@@ -428,51 +425,63 @@ export const useHeaderConfig = (params) => {
 
     // 头部按钮配置
     let headerButtons = useMemo(() => {
-        return [
-            {
-                key: 'save',
-                hidden: config.hideSaveButton,
-                text: config.saveButtonText || 'Save',
-                icon: React.createElement(SaveOutlined),
-                type: 'primary',
-                onClick: handleSaveChanges,
-                // disabled: !config.allowEmptySave && !isFormDirty,// 如果表单内容没修改时禁用按钮
-                disabled: !config.allowEmptySave,
-            },
-            {
-                key: 'back',
-                hidden: config.hideBackButton,
-                text: config.backButtonText || 'Back',
-                icon: React.createElement(ArrowLeftOutlined),
-                onClick: handleBackClick,
-            }
-        ];
+        const saveButton = {
+            key: 'save',
+            hidden: config.hideSaveButton,
+            text: config.saveButtonText || 'Save',
+            icon: React.createElement(SaveOutlined),
+            type: 'primary',
+            onClick: handleSaveChanges,
+            disabled: !config.allowEmptySave,
+            // 添加状态选择的相关props
+            statusModalProps: enableDraft ? {
+                visible: isStatusModalVisible,
+                statusList,
+                onConfirm: handleStatusModalConfirm,
+                onCancel: handleStatusModalCancel
+            } : null
+        };
+
+        const backButton = {
+            key: 'back',
+            hidden: config.hideBackButton,
+            text: config.backButtonText || 'Back',
+            icon: React.createElement(ArrowLeftOutlined),
+            onClick: handleBackClick,
+        };
+
+        return [saveButton, backButton];
     }, [
         config.saveButtonText,
         config.backButtonText,
         config.allowEmptySave,
         isFormDirty,
         handleSaveChanges,
-        handleBackClick
+        handleBackClick,
+        enableDraft,
+        isStatusModalVisible,
+        statusList
     ]);
+
     if (config.headerButtons) {
         config.headerButtons.forEach(button => {
             if (button.key === 'save') {
                 button.onClick = handleSaveChanges;
+                // 添加状态选择的相关props
+                if (enableDraft) {
+                    button.statusModalProps = {
+                        visible: isStatusModalVisible,
+                        statusList,
+                        onConfirm: handleStatusModalConfirm,
+                        onCancel: handleStatusModalCancel
+                    };
+                }
             }
         });
         headerButtons = config.headerButtons;
     }
+
     return {
-        headerButtons,
-        handleSaveChanges,
-        handleBackClick,
-        // 状态选择模态框
-        statusModalProps: {
-            visible: isStatusModalVisible,
-            statusList,
-            onConfirm: handleStatusModalConfirm,
-            onCancel: handleStatusModalCancel
-        }
+        headerButtons
     };
 }; 

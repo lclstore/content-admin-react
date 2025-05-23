@@ -485,14 +485,19 @@ const CollapseForm = ({
                 className={styles.formItem}
                 required={field.required}
                 key={field.name}
-                label={field.label}
+                label={
+                    field.type === 'upload' || field.type === 'structureList'
+                        ? null
+                        : field.label
+                }
 
             >
                 {renderFormControl(field, {
                     form,
                     formConnected,
                     initialValues,
-                    mounted
+                    mounted,
+
                 })}
             </Form.Item>
         );

@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Button, Card, Space, Spin, Modal } from 'antd';
+import { Form, Button, Card, Space, Spin } from 'antd';
 import {
     PlusOutlined,
     DeleteOutlined,
-
 } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import styles from './style.module.css';
@@ -15,40 +14,6 @@ import CollapseForm from './CollapseForm'; //右侧折叠表单
 import dayjs from 'dayjs';
 import { dateRangeKeys } from '@/constants/app';
 import { arrayMove } from '@dnd-kit/sortable';
-
-/**
- * Status selection modal component
- */
-const StatusSelectModal = ({ visible, statusList, onConfirm, onCancel }) => {
-    return (
-        <Modal
-            title="Select Status"
-            open={visible}
-            onCancel={onCancel}
-            maskClosable={false}
-            keyboard={false}
-            centered={true}
-            footer={null} // 移除底部按钮区域
-
-        >
-            <div style={{ margin: '20px 60px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 500 }}>Please select content status:</div>
-                <div style={{ margin: '20px 0 40px 0', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-                    {statusList.map(status => (
-                        <Button
-                            style={{ padding: '10px 20px' }}
-                            key={status.value}
-                            type="default"
-                            onClick={() => onConfirm(status.value)}
-                        >
-                            {status.name}
-                        </Button>
-                    ))}
-                </div>
-            </div>
-        </Modal>
-    );
-};
 
 /**
  * 通用编辑器组件
@@ -174,7 +139,7 @@ export default function CommonEditor(props) {
     const headerContext = useContext(HeaderContext);
 
     // 使用自定义钩子管理头部配置
-    const { headerButtons, handleSaveChanges, handleBackClick, statusModalProps } = useHeaderConfig({
+    const { headerButtons } = useHeaderConfig({
         config,
         id,
         fieldsToValidate,
@@ -966,10 +931,9 @@ export default function CommonEditor(props) {
     };
 
     return (
-        <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer}`}>
+        <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer} ${formType === 'basic' ? "basicEditorContainer" : "advancedEditorContainer"}`}>
             {contextHolder}
             {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
-            <StatusSelectModal {...statusModalProps} />
         </div>
     );
 }

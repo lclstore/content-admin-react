@@ -931,8 +931,8 @@ const FileUpload = ({
 
                         {/* 文件信息 */}
                         <div className={styles.uploadInfo} style={{ flex: '1', minWidth: 0 }}>
-                            <div className={`${styles.uploadLabel} ${field.required ? styles.uploadLabelRequired : ''}`}>
-                                {field.label}
+                            <div className={`${styles.uploadLabel} ${field?.required ? styles.uploadLabelRequired : ''}`}>
+                                {field?.label}
                             </div>
                             <Text type="secondary" className={styles.uploadDescription}>
                                 {uploadDescription || generatedUploadDescription}

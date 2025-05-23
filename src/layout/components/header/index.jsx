@@ -1,10 +1,33 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Button } from 'antd';
+import { Button, Dropdown } from 'antd';
 import menus from '@/config/menu';
 import { HeaderContext } from '@/contexts/HeaderContext';
 
 import './header.css';
+
+/**
+ * 状态选择下拉内容组件
+ */
+const StatusSelectContent = ({ statusList, onConfirm }) => {
+    return (
+        <div style={{ backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 500, marginBottom: '16px' }}>请选择内容状态:</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                {statusList.map(status => (
+                    <Button
+                        style={{ padding: '10px 20px' }}
+                        key={status.value}
+                        type="default"
+                        onClick={() => onConfirm(status.value)}
+                    >
+                        {status.name}
+                    </Button>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 /**
  * Header组件 - 应用全局头部
@@ -13,6 +36,8 @@ import './header.css';
 export default function Header() {
     const location = useLocation();
     const currentPath = location.pathname;
+    // 添加本地状态来控制Dropdown的显示
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     // 从HeaderContext获取按钮数组和自定义标题
     const { buttons, customPageTitle } = useContext(HeaderContext);
@@ -26,6 +51,14 @@ export default function Header() {
     // 获取页面标题，优先使用自定义标题
     const pageTitle = customPageTitle || currentMenu?.title || '内容管理系统';
 
+    // 处理Dropdown可见性变化
+    const handleDropdownOpenChange = (visible, button) => {
+        setDropdownOpen(visible);
+        if (!visible && button?.statusModalProps?.onCancel) {
+            button.statusModalProps.onCancel();
+        }
+    };
+
     return (
         <div className="header">
             <h1 className="page-title">{pageTitle}</h1>
@@ -33,8 +66,57 @@ export default function Header() {
             {/* 动态渲染按钮数组 */}
             <div className="header-actions">
                 {buttons.map((button, index) => {
-                    if (!button.hidden) {
-                        return <Button
+                    if (button.hidden) return null;
+
+                    // 为save按钮添加状态选择Dropdown
+                    if (button.key === 'save' && button.statusModalProps) {
+                        const { statusList, onConfirm } = button.statusModalProps;
+                        const DropdownItems = statusList.map(({ name, value }) => {
+                            return {
+                                key: value,
+                                label: name,
+                                style: {
+                                    padding: '5px 10px'
+                                },
+                                onClick: (e) => {
+                                    if (e.domEvent) e.domEvent.stopPropagation();
+                                    onConfirm(value);
+                                }
+                            }
+                        })
+
+                        return (
+                            <Dropdown
+                                key={button.key || index}
+                                menu={{ items: DropdownItems }}
+                                trigger={['click']}
+                                open={dropdownOpen}
+                                onOpenChange={(visible) => handleDropdownOpenChange(visible, button)}
+                            >
+                                <Button
+                                    type={button.type || 'default'}
+                                    icon={button.icon}
+                                    onClick={(e) => {
+                                        if (button.statusModalProps) {
+                                            setDropdownOpen(true);
+                                        } else {
+                                            button.onClick?.();
+                                        }
+                                    }}
+                                    loading={button.loading}
+                                    size={button.size || 'middle'}
+                                    disabled={button.disabled}
+                                    danger={button.danger}
+                                    className={button.className}
+                                >
+                                    {button.text}
+                                </Button>
+                            </Dropdown>
+                        );
+                    }
+
+                    return (
+                        <Button
                             key={button.key || index}
                             type={button.type || 'default'}
                             icon={button.icon}
@@ -47,7 +129,7 @@ export default function Header() {
                         >
                             {button.text}
                         </Button>
-                    }
+                    );
                 })}
             </div>
         </div>

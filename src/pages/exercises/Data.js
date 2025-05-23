@@ -7,62 +7,104 @@ export const listData = [
     {
         id: 1,
         type: 'video',
-        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123",
-        status:0,
-        met:"1",
-        structureType:"asd",
-        difficulty:"asd",
-        equipment:"asd",
-        position:"asd",
-        target:"asd",
-        frontVideoStatus:"Successful",
-        sideVideoStatus:"Processing"
+<<<<<<< HEAD
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "123",
+        status: 0,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
     },
     {
         id: 2,
         type: 'video',
-        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123123",
-        status:1,
-        met:"1",
-        structureType:"asd",
-        difficulty:"asd",
-        equipment:"asd",
-        position:"asd",
-        target:"asd",
-        frontVideoStatus:"Successful",
-        sideVideoStatus:"Processing"
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "123123",
+        status: 1,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
+=======
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        status: 0,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
+    }, {
+        id: 2,
+        type: 'video',
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        status: 1,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
+>>>>>>> cms-react-ly
     },
     {
         id: 3,
         type: 'video',
-        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"12312312",
-        status:2,
-        met:"1",
-        structureType:"asd",
-        difficulty:"asd",
-        equipment:"asd",
-        position:"asd",
-        target:"asd",
-        frontVideoStatus:"Successful",
-        sideVideoStatus:"Processing"
+<<<<<<< HEAD
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "12312312",
+        status: 2,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
+=======
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+        status: 2,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
+>>>>>>> cms-react-ly
     },
     {
         id: 4,
         type: 'video',
-        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"12312312",
-        status:2,
-        met:"1",
-        structureType:"asd",
-        difficulty:"asd",
-        equipment:"asd",
-        position:"asd",
-        target:"asd",
-        frontVideoStatus:"Successful",
-        sideVideoStatus:"Processing"
+        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
+        name: "12312312",
+        status: 2,
+        met: "1",
+        structureType: "asd",
+        difficulty: "asd",
+        equipment: "asd",
+        position: "asd",
+        target: "asd",
+        frontVideoStatus: "Successful",
+        sideVideoStatus: "Processing"
     },
     // {
     //     id: 5,
@@ -170,18 +212,33 @@ export const listData = [
     //     sideVideoStatus:"Processing"
     // },
 ]
+// 定义强制显示和默认显示的列键
+export const MANDATORY_COLUMN_KEYS = ['image', 'id', 'name', 'actions'];
+
+// 默认可见列的键
+export const DEFAULT_VISIBLE_COLUMN_KEYS = [
+    'image', 'id', 'name', 'status', 'subscription', 'difficulty', 'equipment', 'Injured', 'actions'
+];
+
+// 定义 Equipment 选项 (用于编辑器)
+export const equipmentOptions = ['Dumbbell', 'Resistance band', 'None', 'Bodyweight', 'Kettlebells', 'Yoga mat', 'Chair', 'Bed', 'Cycling Bike']; // Added more based on mock data, adjust as needed
 
 // 定义筛选器配置
 export const filterSections = [
     {
         title: 'Status',
         key: 'status',
-        options: ['Draft', 'Enabled', 'Disabled', 'Deprecated'],
+        options: ['Draft', 'Enabled', 'Disabled'],
     },
     {
         title: 'Structure Type',
         key: 'structureType',
         options: ['Warm Up', 'Main', 'Cool Down']
+    },
+    {
+        title: 'Gender',
+        key: 'gender',
+        options: ['Female', 'Male']
     },
     {
         title: 'Difficulty',
@@ -191,17 +248,17 @@ export const filterSections = [
     {
         title: 'Equipment',
         key: 'equipment',
-        options: ['Dumbbells', 'Resistance', 'band', 'None']
+        options: ['No equipment', 'Chair']
     },
     {
         title: 'Position',
         key: 'position',
-        options: ['Standing', 'Lying', 'Seated', 'Prone', 'Kneeling'],
+        options: ['Standing', 'Seated'],
     },
     {
-        title: 'Target',
-        key: 'target',
-        options: ['Full Body', 'Arm', 'Back', 'Butt', 'Abs', 'Leg', 'Core'],
+        title: 'Injured',
+        key: 'injured',
+        options: ['Shoulder', 'Back', 'Wrist', 'Ankle', 'Hip', 'None'],
     }
 ];
 

@@ -252,7 +252,9 @@
     font-size: 16px;
     font-weight: 600;
 }
-
+.ant-form-item .ant-form-item-label>label.ant-form-item-required::before {
+  color: #000 !important;
+}
 :global(.editorform-item) {
     margin-bottom: 24px !important;
 }

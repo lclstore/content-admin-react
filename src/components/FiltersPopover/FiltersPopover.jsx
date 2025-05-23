@@ -94,7 +94,7 @@ const FiltersPopover = ({
             onReset();
         }
         setTempSelectedValues({});
-        setIsVisible(false);
+        // setIsVisible(false);
     };
     // 确认/更新
     const handleUpdate = () => {

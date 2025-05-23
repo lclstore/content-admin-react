@@ -11,6 +11,11 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
+        structureType:'Main',
+        gender:'Male',
+        difficulty:'Beginner',
+        equipment:'Chair',
+        position:"Seated"
         // layoutType: 1,
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
@@ -25,7 +30,7 @@ export default function UserEditorWithCommon() {
             label: 'Name',
             maxLength: 100,
             required: true,
-            placeholder: 'Enter user name',
+            placeholder: 'Enter name',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
@@ -63,8 +68,19 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
+            name: 'gender',
+            label: 'Gender',
+            options: [
+                { name: 'Female', value: 'Female' },
+                { name: 'Male', value: 'Male' },
+            ],
+            required: true,
+        },
+        {
+            type: 'select',
+            mode: 'single',
             name: 'difficulty',
-            label: 'Difficulty Type',
+            label: 'Difficulty',
             options: [
                 { name: 'Beginner', value: 'Beginner' },
                 { name: 'Intermediate', value: 'Intermediate' },
@@ -78,9 +94,8 @@ export default function UserEditorWithCommon() {
             name: 'equipment',
             label: 'Equipment',
             options: [
-                { name: 'Dumbbell', value: 'Dumbbell' },
-                { name: 'resistanceBand', value: 'Resistance band' },
-                { name: 'None', value: 'None' },
+                { name: 'No equipment', value: 'noEquipment' },
+                { name: 'Chair', value: 'Chair' },
             ],
             required: true,
         },
@@ -91,10 +106,7 @@ export default function UserEditorWithCommon() {
             label: 'Position',
             options: [
                 { name: 'Standing', value: 'Standing' },
-                { name: 'Lying', value: 'Lying' },
                 { name: 'Seated', value: 'Seated' },
-                { name: 'Prone', value: 'Prone' },
-                { name: 'Kneeling', value: 'Kneeling' },
 
             ],
             required: true,
@@ -102,17 +114,26 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'multiple',
-            name: 'target',
-            label: 'Target',
+            name: 'injured',
+            label: 'Injured',
             options: [
-                { name: 'Full Body', value: 'Full_Body' },
-                { name: 'Arm', value: 'Arm' },
+                { name: 'Shoulder', value: 'Shoulder' },
                 { name: 'Back', value: 'Back' },
-                { name: 'Butt', value: 'Butt' },
-                { name: 'Abs', value: 'Abs' },
-                { name: 'Leg', value: 'Leg' },
-                { name: 'Core', value: 'Core' },
+                { name: 'Wrist', value: 'Wrist' },
+                { name: 'Knee', value: 'Knee' },
+                { name: 'Ankle', value: 'Ankle' },
+                { name: 'Hip', value: 'Hip' },
 
+            ]
+        },
+         {
+            type: 'textarea',
+            name: 'howtodoScript', // 遵循命名规范，使用驼峰命名
+            label: 'Howtodo Script',
+            maxLength: 1000,
+            placeholder: 'Howtodo Script',
+            rules: [
+                { max: 100, message: 'Name cannot exceed 100 characters' }
             ],
             required: true,
         },
@@ -121,21 +142,12 @@ export default function UserEditorWithCommon() {
             name: 'guidanceScript', // 遵循命名规范，使用驼峰命名
             label: 'Guidance Script',
             maxLength: 1000,
-            placeholder: 'Enter user name',
+            placeholder: 'Guidance Script',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
         },
-        {
-            type: 'textarea',
-            name: 'howtodoScript', // 遵循命名规范，使用驼峰命名
-            label: 'Howtodo Script',
-            maxLength: 1000,
-            placeholder: 'Enter user name',
-            rules: [
-                { max: 100, message: 'Name cannot exceed 100 characters' }
-            ]
-        },
+       
         {
             type: 'upload',
             // required: true,
@@ -279,7 +291,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
-            config={{ formName: 'Exercises',headerButtons:null }}
+            config={{ formName: 'Exercise',headerButtons:null }}
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}

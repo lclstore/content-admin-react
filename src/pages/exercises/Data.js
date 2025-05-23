@@ -7,34 +7,6 @@ export const listData = [
     {
         id: 1,
         type: 'video',
-<<<<<<< HEAD
-        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name: "123",
-        status: 0,
-        met: "1",
-        structureType: "asd",
-        difficulty: "asd",
-        equipment: "asd",
-        position: "asd",
-        target: "asd",
-        frontVideoStatus: "Successful",
-        sideVideoStatus: "Processing"
-    },
-    {
-        id: 2,
-        type: 'video',
-        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name: "123123",
-        status: 1,
-        met: "1",
-        structureType: "asd",
-        difficulty: "asd",
-        equipment: "asd",
-        position: "asd",
-        target: "asd",
-        frontVideoStatus: "Successful",
-        sideVideoStatus: "Processing"
-=======
         imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
         name: "123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
         status: 0,
@@ -60,24 +32,10 @@ export const listData = [
         target: "asd",
         frontVideoStatus: "Successful",
         sideVideoStatus: "Processing"
->>>>>>> cms-react-ly
     },
     {
         id: 3,
         type: 'video',
-<<<<<<< HEAD
-        imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name: "12312312",
-        status: 2,
-        met: "1",
-        structureType: "asd",
-        difficulty: "asd",
-        equipment: "asd",
-        position: "asd",
-        target: "asd",
-        frontVideoStatus: "Successful",
-        sideVideoStatus: "Processing"
-=======
         imageCoverUrl: "https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
         name: "123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
         status: 2,
@@ -89,7 +47,6 @@ export const listData = [
         target: "asd",
         frontVideoStatus: "Successful",
         sideVideoStatus: "Processing"
->>>>>>> cms-react-ly
     },
     {
         id: 4,

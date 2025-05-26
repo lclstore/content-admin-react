@@ -42,12 +42,12 @@ export const menuIconMap = {
     login: LoginOutlined,
     musics: AudioOutlined,
     collections: CopyOutlined,
-    info: EditOutlined,
+    home: EditOutlined,
     operationRecords: FileOutlined,
     plans: FileOutlined,
     profile: EditOutlined,
-    publish:SyncOutlined,
-    sounds:AudioOutlined
+    publish: SyncOutlined,
+    sounds: AudioOutlined
 
 };
 

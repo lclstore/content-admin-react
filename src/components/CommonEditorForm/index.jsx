@@ -115,7 +115,8 @@ export default function CommonEditor(props) {
     const navigate = useNavigate();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    const idFromUrl = params.get('id');
+    const idFromUrl = params.get('id'); // 从url获取id
+    const isDuplicate = params.get('isDuplicate'); // 是否是复制
     const id = propId !== undefined ? propId : idFromUrl; // 优先使用propId
     const [loading, setLoading] = useState(true);
     // 使用自定义钩子管理表单状态
@@ -729,7 +730,12 @@ export default function CommonEditor(props) {
             const url = `/${module}/detail/${id}`;
             const fetchFormData = initFormData || getformDataById;//公共方法--根据id获取表单数据
             response = await fetchFormData(url) || {};
+
             if (response.data) {
+                if (isDuplicate) {
+                    // 如果是复制，则将数据中的id设置为null
+                    response.data.id = null;
+                }
                 response = response.data;
             }
 
@@ -747,7 +753,7 @@ export default function CommonEditor(props) {
         }
         // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
         if (headerContext.setButtons && changeHeader) {
-            const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 0 && transformedData.status !== 2;
+            const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 'DRAFT' && transformedData.status !== 'DISABLE';
             headerButtons[0].disabled = isNonZeroStatus;
             const saveButton = headerButtons.find(button => button.key === 'save');
             saveButton.disabled = isNonZeroStatus && saveButton.disabled;

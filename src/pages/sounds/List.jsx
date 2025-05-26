@@ -209,9 +209,9 @@ export default function WorkoutsList() {
                 // 定义所有可能的按钮
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
-                isShow: isButtonVisible,
+                // isShow: isButtonVisible,
                 // 按钮点击处理函数
-                onActionClick: handleActionClick
+                // onActionClick: handleActionClick
             },
         ];
     }, [isButtonVisible, handleActionClick]);

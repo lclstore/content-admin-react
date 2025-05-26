@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import { useImmer } from "use-immer"
 import { Table, Input, Button, Spin, Space, Dropdown } from 'antd';
 import {
@@ -69,11 +69,13 @@ function ConfigurableTable({
     moduleKey
 }) {
     moduleKey = moduleKey || useLocation().pathname.split('/')[1];
+    const pathname = useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
     const paginationParams = useRef({
         ...paginationConfig,
     })
+    const navigate = useNavigate(); // 路由导航
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
@@ -548,9 +550,51 @@ function ConfigurableTable({
 
                 // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
                 else if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
+                    // 默认的按钮显示规则
+                    const defaultIsButtonVisible = (record, btnName) => {
+                        const status = record.status;
+                        // 简单的状态-按钮映射关系
+                        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+                        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+                        if (status === 'ENABLE' && ['edit', 'duplicate'].includes(btnName)) return true;
+                        return false;
+                    };
+                    const defaultActionClick = (key, rowData) => {
+                        switch (key) {
+                            // 编辑
+                            case 'edit':
+                                navigate(`/${pathname}/editor?id=${rowData.id}`);
+                                break;
+                            // 复制
+                            case 'duplicate':
+                                navigate(`/${pathname}/editor?id=${rowData.id}&isDuplicate=true`);
+                                break;
+                                // 删除
+                                setIsDeleteModalVisible(true);
+                                break;
+                            // 启用
+                            case 'enable':
+                                setIsDeleteModalVisible(true);
+                                break;
+                                // 禁用
+                                setIsDeleteModalVisible(true);
+                                break;
+                            // 弃用
+                            case 'deprecate':
+                                setIsDeleteModalVisible(true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                     processedCol.render = (_, rowData) => {
-                        let DropdownItems = listConfig.rowButtonsPublic.filter(i => processedCol.actionButtons.includes(i.key))
-                            .filter(({ key }) => processedCol.isShow(rowData, key))
+                        let DropdownItems = listConfig.rowButtonsPublic
+                            .filter(i => processedCol.actionButtons.includes(i.key))
+                            .filter(({ key }) => processedCol.isShow ? processedCol.isShow(rowData, key) : defaultIsButtonVisible(rowData, key))
+                            // 添加排序步骤，按照 actionButtons 中的顺序排序
+                            .sort((a, b) => {
+                                return processedCol.actionButtons.indexOf(a.key) - processedCol.actionButtons.indexOf(b.key);
+                            })
                             .map(({ key, click, icon }) => {
                                 const ItemIcon = icon
                                 return {
@@ -566,11 +610,13 @@ function ConfigurableTable({
                                         if (processedCol.onActionClick) {
                                             processedCol.onActionClick(key, rowData, e, click)
                                         } else {
-                                            click && click({ moduleKey, selectList: [rowData], searchTableData });
+                                            // 默认的处理方法
+                                            defaultActionClick(key, rowData, e)
                                         }
                                     }
                                 };
                             })
+
                         return (
                             <div className="actions-container" onClick={(e) => e.stopPropagation()}>
                                 <Dropdown

@@ -195,7 +195,7 @@ export default function UsersList() {
     // 修改处理提交方法
     const handleModalSubmit = async () => {
         if (editorActionsRef && editorActionsRef.triggerSave) {
-            setIsSubmitting(true);
+            // setIsSubmitting(true);
             try {
 
                 const currentRecord = dataSource.find(user => user.id === editingUserId);
@@ -204,9 +204,9 @@ export default function UsersList() {
                 await editorActionsRef.triggerSave(statusToSave);
                 // 成功消息应该由 handleSaveUser (在 Editor.jsx 中) 处理
 
-                setIsEditorModalVisible(false);
-                setEditingUserId(null);
-                getData(); // 刷新列表数据
+                // setIsEditorModalVisible(false);
+                // setEditingUserId(null);
+                // getData(); // 刷新列表数据
             } catch (error) {
 
                 console.error('保存用户失败 (从List.jsx捕获):', error);

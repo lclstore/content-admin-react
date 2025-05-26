@@ -238,7 +238,8 @@ export default function CommonEditor(props) {
         structurePanels,
         headerContext,
         setIsFormDirty,
-        getLatestValues
+        getLatestValues,
+        setLoading
     });
 
     // 左侧列表添加item - 在组件内部处理选中项

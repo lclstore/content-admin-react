@@ -95,6 +95,7 @@ export const useFormState = (initialValues = {}) => {
  */
 export const useHeaderConfig = (params) => {
     const {
+        setLoading,
         enableDraft = false,
         statusList = optionsConstants.displayStatus,//状态列表
         config,
@@ -225,14 +226,19 @@ export const useHeaderConfig = (params) => {
             );
         }
     };
-
+    //公共请保存form方法
+    const defaultOnSave = (dataToSave, editId, callbackUtils) => {
+        console.log(dataToSave, editId, callbackUtils);
+    }
     // 执行保存操作
     const executeSave = async (dataToSave, status = null) => {
-        if (status) {
-            dataToSave.status = status;
+        setLoading(true);
+        if (!dataToSave.status) {
+            dataToSave.status = 'ENABLE';
         }
+        console.log(onSave);
 
-        console.log('dataToSave', dataToSave);
+
         if (onSave) {
             const editId = id;
             const callbackUtils = {
@@ -356,7 +362,7 @@ export const useHeaderConfig = (params) => {
 
                 // 确保状态值正确
                 dataToSave.status = statusValue;
-                await executeSave(dataToSave); // await executeSave
+                await executeSave(dataToSave); // 调用保存
             } catch (error) {
                 // 尝试解析错误消息体
                 let errorData = error;

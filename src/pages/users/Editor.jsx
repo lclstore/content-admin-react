@@ -6,7 +6,12 @@ import { md5Encrypt } from '@/utils';
 
 export default function UserEditorWithCommon({ id, setFormRef }) {
     // 初始用户数据状态
-    const initialValues = {}
+    const initialValues = {
+        status: 'ENABLE',
+        password: 'dfjfhj42',
+        name: 'dfjfhj42',
+        email: 'dfjfhj42@gmail.com',
+    }
 
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -148,7 +153,7 @@ export default function UserEditorWithCommon({ id, setFormRef }) {
             config={{ formName: 'User', hideSaveButton: false, hideBackButton: true }}
             fields={formFields}
             initialValues={initialValues}
-            onSave={handleSaveUser}
+            // onSave={handleSaveUser}
             id={id}
             setFormRef={setFormRef}
         />

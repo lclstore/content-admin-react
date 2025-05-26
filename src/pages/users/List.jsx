@@ -17,7 +17,8 @@ export default function UsersList() {
     const [messageApi, contextHolder] = message.useMessage();
     const [isEditorModalVisible, setIsEditorModalVisible] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
-    const [formRef, setFormRef] = useState(null);
+    const [editorActionsRef, setEditorActionsRef] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // 操作区域点击处理
     const handleActionAreaClick = useCallback((e) => {
@@ -192,10 +193,27 @@ export default function UsersList() {
     }, [actionClicked, handleEdit]);
 
     // 修改处理提交方法
-    const handleModalSubmit = () => {
-        // 通过 formRef 触发表单提交
-        if (formRef) {
-            formRef.submit();
+    const handleModalSubmit = async () => {
+        if (editorActionsRef && editorActionsRef.triggerSave) {
+            setIsSubmitting(true);
+            try {
+
+                const currentRecord = dataSource.find(user => user.id === editingUserId);
+                const statusToSave = currentRecord?.status || 'ENABLE'; // 默认为 ENABLE
+
+                await editorActionsRef.triggerSave(statusToSave);
+                // 成功消息应该由 handleSaveUser (在 Editor.jsx 中) 处理
+
+                setIsEditorModalVisible(false);
+                setEditingUserId(null);
+                getData(); // 刷新列表数据
+            } catch (error) {
+
+                console.error('保存用户失败 (从List.jsx捕获):', error);
+                // 如果错误没有被下层捕获并显示，可以在这里添加 messageApi.error()
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -227,6 +245,16 @@ export default function UsersList() {
         document.addEventListener('click', handleGlobalClick);
         return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
+
+    useEffect(() => {
+        if (setEditorActionsRef && editorActionsRef) {
+            const formActions = {
+                form,
+                triggerSave: handleStatusModalConfirmFromHook
+            };
+            setEditorActionsRef(formActions);
+        }
+    }, [setEditorActionsRef]);
 
     return (
         <div className="usersContainer page-list">
@@ -265,7 +293,7 @@ export default function UsersList() {
             >
                 <UserEditorWithCommon
                     id={editingUserId}
-                    setFormRef={setFormRef}
+                    setFormRef={setEditorActionsRef}
                 />
             </Modal>
         </div>

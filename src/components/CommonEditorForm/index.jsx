@@ -40,6 +40,7 @@ import { arrayMove } from '@dnd-kit/sortable';
  * @param {boolean} props.changeHeader 是否改变头部
  * @param {Function} props.onSubmit 提交函数
  * @param {Function} props.setFormRef 表单引用设置函数
+ * @param {string} props.id 从props中获取id，用于覆盖从URL获取的id
  */
 export default function CommonEditor(props) {
     const {
@@ -62,7 +63,8 @@ export default function CommonEditor(props) {
         formFields, // 向后兼容：支持旧的formFields属性
         onFormFieldsChange = null, // 字段变更回调
         onCollapseChange = null, // 折叠面板变化回调
-        setFormRef // 添加表单引用设置属性
+        setFormRef, // 添加表单引用设置属性
+        id: propId // 从props中获取id，用于覆盖从URL获取的id
     } = props;
     // 添加选中项状态管理 - 存储从列表中选择的当前项
     const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
@@ -109,7 +111,8 @@ export default function CommonEditor(props) {
     const navigate = useNavigate();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    const id = params.get('id');
+    const idFromUrl = params.get('id');
+    const id = propId !== undefined ? propId : idFromUrl; // 优先使用propId
     const [loading, setLoading] = useState(true);
     // 使用自定义钩子管理表单状态
     const {
@@ -211,9 +214,9 @@ export default function CommonEditor(props) {
     };
 
     // 使用自定义钩子管理头部配置
-    const { headerButtons } = useHeaderConfig({
+    const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook } = useHeaderConfig({
         config,
-        id,
+        id, // 使用正确的 id
         onSubmit: onSubmitCallback, // 使用state中的callback
         fieldsToValidate,
         enableDraft,
@@ -1005,10 +1008,10 @@ export default function CommonEditor(props) {
 
     // 在 useEffect 中设置表单引用
     useEffect(() => {
-        if (setFormRef && form) {
-            setFormRef(form);
+        if (setFormRef && form && handleStatusModalConfirmFromHook) {
+            setFormRef({ form, triggerSave: handleStatusModalConfirmFromHook });
         }
-    }, [form, setFormRef]);
+    }, [setFormRef]);
 
     return (
         <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer} ${formType === 'basic' ? "basicEditorContainer" : "advancedEditorContainer"}`}>

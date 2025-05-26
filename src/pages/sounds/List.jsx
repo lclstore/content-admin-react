@@ -5,7 +5,6 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
 import { statusIconMap, optionsConstants } from '@/constants';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
@@ -151,7 +150,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            
+
             { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', width: 80, visibleColumn: 0 },
             { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', width: 80, visibleColumn: 0 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
@@ -422,12 +421,12 @@ export default function WorkoutsList() {
     /**
      * 重置操作标志
      */
-    useEffect(() => {
-        getData().then()
-        const handleGlobalClick = () => setActionClicked(false);
-        document.addEventListener('click', handleGlobalClick);
-        return () => document.removeEventListener('click', handleGlobalClick);
-    }, []);
+    // useEffect(() => {
+    //     getData().then()
+    //     const handleGlobalClick = () => setActionClicked(false);
+    //     document.addEventListener('click', handleGlobalClick);
+    //     return () => document.removeEventListener('click', handleGlobalClick);
+    // }, []);
 
     // 8. 表格数据和配置
     /**
@@ -484,28 +483,29 @@ export default function WorkoutsList() {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'workoutsList'}
+                uniqueId={'soundsList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"
+                moduleKey="sound"
                 loading={loading}
                 onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or ID...",
                     searchValue: searchValue,
-                    onSearchChange: handleSearchInputChange,
+                    // onSearchChange: handleSearchInputChange,
                 }}
                 showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,
                     activeFilters: selectedFilters,
-                    onUpdate: handleFilterUpdate,
-                    onReset: handleFilterReset,
+                    // onUpdate: handleFilterUpdate,
+                    // onReset: handleFilterReset,
                 }}
-                tableProps={{
-                    onChange: handleTableChange
-                }}
+            // tableProps={{
+            //     onChange: handleTableChange
+            // }}
             />
 
             {/* 删除确认弹窗 */}

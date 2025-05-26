@@ -17,7 +17,7 @@ import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
-import { getList as getListPublick } from "@/config/api.js";
+import { getPublicTableList } from "@/config/api.js";
 import settings from "@/config/settings.js"
 
 /**
@@ -42,16 +42,20 @@ import settings from "@/config/settings.js"
  * @param {boolean} [props.showColumnSettings=true] - 当为true时显示列设置按钮并执行列设置逻辑，当为false时显示所有列且不显示列设置按钮
  * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
- * @param {function} [props.getList] - 获取表格数据的回调函数
+ * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
  */
 function ConfigurableTable({
     uniqueId,
     columns, // 所有列的定义
-    dataSource,
+    dataSource = [],
     rowKey,
     loading = false,
     onRowClick,
+    paginationInfo = {
+        page: 1,
+        pageSize: 10,
+    },
     isInteractionBlockingRowClick, // 接收状态
     mandatoryColumnKeys = [], // 强制列 Key
     visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
@@ -64,19 +68,23 @@ function ConfigurableTable({
     tableProps,
     showColumnSettings = true,//当为true时显示列设置按钮
     leftToolbarItems = [], // 左侧工具栏按钮
-    getList,
+    getTableList,
     moduleKey
 }) {
-    moduleKey = moduleKey || useLocation().pathname.split('/').at(-2);
+    moduleKey = moduleKey || useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
-
+    const paginationParams = useRef({
+        ...paginationInfo,
+    })
+    const [tableData, setTableData] = useState(dataSource)
     // 声明内部 loading，也可以接受外部传入
-    const [loadingLocal,  setLoadingLocal] = useState(loading)
+    const [loadingLocal, setLoadingLocal] = useState(loading)
     useEffect(() => { setLoadingLocal(loading) }, [loading]);
 
-    // table ref
-    const tableRef = useRef(null)
+    //   ref
+    const tableRef = useRef(null) // 表格组件的ref
+    const activeFilters = useRef(filterConfig?.activeFilters || {}) //当前选中的筛选器
     // filter data
     const filterDataHook = useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
@@ -252,9 +260,9 @@ function ConfigurableTable({
 
     // 判断是否有激活的筛选器
     const hasActiveFilters = useMemo(() => {
-        if (!filterConfig || !filterConfig.activeFilters) return false;
-        return Object.values(filterConfig.activeFilters).some(arr => Array.isArray(arr) && arr.length > 0);
-    }, [filterConfig?.activeFilters]);
+        if (!activeFilters.current) return false;
+        return Object.values(activeFilters.current).some(arr => Array.isArray(arr) && arr.length > 0);
+    }, [activeFilters.current]);
 
     // --- 渲染逻辑 ---
     // 根据外部传入的完整 visibleColumnKeys 过滤列进行渲染
@@ -355,8 +363,8 @@ function ConfigurableTable({
                             isActionColumnClick ? 'Action column clicked' :
                                 isMediaCellClick ? 'Media cell clicked' : 'Checkbox clicked');
                     }
-                }else{
-                    listConfig.rowClickPublic && listConfig.rowClickPublic({rowData:record})
+                } else {
+                    listConfig.rowClickPublic && listConfig.rowClickPublic({ rowData: record })
                 }
             },
             style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
@@ -402,16 +410,33 @@ function ConfigurableTable({
         return config;
     }, [scrollX, totalVisibleWidth, tableHeight, tableProps?.scroll?.y]);
 
-    // getData 的方法
-    const getData = useCallback(async () => {
-        // getList 存在 自动调用内置g etListPublick 查询，getList 如果类型为Function 则调用外部传入的getList
-        if(getList){
-            setLoadingLocal(true)
-            const res = await (getList.constructor === Function ? getList : getListPublick)()
-            setLoadingLocal(false)
+    // 查询 表格数据
+    const searchTableData = useCallback(async () => {
+        const fetchTableData = getTableList || getPublicTableList
+
+        const res = await fetchTableData(moduleKey, {
+            ...paginationParams.current,
+            ...activeFilters.current
+        });
+        if (res && res.success) {
+            setTableData(res.data);
         }
     }, [currentlyVisibleColumns, dataSource, rowKey]);
+    // 搜索框 输入框 变化
+    const onSearchChange = useCallback((e) => {
+        paginationParams.current.keywords = e.target.value
 
+        searchTableData()// 查询 表格数据
+    }, [paginationParams])
+    // 筛选器 更新
+    const filterUpdate = useCallback((newFilters) => {
+        activeFilters.current = newFilters;
+        searchTableData()// 查询 表格数据
+    }, [paginationParams])
+    // 筛选器 重置
+    const filterReset = useCallback(() => {
+        searchTableData()// 查询 表格数据
+    }, [paginationParams])
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
     const processedColumns = useMemo(() => {
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
@@ -457,7 +482,7 @@ function ConfigurableTable({
                         if (!optionConfig) {
                             return text;
                         }
-                        console.log("DisplayText",DisplayText)
+                        console.log("DisplayText", DisplayText)
                         const B = () => DisplayText
                         return (
                             <B />
@@ -482,10 +507,10 @@ function ConfigurableTable({
                                     onClick: (e) => {
                                         if (e.domEvent) e.domEvent.stopPropagation();
                                         // 有自定义就执行自定义方法
-                                        if(processedCol.onActionClick){
-                                            processedCol.onActionClick(key,rowData,e,click)
-                                        }else {
-                                            click && click({ moduleKey,selectList:[rowData],getData });
+                                        if (processedCol.onActionClick) {
+                                            processedCol.onActionClick(key, rowData, e, click)
+                                        } else {
+                                            click && click({ moduleKey, selectList: [rowData], searchTableData });
                                         }
                                     }
                                 };
@@ -517,7 +542,7 @@ function ConfigurableTable({
                 // default
                 else {
                     processedCol.render = (text, record) => {
-                        return (<div style={{display: 'flex',  alignItems: 'center'}}>{text}</div>)
+                        return (<div style={{ display: 'flex', alignItems: 'center' }}>{text}</div>)
                     };
                 }
                 // 添加最小宽度
@@ -538,6 +563,7 @@ function ConfigurableTable({
     }, [currentlyVisibleColumns]);
 
     useEffect(() => {
+        searchTableData()//初始化数据
         // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
     }, []);
     return (
@@ -569,11 +595,11 @@ function ConfigurableTable({
                             maxLength={100}
                             showCount
                             placeholder={searchConfig.placeholder || 'Search...'}
-                            value={searchConfig.searchValue}
+                            value={paginationParams.keywords}
                             prefix={<SearchOutlined />}
-                            onChange={searchConfig.onSearchChange}
+                            onChange={onSearchChange}
                             className="configurable-table-search-input"
-                            suffix={loadingLocal ? <Spin size="small"/> : null}
+                            suffix={loadingLocal ? <Spin size="small" /> : null}
                             allowClear
                         />
                     )}
@@ -581,11 +607,9 @@ function ConfigurableTable({
                         <FiltersPopover
                             filterSections={filterConfig.filterSections}
                             dataHook={filterDataHook}
-                            activeFilters={filterConfig.activeFilters || {}}
-                            onUpdate={() => {
-                                filterConfig.onUpdate()
-                            }}
-                            onReset={filterConfig.onReset}
+                            activeFilters={activeFilters.current}
+                            onUpdate={filterUpdate}
+                            onReset={filterReset}
                             showBadgeDot={hasActiveFilters}
                             showClearIcon={hasActiveFilters}
                         >
@@ -625,7 +649,7 @@ function ConfigurableTable({
             {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
             <Table
                 columns={processedColumns}
-                dataSource={dataSource}
+                dataSource={tableData}
                 rowKey={rowKey}
                 loading={loadingLocal}
                 onRow={handleRow}

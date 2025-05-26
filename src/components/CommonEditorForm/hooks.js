@@ -1,7 +1,7 @@
 import { Form, message, notification, Modal, Select } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { savePublicFormData } from '@/api/publicReques'; //公共方法
+import { savePublicFormData } from '@/config/api.js'; //公共方法
 import { useLocation } from 'react-router-dom';
 import React from 'react';
 import { optionsConstants } from '@/constants';

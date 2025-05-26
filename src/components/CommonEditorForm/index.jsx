@@ -14,7 +14,7 @@ import CollapseForm from './CollapseForm'; //右侧折叠表单
 import dayjs from 'dayjs';
 import { dateRangeKeys } from '@/constants/app';
 import { arrayMove } from '@dnd-kit/sortable';
-import { getformDataById } from '@/api/publicReques'; //公共方法--根据id获取表单数据
+import { getformDataById } from '@/config/api.js'; //公共方法--根据id获取表单数据
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染

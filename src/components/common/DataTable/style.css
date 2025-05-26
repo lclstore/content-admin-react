@@ -6,13 +6,13 @@
   margin-bottom: var(--spacing-md);
 }
 
-.data-table-wrapper .ant-table-thead > tr > th {
+.data-table-wrapper .ant-table-thead>tr>th {
   background-color: var(--bg-light);
   color: var(--text-muted);
   font-weight: var(--font-weight-bold);
 }
 
-.data-table-wrapper .ant-table-tbody > tr:hover > td {
+.data-table-wrapper .ant-table-tbody>tr:hover>td {
   background-color: var(--bg-hover);
 }
 
@@ -26,4 +26,4 @@
 
 .data-table-wrapper .ant-table-empty .ant-table-body {
   min-height: 200px;
-} 
+}

@@ -53,10 +53,6 @@ function ConfigurableTable({
     rowKey,
     loading = false,
     onRowClick,
-    paginationInfo = {
-        page: 1,
-        pageSize: 10,
-    },
     isInteractionBlockingRowClick, // 接收状态
     mandatoryColumnKeys = [], // 强制列 Key
     visibleColumnKeys, // 当前所有可见列 Key (包括强制和可配置)
@@ -76,8 +72,10 @@ function ConfigurableTable({
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
     const paginationParams = useRef({
-        ...paginationInfo,
+        ...paginationConfig,
     })
+    // 添加上一次排序状态的引用
+    const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
     const [tableData, setTableData] = useState(dataSource)
     // 声明内部 loading，也可以接受外部传入
@@ -381,13 +379,7 @@ function ConfigurableTable({
         };
     };
 
-    // 最终的分页配置
-    const finalPaginationConfig = useMemo(() => {
-        if (paginationConfig === false) return false;
-        const config = { ...defaultPagination, ...paginationConfig };
-        config.total = dataSource?.length || 0;
-        return config;
-    }, [paginationConfig, dataSource]);
+
 
     // 表格性能优化配置
     const tableVirtualConfig = useMemo(() => {
@@ -443,11 +435,14 @@ function ConfigurableTable({
             abortControllerRef.current = null;
 
             if (res && res.success) {
+
                 setTableData(res.data);
+                paginationParams.current.totalCount = res.totalCount
                 if (isFirstSearch) {
                     setIsEmptyTableData(res.data.length === 0)
                 }
             } else {
+                paginationParams.current.totalCount = 0
                 setIsEmptyTableData(true)
             }
         } catch (error) {
@@ -495,6 +490,14 @@ function ConfigurableTable({
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
             let processedCol = { ...col };
+
+            // 添加默认排序配置
+            if (processedCol.sorter) {
+                processedCol.defaultSortOrder = processedCol.defaultSort === 'ascend' ? 'ascend' :
+                    processedCol.defaultSort === 'descend' ? 'descend' :
+                        'ascend';  // 未指定时默认升序
+            }
+
             if (!col.render) {
                 // 创建cell容器
                 // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
@@ -724,21 +727,41 @@ function ConfigurableTable({
                     columns={processedColumns}
                     dataSource={tableData}
                     rowKey={rowKey}
-                    loading={{
-                        spinning: loadingLocal,
-                        tip: 'Loading...'
-                    }}
                     onRow={handleRow}
                     ref={tableRef}
-                    pagination={finalPaginationConfig}
+                    pagination={{
+                        current: paginationParams.current.pageIndex,//当前页码
+                        pageSize: paginationParams.current.pageSize,//每页条数
+                        total: paginationParams.current.totalCount,//总条数
+                        showSizeChanger: true,//显示分页器
+                        showQuickJumper: true,//显示快速跳转
+                        pageSizeOptions: ['10', '20', '50', '100', '200', '500', '1000'],//每页条数选项
+                        showTotal: (total, range) => `${total} items`,//显示总条数
+                    }}
                     scroll={finalScrollConfig}
                     rowSelection={rowSelection}
                     virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
                     onChange={(pagination, filters, sorter) => {
-                        // 调用原有的onChange回调(如果存在)
-                        if (tableProps?.onChange) {
-                            tableProps.onChange(pagination, filters, sorter);
-                        }
+                        // 判断是否发生了排序变化
+                        const isSorterChanged =
+                            prevSorterRef.current?.field !== sorter.field ||
+                            prevSorterRef.current?.order !== sorter.order;
+
+                        // 更新分页参数 
+                        paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
+                        paginationParams.current.pageSize = pagination.pageSize;
+
+                        // 更新排序参数 
+                        const isAscending = sorter.order === 'ascend';
+                        const orderBy = sorter.field;
+                        const orderDirection = isAscending ? 'ASC' : 'DESC';
+                        paginationParams.current.orderBy = orderBy;
+                        paginationParams.current.orderDirection = orderDirection;
+
+                        // 更新上一次的排序状态
+                        prevSorterRef.current = { ...sorter };
+
+                        searchTableData();// 查询表格数据
                     }}
                     {...tableProps}
                 />

@@ -60,7 +60,7 @@ export const getPublicTableList = async (moduleKey, params) => {
     return new Promise(resolve => {
         request.get({
             url: `/${moduleKey}/page`,
-            load: false,
+            load: true,
             data: params,
             callback: res => resolve(res?.data)
         });

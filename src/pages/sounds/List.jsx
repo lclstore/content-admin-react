@@ -173,7 +173,7 @@ export default function WorkoutsList() {
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             {
                 title: 'Name',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 dataIndex: 'name',
                 key: 'name',
                 width: 350,

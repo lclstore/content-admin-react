@@ -19,7 +19,7 @@ import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
 import { getPublicTableList } from "@/config/api.js";
 import settings from "@/config/settings.js"
-
+import noDataImg from '@/assets/images/no-data.png';
 /**
  * 可配置表格组件
  *
@@ -77,6 +77,7 @@ function ConfigurableTable({
     const paginationParams = useRef({
         ...paginationInfo,
     })
+    const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
     const [tableData, setTableData] = useState(dataSource)
     // 声明内部 loading，也可以接受外部传入
     const [loadingLocal, setLoadingLocal] = useState(loading)
@@ -411,7 +412,7 @@ function ConfigurableTable({
     }, [scrollX, totalVisibleWidth, tableHeight, tableProps?.scroll?.y]);
 
     // 查询 表格数据
-    const searchTableData = useCallback(async () => {
+    const searchTableData = useCallback(async (isFirstSearch) => {
         const fetchTableData = getTableList || getPublicTableList
 
         const res = await fetchTableData(moduleKey, {
@@ -420,6 +421,11 @@ function ConfigurableTable({
         });
         if (res && res.success) {
             setTableData(res.data);
+            if (isFirstSearch) {
+                setIsEmptyTableData(res.data.length === 0)
+            }
+        } else {
+            setIsEmptyTableData(true)
         }
     }, [currentlyVisibleColumns, dataSource, rowKey]);
     // 搜索框 输入框 变化
@@ -563,110 +569,120 @@ function ConfigurableTable({
     }, [currentlyVisibleColumns]);
 
     useEffect(() => {
-        searchTableData()//初始化数据
+        searchTableData(true)//初始化数据
+
         // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
     }, []);
     return (
-        <div className={styles.configurableTableContainer}>
-            {/* 工具栏 */}
-            <div className="configurable-table-toolbar"
-                style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
-                {/* 左侧按钮区域 */}
-                <Space wrap className={styles.configurableTableToolbarLeft}>
-                    {leftToolbarItems.map(item => (
-                        <Button
-                            key={item.key}
-                            onClick={item.onClick}
-                            type={item.type || 'default'} // 默认为 default 类型
-                            icon={item.icon}
-                            disabled={item.disabled}
-                            // 可以传递其他 Button props
-                            {...item.buttonProps}
-                        >
-                            {item.label}
-                        </Button>
-                    ))}
-                </Space>
-
-                {/* 右侧工具区域 */}
-                <Space wrap className={styles.configurableTableToolbarRight}>
-                    {searchConfig && (
-                        <Input
-                            maxLength={100}
-                            showCount
-                            placeholder={searchConfig.placeholder || 'Search...'}
-                            value={paginationParams.keywords}
-                            prefix={<SearchOutlined />}
-                            onChange={onSearchChange}
-                            className="configurable-table-search-input"
-                            suffix={loadingLocal ? <Spin size="small" /> : null}
-                            allowClear
-                        />
-                    )}
-                    {filterConfig && filterConfig.filterSections?.length > 0 && (
-                        <FiltersPopover
-                            filterSections={filterConfig.filterSections}
-                            dataHook={filterDataHook}
-                            activeFilters={activeFilters.current}
-                            onUpdate={filterUpdate}
-                            onReset={filterReset}
-                            showBadgeDot={hasActiveFilters}
-                            showClearIcon={hasActiveFilters}
-                        >
-                            <Button
-                                icon={<FilterOutlined />}
-                                className={styles.configurableTableToolbarBtn}
-                            >
-                                Filters
-                            </Button>
-                        </FiltersPopover>
-                    )}
-                    {showColumnSettings && hasColumnSettingOptions && (
-                        <FiltersPopover
-                            filterSections={[columnSettingsSection]}
-                            activeFilters={initialVisibleColumnTitles}
-                            onUpdate={handleColumnVisibilityUpdate}
-                            onReset={handleColumnVisibilityReset}
-                            popoverPlacement="bottomRight"
-                            applyImmediately={false}
-                            clearButtonText="Reset"
-                            confirmButtonText="Apply"
-                            showBadgeDot={hasActiveColumnSettings}
-                            showClearIcon={false}
-                            isSettingsType
-                        >
-                            <Button
-                                icon={<SettingOutlined />}
-                                className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
-                            >
-                                Table Settings
-                            </Button>
-                        </FiltersPopover>
-                    )}
-                </Space>
+        isEmptyTableData ?
+            <div className={styles.customEmptyWrapper}>
+                <div className={styles.customEmptyImageWrapper}>
+                    <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
+                </div>
+                <div className={styles.customEmptyTitle}>Start Building Your Content </div>
+                <div className={styles.customEmptyDescription}>Create your first program.</div>
             </div>
+            :
+            <div className={styles.configurableTableContainer}>
+                {/* 工具栏 */}
+                <div className="configurable-table-toolbar"
+                    style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
+                    {/* 左侧按钮区域 */}
+                    <Space wrap className={styles.configurableTableToolbarLeft}>
+                        {leftToolbarItems.map(item => (
+                            <Button
+                                key={item.key}
+                                onClick={item.onClick}
+                                type={item.type || 'default'} // 默认为 default 类型
+                                icon={item.icon}
+                                disabled={item.disabled}
+                                // 可以传递其他 Button props
+                                {...item.buttonProps}
+                            >
+                                {item.label}
+                            </Button>
+                        ))}
+                    </Space>
 
-            {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
-            <Table
-                columns={processedColumns}
-                dataSource={tableData}
-                rowKey={rowKey}
-                loading={loadingLocal}
-                onRow={handleRow}
-                ref={tableRef}
-                pagination={finalPaginationConfig}
-                scroll={finalScrollConfig}
-                rowSelection={rowSelection}
-                virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
-                onChange={(pagination, filters, sorter) => {
-                    // 调用原有的onChange回调(如果存在)
-                    if (tableProps?.onChange) {
-                        tableProps.onChange(pagination, filters, sorter);
-                    }
-                }}
-                {...tableProps}
-            />
-        </div>
+                    {/* 右侧工具区域 */}
+                    <Space wrap className={styles.configurableTableToolbarRight}>
+                        {searchConfig && (
+                            <Input
+                                maxLength={100}
+                                showCount
+                                placeholder={searchConfig.placeholder || 'Search...'}
+                                value={paginationParams.keywords}
+                                prefix={<SearchOutlined />}
+                                onChange={onSearchChange}
+                                className="configurable-table-search-input"
+                                suffix={loadingLocal ? <Spin size="small" /> : null}
+                                allowClear
+                            />
+                        )}
+                        {filterConfig && filterConfig.filterSections?.length > 0 && (
+                            <FiltersPopover
+                                filterSections={filterConfig.filterSections}
+                                dataHook={filterDataHook}
+                                activeFilters={activeFilters.current}
+                                onUpdate={filterUpdate}
+                                onReset={filterReset}
+                                showBadgeDot={hasActiveFilters}
+                                showClearIcon={hasActiveFilters}
+                            >
+                                <Button
+                                    icon={<FilterOutlined />}
+                                    className={styles.configurableTableToolbarBtn}
+                                >
+                                    Filters
+                                </Button>
+                            </FiltersPopover>
+                        )}
+                        {showColumnSettings && hasColumnSettingOptions && (
+                            <FiltersPopover
+                                filterSections={[columnSettingsSection]}
+                                activeFilters={initialVisibleColumnTitles}
+                                onUpdate={handleColumnVisibilityUpdate}
+                                onReset={handleColumnVisibilityReset}
+                                popoverPlacement="bottomRight"
+                                applyImmediately={false}
+                                clearButtonText="Reset"
+                                confirmButtonText="Apply"
+                                showBadgeDot={hasActiveColumnSettings}
+                                showClearIcon={false}
+                                isSettingsType
+                            >
+                                <Button
+                                    icon={<SettingOutlined />}
+                                    className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
+                                >
+                                    Table Settings
+                                </Button>
+                            </FiltersPopover>
+                        )}
+                    </Space>
+                </div>
+
+                {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
+                <Table
+                    columns={processedColumns}
+                    dataSource={tableData}
+                    rowKey={rowKey}
+                    loading={loadingLocal}
+                    onRow={handleRow}
+                    ref={tableRef}
+                    pagination={finalPaginationConfig}
+                    scroll={finalScrollConfig}
+                    rowSelection={rowSelection}
+                    virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
+                    onChange={(pagination, filters, sorter) => {
+                        // 调用原有的onChange回调(如果存在)
+                        if (tableProps?.onChange) {
+                            tableProps.onChange(pagination, filters, sorter);
+                        }
+                    }}
+                    {...tableProps}
+                />
+            </div>
     );
 }
 

@@ -11,7 +11,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        translation:1
+        translation: 1
         // layoutType: 1,
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
@@ -65,8 +65,8 @@ export default function UserEditorWithCommon() {
             name: 'translation',
             label: 'Has a Script',
             required: true,
-            checkedChildren:'Yes',
-            unCheckedChildren:'No',
+            checkedChildren: 'Yes',
+            unCheckedChildren: 'No',
         },
         {
             type: 'textarea',
@@ -112,7 +112,7 @@ export default function UserEditorWithCommon() {
         };
         new Promise(resolve => {
             request.post({
-                url: "/sound/save", 
+                url: "/sound/save",
                 load: true,
                 data: values,
                 callback(res) {
@@ -157,10 +157,12 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
+            moduleKey="sound"
+
             config={{ formName: 'Sound' }}
             fields={formFields}
             initialValues={initialValues}
-            onSave={handleSaveUser}
+        // onSave={handleSaveUser}
         />
     );
 } 

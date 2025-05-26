@@ -41,12 +41,15 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {Function} props.onSubmit 提交函数
  * @param {Function} props.setFormRef 表单引用设置函数
  * @param {string} props.id 从props中获取id，用于覆盖从URL获取的id
+ * @param {string} props.moduleKey 模块key
+ * @param {boolean} props.isBack 是否返回上一级
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
-        moduleName,
+        isBack = true,
+        moduleKey,
         onSubmit,
         fields = [],
         changeHeader = true,
@@ -217,8 +220,9 @@ export default function CommonEditor(props) {
     // 使用自定义钩子管理头部配置
     const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook } = useHeaderConfig({
         config,
+        isBack,
         id: id || idFromUrl, // 使用正确的 id
-        moduleName,
+        moduleKey,
         onSubmit: onSubmitCallback, // 使用state中的callback
         fieldsToValidate,
         enableDraft,
@@ -721,7 +725,7 @@ export default function CommonEditor(props) {
         setLoading(true);
         // 如果id存在，则请求获取数据
         if (id) {
-            const module = moduleName || location.pathname.split('/')[1]; // 获取模块名称
+            const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
             const url = `/${module}/detail/${id}`;
             const fetchFormData = initFormData || getformDataById;//公共方法--根据id获取表单数据
             response = await fetchFormData(url) || {};

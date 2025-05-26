@@ -99,10 +99,11 @@ export const useFormState = (initialValues = {}) => {
 export const useHeaderConfig = (params) => {
     const {
         setLoading,
+        isBack,
         enableDraft = false,
         statusList = optionsConstants.displayStatus,//状态列表
         config,
-        moduleName,
+        moduleKey,
         id,
         isFormDirty,
         form,
@@ -248,9 +249,10 @@ export const useHeaderConfig = (params) => {
                 return result;
             } else {
                 // 从 location 获取基础路径
-                const module = moduleName || location.pathname.split('/')[1]; // 获取模块名称
-                const apiUrl = `/${module}${id ? '/update' : '/add'}`; // 完整的API路径
-
+                const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
+                const systemList = ['user'];//系统级别操作对应update/add  业务层操作对应save
+                const isSystem = systemList.includes(module);
+                const apiUrl = `/${module}/${isSystem ? id ? 'update' : 'add' : 'save'}`; // 完整的API路径
                 // 使用新的命名调用
                 const ret = await savePublicFormData(dataToSave, apiUrl, 'post');
                 return ret;
@@ -373,7 +375,7 @@ export const useHeaderConfig = (params) => {
                         messageApi.success(saveResult.message || 'Save successful!');
                     }
                     setIsFormDirty(false);
-                    if (config.navigateAfterSave) {
+                    if (isBack) {
                         navigate(config.afterSaveUrl || -1);
                     }
                 } else {

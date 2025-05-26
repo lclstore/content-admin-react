@@ -70,7 +70,7 @@ export default function UserEditorWithCommon({ id, setFormRef }) {
             fields={formFields}
             initialValues={initialValues}
             id={id}
-            moduleName="user"
+            moduleKey="user"
             setFormRef={setFormRef}
         />
     );

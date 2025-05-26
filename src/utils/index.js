@@ -2,7 +2,7 @@ import settings from '@/config/settings';
 import { v4 as uuidv4 } from 'uuid';
 import { useStore } from "@/store/index.js";
 import md5 from 'md5';
-const { file: fileSettings } = settings;
+
 /**
  * 工具函数集合
  */
@@ -162,7 +162,7 @@ export const getFullUrl = (url) => {
   if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
     return url;
   }
-  return `${fileSettings.baseURL}${url}`;
+  return `${settings.file.baseURL}${url}`;
 };
 
 /**

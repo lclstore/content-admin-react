@@ -14,7 +14,7 @@ import CollapseForm from './CollapseForm'; //右侧折叠表单
 import dayjs from 'dayjs';
 import { dateRangeKeys } from '@/constants/app';
 import { arrayMove } from '@dnd-kit/sortable';
-
+import { getformDataById } from '@/api/publicReques'; //公共方法--根据id获取表单数据
 /**
  * 通用编辑器组件
  * 支持简单表单和复杂表单，根据配置动态渲染
@@ -46,6 +46,7 @@ export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
+        moduleName,
         onSubmit,
         fields = [],
         changeHeader = true,
@@ -216,7 +217,8 @@ export default function CommonEditor(props) {
     // 使用自定义钩子管理头部配置
     const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook } = useHeaderConfig({
         config,
-        id, // 使用正确的 id
+        id: id || idFromUrl, // 使用正确的 id
+        moduleName,
         onSubmit: onSubmitCallback, // 使用state中的callback
         fieldsToValidate,
         enableDraft,
@@ -719,11 +721,17 @@ export default function CommonEditor(props) {
         setLoading(true);
         // 如果id存在，则请求获取数据
         if (id) {
-            response = await initFormData(id) || {};
+            const module = moduleName || location.pathname.split('/')[1]; // 获取模块名称
+            const url = `/${module}/detail/${id}`;
+            const fetchFormData = initFormData || getformDataById;//公共方法--根据id获取表单数据
+            response = await fetchFormData(url) || {};
+            if (response.data) {
+                response = response.data;
+            }
+
         }
 
         const transformedData = transformDatesInObject(response, formType === 'basic' ? fields : internalFormFields); // 转换日期
-
         form.setFieldsValue(transformedData);
 
         // 确保表单值更新后，设置表单状态为"未修改"

@@ -18,13 +18,7 @@ export default function UsersList() {
     const [isEditorModalVisible, setIsEditorModalVisible] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
     const [editorActionsRef, setEditorActionsRef] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 操作区域点击处理
-    const handleActionAreaClick = useCallback((e) => {
-        setActionClicked(true);
-        e.stopPropagation();
-    }, []);
 
     // 编辑处理
     const handleEdit = useCallback((record) => {
@@ -192,27 +186,17 @@ export default function UsersList() {
         handleEdit(record);
     }, [actionClicked, handleEdit]);
 
-    // 修改处理提交方法
+    // 提交form
     const handleModalSubmit = async () => {
         if (editorActionsRef && editorActionsRef.triggerSave) {
-            // setIsSubmitting(true);
-            try {
-
-                const currentRecord = dataSource.find(user => user.id === editingUserId);
-                const statusToSave = currentRecord?.status || 'ENABLE'; // 默认为 ENABLE
-
-                await editorActionsRef.triggerSave(statusToSave);
-                // 成功消息应该由 handleSaveUser (在 Editor.jsx 中) 处理
-
-                // setIsEditorModalVisible(false);
-                // setEditingUserId(null);
-                // getData(); // 刷新列表数据
-            } catch (error) {
-
-                console.error('保存用户失败 (从List.jsx捕获):', error);
-                // 如果错误没有被下层捕获并显示，可以在这里添加 messageApi.error()
-            } finally {
-                setIsSubmitting(false);
+            const currentRecord = dataSource.find(user => user.id === editingUserId);
+            const statusToSave = currentRecord?.status || 'ENABLE'; // 默认为 ENABLE
+            let ret = await editorActionsRef.triggerSave(statusToSave, false);// 返回保存结果
+            if (ret.success) {
+                messageApi.success(ret.message || 'Save successful!');
+                setIsEditorModalVisible(false);
+                setEditingUserId(null);
+                getData(); // 刷新列表数据
             }
         }
     };

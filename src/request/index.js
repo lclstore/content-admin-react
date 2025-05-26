@@ -7,13 +7,13 @@ const VITE_ENV = import.meta.env.VITE_ENV;
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 console.log('VITE_ENV =>>>>>>', VITE_ENV)
-console.log("Message",Message)
+console.log("Message", Message)
 const axios_default = axios.create({
     timeout: 0,
 })
 // const Loading = useStore(state => state.setLoadingGlobal);
 const { setLoadingGlobal } = useStore.getState();
-const Loading  = setLoadingGlobal;
+const Loading = setLoadingGlobal;
 
 // message弹窗管理器
 class MessageC {
@@ -55,17 +55,17 @@ class Request {
     constructor(config) {
         this.config = {
             ...config,
-            callback:config.callback || (() => {}),
-            warningPoint:config.warningPoint ? config.warningPoint : true,
-            success:config.success,
-            method:config.method || 'post',
-            point:config.point ? config.point : false,
-            url:(config.baseUrl || baseUrl) + config.url,
+            callback: config.callback || (() => { }),
+            warningPoint: config.warningPoint ? config.warningPoint : true,
+            success: config.success,
+            method: config.method || 'post',
+            point: config.point ? config.point : false,
+            url: (config.baseUrl || baseUrl) + config.url,
         }
     }
-    send(){
+    send() {
         return new Promise((resolve, reject) => {
-            let loading = Loading,config = this.config;
+            let loading = Loading, config = this.config;
             if (config.load) {
                 loading(true)
             }
@@ -85,13 +85,13 @@ class Request {
                     useStore.getState().navigate('/login')
                 }
                 if (res.data.success) {
-                    config.point && message.open({content: "success", type: 'success'},'success')
+                    config.point && message.open({ content: "success", type: 'success' }, 'success')
                     config.success && config.success(res)
-                }else {
+                } else {
                     // error
                     config.warningPoint && message.open({
                         content: res.data.errMessage,
-                        type: 'warning',
+                        type: 'error',
                         duration: 3,
                     }, res.data.errCode)
                     res.error = res.data.errMessage
@@ -102,16 +102,16 @@ class Request {
                 if (config.load) {
                     loading(false)
                 }
-                message.open({content: err, type: 'error'}, 'error')
-                config.callback({error: err})
+                message.open({ content: err, type: 'error' }, 'error')
+                config.callback({ error: err })
                 console.log(err)
             })
         })
     }
-    async post(){ this.config.method = "post";await this.send() }
-    async get(){ this.config.method = "get";await this.send() }
-    async put(){ this.config.method = "put";await this.send() }
-    async delete(){ this.config.method = "post";await this.send() }
+    async post() { this.config.method = "post"; await this.send() }
+    async get() { this.config.method = "get"; await this.send() }
+    async put() { this.config.method = "put"; await this.send() }
+    async delete() { this.config.method = "post"; await this.send() }
 }
 
 axios_default.interceptors.request.use(config => {
@@ -127,8 +127,8 @@ axios_default.interceptors.request.use(config => {
 })
 export default {
     send: (config) => new Request(config).send(),
-    get:(config) => new Request(config).get(),
-    post:(config) => new Request(config).post(),
-    put:(config) => new Request(config).put(),
-    delete:(config) => new Request(config).delete(),
+    get: (config) => new Request(config).get(),
+    post: (config) => new Request(config).post(),
+    put: (config) => new Request(config).put(),
+    delete: (config) => new Request(config).delete(),
 }

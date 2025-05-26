@@ -4,7 +4,7 @@ import { validateEmail, validatePassword } from '@/utils';
 import request from "@/request";
 import { md5Encrypt } from '@/utils';
 
-export default function UserEditorWithCommon({ id, onSubmit }) {
+export default function UserEditorWithCommon({ id, setFormRef }) {
     // 初始用户数据状态
     const initialValues = {}
 
@@ -79,12 +79,11 @@ export default function UserEditorWithCommon({ id, onSubmit }) {
             load: true,
             data: dataToSave,
             callback(res) {
-                messageApi.success('用户数据保存成功！');
+                messageApi.success('Save user successfully!');
                 if (typeof setLoading === 'function') {
                     setLoading(false);
                 }
                 setDirty(false);
-                onFinish && onFinish();
             }
         });
     };
@@ -114,8 +113,8 @@ export default function UserEditorWithCommon({ id, onSubmit }) {
             fields={formFields}
             initialValues={initialValues}
             onSave={handleSaveUser}
-            onSubmit={onSubmit}
             id={id}
+            setFormRef={setFormRef}
         />
     );
 } 

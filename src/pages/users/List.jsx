@@ -17,6 +17,7 @@ export default function UsersList() {
     const [messageApi, contextHolder] = message.useMessage();
     const [isEditorModalVisible, setIsEditorModalVisible] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
+    const [formRef, setFormRef] = useState(null);
 
     // 操作区域点击处理
     const handleActionAreaClick = useCallback((e) => {
@@ -190,10 +191,15 @@ export default function UsersList() {
         handleEdit(record);
     }, [actionClicked, handleEdit]);
 
-    // 处理编辑完成
-    const handleEditorSubmit = () => {
+    // 修改处理提交方法
+    const handleModalSubmit = () => {
+        // 通过 formRef 触发表单提交
+        if (formRef) {
+            formRef.submit();
+        }
+    };
 
-    }
+
 
     useEffect(() => {
         setCustomPageTitle && setCustomPageTitle('User');
@@ -250,7 +256,7 @@ export default function UsersList() {
                     <Button key="cancel" onClick={() => setIsEditorModalVisible(false)}>
                         Cancel
                     </Button>,
-                    <Button key="submit" type="primary" onClick={handleEditorSubmit}>
+                    <Button key="submit" type="primary" onClick={handleModalSubmit}>
                         Confirm
                     </Button>
                 ]}
@@ -259,7 +265,7 @@ export default function UsersList() {
             >
                 <UserEditorWithCommon
                     id={editingUserId}
-                    onSubmit={handleEditorSubmit}
+                    setFormRef={setFormRef}
                 />
             </Modal>
         </div>

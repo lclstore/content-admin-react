@@ -39,6 +39,7 @@ import { arrayMove } from '@dnd-kit/sortable';
  * @param {Array} props.fieldsToValidate 需要验证的表单字段
  * @param {boolean} props.changeHeader 是否改变头部
  * @param {Function} props.onSubmit 提交函数
+ * @param {Function} props.setFormRef 表单引用设置函数
  */
 export default function CommonEditor(props) {
     const {
@@ -60,10 +61,13 @@ export default function CommonEditor(props) {
         collapseFormConfig = {},  // 折叠表单配置
         formFields, // 向后兼容：支持旧的formFields属性
         onFormFieldsChange = null, // 字段变更回调
-        onCollapseChange = null // 折叠面板变化回调
+        onCollapseChange = null, // 折叠面板变化回调
+        setFormRef // 添加表单引用设置属性
     } = props;
     // 添加选中项状态管理 - 存储从列表中选择的当前项
     const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
+    // 添加onSubmitCallback状态
+    const [onSubmitCallback, setOnSubmitCallback] = useState(null);
     // 内部维护一份formFields状态，优先使用父组件传入的
     const [internalFormFields, setInternalFormFields] = useState(
         collapseFormConfig.fields || formFields || fields || []
@@ -142,11 +146,75 @@ export default function CommonEditor(props) {
     // 获取HeaderContext
     const headerContext = useContext(HeaderContext);
 
+    // 添加handleEditorSubmit方法
+    const handleEditorSubmit = () => {
+        // 设置onSubmitCallback来触发验证
+        setOnSubmitCallback(() => async (values) => {
+            try {
+                // 执行表单验证
+                await form.validateFields();
+
+                // 如果有自定义验证函数，执行它
+                if (validate && !validate(values, form)) {
+                    return;
+                }
+
+                // 获取表单数据
+                const dataToSave = form.getFieldsValue(true);
+
+                // 如果是折叠面板，处理特殊字段
+                if (isCollapse && internalFormFields) {
+                    processFields(internalFormFields, dataToSave);
+                }
+
+                // 执行保存操作
+                if (onSave) {
+                    const editId = id;
+                    const callbackUtils = {
+                        setDirty: setIsFormDirty,
+                        messageApi,
+                        navigate
+                    };
+                    onSave(dataToSave, editId, callbackUtils);
+                } else {
+                    messageApi.success(config.saveSuccessMessage || '保存成功!');
+                    setIsFormDirty(false);
+
+                    if (config.navigateAfterSave) {
+                        navigate(config.afterSaveUrl || -1);
+                    }
+                }
+            } catch (error) {
+                // 处理验证错误
+                console.error('表单验证失败:', error);
+                if (error.errorFields) {
+                    // 显示第一个错误信息
+                    messageApi.error(error.errorFields[0]?.errors?.[0] || '请检查表单填写是否正确');
+
+                    // 如果是折叠面板，展开包含错误字段的面板
+                    if (isCollapse && setActiveCollapseKeys) {
+                        const errorFieldName = error.errorFields[0]?.name?.[0];
+                        const matchedPanel = internalFormFields.find(panel =>
+                            Array.isArray(panel.fields) &&
+                            panel.fields.some(field => field.name === errorFieldName)
+                        );
+
+                        if (matchedPanel) {
+                            setActiveCollapseKeys([matchedPanel.name]);
+                        }
+                    }
+                } else {
+                    messageApi.error('表单验证失败，请检查填写内容');
+                }
+            }
+        });
+    };
+
     // 使用自定义钩子管理头部配置
     const { headerButtons } = useHeaderConfig({
         config,
         id,
-        onSubmit,
+        onSubmit: onSubmitCallback, // 使用state中的callback
         fieldsToValidate,
         enableDraft,
         isFormDirty,
@@ -817,7 +885,7 @@ export default function CommonEditor(props) {
                         name={config.formName || 'basicForm'}
                         layout={config.layout || 'vertical'}
                         onValuesChange={handleFormValuesChange}
-                        onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
+                        onFinish={handleEditorSubmit}
                         initialValues={initialValues}
                         className={styles.form}
                     >
@@ -892,7 +960,7 @@ export default function CommonEditor(props) {
                                 name={config.formName || 'advancedForm'}
                                 layout={config.layout || 'vertical'}
                                 onValuesChange={handleFormValuesChange}
-                                onFinish={headerButtons.find(button => button.key === 'save')?.onClick}
+                                onFinish={handleEditorSubmit}
                                 initialValues={initialValues}
                                 className={styles.form}
                             >
@@ -934,6 +1002,13 @@ export default function CommonEditor(props) {
             </div>
         );
     };
+
+    // 在 useEffect 中设置表单引用
+    useEffect(() => {
+        if (setFormRef && form) {
+            setFormRef(form);
+        }
+    }, [form, setFormRef]);
 
     return (
         <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer} ${formType === 'basic' ? "basicEditorContainer" : "advancedEditorContainer"}`}>

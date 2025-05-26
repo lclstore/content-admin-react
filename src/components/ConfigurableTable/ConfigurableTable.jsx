@@ -20,6 +20,7 @@ import { defaultPagination, actionIconMap, optionsConstants } from '@/constants'
 import { getPublicTableList } from "@/config/api.js";
 import settings from "@/config/settings.js"
 import noDataImg from '@/assets/images/no-data.png';
+import { debounce, times } from 'lodash';
 /**
  * 可配置表格组件
  *
@@ -82,6 +83,9 @@ function ConfigurableTable({
     // 声明内部 loading，也可以接受外部传入
     const [loadingLocal, setLoadingLocal] = useState(loading)
     useEffect(() => { setLoadingLocal(loading) }, [loading]);
+
+    // 用于取消请求的控制器
+    const abortControllerRef = useRef(null);
 
     //   ref
     const tableRef = useRef(null) // 表格组件的ref
@@ -415,25 +419,62 @@ function ConfigurableTable({
     const searchTableData = useCallback(async (isFirstSearch) => {
         const fetchTableData = getTableList || getPublicTableList
 
-        const res = await fetchTableData(moduleKey, {
-            ...paginationParams.current,
-            ...activeFilters.current
-        });
-        if (res && res.success) {
-            setTableData(res.data);
-            if (isFirstSearch) {
-                setIsEmptyTableData(res.data.length === 0)
+        // 如果存在正在进行的请求，取消它
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        // 创建新的 AbortController
+        abortControllerRef.current = new AbortController();
+
+        try {
+            setLoadingLocal(true);
+            const res = await fetchTableData(moduleKey, {
+                ...paginationParams.current,
+                ...activeFilters.current
+            }, { signal: abortControllerRef.current.signal });
+
+            // 请求完成后清除当前的 AbortController
+            abortControllerRef.current = null;
+
+            if (res && res.success) {
+                setTableData(res.data);
+                if (isFirstSearch) {
+                    setIsEmptyTableData(res.data.length === 0)
+                }
+            } else {
+                setIsEmptyTableData(true)
             }
-        } else {
-            setIsEmptyTableData(true)
+        } catch (error) {
+            // 如果是取消请求导致的错误，不做处理
+            if (error.name === 'AbortError') {
+                console.log('Request cancelled');
+                return;
+            }
+            // 其他错误正常处理
+            console.error('Search error:', error);
+            setIsEmptyTableData(true);
+        } finally {
+            // 如果不是被取消的请求，才设置 loading 为 false
+            if (abortControllerRef.current === null) {
+                setLoadingLocal(false);
+            }
         }
     }, [currentlyVisibleColumns, dataSource, rowKey]);
-    // 搜索框 输入框 变化
-    const onSearchChange = useCallback((e) => {
-        paginationParams.current.keywords = e.target.value
 
-        searchTableData()// 查询 表格数据
-    }, [paginationParams])
+    // 搜索框 输入框 变化 (使用防抖)
+    const debouncedSearch = useCallback(
+        debounce((value) => {
+            paginationParams.current.keywords = value;
+            searchTableData(); // 查询表格数据
+        }, 300), // 300ms 的防抖延迟
+        [paginationParams]
+    );
+
+    const onSearchChange = useCallback((e) => {
+        debouncedSearch(e.target.value);
+    }, [debouncedSearch]);
+
     // 筛选器 更新
     const filterUpdate = useCallback((newFilters) => {
         activeFilters.current = newFilters;
@@ -573,6 +614,16 @@ function ConfigurableTable({
 
         // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
     }, []);
+
+    // 组件卸载时取消所有未完成的请求
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+
     return (
         isEmptyTableData ?
             <div className={styles.customEmptyWrapper}>
@@ -667,7 +718,10 @@ function ConfigurableTable({
                     columns={processedColumns}
                     dataSource={tableData}
                     rowKey={rowKey}
-                    loading={loadingLocal}
+                    loading={{
+                        spinning: loadingLocal,
+                        tip: 'Loading...'
+                    }}
                     onRow={handleRow}
                     ref={tableRef}
                     pagination={finalPaginationConfig}

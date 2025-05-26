@@ -12,7 +12,7 @@ import {
     statusOrder,
     difficultyOrder,
     mockUsers,
-    filterSections,
+
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
@@ -21,6 +21,23 @@ import request from "@/request";
 export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
     let mockUsers = []
+    const filterSections = [
+        {
+            title: 'Status',
+            key: 'status',
+            type: 'single', // 单选 //multiple 多选
+            options: [{
+                label: 'Draft',
+                value: 'DRAFT'
+            }, {
+                label: 'Enable',
+                value: 'ENABLE'
+            }, {
+                label: 'Disable',
+                value: 'DISABLE'
+            }],
+        }
+    ];
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
@@ -278,15 +295,6 @@ export default function WorkoutsList() {
     }, [performSearch, searchValue]);
 
     /**
-     * 重置筛选器处理
-     */
-    const handleFilterReset = useCallback(() => {
-        setSelectedFilters({});
-        setSearchValue('');
-        performSearch('', {});
-    }, [performSearch]);
-
-    /**
      * 处理行点击
      */
     const handleRowClick = useCallback((record, event) => {
@@ -500,12 +508,8 @@ export default function WorkoutsList() {
                 filterConfig={{
                     filterSections: filterSections,
                     activeFilters: selectedFilters,
-                    // onUpdate: handleFilterUpdate,
-                    // onReset: handleFilterReset,
                 }}
-            // tableProps={{
-            //     onChange: handleTableChange
-            // }}
+
             />
 
             {/* 删除确认弹窗 */}

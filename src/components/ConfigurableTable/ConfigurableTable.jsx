@@ -266,7 +266,12 @@ function ConfigurableTable({
     // 判断是否有激活的筛选器
     const hasActiveFilters = useMemo(() => {
         if (!activeFilters.current) return false;
-        return Object.values(activeFilters.current).some(arr => Array.isArray(arr) && arr.length > 0);
+        return Object.values(activeFilters.current).some(value => {
+            if (Array.isArray(value)) {
+                return value.length > 0;
+            }
+            return !!value; // 非数组时判断值是否存在
+        });
     }, [activeFilters.current]);
 
     // --- 渲染逻辑 ---
@@ -480,10 +485,11 @@ function ConfigurableTable({
         activeFilters.current = newFilters;
         searchTableData()// 查询 表格数据
     }, [paginationParams])
-    // 筛选器 重置
     const filterReset = useCallback(() => {
+        activeFilters.current = {};
         searchTableData()// 查询 表格数据
     }, [paginationParams])
+
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
     const processedColumns = useMemo(() => {
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型

@@ -8,7 +8,8 @@ import styles from './FiltersPopover.module.css';
  * @param {Array<Object>} filterSections - 过滤器区域配置 (仅过滤器类型需要)
  *   - title: string - 区域标题
  *   - key: string - 区域标识符 (用于 selectedValues)
- *   - options: Array<string> - 区域内的选项
+ *   - type: string - 选择类型 ('single' 或 'multiple')
+ *   - options: Array<Object> - 区域内的选项
  * @param {Object} activeFilters - 外部传入的、当前已应用的过滤器值 (用于初始化 Popover 内部状态)
  * @param {Function} onUpdate - 点击 'Search' 按钮或选项 (当 applyImmediately=true 时) 时的回调, 参数为当前选中的过滤器值
  * @param {Function} onReset - 点击 'Clear' 按钮或清除图标时的回调
@@ -53,21 +54,33 @@ const FiltersPopover = ({
         setIsVisible(open);
     };
 
-    const handleOptionClick = (sectionKey, optionValue, isDisabled) => {
+    const handleOptionClick = (section, optionValue, isDisabled) => {
         if (isDisabled) return;
+
         // 预先计算下一个状态值
         const calculateNextState = (prev) => {
-            const currentSelection = prev[sectionKey] ? [...prev[sectionKey]] : [];
-            const currentIndex = currentSelection.indexOf(optionValue);
-            if (currentIndex === -1) {
-                currentSelection.push(optionValue);
+            const isSingleSelect = section.type === 'single';
+            const currentValue = prev[section.key];
+
+            if (isSingleSelect) {
+                // 单选模式：直接设置值
+                return { ...prev, [section.key]: currentValue === optionValue ? null : optionValue };
             } else {
-                currentSelection.splice(currentIndex, 1);
+                // 多选模式：处理数组
+                const currentSelection = Array.isArray(currentValue) ? [...currentValue] : [];
+                const currentIndex = currentSelection.indexOf(optionValue);
+
+                if (currentIndex === -1) {
+                    currentSelection.push(optionValue);
+                } else {
+                    currentSelection.splice(currentIndex, 1);
+                }
+
+                return { ...prev, [section.key]: currentSelection.length > 0 ? currentSelection : null };
             }
-            return { ...prev, [sectionKey]: currentSelection };
         };
 
-        // 直接使用当前状态计算出下一个状态，而不依赖异步的 setState 回调
+        // 直接使用当前状态计算出下一个状态
         let nextSelectedValues;
         setTempSelectedValues(prev => {
             nextSelectedValues = calculateNextState(prev);
@@ -76,75 +89,84 @@ const FiltersPopover = ({
 
         // 如果需要立即应用且不是设置类型，则使用计算好的 nextSelectedValues 调用 onUpdate
         if (applyImmediately && !isSettingsType && onUpdate) {
-            const currentState = tempSelectedValues; // 获取当前状态
+            const currentState = tempSelectedValues;
             const trulyNextSelectedValues = calculateNextState(currentState);
-
-            // 使用修正后的值调用 onUpdate
             onUpdate(trulyNextSelectedValues);
-
-            // 更新状态 （使用上面计算好的值）
             setTempSelectedValues(trulyNextSelectedValues);
-
-            // setIsVisible(false); // 如果点击立即生效，通常也需要关闭 Popover
         }
     };
+
     // 重置
-    const handleReset = () => {
+    const handleReset = (isClear = false) => {
         if (onReset) {
             onReset();
         }
         setTempSelectedValues({});
-        // setIsVisible(false);
     };
+
     // 确认/更新
     const handleUpdate = () => {
         if (onUpdate) {
-            onUpdate(JSON.parse(JSON.stringify(tempSelectedValues)));
+            // 清理空值
+            const cleanValues = Object.entries(tempSelectedValues).reduce((acc, [key, value]) => {
+                if (value !== null && value !== undefined &&
+                    (!Array.isArray(value) || value.length > 0)) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {});
+            onUpdate(cleanValues);
         }
         setIsVisible(false);
     };
 
     const isSettingsPopover = isSettingsType;
-
     const shouldShowClearIcon = showClearIcon && !isSettingsPopover;
     const shouldShowBadgeDot = showBadgeDot && !isSettingsPopover;
-
-    // 判断是否需要显示底部按钮区域
     const shouldShowFooter = onReset || (!applyImmediately && onUpdate) || isSettingsType;
+
     const content = (
         <div className={styles.filterContent}>
-            {filterSections.map((section, index) => (
-                <React.Fragment key={section.key}>
-                    <div className={styles.filterSectionItem}>
-                        <div className={styles.filterSectionTitle}>{section.title}</div>
-                        <div className={styles.filterSection}>
-                            {section.options.map(option => {
-                                // 支持新的options格式，每个选项可以是字符串或包含key和label的对象
-                                const optionKey = typeof option === 'object' ? option.key : option;
-                                const optionLabel = typeof option === 'object' ? option.label : option;
+            <div className={styles.scrollContent}>
+                {filterSections.map((section, index) => (
+                    <React.Fragment key={index}>
+                        <div className={styles.filterSectionItem}>
+                            <div className={styles.filterSectionTitle}>{section.title}</div>
+                            <div className={styles.filterSection}>
+                                {section.options.map((option, optionIndex) => {
+                                    const optionValue = option.value || option;
+                                    const optionLabel = option.label || option;
 
-                                const isSelected = tempSelectedValues[section.key]?.includes(optionKey);
-                                return (
-                                    <div
-                                        key={optionKey}
-                                        onClick={() => handleOptionClick(section.key, optionKey, option.disabled)}
-                                        className={`${styles.filterButton} ${isSelected ? styles.active : ''} ${option.disabled ? styles.disabled : ''} `}
-                                    >
-                                        {optionLabel}
-                                    </div>
-                                );
-                            })}
+                                    let isSelected;
+                                    if (section.type === 'single') {
+                                        isSelected = tempSelectedValues[section.key] === optionValue;
+                                    } else {
+                                        isSelected = Array.isArray(tempSelectedValues[section.key]) &&
+                                            tempSelectedValues[section.key]?.includes(optionValue);
+                                    }
+
+                                    return (
+                                        <div
+                                            key={optionIndex}
+                                            onClick={() => handleOptionClick(section, optionValue, option.disabled)}
+                                            className={`${styles.filterButton} ${isSelected ? styles.active : ''} ${option.disabled ? styles.disabled : ''}`}
+                                        >
+                                            {optionLabel}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </div>
-                    {index < filterSections.length - 1 && <hr className={styles.divider} />}
-                </React.Fragment>
-            ))}
+                        {index < filterSections.length - 1 && <hr className={styles.divider} />}
+                    </React.Fragment>
+                ))}
+            </div>
 
             {shouldShowFooter && (
                 <div className={styles.filterFooter}>
                     <Space>
                         {onReset && (
-                            <Button onClick={handleReset} className={styles.footerButton}>
+                            <Button onClick={() => setTempSelectedValues({})} className={styles.footerButton}>
                                 {clearButtonText}
                             </Button>
                         )}
@@ -177,8 +199,8 @@ const FiltersPopover = ({
                             icon={<CloseCircleOutlined style={{ color: 'rgb(184, 204, 204)', fontSize: '22px' }} />}
                             size="small"
                             onClick={(e) => {
-                                e.stopPropagation();
                                 handleReset();
+                                e.stopPropagation();
                             }}
                             style={{ marginLeft: '-4px', cursor: 'pointer' }}
                             className={styles.clearIcon}

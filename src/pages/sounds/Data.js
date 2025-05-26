@@ -29,7 +29,17 @@ export const filterSections = [
     {
         title: 'Status',
         key: 'status',
-        options: ['Draft', 'Enabled', 'Disabled'],
+        type: 'single', // 单选 //multi 多选
+        options: [{
+            label: 'Draft',
+            value: 'DRAFT'
+        }, {
+            label: 'Enabled',
+            value: 'ENABLED'
+        }, {
+            label: 'Disabled',
+            value: 'DISABLE'
+        }],
     }
 ];
 
@@ -53,7 +63,7 @@ export const mockWorkoutsForList = [
         category: 'Strength',
         duration: 3600,
         calorie: 450,
-        HasAScript:false,
+        HasAScript: false,
         Premium: true,
         isSubscription: 0,
         detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
@@ -79,7 +89,7 @@ export const mockWorkoutsForList = [
         category: 'Strength',
         duration: 3600,
         calorie: 450,
-        HasAScript:true,
+        HasAScript: true,
         isSubscription: 0,
         detailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         thumbnailImage: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
@@ -661,7 +671,7 @@ export const MOCK_LANG_OPTIONS = [
     { label: 'ES', value: 'ES' },
     { label: 'FR', value: 'FR' },
     { label: 'DE', value: 'DE' },
-]; 
+];
 
 export const mockUsers = [
     {

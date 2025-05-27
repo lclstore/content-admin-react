@@ -65,8 +65,13 @@ try {
                     routerConfig.path,
                     settings.menu?.menuOrder?.[routerConfig.meta] || 999,
                     routerConfig.showName,
-                    (routerConfig.FatherComponent && !routerConfig.indexFatherDom) ? <Outlet/> : pageFiles['../pages/' + routerConfig.component]
+                    (routerConfig.isFatherDom) ? {default:() => <Outlet/>} : pageFiles['../pages/' + routerConfig.component]
                 ]
+            if(routerConfig.Component){ routerConfig.Component = routerConfig.Component.default }
+        },
+        indexCreateRule(routerConfig){
+            routerConfig.Component = pageFiles['../pages/' + routerConfig.component]
+            if(routerConfig.Component){ routerConfig.Component = routerConfig.Component.default }
         }
     })
     dynamicMenus = registerList

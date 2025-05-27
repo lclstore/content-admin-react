@@ -1,5 +1,3 @@
-import Programs from './components/Programs.jsx';
-import Category from './components/Category.jsx'
 // import Categories from './Categories';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import React, { useContext, useEffect, useState } from "react";
@@ -18,19 +16,26 @@ export default function CollectionsList() {
     const navigate = useNavigate(); // 路由导航
     const tabItems = [
         {
-            key: '1',
+            key: 'category/list',
             label: 'Category',
-            children: <Category />,
         },
         {
-            key: '2',
+            key: 'program/list',
             label: 'Program',
-            children: <Programs />,
         },
     ];
     const [defaultTabItem, setDefaultTabItem] = useState(tabItems[0]);
-    useEffect(() => {
 
+    function onChange(key) {
+        // localDown(key)
+        // const tabBarName = tabItems.find(item => item.key === key).label;
+        setDefaultTabItem(tabItems.find(item => item.key === key))
+        // setCustomPageTitle(`${tabBarName} List`);
+        navigate("/collections2/" + key)
+    }
+    useEffect(() => {
+        // 初始加载自动跳转到默认的tab
+        navigate(tabItems[0].key)
         const plansKey = localStorage.getItem('collections');
         if (plansKey) {
             setDefaultTabItem(tabItems[plansKey - 1])
@@ -40,12 +45,6 @@ export default function CollectionsList() {
         }
 
     }, []);
-    function onChange(key) {
-        localDown(key)
-        const tabBarName = tabItems.find(item => item.key === key).label;
-        setDefaultTabItem(tabItems.find(item => item.key == key))
-        setCustomPageTitle(`${tabBarName} List`);
-    }
     const renderTabBar = (props, DefaultTabBar) => (
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
             <DefaultTabBar {...props} />

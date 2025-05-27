@@ -12,12 +12,13 @@
  * @param {String} registerData.dir - 需要进行注册的文件根目录 格式: fileAddresList 为 ../xxx/xxx.xx  dir 应该为 ../xxx/
  * @param {Array<String>} registerData.sort - 排序所用的排序规则
  * @param {Function} registerData.createRule - 创建路由时会调用的钩子
+ * @param {Function} registerData.indexCreateRule - 创建index路由时会调用的钩子
  * @param {String} registerData.suffix - 所解析的文件后缀名
  * @param {Array<String>} registerData.nameTransform - 名称转化用的数组
  * @returns {Array<Object>}
  */
 class RouterRegister {
-    constructor({ fileAddresList, dir, sign, sort, createRule, suffix, nameTransform, iconConifg, FatherComponent }) {
+    constructor({ fileAddresList, dir, sign, sort, createRule, suffix, nameTransform, iconConifg, FatherComponent,indexCreateRule }) {
         this.sign = sign;
         this.dir = dir;
         this.sort = sort;
@@ -26,6 +27,7 @@ class RouterRegister {
         this.nameTransform = nameTransform //名称转化
         this.iconConifg = iconConifg // 绑定的icon
         this.FatherComponent = FatherComponent // 父节点的渲染规则
+        this.indexCreateRule = indexCreateRule
         // 去除了./ ,routeList 中都是  xxx/xxx/xxx{suffix} or xxx/xxx{suffix} 格式
         this.routeList = fileAddresList.filter(address => address.indexOf(dir) !== -1).map(i => i.replace(dir, ''))
         this.registerArray = []
@@ -40,8 +42,8 @@ class RouterRegister {
             // 创建容器
             let dirArry = this.registerArray
             // pathArray长度 大于2，说明是一个有父子层级的节点
-            if (pathArray.length > 2) {
-                const fatherList = pathArray.slice(0, -2)
+            if (pathArray.length >= 2) {
+                const fatherList = pathArray.slice(0, -1)
                 let dirAddress = []
                 fatherList.some(dirName => {
                     dirAddress.push(dirName)
@@ -60,6 +62,7 @@ class RouterRegister {
         })
         // index 节点特殊修改
         this.routeList.filter(i => i.endsWith("/index" + this.suffix)).forEach(address => {
+            // indexFather 下正常来说应该有除了index 以外的子目录，所以searchDir不可能返回false
             this.indexFatherChange(this.searchDir(address.split('/').slice(0,-1)))
         })
         // 节点排序
@@ -92,7 +95,9 @@ class RouterRegister {
             // meta同时也作为左侧侧边栏列表的权限key,主要功能是作为权限key，名称通过showName字段修改
             meta: routerHead,
             // path路由访问路径创建
-            path: "/" + pathArray.slice(0, -1).join('/') + "/" + fileName,
+            // path: "/" + pathArray.slice(0, -1).join('/') + "/" + fileName,
+            // path: `/${fatherPathSting ? address : pathArray.slice(0, -1).join('/') + '/' + fileName}`,
+            path: fileName,
             // 非list,且不为父节点 都隐藏
             noShow: (fileName !== 'list') && !fatherPathSting,
             // active设置绑定的左侧list,非父非list，绑定list，父节点绑自己的address
@@ -135,6 +140,8 @@ class RouterRegister {
         console.log(config)
         config.component = config.component + '/index' + this.suffix
         config.indexFatherDom = true
+        // 重新调用 indexCreateRule 处理
+        this.indexCreateRule(config)
     }
     // 查询 registerArray 中的节点
     searchDir(addressArr) {

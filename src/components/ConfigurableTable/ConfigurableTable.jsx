@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import { useImmer } from "use-immer"
-import { Table, Input, Button, Spin, Space, Dropdown } from 'antd';
+import { Table, Input, Button, Spin, Space, Dropdown, message, Modal } from 'antd';
 import {
     SearchOutlined,
     FilterOutlined,
@@ -17,9 +17,10 @@ import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
-import { getList as getListPublick } from "@/config/api.js";
+import { getPublicTableList, publicUpdateStatus, publicDeleteData } from "@/config/api.js";
 import settings from "@/config/settings.js"
-
+import noDataImg from '@/assets/images/no-data.png';
+import { debounce, times } from 'lodash';
 /**
  * 可配置表格组件
  *
@@ -42,13 +43,13 @@ import settings from "@/config/settings.js"
  * @param {boolean} [props.showColumnSettings=true] - 当为true时显示列设置按钮并执行列设置逻辑，当为false时显示所有列且不显示列设置按钮
  * @param {Array<object>} [props.leftToolbarItems=[]] - 左侧工具栏按钮配置数组，每个对象包含 key, label, onClick 等属性
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
- * @param {function} [props.getList] - 获取表格数据的回调函数
+ * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
  */
 function ConfigurableTable({
     uniqueId,
     columns, // 所有列的定义
-    dataSource,
+    dataSource = [],
     rowKey,
     loading = false,
     onRowClick,
@@ -64,19 +65,32 @@ function ConfigurableTable({
     tableProps,
     showColumnSettings = true,//当为true时显示列设置按钮
     leftToolbarItems = [], // 左侧工具栏按钮
-    getList,
+    getTableList,
     moduleKey
 }) {
-    moduleKey = moduleKey || useLocation().pathname.split('/').at(-2);
+    moduleKey = moduleKey || useLocation().pathname.split('/')[1];
+    const pathname = useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${uniqueId}`;
-
+    const paginationParams = useRef({
+        ...paginationConfig,
+    })
+    const [messageApi, contextHolder] = message.useMessage();
+    const navigate = useNavigate(); // 路由导航
+    // 添加上一次排序状态的引用
+    const prevSorterRef = useRef(null);
+    const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
+    const [tableData, setTableData] = useState(dataSource)
     // 声明内部 loading，也可以接受外部传入
-    const [loadingLocal,  setLoadingLocal] = useState(loading)
+    const [loadingLocal, setLoadingLocal] = useState(loading)
     useEffect(() => { setLoadingLocal(loading) }, [loading]);
 
-    // table ref
-    const tableRef = useRef(null)
+    // 用于取消请求的控制器
+    const abortControllerRef = useRef(null);
+
+    //   ref
+    const tableRef = useRef(null) // 表格组件的ref
+    const activeFilters = useRef(filterConfig?.activeFilters || {}) //当前选中的筛选器
     // filter data
     const filterDataHook = useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
@@ -252,9 +266,14 @@ function ConfigurableTable({
 
     // 判断是否有激活的筛选器
     const hasActiveFilters = useMemo(() => {
-        if (!filterConfig || !filterConfig.activeFilters) return false;
-        return Object.values(filterConfig.activeFilters).some(arr => Array.isArray(arr) && arr.length > 0);
-    }, [filterConfig?.activeFilters]);
+        if (!activeFilters.current) return false;
+        return Object.values(activeFilters.current).some(value => {
+            if (Array.isArray(value)) {
+                return value.length > 0;
+            }
+            return !!value; // 非数组时判断值是否存在
+        });
+    }, [activeFilters.current]);
 
     // --- 渲染逻辑 ---
     // 根据外部传入的完整 visibleColumnKeys 过滤列进行渲染
@@ -355,21 +374,15 @@ function ConfigurableTable({
                             isActionColumnClick ? 'Action column clicked' :
                                 isMediaCellClick ? 'Media cell clicked' : 'Checkbox clicked');
                     }
-                }else{
-                    listConfig.rowClickPublic && listConfig.rowClickPublic({rowData:record})
+                } else {
+                    listConfig.rowClickPublic && listConfig.rowClickPublic({ rowData: record })
                 }
             },
             style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
         };
     };
 
-    // 最终的分页配置
-    const finalPaginationConfig = useMemo(() => {
-        if (paginationConfig === false) return false;
-        const config = { ...defaultPagination, ...paginationConfig };
-        config.total = dataSource?.length || 0;
-        return config;
-    }, [paginationConfig, dataSource]);
+
 
     // 表格性能优化配置
     const tableVirtualConfig = useMemo(() => {
@@ -402,21 +415,100 @@ function ConfigurableTable({
         return config;
     }, [scrollX, totalVisibleWidth, tableHeight, tableProps?.scroll?.y]);
 
-    // getData 的方法
-    const getData = useCallback(async () => {
-        // getList 存在 自动调用内置g etListPublick 查询，getList 如果类型为Function 则调用外部传入的getList
-        if(getList){
-            setLoadingLocal(true)
-            const res = await (getList.constructor === Function ? getList : getListPublick)()
-            setLoadingLocal(false)
+    // 查询 表格数据
+    const searchTableData = useCallback(async (isFirstSearch) => {
+        const fetchTableData = getTableList || getPublicTableList
+
+        // 如果存在正在进行的请求，取消它
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        // 创建新的 AbortController
+        abortControllerRef.current = new AbortController();
+
+        try {
+            setLoadingLocal(true);
+            let res = {
+                data: dataSource,
+                success: true,
+                totalCount: dataSource.length
+            }
+            //外部传入优先使用外部传入的
+            if (dataSource.length === 0) {
+                res = await fetchTableData(moduleKey, {
+                    ...paginationParams.current,
+                    ...activeFilters.current
+                }, { signal: abortControllerRef.current.signal });
+            }
+
+            // 请求完成后清除当前的 AbortController
+            abortControllerRef.current = null;
+
+            if (res && res.success) {
+
+                setTableData(res.data);
+                paginationParams.current.totalCount = res.totalCount
+                if (isFirstSearch) {
+                    setIsEmptyTableData(res.data.length === 0)
+                }
+            } else {
+                paginationParams.current.totalCount = 0
+                setIsEmptyTableData(true)
+            }
+        } catch (error) {
+            // 如果是取消请求导致的错误，不做处理
+            if (error.name === 'AbortError') {
+                console.log('Request cancelled');
+                return;
+            }
+            // 其他错误正常处理
+            console.error('Search error:', error);
+            setIsEmptyTableData(true);
+        } finally {
+            // 如果不是被取消的请求，才设置 loading 为 false
+            if (abortControllerRef.current === null) {
+                setLoadingLocal(false);
+            }
         }
     }, [currentlyVisibleColumns, dataSource, rowKey]);
+
+    // 搜索框 输入框 变化 (使用防抖)
+    const debouncedSearch = useCallback(
+        debounce((value) => {
+            paginationParams.current.keywords = value;
+            searchTableData(); // 查询表格数据
+        }, 300), // 300ms 的防抖延迟
+        [paginationParams]
+    );
+
+    const onSearchChange = useCallback((e) => {
+        debouncedSearch(e.target.value);
+    }, [debouncedSearch]);
+
+    // 筛选器 更新
+    const filterUpdate = useCallback((newFilters) => {
+        activeFilters.current = newFilters;
+        searchTableData()// 查询 表格数据
+    }, [paginationParams])
+    const filterReset = useCallback(() => {
+        activeFilters.current = {};
+        searchTableData()// 查询 表格数据
+    }, [paginationParams])
 
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
     const processedColumns = useMemo(() => {
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
             let processedCol = { ...col };
+
+            // 添加默认排序配置
+            if (processedCol.sorter) {
+                processedCol.defaultSortOrder = processedCol.defaultSort === 'ascend' ? 'ascend' :
+                    processedCol.defaultSort === 'descend' ? 'descend' :
+                        'ascend';  // 未指定时默认升序
+            }
+
             if (!col.render) {
                 // 创建cell容器
                 // 只要列有mediaType属性并且是有效的媒体类型，就添加media-cell类名
@@ -457,7 +549,7 @@ function ConfigurableTable({
                         if (!optionConfig) {
                             return text;
                         }
-                        console.log("DisplayText",DisplayText)
+                        console.log("DisplayText", DisplayText)
                         const B = () => DisplayText
                         return (
                             <B />
@@ -467,9 +559,60 @@ function ConfigurableTable({
 
                 // 如果列有 actionButtons 属性，添加对 actionButtons 的处理逻辑
                 else if (processedCol.actionButtons && Array.isArray(processedCol.actionButtons)) {
+                    // 默认的按钮显示规则
+                    const defaultIsButtonVisible = (record, btnName) => {
+                        const status = record.status;
+                        // 简单的状态-按钮映射关系
+                        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+                        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+                        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+                        return false;
+                    };
+                    const defaultActionClick = async (key, rowData) => {
+                        switch (key) {
+                            // 编辑
+                            case 'edit':
+                                navigate(`/${pathname}/editor?id=${rowData.id}`);
+                                break;
+                            // 复制
+                            case 'duplicate':
+                                navigate(`/${pathname}/editor?id=${rowData.id}&isDuplicate=true`);
+                                break;
+                            // 删除
+                            case 'delete':
+                                // 显示确认对话框
+                                setDeleteRowData(rowData);
+                                setDeleteModalVisible(true);
+                                break;
+                            // 启用/禁用
+                            case 'enable':
+                            case 'disable':
+                                const status = key.toUpperCase();
+                                const result = await publicUpdateStatus({ idList: [rowData.id] }, `/${moduleKey}/${key}`);
+                                if (result.success) {
+                                    messageApi.success(`${key} successfully`);
+                                    searchTableData()// 刷新表格数据
+                                } else {
+                                    messageApi.error(`${key} failed`);
+                                }
+
+                                break;
+                            // 弃用
+                            case 'deprecate':
+
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                     processedCol.render = (_, rowData) => {
-                        let DropdownItems = listConfig.rowButtonsPublic.filter(i => processedCol.actionButtons.includes(i.key))
-                            .filter(({ key }) => processedCol.isShow(rowData, key))
+                        let DropdownItems = listConfig.rowButtonsPublic
+                            .filter(i => processedCol.actionButtons.includes(i.key))
+                            .filter(({ key }) => processedCol.isShow ? processedCol.isShow(rowData, key) : defaultIsButtonVisible(rowData, key))
+                            // 添加排序步骤，按照 actionButtons 中的顺序排序
+                            .sort((a, b) => {
+                                return processedCol.actionButtons.indexOf(a.key) - processedCol.actionButtons.indexOf(b.key);
+                            })
                             .map(({ key, click, icon }) => {
                                 const ItemIcon = icon
                                 return {
@@ -482,14 +625,16 @@ function ConfigurableTable({
                                     onClick: (e) => {
                                         if (e.domEvent) e.domEvent.stopPropagation();
                                         // 有自定义就执行自定义方法
-                                        if(processedCol.onActionClick){
-                                            processedCol.onActionClick(key,rowData,e,click)
-                                        }else {
-                                            click && click({ moduleKey,selectList:[rowData],getData });
+                                        if (processedCol.onActionClick) {
+                                            processedCol.onActionClick(key, rowData, e, click)
+                                        } else {
+                                            // 默认的处理方法
+                                            defaultActionClick(key, rowData, e)
                                         }
                                     }
                                 };
                             })
+
                         return (
                             <div className="actions-container" onClick={(e) => e.stopPropagation()}>
                                 <Dropdown
@@ -538,111 +683,189 @@ function ConfigurableTable({
     }, [currentlyVisibleColumns]);
 
     useEffect(() => {
+        searchTableData(true)//初始化数据
+
         // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
     }, []);
+
+    // 组件卸载时取消所有未完成的请求
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+
+    // 添加删除确认对话框的状态
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteRowData, setDeleteRowData] = useState(null);
+
     return (
-        <div className={styles.configurableTableContainer}>
-            {/* 工具栏 */}
-            <div className="configurable-table-toolbar"
-                style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
-                {/* 左侧按钮区域 */}
-                <Space wrap className={styles.configurableTableToolbarLeft}>
-                    {leftToolbarItems.map(item => (
-                        <Button
-                            key={item.key}
-                            onClick={item.onClick}
-                            type={item.type || 'default'} // 默认为 default 类型
-                            icon={item.icon}
-                            disabled={item.disabled}
-                            // 可以传递其他 Button props
-                            {...item.buttonProps}
-                        >
-                            {item.label}
-                        </Button>
-                    ))}
-                </Space>
-
-                {/* 右侧工具区域 */}
-                <Space wrap className={styles.configurableTableToolbarRight}>
-                    {searchConfig && (
-                        <Input
-                            maxLength={100}
-                            showCount
-                            placeholder={searchConfig.placeholder || 'Search...'}
-                            value={searchConfig.searchValue}
-                            prefix={<SearchOutlined />}
-                            onChange={searchConfig.onSearchChange}
-                            className="configurable-table-search-input"
-                            suffix={loadingLocal ? <Spin size="small"/> : null}
-                            allowClear
-                        />
-                    )}
-                    {filterConfig && filterConfig.filterSections?.length > 0 && (
-                        <FiltersPopover
-                            filterSections={filterConfig.filterSections}
-                            dataHook={filterDataHook}
-                            activeFilters={filterConfig.activeFilters || {}}
-                            onUpdate={() => {
-                                filterConfig.onUpdate()
-                            }}
-                            onReset={filterConfig.onReset}
-                            showBadgeDot={hasActiveFilters}
-                            showClearIcon={hasActiveFilters}
-                        >
-                            <Button
-                                icon={<FilterOutlined />}
-                                className={styles.configurableTableToolbarBtn}
-                            >
-                                Filters
-                            </Button>
-                        </FiltersPopover>
-                    )}
-                    {showColumnSettings && hasColumnSettingOptions && (
-                        <FiltersPopover
-                            filterSections={[columnSettingsSection]}
-                            activeFilters={initialVisibleColumnTitles}
-                            onUpdate={handleColumnVisibilityUpdate}
-                            onReset={handleColumnVisibilityReset}
-                            popoverPlacement="bottomRight"
-                            applyImmediately={false}
-                            clearButtonText="Reset"
-                            confirmButtonText="Apply"
-                            showBadgeDot={hasActiveColumnSettings}
-                            showClearIcon={false}
-                            isSettingsType
-                        >
-                            <Button
-                                icon={<SettingOutlined />}
-                                className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
-                            >
-                                Table Settings
-                            </Button>
-                        </FiltersPopover>
-                    )}
-                </Space>
+        isEmptyTableData ?
+            <div className={styles.customEmptyWrapper}>
+                <div className={styles.customEmptyImageWrapper}>
+                    <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
+                </div>
+                <div className={styles.customEmptyTitle}>Start Building Your Content </div>
+                <div className={styles.customEmptyDescription}>Create your first program.</div>
             </div>
+            :
+            <div className={styles.configurableTableContainer}>
+                {/* 工具栏 */}
+                {contextHolder}
+                <div className="configurable-table-toolbar"
+                    style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
+                    {/* 左侧按钮区域 */}
+                    <Space wrap className={styles.configurableTableToolbarLeft}>
+                        {leftToolbarItems.map(item => (
+                            <Button
+                                key={item.key}
+                                onClick={item.onClick}
+                                type={item.type || 'default'} // 默认为 default 类型
+                                icon={item.icon}
+                                disabled={item.disabled}
+                                // 可以传递其他 Button props
+                                {...item.buttonProps}
+                            >
+                                {item.label}
+                            </Button>
+                        ))}
+                    </Space>
 
-            {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
-            <Table
-                columns={processedColumns}
-                dataSource={dataSource}
-                rowKey={rowKey}
-                loading={loadingLocal}
-                onRow={handleRow}
-                ref={tableRef}
-                pagination={finalPaginationConfig}
-                scroll={finalScrollConfig}
-                rowSelection={rowSelection}
-                virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
-                onChange={(pagination, filters, sorter) => {
-                    // 调用原有的onChange回调(如果存在)
-                    if (tableProps?.onChange) {
-                        tableProps.onChange(pagination, filters, sorter);
-                    }
-                }}
-                {...tableProps}
-            />
-        </div>
+                    {/* 右侧工具区域 */}
+                    <Space wrap className={styles.configurableTableToolbarRight}>
+                        {searchConfig && (
+                            <Input
+                                maxLength={100}
+                                showCount
+                                placeholder={searchConfig.placeholder || 'Search...'}
+                                value={paginationParams.keywords}
+                                prefix={<SearchOutlined />}
+                                onChange={onSearchChange}
+                                className="configurable-table-search-input"
+                                suffix={loadingLocal ? <Spin size="small" /> : null}
+                                allowClear
+                            />
+                        )}
+                        {filterConfig && filterConfig.filterSections?.length > 0 && (
+                            <FiltersPopover
+                                filterSections={filterConfig.filterSections}
+                                dataHook={filterDataHook}
+                                activeFilters={activeFilters.current}
+                                onUpdate={filterUpdate}
+                                onReset={filterReset}
+                                showBadgeDot={hasActiveFilters}
+                                showClearIcon={hasActiveFilters}
+                            >
+                                <Button
+                                    icon={<FilterOutlined />}
+                                    className={styles.configurableTableToolbarBtn}
+                                >
+                                    Filters
+                                </Button>
+                            </FiltersPopover>
+                        )}
+                        {showColumnSettings && hasColumnSettingOptions && (
+                            <FiltersPopover
+                                filterSections={[columnSettingsSection]}
+                                activeFilters={initialVisibleColumnTitles}
+                                onUpdate={handleColumnVisibilityUpdate}
+                                onReset={handleColumnVisibilityReset}
+                                popoverPlacement="bottomRight"
+                                applyImmediately={false}
+                                clearButtonText="Reset"
+                                confirmButtonText="Apply"
+                                showBadgeDot={hasActiveColumnSettings}
+                                showClearIcon={false}
+                                isSettingsType
+                            >
+                                <Button
+                                    icon={<SettingOutlined />}
+                                    className={`${styles.configurableTableToolbarBtn} ${styles.configurableTableSettingsBtn}`}
+                                >
+                                    Table Settings
+                                </Button>
+                            </FiltersPopover>
+                        )}
+                    </Space>
+                </div>
+
+                {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
+                <Table
+                    columns={processedColumns}
+                    dataSource={tableData}
+                    rowKey={rowKey}
+                    onRow={handleRow}
+                    ref={tableRef}
+                    pagination={{
+                        current: paginationParams.current.pageIndex,//当前页码
+                        pageSize: paginationParams.current.pageSize,//每页条数
+                        total: paginationParams.current.totalCount,//总条数
+                        showSizeChanger: true,//显示分页器
+                        showQuickJumper: true,//显示快速跳转
+                        pageSizeOptions: ['10', '20', '50', '100', '200', '500', '1000'],//每页条数选项
+                        showTotal: (total, range) => `${total} items`,//显示总条数
+                    }}
+                    scroll={finalScrollConfig}
+                    rowSelection={rowSelection}
+                    virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
+                    onChange={(pagination, filters, sorter) => {
+                        // 判断是否发生了排序变化
+                        const isSorterChanged =
+                            prevSorterRef.current?.field !== sorter.field ||
+                            prevSorterRef.current?.order !== sorter.order;
+
+                        // 更新分页参数 
+                        paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
+                        paginationParams.current.pageSize = pagination.pageSize;
+
+                        // 更新排序参数 
+                        const isAscending = sorter.order === 'ascend';
+                        const orderBy = sorter.field;
+                        const orderDirection = isAscending ? 'ASC' : 'DESC';
+                        paginationParams.current.orderBy = orderBy;
+                        paginationParams.current.orderDirection = orderDirection;
+
+                        // 更新上一次的排序状态
+                        prevSorterRef.current = { ...sorter };
+
+                        searchTableData();// 查询表格数据
+                    }}
+                    {...tableProps}
+                />
+
+                {/* 删除确认对话框 */}
+                <Modal
+                    title="Confirm Delete"
+                    open={deleteModalVisible}
+                    centered
+                    width={500}
+                    zIndex={100}
+                    onOk={async () => {
+                        if (deleteRowData) {
+                            const result = await publicDeleteData({ idList: [deleteRowData.id] }, `/${moduleKey}/del`);
+                            if (result.success) {
+                                messageApi.success('Delete successfully');
+                                searchTableData(); // 刷新表格数据
+                            } else {
+                                messageApi.error('Delete failed');
+                            }
+                        }
+                        setDeleteModalVisible(false);
+                        setDeleteRowData(null);
+                    }}
+                    onCancel={() => {
+                        setDeleteModalVisible(false);
+                        setDeleteRowData(null);
+                    }}
+                    okText="Delete"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true }}
+                >
+                    <p style={{ fontSize: 15, textAlign: 'center' }}>Are you sure you want to delete 【{deleteRowData?.name}】?</p>
+                </Modal>
+            </div>
     );
 }
 

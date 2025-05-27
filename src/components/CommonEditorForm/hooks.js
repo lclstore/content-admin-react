@@ -1,8 +1,11 @@
 import { Form, message, notification, Modal, Select } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { savePublicFormData } from '@/config/api.js'; //公共方法
+import { useLocation } from 'react-router-dom';
 import React from 'react';
 import { optionsConstants } from '@/constants';
+import { md5Encrypt } from '@/utils';
 
 /**
  * 通用编辑器组件
@@ -95,9 +98,12 @@ export const useFormState = (initialValues = {}) => {
  */
 export const useHeaderConfig = (params) => {
     const {
+        setLoading,
+        isBack,
         enableDraft = false,
         statusList = optionsConstants.displayStatus,//状态列表
         config,
+        moduleKey,
         id,
         isFormDirty,
         form,
@@ -119,6 +125,8 @@ export const useHeaderConfig = (params) => {
         getLatestValues,
         initialValues = {} // 确保初始值可用
     } = params;
+
+    const location = useLocation();
 
     // 创建ref存储最新的collapseFormConfig
     const collapseFormConfigRef = useRef(fields);
@@ -189,6 +197,7 @@ export const useHeaderConfig = (params) => {
                 dataToSave[field.name] = value.format('YYYY-MM-DD');
             }
 
+
             // 递归处理嵌套字段
             if (Array.isArray(field.fields)) {
                 processFields(field.fields, dataToSave, field);
@@ -227,27 +236,29 @@ export const useHeaderConfig = (params) => {
     };
 
     // 执行保存操作
-    const executeSave = (dataToSave, status = null) => {
-        if (status) {
-            dataToSave.status = status;
-        }
+    const executeSave = async (dataToSave, status = null) => {
+        setLoading(true);
 
-        console.log('dataToSave', dataToSave);
-        if (onSave) {
-            const editId = id;
-            const callbackUtils = {
-                setDirty: setIsFormDirty,
-                messageApi,
-                navigate
-            };
-            onSave(dataToSave, editId, callbackUtils);
-        } else {
-            messageApi.success(config.saveSuccessMessage || 'Save successful!');
-            setIsFormDirty(false);
-
-            if (config.navigateAfterSave) {
-                navigate(config.afterSaveUrl || -1);
+        try {
+            if (!dataToSave.status) {
+                dataToSave.status = 'ENABLE';
             }
+
+            if (onSave) {
+                const result = await onSave(dataToSave);
+                return result;
+            } else {
+                // 从 location 获取基础路径
+                const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
+                const systemList = ['user'];//系统级别操作对应update/add  业务层操作对应save
+                const isSystem = systemList.includes(module);
+                const apiUrl = `/${module}/${isSystem ? id ? 'update' : 'add' : 'save'}`; // 完整的API路径
+                // 使用新的命名调用
+                const ret = await savePublicFormData(dataToSave, apiUrl, 'post');
+                return ret;
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -263,143 +274,178 @@ export const useHeaderConfig = (params) => {
             setIsStatusModalVisible(true);
         } else {
             // 直接调用状态确认处理函数，使用当前状态值
-            handleStatusModalConfirm(currentStatus);
+            return handleStatusModalConfirm(currentStatus);
         }
     }, [
         form, enableDraft, initialValues
     ]);
 
     // 处理状态选择确认
-    const handleStatusModalConfirm = (statusValue = 'ENABLE') => {
-        debugger
+    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLE', load = true) => {
         setIsStatusModalVisible(false);
 
-        // 在表单中设置选择的状态
-        form.setFieldValue('status', statusValue);
+        try {
+            // 在表单中设置选择的状态
+            form.setFieldValue('status', statusValue);
 
-        // 根据状态值确定验证规则
-        if (enableDraft && statusValue === 'DRAFT') {
-            // 状态为0，只验证name字段
-            form.validateFields(fieldsToValidate)
-                .then(() => {
-                    const dataToSave = form.getFieldsValue(true);
-                    dataToSave.status = statusValue;
-                    executeSave(dataToSave);
-                })
+            // 根据状态值确定验证规则
+            if (enableDraft && statusValue === 'DRAFT') {
+                // 状态为 DRAFT，只验证指定字段
+                await form.validateFields(fieldsToValidate);
+                const dataToSave = form.getFieldsValue(true);
+                dataToSave.status = statusValue;
+                const saveResult = await executeSave(dataToSave);
 
-        } else {
-            // 其他状态，执行完整验证
-            form.validateFields()
-                .then(values => {
-                    if (validate && !validate(values, form)) {
-                        return;
+                if (saveResult.success) {
+                    setIsFormDirty(false);
+                    if (config.navigateAfterSave) {
+                        navigate(config.afterSaveUrl || -1);
                     }
-                    const dataToSave = form.getFieldsValue(true);
+                } else {
+                    messageApi.error(saveResult.message || '保存失败');
+                }
+                return saveResult; // 返回保存结果
+            } else {
+                // 其他状态，执行完整验证
+                const values = await form.validateFields();
+                if (validate && !validate(values, form)) {
+                    const customValidationError = new Error("Custom validation failed.");
+                    customValidationError.errorFields = [{ name: ['custom'], errors: ['Custom validation failed.'] }];
+                    throw customValidationError;
+                }
+                const dataToSave = form.getFieldsValue(true);
 
-                    // 获取当前使用的FormFields
-                    const currentFormFields = collapseFormConfigRef.current;
-                    if (isCollapse) {
-                        processFields(currentFormFields, dataToSave);
-                    }
-                    const hasStructureListFields = currentFormFields.filter(
-                        formField => formField.type === 'structureList'
-                    );
+                // 获取当前使用的FormFields
+                const currentFormFields = collapseFormConfigRef.current;
+                if (isCollapse) {
+                    processFields(currentFormFields, dataToSave);
+                }
 
-                    //手动验证structureList
-                    hasStructureListFields.forEach(formField => {
-                        dataListValidate(formField, setActiveCollapseKeys);
-                    });
 
-                    const hasDataListFields = currentFormFields.filter(
-                        formField => Array.isArray(formField.dataList)
-                    );
+                const hasStructureListFields = currentFormFields.filter(
+                    formField => formField.type === 'structureList'
+                );
 
-                    // 处理数组列表相关数据格式和验证
-                    const dataListValues = hasDataListFields.map(formField => {
-                        const dataListObject = {
-                            [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)
-                        };
-
-                        if (formField.length > 0) {
-                            formField.fields.forEach(subField => {
-                                const baseName = subField.name.replace(/\d+$/, '');
-                                const value = dataToSave[subField.name];
-                                if (value !== undefined) {
-                                    dataListObject[baseName] = value;
-                                    delete dataToSave[subField.name];
-                                }
-                            });
-                        }
-
-                        return dataListObject;
-                    });
-
-                    if (dataListValues.length > 0) {
-                        const dataKey = hasDataListFields[0].dataKey;
-                        dataToSave[dataKey] = dataListValues;
-                    }
-
-                    // 确保状态值正确
-                    dataToSave.status = statusValue;
-                    executeSave(dataToSave);
-                })
-                .catch((error) => {
-                    // 尝试解析错误消息体
-                    let errorData = error;
-
-                    // 如果错误是字符串格式的JSON，尝试解析它
-                    if (typeof error.message === 'string') {
-                        try {
-                            const parsedError = JSON.parse(error.message);
-                            if (parsedError && parsedError.errorFields) {
-                                errorData = parsedError;
-                            }
-                        } catch (e) {
-                            // 解析失败，使用原始错误
-                        }
-                    }
-
-                    // 检查错误对象是否包含 errorFields 属性
-                    if (!errorData.errorFields || !errorData.errorFields.length) {
-                        messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
-                        return;
-                    }
-
-                    // 处理notification类型的错误
-                    if (errorData.errorFields[0]?.type === 'notification') {
-                        notification.error({
-                            style: {
-                                minWidth: 400,
-                            },
-                            duration: 4000,
-                            placement: 'bottomRight',
-                            message: errorData.errorFields[0].message,
-                            description: errorData.errorFields[0].description,
-                        });
-                        return;
-                    }
-
-                    // 如果启用了折叠功能且提供了 setActiveCollapseKeys 方法
-                    if (isCollapse && setActiveCollapseKeys) {
-                        const errorFieldName = errorData.errorFields[0].name?.[0];
-
-                        // 使用当前的formFields查找面板
-                        const currentFormFields = fields;
-                        const matchedPanel = currentFormFields.find(panel =>
-                            Array.isArray(panel.fields) &&
-                            panel.fields.some(field => field.name === errorFieldName)
-                        );
-
-                        if (matchedPanel) {
-                            setActiveCollapseKeys(matchedPanel.name);
-                        }
-                    }
-
-                    // 显示错误信息
-                    messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
+                //手动验证structureList
+                hasStructureListFields.forEach(formField => {
+                    dataListValidate(formField, setActiveCollapseKeys);
                 });
+                // 处理数组列表相关数据格式和验证
+                const hasDataListFields = currentFormFields.filter(
+                    formField => Array.isArray(formField.dataList)
+                );
+
+
+                // 处理数组列表相关数据格式和验证
+                const dataListValues = hasDataListFields.map(formField => {
+                    const dataListObject = {
+                        [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)
+                    };
+
+                    if (formField.length > 0) {
+                        formField.fields.forEach(subField => {
+                            const baseName = subField.name.replace(/\d+$/, '');
+                            const value = dataToSave[subField.name];
+                            if (value !== undefined) {
+                                dataListObject[baseName] = value;
+                                delete dataToSave[subField.name];
+                            }
+                        });
+                    }
+
+                    return dataListObject;
+                });
+
+                if (dataListValues.length > 0) {
+                    const dataKey = hasDataListFields[0].dataKey;
+                    dataToSave[dataKey] = dataListValues;
+                }
+
+                //处理密码字段--加密
+                const passwordField = currentFormFields.find(field => field.type === 'password');
+                if (passwordField) {
+                    dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
+                }
+                // 确保状态值正确
+                dataToSave.status = statusValue;
+                const saveResult = await executeSave(dataToSave);//执行保存
+
+                if (saveResult.success) {
+                    if (load) {
+                        messageApi.success(saveResult.message || 'Save successful!');
+                    }
+                    setIsFormDirty(false);
+                    if (isBack) {
+                        navigate(config.afterSaveUrl || -1);
+                    }
+                } else {
+                    messageApi.error(saveResult.message || 'Save failed!');
+                }
+
+                return saveResult; // 返回保存结果
+            }
+        } catch (error) {
+            // 尝试解析错误消息体
+            let errorData = error;
+
+            // 如果错误是字符串格式的JSON，尝试解析它
+            if (typeof error.message === 'string') {
+                try {
+                    const parsedError = JSON.parse(error.message);
+                    if (parsedError && parsedError.errorFields) {
+                        errorData = parsedError;
+                    }
+                } catch (e) {
+                    // 解析失败，使用原始错误
+                }
+            }
+
+            // 检查错误对象是否包含 errorFields 属性
+            if (!errorData.errorFields || !errorData.errorFields.length) {
+                messageApi.error(config.validationErrorMessage || 'Please check if the form is filled correctly');
+                throw error; // 重新抛出错误
+            }
+
+            // 处理notification类型的错误
+            if (errorData.errorFields[0]?.type === 'notification') {
+                notification.error({
+                    style: {
+                        minWidth: 400,
+                    },
+                    duration: 4000,
+                    placement: 'bottomRight',
+                    message: errorData.errorFields[0].message,
+                    description: errorData.errorFields[0].description,
+                });
+                throw error; // 重新抛出错误
+            }
+
+            // 如果启用了折叠功能且提供了 setActiveCollapseKeys 方法
+            if (isCollapse && setActiveCollapseKeys) {
+                const errorFieldName = errorData.errorFields[0].name?.[0];
+
+                // 使用当前的formFields查找面板
+                const currentFormFields = fields;
+                const matchedPanel = currentFormFields.find(panel =>
+                    Array.isArray(panel.fields) &&
+                    panel.fields.some(field => field.name === errorFieldName)
+                );
+
+                if (matchedPanel) {
+                    setActiveCollapseKeys(matchedPanel.name);
+                }
+            }
+
+            // 显示错误信息
+            messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
+            throw error; // 确保错误也被正确传递
         }
-    };
+    }, [
+        form, enableDraft, fieldsToValidate, executeSave, validate, collapseFormConfigRef,
+        isCollapse, processFields, dataListValidate, setActiveCollapseKeys, messageApi, config
+        // 移除了 pendingSaveData, setIsStatusModalVisible 因为它们不直接影响此函数的异步流程
+        // 确保所有依赖项都已正确列出
+    ]);
 
     // 处理状态选择取消
     const handleStatusModalCancel = () => {
@@ -483,6 +529,8 @@ export const useHeaderConfig = (params) => {
     }
 
     return {
-        headerButtons
+        headerButtons,
+        handleStatusModalConfirm,
+        handleSaveChanges // 导出 handleSaveChanges 函数
     };
 }; 

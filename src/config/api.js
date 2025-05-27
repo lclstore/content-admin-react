@@ -1,5 +1,5 @@
 import request from "@/request"
-import {uuid} from "@/utils/index.js";
+import { uuid } from "@/utils/index.js";
 // s3上传
 /**
  *  @param {File} file - 文件
@@ -9,7 +9,7 @@ import {uuid} from "@/utils/index.js";
  *  @returns {String} returnData.fileUrl - 返回的文件读取的绝对路径
  *  @returns {String} returnData.localUrl - 返回的文件的本地读取路径
  */
-export const uploadFile = async function ({file, dirKey}) {
+export const uploadFile = async function ({ file, dirKey }) {
     // debugger
     let returnData = {
         localUrl: URL.createObjectURL(file)
@@ -27,7 +27,7 @@ export const uploadFile = async function ({file, dirKey}) {
             callback: res => {
                 res.error ? resolve('error') : resolve(res.data.data)
             }
-        })  
+        })
     })
 
     // 对fileUrl进行处理,如果返回url路径包含name，把name的值替换为file.name,如果不包含name则在url添加name且值为file.name
@@ -47,7 +47,7 @@ export const uploadFile = async function ({file, dirKey}) {
             body: file,
         }).then(() => {
             // 上传成功
-            returnData = {...returnData, ...fileUrl}
+            returnData = { ...returnData, ...fileUrl }
             Reflect.deleteProperty(returnData, 'uploadUrl')
         }).catch(() => returnData.error = true)
     } else {
@@ -55,37 +55,86 @@ export const uploadFile = async function ({file, dirKey}) {
     }
     return returnData
 }
-export const getList = async ({moduleKey}) => {
+// 获取公共table列表
+export const getPublicTableList = async (moduleKey, params) => {
     return new Promise(resolve => {
         request.get({
             url: `/${moduleKey}/page`,
-            callback: res => resolve(res)
+            load: true,
+            data: params,
+            callback: res => resolve(res?.data)
         });
     })
 }
-export const enable = async ({moduleKey, idList}) => {
+// 根据id获取表单数据
+export const getformDataById = (url) => {
+    return new Promise((resolve, reject) => {
+        request.get({
+            url: url,
+            callback(res) {
+                resolve(res?.data);
+            }
+        });
+    });
+};
+// 保存公共表单数据
+export const savePublicFormData = (params, url) => {
+    return new Promise((resolve, reject) => {
+        request.post({
+            url: url,
+            load: false,
+            data: params,
+            callback(res) {
+                resolve(res?.data);
+            }
+        });
+    });
+};
+// 公共启用/禁用数据
+export const publicUpdateStatus = (params, url) => {
+    return new Promise(resolve => {
+        request.post({
+            url: url,
+            load: true,
+            data: params,
+            callback: res => resolve(res?.data)
+        });
+    })
+}
+// 公共删除数据
+export const publicDeleteData = (params, url) => {
+    return new Promise(resolve => {
+        request.post({
+            url: url,
+            load: true,
+            data: params,
+            callback: res => resolve(res?.data)
+        });
+    })
+}
+export const enable = async ({ moduleKey, idList }) => {
     return new Promise(resolve => {
         request.post({
             url: `/${moduleKey}/enable`,
-            data: {idList},
+            data: { idList },
             callback: res => resolve(res)
         });
     })
 }
-export const disable = async ({moduleKey, idList}) => {
+export const disable = async ({ moduleKey, idList }) => {
     return new Promise(resolve => {
         request.post({
             url: `/${moduleKey}/disable`,
-            data: {idList},
+            data: { idList },
             callback: res => resolve(res)
         });
     })
 }
-export const del = async ({moduleKey, idList}) => {
+export const del = async ({ moduleKey, idList }) => {
     return new Promise(resolve => {
         request.post({
             url: `/${moduleKey}/del`,
-            data: {idList},
+            data: { idList },
             callback: res => resolve(res)
         });
     })

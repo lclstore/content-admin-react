@@ -66,9 +66,7 @@
     gap: 8px;
 }
 
-.searchInput {
-    width: 300px;
-}
+
 
 /* 添加响应式布局 */
 @media (max-width: 768px) {

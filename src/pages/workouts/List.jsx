@@ -149,6 +149,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 1 },
             { title: 'Cover Image', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'coverImage', key: 'image' },
             { title: 'Detail Image', mediaType: 'audio', dataIndex: 'detailImage', key: 'detailImage', width: 80, visibleColumn: 1 },
             { title: 'Thumbnail Image', mediaType: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', width: 130, visibleColumn: 1 },
@@ -161,6 +162,9 @@ export default function WorkoutsList() {
                 width: 120,
                 visibleColumn: 0
             },
+
+
+
             { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
             {
                 title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
@@ -175,11 +179,6 @@ export default function WorkoutsList() {
                 }
             },
             { title: 'Calorie (Kcal)', align: 'center', dataIndex: 'calorie', key: 'calorie', sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0), width: 150, visibleColumn: 2 },
-            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
-            { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
-            { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
-            { title: 'Target', dataIndex: 'target', key: 'target', width: 200, visibleColumn: 1 },
-            { title: 'Exercise Num', align: 'center', dataIndex: 'exerciseNum', key: 'exerciseNum', sorter: (a, b) => (a.exerciseNum || 0) - (b.exerciseNum || 0), width: 130, visibleColumn: 1 },
             {
                 title: 'New Date',
                 key: 'newDate',
@@ -189,7 +188,12 @@ export default function WorkoutsList() {
                 width: 220,
                 visibleColumn: 1
             },
+            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
+            { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
+            { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
+            { title: 'Injured', dataIndex: 'injured', key: 'injured', width: 200, visibleColumn: 1 },
             { title: 'Audio Lang', dataIndex: 'audioLang', key: 'audioLang', width: 120, visibleColumn: 1 },
+            { title: 'Exercise Num', align: 'center', dataIndex: 'exerciseNum', key: 'exerciseNum', sorter: (a, b) => (a.exerciseNum || 0) - (b.exerciseNum || 0), width: 130, visibleColumn: 1 },
             {
                 title: 'File Status', dataIndex: 'fileStatus', key: 'fileStatus',
                 width: 120,
@@ -197,6 +201,11 @@ export default function WorkoutsList() {
                 options: 'fileStatus',
                 visibleColumn: 1
             },
+            { title: 'Gender', dataIndex: 'gender', key: 'gender', width: 130, visibleColumn: 1 },
+            // { title: 'Target', dataIndex: 'target', key: 'target', width: 200, visibleColumn: 1 },
+
+
+
             {
                 title: 'Actions',
                 key: 'actions',

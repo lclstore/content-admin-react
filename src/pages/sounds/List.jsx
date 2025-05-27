@@ -5,7 +5,6 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { formatDateRange } from '@/utils';
 import { statusIconMap, optionsConstants } from '@/constants';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import TagSelector from '@/components/TagSelector/TagSelector';
@@ -13,7 +12,7 @@ import {
     statusOrder,
     difficultyOrder,
     mockUsers,
-    filterSections,
+
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
 } from './Data';
@@ -22,6 +21,23 @@ import request from "@/request";
 export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
     let mockUsers = []
+    const filterSections = [
+        {
+            title: 'Status',
+            key: 'status',
+            type: 'single', // 单选 //multiple 多选
+            options: [{
+                label: 'Draft',
+                value: 'DRAFT'
+            }, {
+                label: 'Enable',
+                value: 'ENABLE'
+            }, {
+                label: 'Disable',
+                value: 'DISABLE'
+            }],
+        }
+    ];
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const [dataSource, setDataSource] = useState(mockUsers); // 表格数据源
@@ -151,13 +167,13 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            
+
             { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', width: 80, visibleColumn: 0 },
             { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', width: 80, visibleColumn: 0 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             {
                 title: 'Name',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 dataIndex: 'name',
                 key: 'name',
                 width: 350,
@@ -193,9 +209,9 @@ export default function WorkoutsList() {
                 // 定义所有可能的按钮
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
-                isShow: isButtonVisible,
+                // isShow: isButtonVisible,
                 // 按钮点击处理函数
-                onActionClick: handleActionClick
+                // onActionClick: handleActionClick
             },
         ];
     }, [isButtonVisible, handleActionClick]);
@@ -277,15 +293,6 @@ export default function WorkoutsList() {
         setSelectedFilters(newFilters);
         performSearch(searchValue, newFilters);
     }, [performSearch, searchValue]);
-
-    /**
-     * 重置筛选器处理
-     */
-    const handleFilterReset = useCallback(() => {
-        setSelectedFilters({});
-        setSearchValue('');
-        performSearch('', {});
-    }, [performSearch]);
 
     /**
      * 处理行点击
@@ -422,12 +429,12 @@ export default function WorkoutsList() {
     /**
      * 重置操作标志
      */
-    useEffect(() => {
-        getData().then()
-        const handleGlobalClick = () => setActionClicked(false);
-        document.addEventListener('click', handleGlobalClick);
-        return () => document.removeEventListener('click', handleGlobalClick);
-    }, []);
+    // useEffect(() => {
+    //     getData().then()
+    //     const handleGlobalClick = () => setActionClicked(false);
+    //     document.addEventListener('click', handleGlobalClick);
+    //     return () => document.removeEventListener('click', handleGlobalClick);
+    // }, []);
 
     // 8. 表格数据和配置
     /**
@@ -484,28 +491,25 @@ export default function WorkoutsList() {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'workoutsList'}
+                uniqueId={'soundsList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"
+                moduleKey="sound"
                 loading={loading}
                 onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or ID...",
                     searchValue: searchValue,
-                    onSearchChange: handleSearchInputChange,
+                    // onSearchChange: handleSearchInputChange,
                 }}
                 showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,
                     activeFilters: selectedFilters,
-                    onUpdate: handleFilterUpdate,
-                    onReset: handleFilterReset,
                 }}
-                tableProps={{
-                    onChange: handleTableChange
-                }}
+
             />
 
             {/* 删除确认弹窗 */}

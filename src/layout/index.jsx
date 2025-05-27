@@ -1,14 +1,14 @@
-import {Layout, Spin} from 'antd'
+import { Layout, Spin } from 'antd'
 import AppSider from './components/sider'
 import AppHeader from './components/header'
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import settings from '@/config/settings'
 import './layout.css';
-import {Outlet} from 'react-router-dom'
-import {useStore} from "@/store/index.js";
-import {useNavigate} from "react-router";
+import { Outlet } from 'react-router-dom'
+import { useStore } from "@/store/index.js";
+import { useNavigate } from "react-router";
 
-const {Header, Sider, Content} = Layout
+const { Header, Sider, Content } = Layout
 
 export default function AppLayout() {
     const [collapsed, setCollapsed] = useState(false);
@@ -21,10 +21,10 @@ export default function AppLayout() {
     }, [navigate]);
     return (
         <Layout className='layoutContainer'>
-            <Spin spinning={loadingGlobal} fullscreen/>
+            <Spin spinning={loadingGlobal} fullscreen tip="Loading..." />
             <Sider className='siderContainer' theme={settings.layout.theme} width={settings.layout.sidebarWidth}
-                   trigger={null} collapsible collapsed={collapsed}>
-                <AppSider/>
+                trigger={null} collapsible collapsed={collapsed}>
+                <AppSider />
             </Sider>
             <Layout>
                 <Header
@@ -33,7 +33,7 @@ export default function AppLayout() {
                     }}
                     className='headerContainer'
                 >
-                    <AppHeader/>
+                    <AppHeader />
                 </Header>
                 <Content
                     className='contentContainer'
@@ -42,7 +42,7 @@ export default function AppLayout() {
                         position: 'relative',
                     }}
                 >
-                    <Outlet/>
+                    <Outlet />
                 </Content>
             </Layout>
         </Layout>

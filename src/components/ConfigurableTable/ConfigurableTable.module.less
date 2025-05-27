@@ -1,5 +1,3 @@
-
-
 .configurableTableContainer {
   width: 100%;
   padding: 20px;
@@ -8,13 +6,16 @@
   right: 0;
   top: 0;
   bottom: 0;
-  display:flex;
-  flex-direction:column;
-  :global{
+  display: flex;
+  flex-direction: column;
+
+  :global {
+
     // 基础类
-    .flex{
+    .flex {
       display: flex;
     }
+
     // 表格查询栏
     .configurable-table-toolbar {
       display: flex;
@@ -23,27 +24,32 @@
       margin-bottom: 16px;
       flex-wrap: wrap;
       gap: 10px;
+
       /* 左侧工具栏组 */
-      > .ant-space {
+      >.ant-space {
         flex-wrap: wrap;
         /* 允许按钮换行 */
         gap: 10px !important;
         /* 按钮之间的间隙 */
       }
     }
+
     // 表格整体
     .ant-table-wrapper {
       background: none;
       display: flex;
       overflow: auto;
       flex-direction: column;
+
       &::-webkit-scrollbar {
         width: 0.01px;
       }
-      .ant-table-cell{
+
+      .ant-table-cell {
         //padding: 16px 8px;
         padding: 0;
-        .td-cell{
+
+        .td-cell {
           min-height: 79px;
           box-sizing: border-box;
           margin: 0 8px;
@@ -51,16 +57,19 @@
           align-items: center;
           position: relative;
           word-break: break-word;
-          .actions-container{
+
+          .actions-container {
             display: flex;
             align-items: center;
             justify-content: center;
           }
         }
       }
+
       .ant-table-thead {
         background: #f5f5f5 !important;
-        & > tr > th {
+
+        &>tr>th {
           padding: 4px 8px;
           background: #f5f5f5 !important;
           color: #889e9e;
@@ -68,9 +77,11 @@
           line-height: 1.3;
           border: none;
           height: 30px;
-          .ant-table-column-sorters{
+
+          .ant-table-column-sorters {
             justify-content: flex-start;
-            .ant-table-column-title{
+
+            .ant-table-column-title {
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
@@ -78,46 +89,56 @@
             }
           }
         }
-        & > tr > th.ant-table-column-sort {
+
+        &>tr>th.ant-table-column-sort {
 
           background: #f5f5f5 !important;
         }
-        & > tr > th.ant-table-column-sort:hover {
+
+        &>tr>th.ant-table-column-sort:hover {
           background: #f5f5f5 !important;
         }
-        & > tr > th.ant-table-column-sort {
+
+        &>tr>th.ant-table-column-sort {
           background: #f5f5f5 !important;
         }
-        & > tr > th.ant-table-column-sort:hover {
+
+        &>tr>th.ant-table-column-sort:hover {
           background: #f5f5f5 !important;
         }
       }
 
-      .ant-table-tbody{
+      .ant-table-tbody {
+
         /* 多选表格选中效果 */
-        .ant-table-row.ant-table-row-selected > .ant-table-cell {
+        .ant-table-row.ant-table-row-selected>.ant-table-cell {
           background: #e6f4ff;
         }
-        & > tr > td.ant-table-cell{
+
+        &>tr>td.ant-table-cell {
           font-size: var(--font-md);
           font-weight: var(--font-weight-medium);
           color: var(--primary-color);
+
           .success-icon {
             color: #52c41a;
             font-weight: bolder;
             font-size: 16px;
           }
+
           .error-icon {
             color: #ff4d4f;
             font-weight: bolder;
             font-size: 16px;
           }
+
           .ant-empty {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
           }
+
           .userAvatar {
             width: 40px;
             height: 40px;
@@ -127,40 +148,48 @@
             justify-content: center;
             background-color: #f0f2f5;
           }
+
           .anticon-ellipsis {
             color: var(--text-primary);
             font-size: 24px;
             font-weight: bolder;
           }
+
           .statusTag {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
           }
-          .statusTag{
+
+          .statusTag {
             .successIcon {
               color: var(--active-border-color);
             }
+
             .errorIcon {
               color: var(--color-error-light);
             }
           }
         }
-        & > tr > td:first-child .userAvatar {
+
+        &>tr>td:first-child .userAvatar {
           margin-right: 12px;
         }
-        & > tr > td:first-child .userInfoText {
+
+        &>tr>td:first-child .userInfoText {
           display: flex;
           flex-direction: column;
           justify-content: center;
           line-height: normal;
         }
-        & > tr > td:first-child .userInfoText span {
+
+        &>tr>td:first-child .userInfoText span {
           line-height: 1.5;
         }
+
         /* 表格排序列悬停样式 */
-        & > tr:hover > td {
+        &>tr:hover>td {
           background-color: #fafafa !important;
         }
       }
@@ -202,12 +231,15 @@
       }
 
     }
+
     .configurable-table-search-input {
-      width: 300px;
+      width: 400px;
     }
+
     /* 确保操作列的内容即使在有 data-action-key 时也能正常显示 */
     [data-action-key] {
       display: contents;
+
       /* 使 div 表现得像其内容一样，不影响布局 */
       /* 微调下拉菜单按钮，防止被行点击覆盖 */
       .actionDropdown .actionButton {
@@ -293,4 +325,37 @@
 /* 给MediaCell对应的表格单元格设置padding为0 */
 .configurableTableContainer .mediaCellTd {
   padding: 0 !important;
+}
+
+.customEmptyWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 100px 0;
+}
+
+.customEmptyImageWrapper {
+
+  width: 244px;
+  height: 244px;
+  margin: 50px auto;
+
+  .customEmptyImage {
+
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.customEmptyTitle {
+  margin-bottom: 10px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #243636;
+}
+
+.customEmptyDescription {
+  font-size: 14px;
+  color: #889E9E;
 }

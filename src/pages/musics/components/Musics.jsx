@@ -368,7 +368,7 @@ export default function Musics() {
     }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
 
     // 排序
-    const sortGetData = (orderBy,orderDirection) => {
+    const sortGetData = (orderBy, orderDirection) => {
         return new Promise(resolve => {
             request.get({
                 url: "/music/page",
@@ -482,11 +482,11 @@ export default function Musics() {
     // 处理表格变更（排序、筛选、分页）
     const handleTableChange = useCallback((pagination, filters, sorter) => {
         if (sorter.order) {
-            
+
             const isAscending = sorter.order === 'ascend';
             console.log(isAscending)
             console.log(`当前排序：字段=${sorter.field}，方向=${isAscending ? '升序' : '降序'}`);
-            sortGetData(sorter.field,`${isAscending ? 'ASC' : 'DESC'}`)
+            sortGetData(sorter.field, `${isAscending ? 'ASC' : 'DESC'}`)
 
             // 根据排序信息执行其他操作
             if (sorter.field === 'age' && !isAscending) {
@@ -512,6 +512,7 @@ export default function Musics() {
             {/* 可配置表格组件 */}
             <ConfigurableTable
                 uniqueId={'workoutsList'}
+                moduleKey={'music'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"
@@ -520,15 +521,13 @@ export default function Musics() {
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or ID...",
-                    searchValue: searchValue,
-                    onSearchChange: handleSearchInputChange,
+
                 }}
                 showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,
                     activeFilters: selectedFilters,
-                    onUpdate: handleFilterUpdate,
-                    onReset: handleFilterReset,
+
                 }}
                 // leftToolbarItems={leftToolbarItems}
                 // rowSelection={rowSelection}

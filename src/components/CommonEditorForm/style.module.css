@@ -659,7 +659,7 @@
 
 /* 左侧列表容器 */
 .commonListContainer {
-    width: 300px;
+    width: 400px;
     height: 100%;
     overflow: auto;
     border-right: 1px solid #f0f0f0;

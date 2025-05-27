@@ -1,15 +1,20 @@
 /* FiltersPopover.module.css */
 
 .filterContent {
-    padding: 16px;
-    max-width: 550px;
-    max-height: 480px;
-    overflow-y: auto;
+    max-width: 650px;
+    max-height: 580px;
     background-color: #fff;
-    /* 背景色 */
     border-radius: 8px;
     display: flex;
     flex-direction: column;
+}
+
+.scrollContent {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* 确保flex子项可以正确滚动 */
 }
 
 .filterSectionItem {
@@ -83,16 +88,17 @@
     height: 1px;
     /* 设置高度 */
     background-color: #f0f0f0;
+    margin: 8px 0;
 }
 
 .filterFooter {
+    flex: 0 0 auto;
     text-align: center;
     border-top: 1px solid #f0f0f0;
-    /* 分割线 */
-    padding-top: 16px;
-    /* 顶部内边距 */
-    margin-top: auto;
-    /* 将页脚推到底部 */
+    padding: 12px 16px;
+    background: #fff;
+    /* border-radius: 0 0 8px 8px; */
+    /* box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06); */
 }
 
 .footerButton {

@@ -1,8 +1,8 @@
 import settings from '@/config/settings';
 import { v4 as uuidv4 } from 'uuid';
 import { useStore } from "@/store/index.js";
+import md5 from 'md5';
 
-const { file: fileSettings } = settings;
 /**
  * 工具函数集合
  */
@@ -13,7 +13,7 @@ export function router() {
   const navigate = state.navigate;
   const routerList = location.pathname.split('/')
   return {
-    push(path){
+    push(path) {
       routerList[routerList.length - 1] = path
       navigate(routerList.join("/"))
     }
@@ -162,7 +162,7 @@ export const getFullUrl = (url) => {
   if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) {
     return url;
   }
-  return `${fileSettings.baseURL}${url}`;
+  return `${settings.file.baseURL}${url}`;
 };
 
 /**
@@ -186,11 +186,11 @@ export const generateUUID = () => {
 // uuid 生成
 export const uuid = (is_) => {
   let str = ''
-  function create16(){
+  function create16() {
     return parseInt(Math.random() * 16).toString(16)
   }
-  for(let i = 0;i < 32;i++ ){
-    if(is_ === '-' && (i === 8 || i === 12 || i === 16 || i === 20)){
+  for (let i = 0; i < 32; i++) {
+    if (is_ === '-' && (i === 8 || i === 12 || i === 16 || i === 20)) {
       str += '-'
     }
     str += create16()
@@ -205,3 +205,12 @@ export const uuid = (is_) => {
 export const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+/**
+ * 加密字符串
+ * @param {string} value 需要加密的字符串
+ * @returns {string} 加密后的字符串
+ */
+export const md5Encrypt = (value) => {
+  return md5(value || '')
+}
+

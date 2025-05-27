@@ -1,0 +1,36 @@
+.homeContainer {
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+.homeSidebar,
+.logs {
+    flex: 1;
+}
+
+.homeSidebar {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.homeBox {
+    border-radius: 16px;
+    border: 1px solid #e2ebeb;
+    background-color: #fff;
+}
+
+.titleBar {
+    padding: 0 16px;
+    height: 56px;
+    line-height: 56px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    border-bottom: 1px solid #e2ebeb;
+}

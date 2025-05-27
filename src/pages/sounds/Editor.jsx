@@ -56,7 +56,7 @@ export default function UserEditorWithCommon() {
             content: ({ getFieldValue }) => {      // content 支持函数
                 const layoutType = getFieldValue('translation');
                 console.log('layoutType', layoutType)
-                return layoutType === 1
+                return layoutType
                     ? true
                     : false;
             },

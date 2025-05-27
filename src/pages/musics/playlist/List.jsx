@@ -17,7 +17,7 @@ import {
     filterSections1,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
-} from './Data';
+} from '../components/Data';
 
 export default function Playlists() {
     // 1. 状态定义 - 组件内部状态管理
@@ -173,7 +173,7 @@ export default function Playlists() {
             { title: 'Type', dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
 
             { title: 'Music Num', dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
-            
+
 
             {
                 title: 'Actions',

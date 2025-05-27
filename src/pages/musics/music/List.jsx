@@ -130,7 +130,7 @@ export default function Musics() {
 
     //渲染表格
     return (
-        <div className="workoutsContainer page-list">
+        <div className="workoutsContainer page-list"  >
             <ConfigurableTable
                 moduleKey={'music'}
                 columns={allColumnDefinitions}

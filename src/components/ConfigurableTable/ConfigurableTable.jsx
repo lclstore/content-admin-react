@@ -68,7 +68,13 @@ function ConfigurableTable({
     getTableList,
     moduleKey
 }) {
-    moduleKey = moduleKey || useLocation().pathname.split('/')[1];
+    const pathSegments = useLocation().pathname.split('/').filter(Boolean);
+    const routeLevel = pathSegments.length;
+    let pathUrl = useLocation().pathname.split('/')[1];
+    moduleKey = moduleKey || pathSegments[1];
+    if (routeLevel == 3) {
+        pathUrl = `${pathSegments[0]}/${pathSegments[1]}`;
+    }
     const pathname = useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${moduleKey}`;
@@ -353,7 +359,7 @@ function ConfigurableTable({
                     onRowClick(record, event);
                 } else {
                     // 默认行为：导航到编辑页面
-                    navigate(`/${pathname}/editor?id=${record.id}`);
+                    navigate(`/${pathUrl}/editor?id=${record.id}`);
                 }
             },
             style: { cursor: 'pointer' }, // 保持光标样式
@@ -545,14 +551,18 @@ function ConfigurableTable({
                         return false;
                     };
                     const defaultActionClick = async (key, rowData) => {
+
                         switch (key) {
+
                             // 编辑
                             case 'edit':
-                                navigate(`/${pathname}/editor?id=${rowData.id}`);
+                                // 获取当前路径并分割成数组
+                                // 判断路由层级
+                                navigate(`/${pathUrl}/editor?id=${rowData.id}`);
                                 break;
                             // 复制
                             case 'duplicate':
-                                navigate(`/${pathname}/editor?id=${rowData.id}&isDuplicate=true`);
+                                navigate(`/${pathUrl}/editor?id=${rowData.id}&isDuplicate=true`);
                                 break;
                             // 删除
                             case 'delete':

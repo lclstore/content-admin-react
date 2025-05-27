@@ -108,7 +108,18 @@ export default function UserEditorWithCommon() {
 
 
     };
+    useEffect(() => {
+        // 初始加载自动跳转到默认的tab
+        navigate(tabItems[0].key)
+        const plansKey = localStorage.getItem('collections');
+        if (plansKey) {
+            setDefaultTabItem(tabItems[plansKey - 1])
+            console.log('defaultTabItem', defaultTabItem)
+            localDown(1)
 
+        }
+
+    }, []);
     //请求列数据方法
     const initFormData = (id) => {
         return new Promise((resolve) => {
@@ -130,13 +141,10 @@ export default function UserEditorWithCommon() {
     };
     return (
         <CommonEditorForm
-            initFormData={initFormData}
             formType="basic"
-            isTabs={true}
             config={{ formName: 'Music', title: 'Music', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}
-            onSave={handleSaveUser}
         />
     );
 } 

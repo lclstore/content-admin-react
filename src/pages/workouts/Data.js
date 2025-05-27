@@ -32,30 +32,31 @@ export const filterSections = [
         options: ['Draft', 'Enabled', 'Disabled'],
     },
     {
+        title: 'Gender',
+        key: 'gender',
+        options: ['Female', 'Male'],
+    },
+    {
         title: 'Difficulty',
         key: 'difficulty',
         options: ['Beginner', 'Intermediate', 'Advanced'],
+    },
+    {
+        title: 'Position',
+        key: 'position',
+        options: ['Standing',  'Seated'],
     },
     {
         title: 'Equipment',
         key: 'equipment',
         options: ['Dumbbells', 'Resistance band', 'None'],
     },
-    // {
-    //     title: 'Function Type',
-    //     key: 'functionType',
-    //     options: ['Warm Up', 'Main', 'Cool Down'],
-    // },
 
+    
     {
-        title: 'Position',
-        key: 'position',
-        options: ['Standing', 'Lying', 'Seated', 'Prone', 'Kneeling'],
-    },
-    {
-        title: 'Target',
-        key: 'target',
-        options: ['Full Body', 'Arm', 'Back', 'Butt', 'Abs', 'Leg', 'Core'],
+        title: 'Injured',
+        key: 'injured',
+        options: ['Shoulder', 'Back', 'Wrist', 'Knee', 'Ankle', 'Hip', 'None'],
     }
 ];
 

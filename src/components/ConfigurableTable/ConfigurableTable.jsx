@@ -640,7 +640,7 @@ function ConfigurableTable({
                 // default
                 else {
                     processedCol.render = (text, record) => {
-                        return (<div style={{ display: 'flex', alignItems: 'center' }}>{text}</div>)
+                        return (<>{text}</>)
                     };
                 }
                 // 添加最小宽度

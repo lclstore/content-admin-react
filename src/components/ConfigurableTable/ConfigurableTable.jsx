@@ -528,6 +528,7 @@ function ConfigurableTable({
                             // 直接将列定义的 mediaType ('image', 'video', 'audio') 传递给 MediaCell
                             return (
                                 <MediaCell
+                                    key={`${record[rowKey]}-${processedCol.key || processedCol.dataIndex}`}
                                     record={record}
                                     processedCol={processedCol} // 直接使用列定义的配置信息
                                 />
@@ -540,7 +541,8 @@ function ConfigurableTable({
                 else if (processedCol.options) {
                     const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
 
-                    processedCol.render = (text, record) => {
+                    processedCol.render = (text, record, index) => {
+                        if (!record) return null; // 如果record不存在，返回null
                         const key = text;
                         const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
                         // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
@@ -549,11 +551,7 @@ function ConfigurableTable({
                         if (!optionConfig) {
                             return text;
                         }
-                        console.log("DisplayText", DisplayText)
-                        const B = () => DisplayText
-                        return (
-                            <B />
-                        );
+                        return DisplayText;
                     };
                 }
 
@@ -605,10 +603,11 @@ function ConfigurableTable({
                                 break;
                         }
                     }
-                    processedCol.render = (_, rowData) => {
+                    processedCol.render = (text, record, index) => {
+                        if (!record) return null; // 如果record不存在，返回null
                         let DropdownItems = listConfig.rowButtonsPublic
                             .filter(i => processedCol.actionButtons.includes(i.key))
-                            .filter(({ key }) => processedCol.isShow ? processedCol.isShow(rowData, key) : defaultIsButtonVisible(rowData, key))
+                            .filter(({ key }) => processedCol.isShow ? processedCol.isShow(record, key) : defaultIsButtonVisible(record, key))
                             // 添加排序步骤，按照 actionButtons 中的顺序排序
                             .sort((a, b) => {
                                 return processedCol.actionButtons.indexOf(a.key) - processedCol.actionButtons.indexOf(b.key);
@@ -626,17 +625,17 @@ function ConfigurableTable({
                                         if (e.domEvent) e.domEvent.stopPropagation();
                                         // 有自定义就执行自定义方法
                                         if (processedCol.onActionClick) {
-                                            processedCol.onActionClick(key, rowData, e, click)
+                                            processedCol.onActionClick(key, record, e, click)
                                         } else {
                                             // 默认的处理方法
-                                            defaultActionClick(key, rowData, e)
+                                            defaultActionClick(key, record, e)
                                         }
                                     }
                                 };
                             })
 
                         return (
-                            <div className="actions-container" onClick={(e) => e.stopPropagation()}>
+                            <div className="actions-container" onClick={(e) => e.stopPropagation()} key={`actions-${record[rowKey] || index}`}>
                                 <Dropdown
                                     menu={{ items: DropdownItems }}
                                     trigger={['click']}
@@ -670,10 +669,11 @@ function ConfigurableTable({
             }
             const childrenRender = processedCol.render
             // 给所有渲染添加一个 class td-cell 的容器
-            processedCol.render = (text, record) => {
-                const C = childrenRender(text, record)
+            processedCol.render = (text, record, index) => {
+                if (!record) return null; // 如果record不存在，返回null
+                const C = childrenRender(text, record, index);
                 return (
-                    <div className="td-cell">
+                    <div key={`${record[rowKey] || index}-${processedCol.key || processedCol.dataIndex}`} className="td-cell">
                         {C}
                     </div>
                 )
@@ -718,9 +718,9 @@ function ConfigurableTable({
                     style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
                     {/* 左侧按钮区域 */}
                     <Space wrap className={styles.configurableTableToolbarLeft}>
-                        {leftToolbarItems.map(item => (
+                        {leftToolbarItems.map((item, index) => (
                             <Button
-                                key={item.key}
+                                key={`${item.key || index}`}
                                 onClick={item.onClick}
                                 type={item.type || 'default'} // 默认为 default 类型
                                 icon={item.icon}
@@ -795,7 +795,7 @@ function ConfigurableTable({
                 <Table
                     columns={processedColumns}
                     dataSource={tableData}
-                    rowKey={rowKey}
+                    rowKey={rowKey || 'id'}
                     onRow={handleRow}
                     ref={tableRef}
                     pagination={{

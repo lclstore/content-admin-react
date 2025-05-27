@@ -66,6 +66,7 @@ export default function UserEditorWithCommon({ id, setFormRef }) {
         <CommonEditorForm
             changeHeader={false}
             formType="basic"
+            isBack={false}
             config={{ formName: 'User', hideSaveButton: false, hideBackButton: true }}
             fields={formFields}
             initialValues={initialValues}

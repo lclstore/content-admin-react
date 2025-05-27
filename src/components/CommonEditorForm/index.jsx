@@ -43,11 +43,13 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {string} props.id 从props中获取id，用于覆盖从URL获取的id
  * @param {string} props.moduleKey 模块key
  * @param {boolean} props.isBack 是否返回上一级
+ * @param {boolean} props.isTabs 是否为标签页
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
+        isTabs = false,
         isBack = true,
         moduleKey,
         onSubmit,
@@ -219,12 +221,12 @@ export default function CommonEditor(props) {
     };
 
     // 使用自定义钩子管理头部配置
-    const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook } = useHeaderConfig({
+    const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook, setHeaderButtons } = useHeaderConfig({
         config,
         isBack,
-        id: id || idFromUrl, // 使用正确的 id
+        id: id || idFromUrl,
         moduleKey,
-        onSubmit: onSubmitCallback, // 使用state中的callback
+        onSubmit: onSubmitCallback,
         fieldsToValidate,
         enableDraft,
         isFormDirty,
@@ -738,7 +740,6 @@ export default function CommonEditor(props) {
                 }
                 response = response.data;
             }
-
         }
 
         const transformedData = transformDatesInObject(response, formType === 'basic' ? fields : internalFormFields); // 转换日期
@@ -751,14 +752,12 @@ export default function CommonEditor(props) {
         if (config.onDataLoaded) {
             config.onDataLoaded(transformedData);
         }
-        // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
-        if (headerContext.setButtons && changeHeader) {
-            const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 'DRAFT' && transformedData.status !== 'DISABLE';
-            headerButtons[0].disabled = isNonZeroStatus;
-            const saveButton = headerButtons.find(button => button.key === 'save');
-            saveButton.disabled = isNonZeroStatus && saveButton.disabled;
-            headerContext.setButtons(headerButtons);
+
+        // 设置头部按钮状态
+        if (changeHeader) {
+            setHeaderButtons(transformedData);
         }
+
         setLoading(false);
     };
     // 初始化表单数据
@@ -913,6 +912,7 @@ export default function CommonEditor(props) {
                     >
                         {renderBasicForm(fields, {
                             form,
+                            moduleKey,
                             selectedItemFromList: selectedItemFromList,
                             onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
@@ -991,6 +991,7 @@ export default function CommonEditor(props) {
                                     <CollapseForm
                                         fields={internalFormFields}
                                         form={form}
+                                        moduleKey={moduleKey}
                                         renderItemMata={renderItemMata}
                                         commonListConfig={commonListConfig}
                                         selectedItemFromList={effectiveSelectedItem}

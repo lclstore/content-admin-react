@@ -25,7 +25,6 @@ import { debounce, times } from 'lodash';
  * 可配置表格组件
  *
  * @param {object} props - 组件属性
- * @param {string} props.uniqueId - 表格的唯一标识符，用于 localStorage 存储列设置
  * @param {Array} props.columns - Ant Design Table 的列定义数组 (包含所有列的定义)
  * @param {Array} props.dataSource - 表格数据源
  * @param {string|function} props.rowKey - 表格行的 Key，一般是 id
@@ -45,12 +44,13 @@ import { debounce, times } from 'lodash';
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
+ * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
  */
 function ConfigurableTable({
-    uniqueId,
     columns, // 所有列的定义
     dataSource = [],
-    rowKey,
+    refreshKey = 0,
+    rowKey = 'id',
     loading = false,
     onRowClick,
     isInteractionBlockingRowClick, // 接收状态
@@ -68,10 +68,16 @@ function ConfigurableTable({
     getTableList,
     moduleKey
 }) {
-    moduleKey = moduleKey || useLocation().pathname.split('/')[1];
+    const pathSegments = useLocation().pathname.split('/').filter(Boolean);
+    const routeLevel = pathSegments.length;
+    let pathUrl = useLocation().pathname.split('/')[1];
+    moduleKey = moduleKey || pathSegments[1];
+    if (routeLevel == 3) {
+        pathUrl = `${pathSegments[0]}/${pathSegments[1]}`;
+    }
     const pathname = useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
-    const storageKey = `table_visible_columns_${uniqueId}`;
+    const storageKey = `table_visible_columns_${moduleKey}`;
     const paginationParams = useRef({
         ...paginationConfig,
     })
@@ -116,7 +122,9 @@ function ConfigurableTable({
     });
 
     // 实际使用的可见列键（优先使用外部传入的值）
-    const effectiveVisibleColumnKeys = visibleColumnKeys || internalVisibleColumnKeys;
+    const effectiveVisibleColumnKeys = useMemo(() => {
+        return visibleColumnKeys || internalVisibleColumnKeys;
+    }, [visibleColumnKeys, internalVisibleColumnKeys]);
 
     // 计算可能的列分类：禁用列、可配置列和默认可见列
     const columnCategories = useMemo(() => {
@@ -171,39 +179,55 @@ function ConfigurableTable({
 
     // 列设置 Filter Section 数据
     const columnSettingsSection = useMemo(() => {
-        // 创建选项数组，每个选项包含key和title
-        const options = columns.map(col => ({
-            key: col.key,
-            label: col.title,
-            disabled: !col.visibleColumn
-        }));
+        // 创建选项数组，每个选项包含key、value、label
+        const options = columns
+            .filter(col => col.key !== 'actions')
+            .map(col => {
+                const key = col.key || col.dataIndex;
+                return {
+                    key,
+                    value: key, // value 与 key 相同
+                    label: col.title,
+                    disabled: col.visibleColumn === 0 || col.visibleColumn === undefined // 禁用强制显示的列
+                };
+            });
 
         return {
+            type: 'multiple',
             title: 'Visible Columns',
             key: 'visibleColumns',
-            options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
+            options: options // 使用过滤后的选项数组
         };
-    }, [optionalColumnsForSetting]);
+    }, [columns]);
+    console.log(columnSettingsSection);
 
-    // 准备传递给列设置 Popover 的初始选中值 (仅包含当前可见的 *可配置* 列)
+    // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {
         const currentVisibleSet = new Set(effectiveVisibleColumnKeys || []);
-        // 选择当前可见的列键
-        const visibleKeys = optionalColumnsForSetting
-            .filter(col => currentVisibleSet.has(col.key))
-            .map(col => col.key);
+        // 只选择可配置的列（visibleColumn 为 1 或 2）
+        const visibleKeys = columns
+            .filter(col => {
+                const key = col.key || col.dataIndex;
+                return (col.visibleColumn === 1 || col.visibleColumn === 2) && currentVisibleSet.has(key);
+            })
+            .map(col => col.key || col.dataIndex);
 
         return {
             visibleColumns: visibleKeys
         };
-    }, [effectiveVisibleColumnKeys, optionalColumnsForSetting]);
+    }, [effectiveVisibleColumnKeys, columns]);
 
     // 处理列可见性 Popover 的更新
-    const handleColumnVisibilityUpdate = (newSelections) => {
+    const handleColumnVisibilityUpdate = useCallback((newSelections) => {
         const selectedKeys = newSelections.visibleColumns || [];
 
-        // 合并强制列
-        const finalKeys = Array.from(new Set([...selectedKeys, ...disabledKeys]));
+        // 获取所有强制显示的列（visibleColumn === 0）
+        const mandatoryKeys = columns
+            .filter(col => col.visibleColumn === 0)
+            .map(col => col.key || col.dataIndex);
+
+        // 合并选中的列和强制显示的列
+        const finalKeys = Array.from(new Set([...selectedKeys, ...mandatoryKeys]));
 
         // 如果外部提供了回调，则调用外部回调
         if (onVisibilityChange) {
@@ -217,12 +241,14 @@ function ConfigurableTable({
                 console.error("保存列配置到localStorage失败:", error);
             }
         }
-    };
+    }, [columns, onVisibilityChange, storageKey]);
 
     // 处理列可见性 Popover 的重置
-    const handleColumnVisibilityReset = () => {
-        // 重置为计算出的包含强制列的有效默认值
-        const resetKeys = effectiveDefaultVisibleKeys;
+    const handleColumnVisibilityReset = useCallback(() => {
+        // 获取所有强制显示的列和默认可见的列
+        const resetKeys = columns
+            .filter(col => col.visibleColumn === 0 || col.visibleColumn === 2)
+            .map(col => col.key || col.dataIndex);
 
         if (onVisibilityChange) {
             onVisibilityChange(resetKeys);
@@ -235,17 +261,24 @@ function ConfigurableTable({
                 console.error("重置列配置到localStorage失败:", error);
             }
         }
-    };
+    }, [columns, onVisibilityChange, storageKey]);
 
     // 检查列设置是否有非默认值
     const hasActiveColumnSettings = useMemo(() => {
         // 1. 获取当前可见的可配置列
-        const currentVisibleConfigurableKeys = (effectiveVisibleColumnKeys || [])
-            .filter(key => configurableOptionKeys.includes(key));
+        const currentVisibleConfigurableKeys = effectiveVisibleColumnKeys
+            .filter(key => {
+                const col = columns.find(c => (c.key || c.dataIndex) === key);
+                return col && (col.visibleColumn === 1 || col.visibleColumn === 2);
+            });
+
         // 2. 获取默认的可配置列
-        const defaultSet = new Set(defaultVisibleKeys);
+        const defaultConfigurableKeys = columns
+            .filter(col => col.visibleColumn === 2)
+            .map(col => col.key || col.dataIndex);
 
         const currentSet = new Set(currentVisibleConfigurableKeys);
+        const defaultSet = new Set(defaultConfigurableKeys);
 
         if (currentSet.size !== defaultSet.size) return true;
         for (const key of currentSet) {
@@ -255,8 +288,7 @@ function ConfigurableTable({
             if (!currentSet.has(key)) return true;
         }
         return false;
-    }, [effectiveVisibleColumnKeys, configurableOptionKeys, defaultVisibleKeys]);
-
+    }, [effectiveVisibleColumnKeys, columns]);
 
     // 判断是否有可用的列设置选项
     const hasColumnSettingOptions = useMemo(() => {
@@ -285,7 +317,10 @@ function ConfigurableTable({
 
         // 原有逻辑：按照可见列设置过滤
         const visibleSet = new Set(effectiveVisibleColumnKeys || []);
-        return columns.filter(col => visibleSet.has(col.key || col.dataIndex));
+        return columns.filter(col => {
+            const key = col.key || col.dataIndex;
+            return visibleSet.has(key);
+        });
     }, [columns, effectiveVisibleColumnKeys, showColumnSettings]);
 
     // 计算可见列的总宽度
@@ -316,69 +351,47 @@ function ConfigurableTable({
             onClick: (event) => {
                 // 首先检查全局媒体预览状态 - 如果任何预览激活，直接阻止行点击
                 if (window.MEDIA_PREVIEW && window.MEDIA_PREVIEW.isAnyPreviewActive()) {
-                    console.log('Row click blocked: Media preview is active');
+                    console.log('行点击被阻止：媒体预览处于激活状态');
+                    return;
+                }
+
+                // 检查是否点击了操作区域
+                const isActionClick = event.target.closest('.actions-container');
+                if (isActionClick) {
+                    console.log('行点击被阻止：点击了操作区域');
+                    return;
+                }
+
+                // 检查是否点击了媒体单元格
+                const isMediaClick = event.target.closest('td.media-cell') ||
+                    (event.target.classList &&
+                        (event.target.classList.contains('media-cell') ||
+                            event.target.classList.contains('mediaCell')));
+                if (isMediaClick) {
+                    console.log('行点击被阻止：点击了媒体单元格');
+                    return;
+                }
+
+                // 检查是否点击了复选框单元格
+                const isCheckboxClick = event.target.closest('td.ant-table-cell.ant-table-selection-column') ||
+                    (event.target.classList &&
+                        (event.target.classList.contains('ant-table-selection-column') ||
+                            event.target.classList.contains('ant-checkbox-wrapper') ||
+                            event.target.classList.contains('ant-checkbox') ||
+                            event.target.classList.contains('ant-checkbox-input')));
+                if (isCheckboxClick) {
+                    console.log('行点击被阻止：点击了复选框');
                     return;
                 }
 
                 if (onRowClick) {
-                    // 检查是否点击了操作列或媒体单元格
-                    let targetElement = event.target;
-                    let isActionColumnClick = false;
-                    let isMediaCellClick = false;
-                    let isCheckboxClick = false;
-
-                    // 向上遍历DOM树检查目标元素
-                    while (targetElement && targetElement !== event.currentTarget) {
-                        // 检查是否点击了操作列
-                        if (targetElement.dataset && targetElement.dataset.actionKey === 'actions') {
-                            isActionColumnClick = true;
-                            break;
-                        }
-
-                        // 检查是否点击了媒体单元格
-                        // 使用多种选择器以提高检测精度
-                        if (
-                            targetElement.closest('td.action-cell') ||
-                            targetElement.closest('td.media-cell') ||
-                            targetElement.classList && (
-                                targetElement.classList.contains('media-cell') ||
-                                targetElement.classList.contains(styles.mediaCell)
-                            )
-                        ) {
-                            isMediaCellClick = true;
-                            break;
-                        }
-
-                        // 检查是否点击了复选框单元格
-                        if (
-                            targetElement.closest('td.ant-table-cell.ant-table-selection-column') ||
-                            (targetElement.classList && (
-                                targetElement.classList.contains('ant-table-selection-column') ||
-                                targetElement.classList.contains('ant-checkbox-wrapper') ||
-                                targetElement.classList.contains('ant-checkbox') ||
-                                targetElement.classList.contains('ant-checkbox-input')
-                            ))
-                        ) {
-                            isCheckboxClick = true;
-                            break;
-                        }
-
-                        targetElement = targetElement.parentElement;
-                    }
-
-                    // 如果是操作列点击、媒体单元格点击或复选框点击，不触发行点击事件
-                    if (!isActionColumnClick && !isMediaCellClick && !isCheckboxClick) {
-                        onRowClick(record, event);
-                    } else {
-                        console.log('Row click blocked:',
-                            isActionColumnClick ? 'Action column clicked' :
-                                isMediaCellClick ? 'Media cell clicked' : 'Checkbox clicked');
-                    }
+                    onRowClick(record, event);
                 } else {
-                    listConfig.rowClickPublic && listConfig.rowClickPublic({ rowData: record })
+                    // 默认行为：导航到编辑页面
+                    navigate(`/${pathUrl}/editor?id=${record.id}`);
                 }
             },
-            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
+            style: { cursor: 'pointer' }, // 保持光标样式
         };
     };
 
@@ -528,6 +541,7 @@ function ConfigurableTable({
                             // 直接将列定义的 mediaType ('image', 'video', 'audio') 传递给 MediaCell
                             return (
                                 <MediaCell
+                                    key={`${record[rowKey]}-${processedCol.key || processedCol.dataIndex}`}
                                     record={record}
                                     processedCol={processedCol} // 直接使用列定义的配置信息
                                 />
@@ -540,7 +554,8 @@ function ConfigurableTable({
                 else if (processedCol.options) {
                     const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
 
-                    processedCol.render = (text, record) => {
+                    processedCol.render = (text, record, index) => {
+                        if (!record) return null; // 如果record不存在，返回null
                         const key = text;
                         const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
                         // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
@@ -549,11 +564,7 @@ function ConfigurableTable({
                         if (!optionConfig) {
                             return text;
                         }
-                        console.log("DisplayText", DisplayText)
-                        const B = () => DisplayText
-                        return (
-                            <B />
-                        );
+                        return DisplayText;
                     };
                 }
 
@@ -565,18 +576,22 @@ function ConfigurableTable({
                         // 简单的状态-按钮映射关系
                         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
                         if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-                        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+                        if (status === 'ENABLE' && ['edit', 'duplicate'].includes(btnName)) return true;
                         return false;
                     };
                     const defaultActionClick = async (key, rowData) => {
+
                         switch (key) {
+
                             // 编辑
                             case 'edit':
-                                navigate(`/${pathname}/editor?id=${rowData.id}`);
+                                // 获取当前路径并分割成数组
+                                // 判断路由层级
+                                navigate(`/${pathUrl}/editor?id=${rowData.id}`);
                                 break;
                             // 复制
                             case 'duplicate':
-                                navigate(`/${pathname}/editor?id=${rowData.id}&isDuplicate=true`);
+                                navigate(`/${pathUrl}/editor?id=${rowData.id}&isDuplicate=true`);
                                 break;
                             // 删除
                             case 'delete':
@@ -590,10 +605,10 @@ function ConfigurableTable({
                                 const status = key.toUpperCase();
                                 const result = await publicUpdateStatus({ idList: [rowData.id] }, `/${moduleKey}/${key}`);
                                 if (result.success) {
-                                    messageApi.success(`${key} successfully`);
+                                    messageApi.success(`successfully!`);
                                     searchTableData()// 刷新表格数据
                                 } else {
-                                    messageApi.error(`${key} failed`);
+                                    messageApi.error(`failed!`);
                                 }
 
                                 break;
@@ -605,15 +620,17 @@ function ConfigurableTable({
                                 break;
                         }
                     }
-                    processedCol.render = (_, rowData) => {
+                    processedCol.render = (text, record, index) => {
+                        if (!record) return null; // 如果record不存在，返回null
                         let DropdownItems = listConfig.rowButtonsPublic
                             .filter(i => processedCol.actionButtons.includes(i.key))
-                            .filter(({ key }) => processedCol.isShow ? processedCol.isShow(rowData, key) : defaultIsButtonVisible(rowData, key))
+                            .filter(({ key }) => processedCol.isShow ? processedCol.isShow(record, key) : defaultIsButtonVisible(record, key))
                             // 添加排序步骤，按照 actionButtons 中的顺序排序
                             .sort((a, b) => {
                                 return processedCol.actionButtons.indexOf(a.key) - processedCol.actionButtons.indexOf(b.key);
                             })
                             .map(({ key, click, icon }) => {
+
                                 const ItemIcon = icon
                                 return {
                                     key,
@@ -626,17 +643,17 @@ function ConfigurableTable({
                                         if (e.domEvent) e.domEvent.stopPropagation();
                                         // 有自定义就执行自定义方法
                                         if (processedCol.onActionClick) {
-                                            processedCol.onActionClick(key, rowData, e, click)
+                                            processedCol.onActionClick(key, record, e, click)
                                         } else {
                                             // 默认的处理方法
-                                            defaultActionClick(key, rowData, e)
+                                            defaultActionClick(key, record, e)
                                         }
                                     }
                                 };
                             })
 
                         return (
-                            <div className="actions-container" onClick={(e) => e.stopPropagation()}>
+                            <div className="actions-container" onClick={(e) => e.stopPropagation()} key={`actions-${record[rowKey] || index}`}>
                                 <Dropdown
                                     menu={{ items: DropdownItems }}
                                     trigger={['click']}
@@ -670,10 +687,11 @@ function ConfigurableTable({
             }
             const childrenRender = processedCol.render
             // 给所有渲染添加一个 class td-cell 的容器
-            processedCol.render = (text, record) => {
-                const C = childrenRender(text, record)
+            processedCol.render = (text, record, index) => {
+                if (!record) return null; // 如果record不存在，返回null
+                const C = childrenRender(text, record, index);
                 return (
-                    <div className="td-cell">
+                    <div key={`${record[rowKey] || index}-${processedCol.key || processedCol.dataIndex}`} className="td-cell">
                         {C}
                     </div>
                 )
@@ -696,10 +714,34 @@ function ConfigurableTable({
             }
         };
     }, []);
+    // 刷新表格数据
+    useEffect(() => {
+        if (refreshKey === 1) {
+            searchTableData()//当前页面刷新
+        } else if (refreshKey === 2) {
+            paginationParams.current.pageIndex = 1;
+            searchTableData()//全局刷新
+        }
+    }, [refreshKey])
 
     // 添加删除确认对话框的状态
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [deleteRowData, setDeleteRowData] = useState(null);
+
+    // 在组件挂载时从 localStorage 读取配置
+    useEffect(() => {
+        if (!visibleColumnKeys) {  // 只在没有外部传入 visibleColumnKeys 时执行
+            try {
+                const savedValue = localStorage.getItem(storageKey);
+                if (savedValue) {
+                    const parsedValue = JSON.parse(savedValue);
+                    setInternalVisibleColumnKeys(parsedValue);
+                }
+            } catch (error) {
+                console.error("读取localStorage中的列配置失败:", error);
+            }
+        }
+    }, [storageKey, visibleColumnKeys]);
 
     return (
         isEmptyTableData ?
@@ -718,9 +760,9 @@ function ConfigurableTable({
                     style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
                     {/* 左侧按钮区域 */}
                     <Space wrap className={styles.configurableTableToolbarLeft}>
-                        {leftToolbarItems.map(item => (
+                        {leftToolbarItems.map((item, index) => (
                             <Button
-                                key={item.key}
+                                key={`${item.key || index}`}
                                 onClick={item.onClick}
                                 type={item.type || 'default'} // 默认为 default 类型
                                 icon={item.icon}
@@ -846,10 +888,10 @@ function ConfigurableTable({
                         if (deleteRowData) {
                             const result = await publicDeleteData({ idList: [deleteRowData.id] }, `/${moduleKey}/del`);
                             if (result.success) {
-                                messageApi.success('Delete successfully');
+                                messageApi.success('successful!');
                                 searchTableData(); // 刷新表格数据
                             } else {
-                                messageApi.error('Delete failed');
+                                messageApi.error('failed!');
                             }
                         }
                         setDeleteModalVisible(false);
@@ -859,11 +901,11 @@ function ConfigurableTable({
                         setDeleteModalVisible(false);
                         setDeleteRowData(null);
                     }}
-                    okText="Delete"
-                    cancelText="Cancel"
+                    okText="DELETE"
+                    cancelText="CANCEL"
                     okButtonProps={{ danger: true }}
                 >
-                    <p style={{ fontSize: 15, textAlign: 'center' }}>Are you sure you want to delete 【{deleteRowData?.name}】?</p>
+                    <p style={{ fontSize: 15, textAlign: 'center' }}>Delete【{deleteRowData?.name}】? You will not be able to use it anymore once it is deleted.</p>
                 </Modal>
             </div>
     );

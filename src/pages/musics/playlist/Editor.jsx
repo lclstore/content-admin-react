@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
-import { mockUsers } from './Data';
+
 import { validateEmail, validatePassword } from '@/utils';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
-
+    const mockUsers = []
 
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
@@ -34,14 +34,14 @@ export default function UserEditorWithCommon() {
             type: 'switch',
             name: 'premium',
             label: 'Premium',
-            checkedChildren:"Yes",
-            unCheckedChildren:'No'
+            checkedChildren: "Yes",
+            unCheckedChildren: 'No'
 
         },
         {
             type: 'select',
             mode: 'single',
-            name: 'type', 
+            name: 'type',
             label: 'Type',
             options: [
                 { name: 'Regular', value: 'Regular' },
@@ -92,7 +92,7 @@ export default function UserEditorWithCommon() {
                     : null;
             },
         },
-        
+
 
         {
             type: 'dateRange',

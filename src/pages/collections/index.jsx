@@ -43,7 +43,7 @@ export default function CollectionsList() {
     function onChange(key) {
         localDown(key)
         const tabBarName = tabItems.find(item => item.key === key).label;
-         setDefaultTabItem(tabItems.find(item => item.key == key))
+        setDefaultTabItem(tabItems.find(item => item.key == key))
         setCustomPageTitle(`${tabBarName} List`);
     }
     const renderTabBar = (props, DefaultTabBar) => (
@@ -52,7 +52,7 @@ export default function CollectionsList() {
         </StickyBox>
     );
     return <Tabs style={{ backgroundColor: 'white',flex:1 }} activeKey={defaultTabItem.key}
-        renderTabBar={renderTabBar}
-        items={tabItems.map(i => ({ ...i, children: <div style={{ padding: '20px' }}>{i.children}</div> }))}
-        onChange={onChange} />
+                 renderTabBar={renderTabBar}
+                 items={tabItems.map(i => ({ ...i, children: <div style={{ padding: '20px' }}>{i.children}</div> }))}
+                 onChange={onChange} />
 }

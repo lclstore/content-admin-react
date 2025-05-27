@@ -1,4 +1,8 @@
 // const fileAddresList = import.meta.glob('@/components', true, /{suffix}/).keys()
+// 文件命名规则，通过文件名来判断每个节点类型，目前为normal 正常类型，和父节点类型
+// 1.正常创建的都是normal类型，
+// 2.当目录下包含index 文件代表此目录是一个父节点
+// 3.或者目录下有其他目录且只有目录没有文件 代表其为父节点
 /**
  * 构建数据
  * @constructor
@@ -30,14 +34,13 @@ class RouterRegister {
     }
     initRouter() {
         // 创建节点
-        // address 格式 xxx/xxx/xxx{suffix} or xxx/xxx{suffix}
-        this.routeList.some(address => {
+        // address 格式 xxx/xxx/xxx{suffix} or xxx/xxx{suffix}，过滤 index 节点
+        this.routeList.filter(i => !i.endsWith("/index" + this.suffix)).some(address => {
             let pathArray = address.split('/')
             // 创建容器
             let dirArry = this.registerArray
             // pathArray长度 大于2，说明是一个有父子层级的节点
             if (pathArray.length > 2) {
-                console.log(pathArray)
                 const fatherList = pathArray.slice(0, -2)
                 let dirAddress = []
                 fatherList.some(dirName => {
@@ -55,6 +58,10 @@ class RouterRegister {
             }
             dirArry.push(this.createRoute(address))
         })
+        // index 节点特殊修改
+        this.routeList.filter(i => i.endsWith("/index" + this.suffix)).forEach(address => {
+            this.indexFatherChange(this.searchDir(address.split('/').slice(0,-1)))
+        })
         // 节点排序
         this.sort && this.registerArray.sort((a, b) => {
             let aSort = this.sort.indexOf(a.meta) !== -1 ? this.sort.indexOf(a.meta) : this.registerArray.length
@@ -68,7 +75,7 @@ class RouterRegister {
         let fatherPathSting = false
         // 文件夹名,文件的上一层肯定是它的模块名
         let routerHead = pathArray[pathArray.length - 2]
-        // address 最后一位不带 vue 就是创建一个父节点
+        // address 最后一位不带 suffix 后缀，或者是一个 index 就是创建一个父节点
         if (pathArray.slice(-1)[0].indexOf(this.suffix) === -1) {
             fatherPathSting = true
             routerHead = pathArray.slice(-1)[0]
@@ -97,9 +104,9 @@ class RouterRegister {
         // component路径创建
         {
             let component;
-            component = this.FatherComponent
-            if (!fatherPathSting) {
-                component = address
+            component = address
+            if (fatherPathSting && this.FatherComponent) {
+                component = this.FatherComponent
             }
             RouterObj.component = component
         }
@@ -122,6 +129,12 @@ class RouterRegister {
         }
         this.createRule && this.createRule(RouterObj)
         return RouterObj
+    }
+    // 用于 isIndexFather 特殊节点特殊处理 补丁
+    indexFatherChange(config){
+        console.log(config)
+        config.component = config.component + '/index' + this.suffix
+        config.indexFatherDom = true
     }
     // 查询 registerArray 中的节点
     searchDir(addressArr) {

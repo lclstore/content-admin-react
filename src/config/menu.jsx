@@ -65,7 +65,7 @@ try {
                     routerConfig.path,
                     settings.menu?.menuOrder?.[routerConfig.meta] || 999,
                     routerConfig.showName,
-                    routerConfig.FatherComponent ? <Outlet/> : pageFiles['../pages/' + routerConfig.component]
+                    (routerConfig.FatherComponent && !routerConfig.indexFatherDom) ? <Outlet/> : pageFiles['../pages/' + routerConfig.component]
                 ]
         }
     })
@@ -77,6 +77,7 @@ try {
     console.error('菜单生成错误:', error);
 }
 
+console.log(dynamicMenus)
 // 合并静态菜单和动态菜单
 const menus = [...dynamicMenus, ...staticMenus];
 

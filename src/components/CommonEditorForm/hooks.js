@@ -305,7 +305,7 @@ export const useHeaderConfig = (params) => {
                         navigate(config.afterSaveUrl || -1);
                     }
                 } else {
-                    messageApi.error(saveResult.message || 'Save failed!');
+                    messageApi.error(saveResult.errMessage || 'Save failed!');
                 }
                 return saveResult; // 返回保存结果
             } else {
@@ -382,7 +382,7 @@ export const useHeaderConfig = (params) => {
                         navigate(config.afterSaveUrl || -1);
                     }
                 } else {
-                    messageApi.error(saveResult.message || 'Save failed!');
+                    messageApi.error(saveResult.errMessage || 'Save failed!');
                 }
 
                 return saveResult; // 返回保存结果

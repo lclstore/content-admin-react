@@ -210,10 +210,12 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
  * @param {Function} props.onCopyItem 处理复制项的回调函数
  * @param {Function} props.onReplaceItem 处理替换项的回调函数
  * @param {Component} props.commonListConfig 替换弹框中显示的commonListConfig组件
+ * @param {String} props.moduleKey 模块key
  */
 const CollapseForm = ({
     fields = [],
     form,
+    moduleKey,
     renderItemMata,
     commonListConfig = {},
     selectedItemFromList = null,
@@ -232,7 +234,7 @@ const CollapseForm = ({
     onCopyItem,
     onReplaceItem,
 }) => {
-
+    debugger
     const newField = fields.find(item => item.isShowAdd);
     // 表单连接状态
     const formConnected = !!form;

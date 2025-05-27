@@ -910,6 +910,7 @@ export default function CommonEditor(props) {
                     >
                         {renderBasicForm(fields, {
                             form,
+                            moduleKey,
                             selectedItemFromList: selectedItemFromList,
                             onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
@@ -988,6 +989,7 @@ export default function CommonEditor(props) {
                                     <CollapseForm
                                         fields={internalFormFields}
                                         form={form}
+                                        moduleKey={moduleKey}
                                         renderItemMata={renderItemMata}
                                         commonListConfig={commonListConfig}
                                         selectedItemFromList={effectiveSelectedItem}

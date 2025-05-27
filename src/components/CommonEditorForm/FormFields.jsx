@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import {
     Input,
     DatePicker,
@@ -84,7 +85,7 @@ export const renderFormControl = (field, options = {}) => {
         disabled = false,
         width,
     } = field;
-    const { form, formConnected, initialValues, mounted } = options;
+    const { form, formConnected, initialValues, mounted, moduleKey } = options;
 
     // 获取字段值，仅用于显示，不在渲染中更新状态
     let fieldValue = '';
@@ -290,10 +291,13 @@ export const renderFormControl = (field, options = {}) => {
                 key: uploadKey,
                 ...uploadRest
             } = field;
+            const dirName = moduleKey || useLocation().pathname.split('/')[1];
+
             // 从options中解构出form对象
             // FileUpload 组件不需要在这里添加 Form.Item，因为 renderFormItem 已经创建了一个
             return (
                 <FileUpload
+                    dirKey={dirName}
                     form={options.form}
                     key={uploadKey}
                     value={fieldValue}
@@ -308,7 +312,6 @@ export const renderFormControl = (field, options = {}) => {
                     uploadSuccessMessage={uploadSuccessMessage}
                     uploadFailMessage={uploadFailMessage}
                     uploadErrorMessage={uploadErrorMessage}
-                    dirKey={dirKey}
                     uploadFn={uploadFn}
                     field={field}
                     style={style}

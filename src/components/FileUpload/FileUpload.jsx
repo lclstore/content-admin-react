@@ -36,7 +36,7 @@ const FileUpload = ({
     uploadDescription,  // 自定义上传区域描述文本，不提供则自动生成
     uploadErrorMessage, // 自定义上传错误消息
     uploadFn = fileSettings?.uploadFile, // 自定义上传函数
-    dirKey = 'default', // 上传目录键名
+    dirKey, // 上传目录键名
     uploadSuccessMessage, // 自定义上传成功消息
     uploadFailMessage,    // 自定义上传失败消息
     beforeUpload,         // 上传前的自定义验证函数
@@ -269,7 +269,7 @@ const FileUpload = ({
         try {
             const result = await uploadFn({
                 file,
-                dirKey: dirKey || 'default',
+                dirKey: dirKey,
                 onProgress: (event) => {
                     if (onProgress && typeof event?.percent === 'number') {
                         onProgress({ percent: event.percent });

@@ -10,13 +10,13 @@ import { uuid } from "@/utils/index.js";
  *  @returns {String} returnData.localUrl - 返回的文件的本地读取路径
  */
 export const uploadFile = async function ({ file, dirKey }) {
-    // debugger
+    const fileType = file.type.split('/')[0];  //文件类型
     let returnData = {
         localUrl: URL.createObjectURL(file)
     }
     // 生成uuid作为名称
     const params = {
-        dirKey,
+        dirKey: `${dirKey}-${fileType}`,
         fileName: file.name.replace(/.+\./, uuid() + '.'),
         contentType: file.type
     };

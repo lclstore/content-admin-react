@@ -188,7 +188,7 @@ export default function WorkoutsList() {
                 width: 220,
                 visibleColumn: 1
             },
-            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
+            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 2 },
             { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
             { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
             { title: 'Injured', dataIndex: 'injured', key: 'injured', width: 200, visibleColumn: 1 },

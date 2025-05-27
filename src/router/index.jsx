@@ -61,8 +61,9 @@ const generateRoutes = () => {
         // 动态引入组件
         return {
           path: menu.path,
-          element: <SuspenseWrapper component={<menu.Component.default />} />,
+          element: <SuspenseWrapper component={<menu.Component/>} />,
           hideInMenu: menu.hideInMenu,
+          children: menu.children
         };
       } catch (error) {
         console.error(`加载组件 ${menu.key} 失败:`, error);
@@ -72,9 +73,9 @@ const generateRoutes = () => {
   // 配置Layout布局路由
   const mainRoute = {
     element: <AuthGuard><AppLayout /></AuthGuard>,
-    children: layoutRoutes
+    children: layoutRoutes,
+    path: '/',
   };
-
   // 合并路由
   const routes = [];
 
@@ -83,7 +84,13 @@ const generateRoutes = () => {
     path: '/',
     element: <Navigate to={settings.router.homePath} replace />
   });
-
+  // // 创建默认的重定向
+  // mainRoute.children.forEach(item => {
+  //   routes.push({
+  //     path: item.path,
+  //     element: <Navigate to="list" replace />
+  //   });
+  // })
   // 添加主布局路由
   routes.push(mainRoute);
 

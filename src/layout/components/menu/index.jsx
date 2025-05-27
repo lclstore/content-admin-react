@@ -54,7 +54,11 @@ export default function SideMenu() {
     const handleMenuClick = ({ key }) => {
         const targetMenuItem = menuItems.find(item => item.key === key);
         if (targetMenuItem && targetMenuItem.path) {
-            navigate(targetMenuItem.path);
+            let dumpPath = "";
+            // 默认是list
+            targetMenuItem.children.map(i => i.path).some(i => i === "list") && (dumpPath = "/list");
+            // indexFatherDom 就跳本身
+            navigate(targetMenuItem.path + dumpPath);
         }
     };
 

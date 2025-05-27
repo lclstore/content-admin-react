@@ -43,11 +43,13 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {string} props.id 从props中获取id，用于覆盖从URL获取的id
  * @param {string} props.moduleKey 模块key
  * @param {boolean} props.isBack 是否返回上一级
+ * @param {boolean} props.isTabs 是否为标签页
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
+        isTabs = false,
         isBack = true,
         moduleKey,
         onSubmit,

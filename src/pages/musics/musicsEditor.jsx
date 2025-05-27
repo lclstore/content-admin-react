@@ -92,7 +92,7 @@ export default function UserEditorWithCommon() {
                     messageApi.success('Saved successfully!');
                     setTimeout(() => {
                         navigate(-1)
-                    }, 1500) 
+                    }, 1500)
 
                     resolve()
                 }
@@ -132,6 +132,7 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             initFormData={initFormData}
             formType="basic"
+            isTabs={true}
             config={{ formName: 'Music', title: 'Music', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}

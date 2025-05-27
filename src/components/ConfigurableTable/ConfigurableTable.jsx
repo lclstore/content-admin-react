@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from "react-router"
 import { useImmer } from "use-immer"
-import { Table, Input, Button, Spin, Space, Dropdown } from 'antd';
+import { Table, Input, Button, Spin, Space, Dropdown, message, Modal } from 'antd';
 import {
     SearchOutlined,
     FilterOutlined,
@@ -17,7 +17,7 @@ import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
-import { getPublicTableList } from "@/config/api.js";
+import { getPublicTableList, publicUpdateStatus, publicDeleteData } from "@/config/api.js";
 import settings from "@/config/settings.js"
 import noDataImg from '@/assets/images/no-data.png';
 import { debounce, times } from 'lodash';
@@ -75,6 +75,7 @@ function ConfigurableTable({
     const paginationParams = useRef({
         ...paginationConfig,
     })
+    const [messageApi, contextHolder] = message.useMessage();
     const navigate = useNavigate(); // 路由导航
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
@@ -428,10 +429,18 @@ function ConfigurableTable({
 
         try {
             setLoadingLocal(true);
-            const res = await fetchTableData(moduleKey, {
-                ...paginationParams.current,
-                ...activeFilters.current
-            }, { signal: abortControllerRef.current.signal });
+            let res = {
+                data: dataSource,
+                success: true,
+                totalCount: dataSource.length
+            }
+            //外部传入优先使用外部传入的
+            if (dataSource.length === 0) {
+                res = await fetchTableData(moduleKey, {
+                    ...paginationParams.current,
+                    ...activeFilters.current
+                }, { signal: abortControllerRef.current.signal });
+            }
 
             // 请求完成后清除当前的 AbortController
             abortControllerRef.current = null;
@@ -556,10 +565,10 @@ function ConfigurableTable({
                         // 简单的状态-按钮映射关系
                         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
                         if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-                        if (status === 'ENABLE' && ['edit', 'duplicate'].includes(btnName)) return true;
+                        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
                         return false;
                     };
-                    const defaultActionClick = (key, rowData) => {
+                    const defaultActionClick = async (key, rowData) => {
                         switch (key) {
                             // 编辑
                             case 'edit':
@@ -569,19 +578,28 @@ function ConfigurableTable({
                             case 'duplicate':
                                 navigate(`/${pathname}/editor?id=${rowData.id}&isDuplicate=true`);
                                 break;
-                                // 删除
-                                setIsDeleteModalVisible(true);
+                            // 删除
+                            case 'delete':
+                                // 显示确认对话框
+                                setDeleteRowData(rowData);
+                                setDeleteModalVisible(true);
                                 break;
-                            // 启用
+                            // 启用/禁用
                             case 'enable':
-                                setIsDeleteModalVisible(true);
-                                break;
-                                // 禁用
-                                setIsDeleteModalVisible(true);
+                            case 'disable':
+                                const status = key.toUpperCase();
+                                const result = await publicUpdateStatus({ idList: [rowData.id] }, `/${moduleKey}/${key}`);
+                                if (result.success) {
+                                    messageApi.success(`${key} successfully`);
+                                    searchTableData()// 刷新表格数据
+                                } else {
+                                    messageApi.error(`${key} failed`);
+                                }
+
                                 break;
                             // 弃用
                             case 'deprecate':
-                                setIsDeleteModalVisible(true);
+
                                 break;
                             default:
                                 break;
@@ -679,6 +697,10 @@ function ConfigurableTable({
         };
     }, []);
 
+    // 添加删除确认对话框的状态
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteRowData, setDeleteRowData] = useState(null);
+
     return (
         isEmptyTableData ?
             <div className={styles.customEmptyWrapper}>
@@ -691,6 +713,7 @@ function ConfigurableTable({
             :
             <div className={styles.configurableTableContainer}>
                 {/* 工具栏 */}
+                {contextHolder}
                 <div className="configurable-table-toolbar"
                     style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
                     {/* 左侧按钮区域 */}
@@ -811,6 +834,37 @@ function ConfigurableTable({
                     }}
                     {...tableProps}
                 />
+
+                {/* 删除确认对话框 */}
+                <Modal
+                    title="Confirm Delete"
+                    open={deleteModalVisible}
+                    centered
+                    width={500}
+                    zIndex={100}
+                    onOk={async () => {
+                        if (deleteRowData) {
+                            const result = await publicDeleteData({ idList: [deleteRowData.id] }, `/${moduleKey}/del`);
+                            if (result.success) {
+                                messageApi.success('Delete successfully');
+                                searchTableData(); // 刷新表格数据
+                            } else {
+                                messageApi.error('Delete failed');
+                            }
+                        }
+                        setDeleteModalVisible(false);
+                        setDeleteRowData(null);
+                    }}
+                    onCancel={() => {
+                        setDeleteModalVisible(false);
+                        setDeleteRowData(null);
+                    }}
+                    okText="Delete"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true }}
+                >
+                    <p style={{ fontSize: 15, textAlign: 'center' }}>Are you sure you want to delete 【{deleteRowData?.name}】?</p>
+                </Modal>
             </div>
     );
 }

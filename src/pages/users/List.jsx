@@ -246,8 +246,8 @@ export default function UsersList() {
 
             <ConfigurableTable
                 uniqueId={'usersList'}
+                moduleKey={'user'}
                 columns={allColumnDefinitions}
-                dataSource={dataSource}
                 rowKey="id"
                 loading={loading}
                 showColumnSettings={false}

@@ -316,69 +316,47 @@ function ConfigurableTable({
             onClick: (event) => {
                 // 首先检查全局媒体预览状态 - 如果任何预览激活，直接阻止行点击
                 if (window.MEDIA_PREVIEW && window.MEDIA_PREVIEW.isAnyPreviewActive()) {
-                    console.log('Row click blocked: Media preview is active');
+                    console.log('行点击被阻止：媒体预览处于激活状态');
+                    return;
+                }
+
+                // 检查是否点击了操作区域
+                const isActionClick = event.target.closest('.actions-container');
+                if (isActionClick) {
+                    console.log('行点击被阻止：点击了操作区域');
+                    return;
+                }
+
+                // 检查是否点击了媒体单元格
+                const isMediaClick = event.target.closest('td.media-cell') ||
+                    (event.target.classList &&
+                        (event.target.classList.contains('media-cell') ||
+                            event.target.classList.contains('mediaCell')));
+                if (isMediaClick) {
+                    console.log('行点击被阻止：点击了媒体单元格');
+                    return;
+                }
+
+                // 检查是否点击了复选框单元格
+                const isCheckboxClick = event.target.closest('td.ant-table-cell.ant-table-selection-column') ||
+                    (event.target.classList &&
+                        (event.target.classList.contains('ant-table-selection-column') ||
+                            event.target.classList.contains('ant-checkbox-wrapper') ||
+                            event.target.classList.contains('ant-checkbox') ||
+                            event.target.classList.contains('ant-checkbox-input')));
+                if (isCheckboxClick) {
+                    console.log('行点击被阻止：点击了复选框');
                     return;
                 }
 
                 if (onRowClick) {
-                    // 检查是否点击了操作列或媒体单元格
-                    let targetElement = event.target;
-                    let isActionColumnClick = false;
-                    let isMediaCellClick = false;
-                    let isCheckboxClick = false;
-
-                    // 向上遍历DOM树检查目标元素
-                    while (targetElement && targetElement !== event.currentTarget) {
-                        // 检查是否点击了操作列
-                        if (targetElement.dataset && targetElement.dataset.actionKey === 'actions') {
-                            isActionColumnClick = true;
-                            break;
-                        }
-
-                        // 检查是否点击了媒体单元格
-                        // 使用多种选择器以提高检测精度
-                        if (
-                            targetElement.closest('td.action-cell') ||
-                            targetElement.closest('td.media-cell') ||
-                            targetElement.classList && (
-                                targetElement.classList.contains('media-cell') ||
-                                targetElement.classList.contains(styles.mediaCell)
-                            )
-                        ) {
-                            isMediaCellClick = true;
-                            break;
-                        }
-
-                        // 检查是否点击了复选框单元格
-                        if (
-                            targetElement.closest('td.ant-table-cell.ant-table-selection-column') ||
-                            (targetElement.classList && (
-                                targetElement.classList.contains('ant-table-selection-column') ||
-                                targetElement.classList.contains('ant-checkbox-wrapper') ||
-                                targetElement.classList.contains('ant-checkbox') ||
-                                targetElement.classList.contains('ant-checkbox-input')
-                            ))
-                        ) {
-                            isCheckboxClick = true;
-                            break;
-                        }
-
-                        targetElement = targetElement.parentElement;
-                    }
-
-                    // 如果是操作列点击、媒体单元格点击或复选框点击，不触发行点击事件
-                    if (!isActionColumnClick && !isMediaCellClick && !isCheckboxClick) {
-                        onRowClick(record, event);
-                    } else {
-                        console.log('Row click blocked:',
-                            isActionColumnClick ? 'Action column clicked' :
-                                isMediaCellClick ? 'Media cell clicked' : 'Checkbox clicked');
-                    }
+                    onRowClick(record, event);
                 } else {
-                    listConfig.rowClickPublic && listConfig.rowClickPublic({ rowData: record })
+                    // 默认行为：导航到编辑页面
+                    navigate(`/${pathname}/editor?id=${record.id}`);
                 }
             },
-            style: onRowClick ? { cursor: 'pointer' } : {}, // 保持光标样式
+            style: { cursor: 'pointer' }, // 保持光标样式
         };
     };
 

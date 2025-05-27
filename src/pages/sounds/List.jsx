@@ -10,7 +10,7 @@ import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable'
 export default function WorkoutsList() {
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
-    const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
+    //查询条件数组
     const filterSections = [
         {
             title: 'Status',
@@ -20,10 +20,10 @@ export default function WorkoutsList() {
                 label: 'Draft',
                 value: 'DRAFT'
             }, {
-                label: 'Enable',
+                label: 'Enabled',
                 value: 'ENABLE'
             }, {
-                label: 'Disable',
+                label: 'Disabled',
                 value: 'DISABLE'
             }],
         }
@@ -84,58 +84,6 @@ export default function WorkoutsList() {
         ];
     }, []);
 
-
-
-
-
-    /**
-     * 处理行点击
-     */
-    const handleRowClick = useCallback((record, event) => {
-        // 如果全局媒体预览处于激活状态，不处理行点击
-        if (window.MEDIA_PREVIEW && window.MEDIA_PREVIEW.isAnyPreviewActive()) {
-            return;
-        }
-
-        // 如果操作按钮被点击，不处理行点击
-        if (actionClicked) {
-            return;
-        }
-
-        // 检查是否点击了操作区域
-        const isActionClick = event.target.closest('.actions-container');
-        if (isActionClick) {
-            return;
-        }
-
-        // 检查是否点击了媒体单元格
-        const isMediaClick = event.target.closest('td.media-cell') ||
-            (event.target.classList &&
-                (event.target.classList.contains('media-cell') ||
-                    event.target.classList.contains('mediaCell')));
-        if (isMediaClick) {
-            console.log('行点击被阻止：点击了媒体单元格');
-            return;
-        }
-
-        // 检查是否点击了复选框单元格
-        const isCheckboxClick = event.target.closest('td.ant-table-cell.ant-table-selection-column') ||
-            (event.target.classList &&
-                (event.target.classList.contains('ant-table-selection-column') ||
-                    event.target.classList.contains('ant-checkbox-wrapper') ||
-                    event.target.classList.contains('ant-checkbox') ||
-                    event.target.classList.contains('ant-checkbox-input')));
-        if (isCheckboxClick) {
-            console.log('行点击被阻止：点击了复选框');
-            return;
-        }
-
-        // 正常导航到编辑页面
-        navigate(`/sounds/editor?id=${record.id}`);
-    }, [navigate, actionClicked]);
-
-
-
     /**
      * 设置导航栏按钮
      */
@@ -161,15 +109,12 @@ export default function WorkoutsList() {
         };
     }, [setButtons, setCustomPageTitle, navigate]);
 
-
-
-    // 9. 渲染 - 组件UI呈现
+    //渲染表格组件
     return (
         <div className="workoutsContainer page-list">
             <ConfigurableTable
                 columns={allColumnDefinitions}
                 moduleKey="sound"
-                onRowClick={handleRowClick}
                 searchConfig={{
                     placeholder: "Search name or ID...",
                 }}

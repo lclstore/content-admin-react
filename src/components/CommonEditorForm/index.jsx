@@ -219,12 +219,12 @@ export default function CommonEditor(props) {
     };
 
     // 使用自定义钩子管理头部配置
-    const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook } = useHeaderConfig({
+    const { headerButtons, handleStatusModalConfirm: handleStatusModalConfirmFromHook, setHeaderButtons } = useHeaderConfig({
         config,
         isBack,
-        id: id || idFromUrl, // 使用正确的 id
+        id: id || idFromUrl,
         moduleKey,
-        onSubmit: onSubmitCallback, // 使用state中的callback
+        onSubmit: onSubmitCallback,
         fieldsToValidate,
         enableDraft,
         isFormDirty,
@@ -738,7 +738,6 @@ export default function CommonEditor(props) {
                 }
                 response = response.data;
             }
-
         }
 
         const transformedData = transformDatesInObject(response, formType === 'basic' ? fields : internalFormFields); // 转换日期
@@ -751,15 +750,12 @@ export default function CommonEditor(props) {
         if (config.onDataLoaded) {
             config.onDataLoaded(transformedData);
         }
-        // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
-        if (headerContext.setButtons && changeHeader) {
-            const isNonZeroStatus = id && transformedData.status === 'ENABLE';
-            // headerButtons[0].disabled = isNonZeroStatus;
-            const saveButton = headerButtons.find(button => button.key === 'save');
 
-            saveButton.disabled = saveButton.disabled; // 暂时取消isNonZeroStatus
-            headerContext.setButtons(headerButtons);
+        // 设置头部按钮状态
+        if (changeHeader) {
+            setHeaderButtons(transformedData);
         }
+
         setLoading(false);
     };
     // 初始化表单数据

@@ -452,6 +452,18 @@ export const useHeaderConfig = (params) => {
         setIsStatusModalVisible(false);
         setPendingSaveData(null);
     };
+    const visibleStatusList = (button) => {
+        let visibleStatusList = [];
+        switch (button.status) {
+            case 'DISABLE':
+            case 'ENABLE':
+                visibleStatusList = statusList.filter(status => status.value == 'DRAFT');
+                break;
+            default:
+                visibleStatusList = statusList;
+        }
+        return visibleStatusList;
+    }
 
     // 返回按钮处理函数
     const handleBackClick = useCallback(() => {
@@ -479,11 +491,12 @@ export const useHeaderConfig = (params) => {
             icon: React.createElement(SaveOutlined),
             type: 'primary',
             onClick: handleSaveChanges,
-            disabled: !config.allowEmptySave,
+            // disabled: !config.allowEmptySave,
+            disabled: false,
             // 添加状态选择的相关props
             statusModalProps: enableDraft ? {
                 visible: isStatusModalVisible,
-                statusList,
+                statusList: visibleStatusList(),
                 onConfirm: handleStatusModalConfirm,
                 onCancel: handleStatusModalCancel
             } : null
@@ -518,7 +531,7 @@ export const useHeaderConfig = (params) => {
                 if (enableDraft) {
                     button.statusModalProps = {
                         visible: isStatusModalVisible,
-                        statusList,
+                        statusList: visibleStatusList(),
                         onConfirm: handleStatusModalConfirm,
                         onCancel: handleStatusModalCancel
                     };
@@ -526,6 +539,7 @@ export const useHeaderConfig = (params) => {
             }
         });
         headerButtons = config.headerButtons;
+        debugger
     }
 
     return {

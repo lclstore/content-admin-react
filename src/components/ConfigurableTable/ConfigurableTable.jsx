@@ -565,7 +565,7 @@ function ConfigurableTable({
                         // 简单的状态-按钮映射关系
                         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
                         if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-                        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+                        if (status === 'ENABLE' && ['edit', 'duplicate'].includes(btnName)) return true;
                         return false;
                     };
                     const defaultActionClick = async (key, rowData) => {

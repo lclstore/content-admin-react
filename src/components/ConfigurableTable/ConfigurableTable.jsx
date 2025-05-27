@@ -590,10 +590,10 @@ function ConfigurableTable({
                                 const status = key.toUpperCase();
                                 const result = await publicUpdateStatus({ idList: [rowData.id] }, `/${moduleKey}/${key}`);
                                 if (result.success) {
-                                    messageApi.success(`${key} successfully`);
+                                    messageApi.success(`successfully!`);
                                     searchTableData()// 刷新表格数据
                                 } else {
-                                    messageApi.error(`${key} failed`);
+                                    messageApi.error(`failed!`);
                                 }
 
                                 break;
@@ -846,10 +846,10 @@ function ConfigurableTable({
                         if (deleteRowData) {
                             const result = await publicDeleteData({ idList: [deleteRowData.id] }, `/${moduleKey}/del`);
                             if (result.success) {
-                                messageApi.success('Delete successfully');
+                                messageApi.success('successful!');
                                 searchTableData(); // 刷新表格数据
                             } else {
-                                messageApi.error('Delete failed');
+                                messageApi.error('failed!');
                             }
                         }
                         setDeleteModalVisible(false);
@@ -859,11 +859,11 @@ function ConfigurableTable({
                         setDeleteModalVisible(false);
                         setDeleteRowData(null);
                     }}
-                    okText="Delete"
-                    cancelText="Cancel"
+                    okText="DELETE"
+                    cancelText="CANCEL"
                     okButtonProps={{ danger: true }}
                 >
-                    <p style={{ fontSize: 15, textAlign: 'center' }}>Are you sure you want to delete 【{deleteRowData?.name}】?</p>
+                    <p style={{ fontSize: 15, textAlign: 'center' }}>Delete【{deleteRowData?.name}】? You will not be able to use it anymore once it is deleted.</p>
                 </Modal>
             </div>
     );

@@ -25,7 +25,6 @@ import { debounce, times } from 'lodash';
  * 可配置表格组件
  *
  * @param {object} props - 组件属性
- * @param {string} props.uniqueId - 表格的唯一标识符，用于 localStorage 存储列设置
  * @param {Array} props.columns - Ant Design Table 的列定义数组 (包含所有列的定义)
  * @param {Array} props.dataSource - 表格数据源
  * @param {string|function} props.rowKey - 表格行的 Key，一般是 id
@@ -45,12 +44,13 @@ import { debounce, times } from 'lodash';
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
+ * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
  */
 function ConfigurableTable({
-    uniqueId,
     columns, // 所有列的定义
     dataSource = [],
-    rowKey,
+    refreshKey = 0,
+    rowKey = 'id',
     loading = false,
     onRowClick,
     isInteractionBlockingRowClick, // 接收状态
@@ -71,7 +71,7 @@ function ConfigurableTable({
     moduleKey = moduleKey || useLocation().pathname.split('/')[1];
     const pathname = useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
-    const storageKey = `table_visible_columns_${uniqueId}`;
+    const storageKey = `table_visible_columns_${moduleKey}`;
     const paginationParams = useRef({
         ...paginationConfig,
     })
@@ -591,6 +591,7 @@ function ConfigurableTable({
                                 return processedCol.actionButtons.indexOf(a.key) - processedCol.actionButtons.indexOf(b.key);
                             })
                             .map(({ key, click, icon }) => {
+
                                 const ItemIcon = icon
                                 return {
                                     key,
@@ -674,6 +675,15 @@ function ConfigurableTable({
             }
         };
     }, []);
+    // 刷新表格数据
+    useEffect(() => {
+        if (refreshKey === 1) {
+            searchTableData()//当前页面刷新
+        } else if (refreshKey === 2) {
+            paginationParams.current.pageIndex = 1;
+            searchTableData()//全局刷新
+        }
+    }, [refreshKey])
 
     // 添加删除确认对话框的状态
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -773,7 +783,7 @@ function ConfigurableTable({
                 <Table
                     columns={processedColumns}
                     dataSource={tableData}
-                    rowKey={rowKey || 'id'}
+                    rowKey={rowKey}
                     onRow={handleRow}
                     ref={tableRef}
                     pagination={{

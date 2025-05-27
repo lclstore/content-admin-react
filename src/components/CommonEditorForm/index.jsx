@@ -753,7 +753,7 @@ export default function CommonEditor(props) {
         }
         // 设置头部按钮: 如果id存在，且status不为0，则禁用保存按钮 或者表单内容没修改时禁用按钮
         if (headerContext.setButtons && changeHeader) {
-            const isNonZeroStatus = id && transformedData.status !== undefined && transformedData.status !== 'DRAFT' && transformedData.status !== 'DISABLE';
+            const isNonZeroStatus = id && transformedData.status === 'ENABLE';
             headerButtons[0].disabled = isNonZeroStatus;
             const saveButton = headerButtons.find(button => button.key === 'save');
             saveButton.disabled = isNonZeroStatus && saveButton.disabled;

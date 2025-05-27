@@ -203,10 +203,16 @@ export const renderFormControl = (field, options = {}) => {
         case 'switch':
             field.checkedChildren = field.checkedChildren || 'Enabled';
             field.unCheckedChildren = field.unCheckedChildren || 'Disabled';
-            // 确保初始值为0或1
+
+            // 转换初始值为布尔值
+            const initialChecked = fieldValue ? true : false;
+
+            // 使用useEffect处理初始值设置
             useEffect(() => {
-                form.setFieldValue(name, fieldValue === 1 || fieldValue === true ? 1 : 0);
-            }, []);
+                if (fieldValue !== undefined) {
+                    form.setFieldValue(name, initialChecked ? 1 : 0);
+                }
+            }, []);  // 仅在组件挂载时执行一次
 
             // 提取key属性，确保不会传递给Switch组件
             const { key: switchKey, ...switchRest } = field;
@@ -214,7 +220,7 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Switch
                     key={switchKey}
-                    defaultChecked={field.defaultChecked || false}
+
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑

@@ -298,11 +298,11 @@ export const useHeaderConfig = (params) => {
 
                 if (saveResult.success) {
                     setIsFormDirty(false);
-                    if (config.navigateAfterSave) {
+                    if (isBack) {
                         navigate(config.afterSaveUrl || -1);
                     }
                 } else {
-                    messageApi.error(saveResult.message || '保存失败');
+                    messageApi.error(saveResult.message || 'Save failed!');
                 }
                 return saveResult; // 返回保存结果
             } else {

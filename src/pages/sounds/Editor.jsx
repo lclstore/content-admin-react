@@ -68,7 +68,7 @@ export default function UserEditorWithCommon() {
 
     return (
         <CommonEditorForm
-
+            enableDraft={true}
             formType="basic"
             moduleKey="sound"
             config={{ formName: 'Sound' }}

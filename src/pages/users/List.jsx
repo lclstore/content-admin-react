@@ -20,6 +20,7 @@ export default function UsersList() {
     const handleEdit = useCallback((record) => {
         setEditingUserId(record?.id || null);
         setIsEditorModalVisible(true);
+        setRefreshKey(null);// 清空刷新
     }, []);
 
 

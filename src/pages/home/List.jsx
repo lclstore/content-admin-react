@@ -160,7 +160,6 @@ export default function Home() {
             name: 'name',
             label: 'Apple Store Name',
             maxLength: 100,
-            placeholder: 'Enter app name'
         },
         {
             type: 'input',
@@ -168,7 +167,6 @@ export default function Home() {
             label: 'App Code',
             required: true,
             maxLength: 50,
-            placeholder: 'Enter app code'
         }
     ], []);
 

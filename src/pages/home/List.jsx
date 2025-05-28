@@ -49,7 +49,7 @@ export default function Home() {
     const getLogs = async () => {
         return new Promise(resolve => {
             request.get({
-                url: `/home/changelogs`,
+                url: `/home/changelogs/page`,
                 load: true,
                 data: logsParams.current,
                 callback: res => {
@@ -65,7 +65,7 @@ export default function Home() {
     const getHelps = async () => {
         return new Promise(resolve => {
             request.get({
-                url: `/home/helps`,
+                url: `/home/helps/page`,
                 load: true,
                 data: {
                     page: 1,
@@ -129,8 +129,13 @@ export default function Home() {
             type: 'input',
             name: 'url',
             label: 'URL',
-            maxLength: 100,
+            required: true,
+            maxLength: 1000,
             showCount: true,
+            rules: [{
+                pattern: /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/,
+                message: 'Please enter a valid URL'
+            }]
         },
     ], []);
 
@@ -156,21 +161,21 @@ export default function Home() {
             type: 'textarea',
             name: 'newInfo',
             label: 'New Info',
-            maxLength: 100,
+            maxLength: 1000,
             showCount: true,
         },
         {
             type: 'textarea',
             name: 'improvedInfo',
             label: 'Improved Info',
-            maxLength: 100,
+            maxLength: 1000,
             showCount: true,
         },
         {
             type: 'textarea',
             name: 'fixedInfo',
             label: 'Fixed Info',
-            maxLength: 100,
+            maxLength: 1000,
             showCount: true,
         },
     ], []);
@@ -376,14 +381,16 @@ export default function Home() {
                             <span> Help & Support</span>
                         </div>
                         <span className={styles.addIcon} onClick={() => showModal('help')}>
-                            <PlusOutlined className={styles.titleIcon} />Add
+                            <Button type="primary" icon={<PlusOutlined />}  >Add</Button>
                         </span>
                     </div>
                     <div className={`${styles.homeContent} ${styles.helpContent}`}>
                         {helps.map((help, index) => (
                             <Button
                                 key={index}
-                                type="primary"
+                                style={{
+                                    color: '#243636b3',
+                                }}
                                 className={styles.helpButton}
                                 onClick={() => window.open(help.url, '_blank')}
                             >
@@ -401,7 +408,7 @@ export default function Home() {
                         <span>Changelogs</span>
                     </div>
                     <span className={styles.addIcon} onClick={() => showModal('log')}>
-                        <PlusOutlined className={styles.titleIcon} />Add
+                        <Button type="primary" icon={<PlusOutlined />}  >Add</Button>
                     </span>
                 </div>
                 <div className={`${styles.homeContent} ${styles.logsContent}`}>

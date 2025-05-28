@@ -67,7 +67,7 @@ export const mockWorkoutsForList = [
         id: 1,
         type: 'image',
         image: 'internal/test/ccdfcc51d1d4419c9a9d3ecce9bbebf4.png',
-        coverImage: '',
+        coverImage: 'https://hhcontent.s3.eu-central-1.amazonaws.com/t/none/u/undefined/w/67f5dfa1916d1900124391ea/x/video_720p.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KU4XQXHZETDYO3V%2F20250528%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250528T085651Z&X-Amz-Expires=604800&X-Amz-Signature=0a4289697e426dd7464ac640650a045353e95613d932ef5f93531529d82d3f5f&X-Amz-SignedHeaders=host&x-amz-request-payer=requester&x-id=GetObject',
         name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
         status: 'ENABLED',
         difficulty: 'Hard',

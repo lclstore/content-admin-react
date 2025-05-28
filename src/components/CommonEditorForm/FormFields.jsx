@@ -323,12 +323,9 @@ export const renderFormControl = (field, options = {}) => {
         case 'inputGroup':
             const { inputConfig } = field;
             return (
-                <Form.Item
-                    className='inputGroup'
-                >
+                <Form.Item className='inputGroup'>
                     <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {
-                            // 处理每个子项的验证规则
                             const itemRules = processValidationRules(config.rules || [], {
                                 required: config.required,
                                 label: config.label || label,
@@ -345,7 +342,7 @@ export const renderFormControl = (field, options = {}) => {
                                         required={config.required}
                                         rules={itemRules}
                                     >
-                                        {renderFormControl(config)}
+                                        {renderFormControl(config, options)}
                                     </Form.Item>
                                 </div>
                             );
@@ -353,6 +350,8 @@ export const renderFormControl = (field, options = {}) => {
                     </div>
                 </Form.Item>
             );
+
+
         //数字步进器
         case 'numberStepper':
             // 提取key属性，确保其不会通过展开运算符传递

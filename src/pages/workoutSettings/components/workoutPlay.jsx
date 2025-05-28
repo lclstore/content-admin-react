@@ -229,12 +229,19 @@ export default function UserEditorWithCommon() {
                             label: 'Start Time (mm:ss,sss)',
                             keys: ['startTime'],
                             required: false,
-                        } 
-                        
+                        },
+                        {
+                            type: 'switch',
+                            name: 'isSelected',
+                            label: 'Selected',
+                            required: true,
+                        }
+
+
 
                     ]
                 },
-                
+
 
             ]
         },

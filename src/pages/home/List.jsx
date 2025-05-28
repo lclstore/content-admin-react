@@ -85,6 +85,7 @@ export default function Home() {
         getInfo();
         getLogs();
         getHelps();
+        setCustomPageTitle('Home');
     }, [])
     // 切换展开状态
     const toggleExpand = (index) => {

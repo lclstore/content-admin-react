@@ -20,10 +20,10 @@ const filterSections = [
             value: 'DRAFT'
         }, {
             label: 'Enabled',
-            value: 'ENABLE'
+            value: 'ENABLED'
         }, {
             label: 'Disabled',
-            value: 'DISABLE'
+            value: 'DISABLED'
         }],
     }
 ];
@@ -56,8 +56,8 @@ export default function Musics() {
         //  console.log(status)
         // 简单的状态-按钮映射关系
         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+        if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLED' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
 

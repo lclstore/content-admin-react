@@ -181,7 +181,7 @@ function ConfigurableTable({
     const columnSettingsSection = useMemo(() => {
         // 创建选项数组，每个选项包含key、value、label
         const options = columns
-            .filter(col => col.key !== 'actions')
+            // .filter(col => col.key !== 'actions')
             .map(col => {
                 const key = col.key || col.dataIndex;
                 return {
@@ -575,8 +575,8 @@ function ConfigurableTable({
                         const status = record.status;
                         // 简单的状态-按钮映射关系
                         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-                        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-                        if (status === 'ENABLE' && ['edit', 'duplicate'].includes(btnName)) return true;
+                        if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+                        if (status === 'ENABLED' && ['edit', 'duplicate'].includes(btnName)) return true;
                         return false;
                     };
                     const defaultActionClick = async (key, rowData) => {

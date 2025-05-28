@@ -28,7 +28,7 @@ export default function UsersList() {
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
-        if (status === 'ENABLE' && ['disable'].includes(btnName)) return true;
+        if (status === 'ENABLED' && ['disable'].includes(btnName)) return true;
         if (status === 'DISABLE' && ['enable'].includes(btnName)) return true;
         return false;
     }, []);
@@ -142,7 +142,7 @@ export default function UsersList() {
     const handleModalSubmit = async () => {
         if (editorActionsRef && editorActionsRef.triggerSave) {
             const currentRecord = dataSource.find(user => user.id === editingUserId);
-            const statusToSave = currentRecord?.status || 'ENABLE'; // 默认为 ENABLE
+            const statusToSave = currentRecord?.status || 'ENABLED'; // 默认为 ENABLED
             let ret = await editorActionsRef.triggerSave(statusToSave, false);// 返回保存结果
             if (ret.success) {
                 messageApi.success(ret.message || 'Save successful!');

@@ -104,6 +104,7 @@ export const useHeaderConfig = (params) => {
         statusList = optionsConstants.displayStatus,//状态列表
         config,
         moduleKey,
+        operationName,
         id,
         isFormDirty,
         form,
@@ -244,7 +245,7 @@ export const useHeaderConfig = (params) => {
 
         try {
             if (!dataToSave.status) {
-                dataToSave.status = 'ENABLE';
+                dataToSave.status = 'ENABLED';
             }
 
             if (onSave) {
@@ -255,7 +256,8 @@ export const useHeaderConfig = (params) => {
                 const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
                 const systemList = ['user'];//系统级别操作对应update/add  业务层操作对应save
                 const isSystem = systemList.includes(module);
-                const apiUrl = `/${module}/${isSystem ? id ? 'update' : 'add' : 'save'}`; // 完整的API路径
+                const operation = operationName || (isSystem ? id ? 'update' : 'add' : 'save');
+                const apiUrl = `/${module}/${operation}`; // 完整的API路径
                 // 使用新的命名调用
                 const ret = await savePublicFormData(dataToSave, apiUrl, 'post');
                 return ret;
@@ -270,7 +272,7 @@ export const useHeaderConfig = (params) => {
         if (!form) return;
 
         // 获取当前表单值中的状态，如果没有则使用初始状态
-        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLE';
+        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLED';
         // 如果启用草稿功能，先弹出状态选择框，否则直接使用当前状态
         if (enableDraft) {
             setPendingSaveData({});
@@ -284,7 +286,7 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 处理状态选择确认
-    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLE', load = true) => {
+    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLED', load = true) => {
         setIsStatusModalVisible(false);
 
         try {
@@ -463,8 +465,8 @@ export const useHeaderConfig = (params) => {
         }
 
         switch (button.status) {
-            case 'DISABLE':
-            case 'ENABLE':
+            case 'DISABLED':
+            case 'ENABLED':
                 visibleStatusList = statusList.filter(status => status.value === 'DRAFT');
                 break;
             default:
@@ -496,8 +498,8 @@ export const useHeaderConfig = (params) => {
         const getVisibleStatusList = (status) => {
             let filteredStatusList = [];
             switch (status) {
-                case 'DISABLE':
-                case 'ENABLE':
+                case 'DISABLED':
+                case 'ENABLED':
                     filteredStatusList = statusList.filter(status => status.value !== 'DRAFT');
                     break;
                 default:

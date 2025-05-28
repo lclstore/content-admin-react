@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Modal, message } from 'antd';
-import { PlusOutlined,ArrowDownOutlined,ArrowUpOutlined } from '@ant-design/icons';
+import { PlusOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { statusIconMap, optionsConstants } from '@/constants';
@@ -67,7 +67,7 @@ export default () => {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         let state = false
-        if(btnName === 'edit'){ state = true }
+        if (btnName === 'edit') { state = true }
         if (
             (status === 0 && (btnName === "enable" || btnName === "delete" || btnName === "duplication")) ||
             (status === 1 && (btnName === "disabled" || btnName === "duplication")) ||
@@ -96,7 +96,7 @@ export default () => {
                 key: 'imageCoverUrl',
                 visibleColumn: 0
             },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80},
+            { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80 },
 
             {
                 title: 'Name',
@@ -183,7 +183,7 @@ export default () => {
                 fixed: 'right',
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable','edit','duplicate','delete'],
+                actionButtons: ['enable', 'disable', 'edit', 'duplicate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
             }
@@ -277,15 +277,15 @@ export default () => {
     const getData = useCallback(() => {
         return new Promise(resolve => {
             request.get({
-                url:"/sound/page",
-                load:true,
-                callback(res){
-                    console.log('res',res)
+                url: "/sound/page",
+                load: true,
+                callback(res) {
+                    console.log('res', res)
                     resolve()
                 }
             })
         })
-    },[])
+    }, [])
     // 副作用 - 组件生命周期相关处理
     /**
      * 设置导航栏按钮

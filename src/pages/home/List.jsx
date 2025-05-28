@@ -1,93 +1,130 @@
 import styles from './list.module.css';
-import { useEffect, useContext, useState, useMemo, useRef } from 'react';
+import { useEffect, useContext, useState, useMemo, useRef, useCallback } from 'react';
 import { PlusOutlined, InfoCircleOutlined, QuestionCircleOutlined, ProfileOutlined } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Button, Image, Tag, Timeline, Pagination, Modal, Form, Input, message, } from 'antd';
 import appIcon from '@/assets/images/app-icon.png';
 import CommonEditorForm from '@/components/CommonEditorForm';
-
+import request from '@/request';
 export default function Home() {
     const [messageApi, contextHolder] = message.useMessage();
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     // APP信息数据对象
-    const [appInfo, setAppInfo] = useState({
-        appIcon: appIcon, // 系统默认图片
-        name: 'web 单体应用 OOG-001',
-        appCode: 'OOG-001'
-    });
-
-    // 日志信息数据
-    const [logs] = useState([
-        {
-            version: 'v1.1.0',
-            date: '2025-05-15',
-            new: '首个正式版本上线',
-            improved: '提升首页加载速度',
-            fixed: '修复导出文件名乱码问题'
-        },
-        {
-            version: 'v1.0.1',
-            date: '2025-05-01',
-            new: '新增数据导出功能',
-            improved: '优化表单验证逻辑',
-            fixed: '修复列表排序异常'
-        },
-        {
-            version: 'v1.1.0',
-            date: '2025-05-15',
-            new: '首个正式版本上线',
-            improved: '提升首页加载速度',
-            fixed: '修复导出文件名乱码问题'
-        },
-        {
-            version: 'v1.0.1',
-            date: '2025-05-01',
-            new: '新增数据导出功能',
-            improved: '优化表单验证逻辑',
-            fixed: '修复列表排序异常'
-        },
-        {
-            version: 'v1.1.0',
-            date: '2025-05-15',
-            new: '首个正式版本上线',
-            improved: '提升首页加载速度',
-            fixed: '修复导出文件名乱码问题'
-        },
-        {
-            version: 'v1.0.1',
-            date: '2025-05-01',
-            new: '新增数据导出功能',
-            improved: '优化表单验证逻辑',
-            fixed: '修复列表排序异常'
-        }
-    ]);
-    // 添加展开状态管理，默认展开第一条
-    const [expandedItems, setExpandedItems] = useState({
-        0: true // 默认展开第一条
-    });
+    const [appInfo, setAppInfo] = useState();
+    const [logs, setLogs] = useState([]);
+    const [helps, setHelps] = useState([]);
     // 添加分页相关状态
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5; // 每页显示的日志数量
 
-    // 添加Help弹框状态
-    const [helpModalVisible, setHelpModalVisible] = useState(false);
-    // 添加 App Info 弹框状态
-    const [appInfoModalVisible, setAppInfoModalVisible] = useState(false);
-    // 表单实例
-    const [form] = Form.useForm();
-    const formRef = useRef(null);
-    const helpFormRef = useRef(null);
-    // 添加 App Info 表单引用
-    const appInfoFormRef = useRef(null);
+    // 添加展开状态管理，默认展开第一条
+    const [expandedItems, setExpandedItems] = useState({
+        0: true // 默认展开第一条
+    });
 
-    // 添加日志编辑相关状态
-    const [logModalVisible, setLogModalVisible] = useState(false);
-    const [editingLogId, setEditingLogId] = useState(null);
 
+    // 获取appInfo
+    const getInfo = async () => {
+        return new Promise(resolve => {
+            request.get({
+                url: `/home/info`,
+                load: true,
+                callback: res => {
+                    if (res.data.success) {
+                        setAppInfo(res?.data?.data || null);
+                    }
+                }
+            });
+        })
+    }
+    // 日志分页参数
+    const logsParams = useRef({
+        pageIndex: 1,
+        pageSize: 10,
+        totalCount: 0
+    })
+    // 获取logs
+    const getLogs = async () => {
+        return new Promise(resolve => {
+            request.get({
+                url: `/home/changelogs`,
+                load: true,
+                data: logsParams.current,
+                callback: res => {
+                    if (res.data.success) {
+                        setLogs(res?.data?.data || []);
+                        logsParams.current.totalCount = res?.data?.totalCount || 0;
+                    }
+                }
+            });
+        })
+    }
+    // 获取helps
+    const getHelps = async () => {
+        return new Promise(resolve => {
+            request.get({
+                url: `/home/helps`,
+                load: true,
+                data: {
+                    page: 1,
+                    pageSize: 99999
+                },
+                callback: res => {
+                    if (res.data.success) {
+                        setHelps(res?.data?.data || []);
+                    }
+                }
+            });
+        })
+    }
+
+
+    useEffect(() => {
+        getInfo();
+        getLogs();
+        getHelps();
+    }, [])
+    // 切换展开状态
+    const toggleExpand = (index) => {
+        // 创建新的展开状态对象，所有项都设置为false
+        const newExpandedItems = {};
+        Object.keys(expandedItems).forEach(key => {
+            newExpandedItems[key] = false;
+        });
+
+        // 只设置当前点击项的状态
+        newExpandedItems[index] = !expandedItems[index];
+        setExpandedItems(newExpandedItems);
+    };
+
+    // 处理页码变化
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        // 切换页面时，默认展开新页第一条，其他收起
+        const newExpandedItems = {};
+        const firstItemIndex = (page - 1) * pageSize;
+        newExpandedItems[firstItemIndex] = true;
+        setExpandedItems(newExpandedItems);
+    };
+
+    // 计算当前页的日志
+    const getCurrentPageLogs = () => {
+        const start = (currentPage - 1) * pageSize;
+        return logs.slice(start, start + pageSize);
+    };
     // Help Document表单字段配置
     const helpFormFields = useMemo(() => [
+
+        {
+            type: 'input',
+            name: 'name',
+            label: 'Name',
+            required: true,
+            maxLength: 100,
+            showCount: true,
+        },
         {
             type: 'input',
             name: 'url',
@@ -95,13 +132,6 @@ export default function Home() {
             maxLength: 100,
             showCount: true,
         },
-        {
-            type: 'input',
-            name: 'name',
-            label: 'Name',
-            maxLength: 100,
-            showCount: true,
-        }
     ], []);
 
     // 表单字段配置
@@ -124,22 +154,22 @@ export default function Home() {
         },
         {
             type: 'textarea',
-            name: 'new',
-            label: 'New',
+            name: 'newInfo',
+            label: 'New Info',
             maxLength: 100,
             showCount: true,
         },
         {
             type: 'textarea',
-            name: 'improved',
-            label: 'Improved',
+            name: 'improvedInfo',
+            label: 'Improved Info',
             maxLength: 100,
             showCount: true,
         },
         {
             type: 'textarea',
-            name: 'fixed',
-            label: 'Fixed',
+            name: 'fixedInfo',
+            label: 'Fixed Info',
             maxLength: 100,
             showCount: true,
         },
@@ -157,7 +187,7 @@ export default function Home() {
         },
         {
             type: 'input',
-            name: 'name',
+            name: 'appStoreName',
             label: 'Apple Store Name',
             maxLength: 100,
         },
@@ -170,132 +200,122 @@ export default function Home() {
         }
     ], []);
 
-    // 切换展开状态
-    const toggleExpand = (index) => {
-        setExpandedItems(prev => ({
-            ...prev,
-            [index]: !prev[index]
-        }));
-    };
+    // 统一的弹框配置
+    const modalConfigs = useMemo(() => ({
+        help: {
+            title: 'Add Help Document',
+            width: 600,
+            formName: 'Help Document',
+            fields: helpFormFields,
+            successMessage: 'Link added',
+            operationName: 'addHelps'
+        },
+        log: {
+            title: 'Add Log',
+            width: 600,
+            formName: 'Log',
+            fields: formFields,
+            successMessage: 'Log Added',
+            operationName: 'addChangeLogs'
+        },
+        appInfo: {
+            title: 'Add App Info',
+            width: 700,
+            formName: 'App Info',
+            fields: appInfoFields,
+            successMessage: 'Info Updated',
+            operationName: 'save'
+        }
+    }), [helpFormFields, formFields, appInfoFields]);
 
-    // 处理页码变化
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-        setExpandedItems({ [((page - 1) * pageSize)]: true }); // 默认展开新页第一条
-    };
+    // 当前激活的弹框类型
+    const [activeModalType, setActiveModalType] = useState(null);
 
-    // 计算当前页的日志
-    const getCurrentPageLogs = () => {
-        const start = (currentPage - 1) * pageSize;
-        return logs.slice(start, start + pageSize);
-    };
+    // 统一的弹框状态管理
+    const [modalStates, setModalStates] = useState({
+        help: false,
+        log: false,
+        appInfo: false
+    });
+
+    // 统一的编辑器引用
+    const [editorRef, setEditorRef] = useState(null);
 
     // 渲染日志内容
     const renderLogContent = (log) => (
         <div className={styles.logsBody}>
-            {log.new && (
+            {log.newInfo && (
                 <div className={styles.logSection}>
                     <div className={styles.logLabel}>
                         <Tag color="success">New</Tag>
                     </div>
-                    <div className={styles.logContent}>{log.new}</div>
+                    <div className={styles.logContent}>{log.newInfo}</div>
                 </div>
             )}
-            {log.improved && (
+            {log.improvedInfo && (
                 <div className={styles.logSection}>
                     <div className={styles.logLabel}>
                         <Tag color="processing">Improved</Tag>
                     </div>
-                    <div className={styles.logContent}>{log.improved}</div>
+                    <div className={styles.logContent}>{log.improvedInfo}</div>
                 </div>
             )}
-            {log.fixed && (
+            {log.fixedInfo && (
                 <div className={styles.logSection}>
                     <div className={styles.logLabel}>
                         <Tag color="warning">Fixed</Tag>
                     </div>
-                    <div className={styles.logContent}>{log.fixed}</div>
+                    <div className={styles.logContent}>{log.fixedInfo}</div>
                 </div>
             )}
         </div>
     );
 
-    // 处理Help弹框提交
-    const handleHelpSubmit = async () => {
+    // 统一的打开弹框方法
+    const showModal = (type) => {
+        setActiveModalType(type);
+        setModalStates(prev => ({
+            ...prev,
+            [type]: true
+        }));
+    };
+
+    // 统一的关闭弹框方法
+    const hideModal = (type) => {
+        setModalStates(prev => ({
+            ...prev,
+            [type]: false
+        }));
+        setActiveModalType(null);
+        setEditorRef(null); // 清空编辑器引用
+    };
+
+    // 统一的表单提交处理方法
+    const handleModalSubmit = async (type) => {
         try {
-            if (helpFormRef.current) {
-                const { form } = helpFormRef.current;
-                await form.validateFields();
-                const values = form.getFieldsValue();
-                console.log('Help提交的值:', values);
-                setHelpModalVisible(false);
-                messageApi.success('Link added');
-                form.resetFields();
+            if (editorRef?.triggerSave) {
+                const ret = await editorRef.triggerSave('ENABLED', false);
+                if (ret.success) {
+                    messageApi.success(modalConfigs[type].successMessage);
+
+                    // 特殊处理 appInfo 的情况
+                    if (type === 'appInfo') {
+                        getInfo()// 获取appInfo
+                    } else if (type === 'log') {
+                        getLogs()// 获取logs
+                    } else if (type === 'help') {
+                        getHelps()// 获取helps
+                    }
+
+                    hideModal(type);
+                    editorRef.form.resetFields();
+                }
             }
         } catch (error) {
             console.error('表单验证失败:', error);
         }
     };
 
-    // 处理 App Info 提交
-    const handleAppInfoSubmit = async () => {
-        try {
-            if (appInfoFormRef.current) {
-                const { form } = appInfoFormRef.current;
-                await form.validateFields();
-                const values = form.getFieldsValue();
-                console.log('App Info 提交的值:', values);
-                // TODO: 这里添加实际的保存逻辑
-                // setAppInfo(values); // 更新 App Info
-                messageApi.success('Info Updated');
-                setAppInfo({
-                    appIcon: appIcon, // 系统默认图片
-                    name: 'web 单体应用 OOG-001',
-                    appCode: 'OOG-001'
-                })
-                setAppInfoModalVisible(false);
-                form.resetFields();
-
-            }
-        } catch (error) {
-            console.error('表单验证失败:', error);
-        }
-    };
-
-    // 打开日志编辑弹窗
-    const showLogModal = (id = null) => {
-        setEditingLogId(id);
-        setLogModalVisible(true);
-    };
-
-    // 关闭日志编辑弹窗
-    const handleLogModalCancel = () => {
-        setLogModalVisible(false);
-        setEditingLogId(null);
-    };
-
-    // 处理日志提交
-    const handleLogSubmit = async () => {
-        try {
-            if (formRef.current) {
-                const { form } = formRef.current;
-                await form.validateFields();
-                const values = form.getFieldsValue();
-                console.log('提交的日志数据:', values);
-
-                // TODO: 这里添加实际的保存逻辑
-
-                handleLogModalCancel();
-                form.resetFields();
-                messageApi.success('Log Added');
-            }
-        } catch (error) {
-            console.error('表单验证失败:', error);
-        }
-    };
-    useEffect(() => {
-        setAppInfo(null)
-    }, []);
 
     return (
         <div className={styles.homeContainer}>
@@ -315,21 +335,23 @@ export default function Home() {
                             <div className={styles.infoItem}>
                                 <div className={styles.infoItemLeft}>
                                     <Image
+
                                         preview={{
                                             mask: null
                                         }}
                                         style={{
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
+                                            borderRadius: '6px'
                                         }}
                                         src={appInfo.appIcon}
                                         alt="APP Icon"
                                         width={80}
                                         height={80}
-                                        fallback="/default-app-icon.png"
+                                        fallback={appIcon}
                                     />
                                 </div>
                                 <div className={styles.infoItemRight}>
-                                    <div className={styles.infoItemRightTitle}>{appInfo.name}</div>
+                                    <div className={styles.infoItemRightTitle}>{appInfo.appStoreName}</div>
                                     <div className={styles.infoItemRightContent}>{appInfo.appCode}</div>
                                 </div>
                             </div>
@@ -339,7 +361,7 @@ export default function Home() {
                                 <Button
                                     type="primary"
                                     icon={<PlusOutlined />}
-                                    onClick={() => setAppInfoModalVisible(true)}
+                                    onClick={() => showModal('appInfo')}
                                 >
                                     Add App Info
                                 </Button>
@@ -353,25 +375,22 @@ export default function Home() {
                             <QuestionCircleOutlined className={styles.titleIcon} />
                             <span> Help & Support</span>
                         </div>
-                        <span className={styles.addIcon} onClick={() => setHelpModalVisible(true)}>
+                        <span className={styles.addIcon} onClick={() => showModal('help')}>
                             <PlusOutlined className={styles.titleIcon} />Add
                         </span>
                     </div>
                     <div className={`${styles.homeContent} ${styles.helpContent}`}>
-                        <Button
-                            type="primary"
-                            className={styles.helpButton}
-                            onClick={() => window.open('https://api-docs-url', '_blank')}
-                        >
-                            API Docs
-                        </Button>
-                        <Button
-                            type="primary"
-                            className={styles.helpButton}
-                            onClick={() => window.open('https://prd-url', '_blank')}
-                        >
-                            PRD
-                        </Button>
+                        {helps.map((help, index) => (
+                            <Button
+                                key={index}
+                                type="primary"
+                                className={styles.helpButton}
+                                onClick={() => window.open(help.url, '_blank')}
+                            >
+                                {help.name}
+                            </Button>
+                        ))}
+
                     </div>
                 </div>
             </div>
@@ -381,7 +400,7 @@ export default function Home() {
                         <ProfileOutlined className={styles.titleIcon} />
                         <span>Changelogs</span>
                     </div>
-                    <span className={styles.addIcon} onClick={() => showLogModal()}>
+                    <span className={styles.addIcon} onClick={() => showModal('log')}>
                         <PlusOutlined className={styles.titleIcon} />Add
                     </span>
                 </div>
@@ -389,123 +408,68 @@ export default function Home() {
                     {/* 使用时间轴展示所有日志 */}
                     <div className={styles.timelineContainer}>
                         <Timeline
-                            items={getCurrentPageLogs().map((log, index) => ({
+                            items={logs.map((log, index) => ({
                                 key: index,
                                 children: (
                                     <div
                                         className={styles.timelineItem}
                                         onClick={() => toggleExpand(index)}
+                                        style={{ cursor: 'pointer' }}
                                     >
                                         <div className={styles.timelineHeader}>
                                             <Tag color="blue" className={styles.versionTag}>{log.version}</Tag>
                                             <span className={styles.date}>{log.date}</span>
                                         </div>
-                                        {expandedItems[index + ((currentPage - 1) * pageSize)] && renderLogContent(log)}
+                                        {expandedItems[index] && renderLogContent(log)}
                                     </div>
                                 )
                             }))}
                         />
-                        <div className={styles.paginationContainer}>
-                            <Pagination
-                                current={currentPage}
-                                total={logs.length}
-                                pageSize={pageSize}
-                                onChange={handlePageChange}
-                                size="small"
-                                showTotal={(total) => `${total} items`}
-                                showSizeChanger={false}
-                            />
-                        </div>
                     </div>
-
+                    <div className={styles.paginationContainer}>
+                        <Pagination
+                            current={logsParams.current.pageIndex}
+                            total={logsParams.current.totalCount}
+                            pageSize={logsParams.current.pageSize}
+                            onChange={handlePageChange}
+                            size="small"
+                            showTotal={(total) => `${total} items`}
+                            showSizeChanger={false}
+                        />
+                    </div>
                 </div>
-
             </div>
 
-            {/* Help & Support 添加弹框 */}
-            <Modal
-                title="Add Help Document"
-                open={helpModalVisible}
-                onOk={handleHelpSubmit}
-                onCancel={() => setHelpModalVisible(false)}
-                width={600}
-                destroyOnClose
-            >
-                <div className={styles.formWrapper}>
-                    <CommonEditorForm
-                        changeHeader={false}
-                        formType="basic"
-                        isBack={false}
-                        config={{
-                            formName: 'Help Document',
-                            hideSaveButton: true,
-                            hideBackButton: true,
-                            layout: 'vertical'
-                        }}
-                        fields={helpFormFields}
-                        initialValues={{}}
-                        moduleKey="help"
-                        setFormRef={ref => helpFormRef.current = ref}
-                    />
-                </div>
-            </Modal>
-
-            {/* 日志编辑弹窗 */}
-            <Modal
-                title={editingLogId ? "Edit Log" : "Add Log"}
-                open={logModalVisible}
-                onCancel={handleLogModalCancel}
-                onOk={handleLogSubmit}
-                width={600}
-                destroyOnClose
-            >
-                <div className={styles.formWrapper}>
-                    <CommonEditorForm
-                        changeHeader={false}
-                        formType="basic"
-                        isBack={false}
-                        config={{
-                            formName: 'Log',
-                            hideSaveButton: true,
-                            hideBackButton: true,
-                            layout: 'vertical'
-                        }}
-                        fields={formFields}
-                        initialValues={{}}
-                        id={editingLogId}
-                        moduleKey="log"
-                        setFormRef={ref => formRef.current = ref}
-                    />
-                </div>
-            </Modal>
-
-            {/* App Info 编辑弹框 */}
-            <Modal
-                title="Add App Info"
-                open={appInfoModalVisible}
-                onOk={handleAppInfoSubmit}
-                onCancel={() => setAppInfoModalVisible(false)}
-                width={700}
-                destroyOnClose
-            >
-                <div className={styles.formWrapper}>
-                    <CommonEditorForm
-                        changeHeader={false}
-                        formType="basic"
-                        isBack={false}
-                        config={{
-                            formName: 'App Info',
-                            hideSaveButton: true,
-                            hideBackButton: true,
-                            layout: 'vertical'
-                        }}
-                        fields={appInfoFields}
-                        initialValues={{}}
-                        moduleKey="appInfo"
-                        setFormRef={ref => appInfoFormRef.current = ref}
-                    />
-                </div>
-            </Modal>
+            {/* 统一的弹框组件 */}
+            {activeModalType && (
+                <Modal
+                    title={modalConfigs[activeModalType].title}
+                    open={modalStates[activeModalType]}
+                    onOk={() => handleModalSubmit(activeModalType)}
+                    onCancel={() => hideModal(activeModalType)}
+                    width={modalConfigs[activeModalType].width}
+                    destroyOnClose
+                >
+                    <div className={styles.formWrapper}>
+                        <CommonEditorForm
+                            changeHeader={false}
+                            formType="basic"
+                            isBack={false}
+                            config={{
+                                formName: modalConfigs[activeModalType].formName,
+                                hideSaveButton: true,
+                                hideBackButton: true,
+                                layout: 'vertical'
+                            }}
+                            fields={modalConfigs[activeModalType].fields}
+                            initialValues={{}}
+                            moduleKey='home'
+                            operationName={modalConfigs[activeModalType].operationName}
+                            setFormRef={setEditorRef}
+                        />
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 }

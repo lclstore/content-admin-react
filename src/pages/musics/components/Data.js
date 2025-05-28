@@ -40,8 +40,8 @@ export const filterSections1 = [
     }, {
         title: 'Type',
         key: 'type',
-        options: ['Regular', 'Yoga','Dance'],
-    }, 
+        options: ['Regular', 'Yoga', 'Dance'],
+    },
 ];
 // --- 以下是从 WorkoutsEditor.jsx 移动并整理的数据 ---
 
@@ -53,7 +53,7 @@ export const mockWorkoutsForList = [
         image: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         audio: '/cms/fitnessVideo/img/6379cf54631c41469b5fedb0900bbb42.png?alt=media&name=f3683cc7-f759-4ed2-a9f3-4f1d10123c6d.png',
         name: 'Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting Weight Lifting ',
-        status: 'ENABLE',
+        status: 'ENABLED',
         generateStatus: 'Disabled',
         difficulty: 'Hard',
         equipment: 'Dumbbells, Barbell',
@@ -73,7 +73,7 @@ export const mockWorkoutsForList = [
         exerciseNum: 12,
         workoutNum: 12,
         audioLang: null,
-        application:'Plan',
+        application: 'Plan',
         fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {
@@ -101,7 +101,7 @@ export const mockWorkoutsForList = [
         exerciseNum: 12,
         workoutNum: 12,
         audioLang: null,
-        application:'Plan',
+        application: 'Plan',
         fileStatus: ['Successful', 'Processing', 'Failed'][Math.floor(Math.random() * 3)],
     },
     {

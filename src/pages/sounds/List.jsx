@@ -21,10 +21,10 @@ export default function WorkoutsList() {
                 value: 'DRAFT'
             }, {
                 label: 'Enabled',
-                value: 'ENABLE'
+                value: 'ENABLED'
             }, {
                 label: 'Disabled',
-                value: 'DISABLE'
+                value: 'DISABLED'
             }],
         }
     ];

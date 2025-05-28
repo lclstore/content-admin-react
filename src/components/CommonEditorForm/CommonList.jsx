@@ -70,7 +70,7 @@ const CommonList = ({
     defaultQueryParams = {
         page: 1,
         pageSize: 10,
-        status: 'ENABLE'
+        status: 'ENABLED'
     }
 }) => {
     const [scrollableId] = useState(() => `commonListScrollableDiv-${Math.random().toString(36).substring(2, 9)}`);

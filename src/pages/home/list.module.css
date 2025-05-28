@@ -92,7 +92,8 @@
 
 /* Help内容区域样式 */
 .helpContent {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
 }
 
@@ -219,7 +220,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 16px;
+    padding: 16px 0;
     position: sticky;
     bottom: 0;
     left: 0;

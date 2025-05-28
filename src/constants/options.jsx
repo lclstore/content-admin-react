@@ -1,4 +1,4 @@
-import { EditFilled, CheckCircleFilled, CloseCircleFilled, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { EditFilled, CheckCircleFilled, CloseCircleFilled, LoadingOutlined, CheckOutlined, CloseOutlined, SyncOutlined } from '@ant-design/icons';
 export const optionsConstants = {
     displayStatus: [
         { name: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Draft</div>, value: 'DRAFT' },
@@ -39,5 +39,23 @@ export const optionsConstants = {
         { name: <span style={{ color: '#9b59b6' }}>Seated</span>, value: 2 },
         { name: <span style={{ color: '#e67e22' }}>Prone</span>, value: 3 },
         { name: <span style={{ color: '#e74c3c' }}>Kneeling</span>, value: 4 },
+    ],
+    publishStatus: [
+        {
+            name: <div><LoadingOutlined style={{ marginRight: '5px', color: "#faad14" }} />WAITTING</div>,
+            value: 'WAITTING'
+        },
+        {
+            name: <div><CheckOutlined style={{ marginRight: '5px', color: "#52c41a" }} />SUCCESS</div>,
+            value: 'SUCCESS'
+        },
+        {
+            name: <div><CloseOutlined style={{ marginRight: '5px', color: "#ff4d4f" }} />FAIL</div>,
+            value: 'FAIL'
+        },
+        {
+            name: <div><SyncOutlined style={{ marginRight: '5px', color: "#1890ff" }} />PROCESSING</div>,
+            value: 'PROCESSING'
+        },
     ],
 };

@@ -452,12 +452,14 @@ export default function Home() {
                 <Modal
                     title={modalConfigs[activeModalType].title}
                     open={modalStates[activeModalType]}
+                    okText="Confirm"
+                    cancelText="Cancel"
                     onOk={() => handleModalSubmit(activeModalType)}
                     onCancel={() => hideModal(activeModalType)}
-                    width={modalConfigs[activeModalType].width}
+                    width={850}
                     destroyOnClose
                 >
-                    <div className={styles.formWrapper}>
+                    <div  >
                         <CommonEditorForm
                             changeHeader={false}
                             formType="basic"

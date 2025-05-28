@@ -141,7 +141,7 @@ export function randomString(length = 8) {
 }
 
 // 格式化时长 (秒 -> MM:SS)
-export const formatDuration = (seconds) => {
+export const formatDuration = (seconds = 0) => {
   if (isNaN(seconds) || seconds < 0) {
     return '00:00';
   }

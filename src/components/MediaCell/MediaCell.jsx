@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, memo, useMemo } from 'react';
 import { Image, Modal } from 'antd';
-import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
+import { FileImageOutlined, CaretRightOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
 import styles from './MediaCell.module.less'; // 导入 CSS Modules
 import { getFullUrl } from '@/utils';
@@ -34,10 +34,10 @@ const MediaTags = memo(({ showNewTag, showLockIcon }) => {
 });
 
 // 视频媒体组件
-const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) => {
+const VideoMedia = memo(({ src, posterImage, duration, onPreview, mediaType }) => {
     if (!src) {
         return <div className={`${styles.videoContainer} ${styles.mediaCell}`}>
-            <img style={{width:"100%",height:"100%"}} src={mediaType === 'video' ? videoError : audioError} alt=""/>
+            <img style={{ width: "100%", height: "100%" }} src={mediaType === 'video' ? videoError : audioError} alt="" />
         </div>;
     }
 
@@ -60,13 +60,11 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) =>
             {/*    onClick={(e) => e.stopPropagation()}*/}
             {/*/>*/}
             <div className={`${styles.videoOverlay} ${styles.videoPlayIconOverlay}`}>
-                <PlayCircleOutlined />
+                <CaretRightOutlined />
             </div>
-            {duration !== undefined && (
-                <div className={styles.videoDurationOverlay}>
-                    {formatDuration(duration)}
-                </div>
-            )}
+            <div className={styles.videoDurationOverlay}>
+                {formatDuration(duration)}
+            </div>
             {/*<div className={`${styles.videoOverlay} ${styles.videoPreviewHintOverlay}`}>*/}
             {/*    <EyeOutlined />*/}
             {/*    <span style={{ marginLeft: '5px' }}>Preview</span>*/}
@@ -78,7 +76,9 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) =>
 // 音频媒体组件
 const AudioMedia = memo(({ src, onPreview }) => {
     if (!src) {
-        return <div className={`${styles.audioContainer} ${styles.mediaCell}`}></div>;
+        return <div className={`${styles.audioContainer} ${styles.mediaCell}`}>
+            <img style={{ width: "100%", height: "100%" }} src={audioError} alt="" />
+        </div>;
     }
 
     const fullSrc = getFullUrl(src);
@@ -106,7 +106,7 @@ const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) =>
                 alt={`${name || 'Media'}'s image`}
                 preview={{
                     onVisibleChange: onPreviewVisibleChange,
-                    maskClassName:"no-mask"
+                    maskClassName: "no-mask"
                 }}
                 onError={onImageError}
                 loading="lazy"
@@ -335,7 +335,7 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
             case 'audio':
                 return (
                     <>
-                        <VideoMedia
+                        <AudioMedia
                             src={mediaSrc}
                             mediaType={mediaType}
                             onPreview={handleAudioPreview}

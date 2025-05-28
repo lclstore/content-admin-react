@@ -214,3 +214,14 @@ export const md5Encrypt = (value) => {
   return md5(value || '')
 }
 
+/**
+ * 验证版本号格式是否正确
+ * @param {string} version - 版本号字符串
+ * @returns {boolean} - 是否是有效的版本号
+ */
+export const validateVersion = (version) => {
+  // 版本号格式：主版本号.次版本号.修订号 (如：1.0.0)
+  const versionPattern = /^\d+\.\d+\.\d+$/;
+  return versionPattern.test(version);
+};
+

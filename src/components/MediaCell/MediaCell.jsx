@@ -174,7 +174,7 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
                         <video
                             src={fullUrl}
                             controls
-                            style={{ width: '100%', display: 'block', }}
+                            style={{ width: '100%', display: 'block', height: '100%', minWidth: '720px' }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             Your browser does not support the video tag.

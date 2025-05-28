@@ -91,11 +91,13 @@ const Login = () => {
                 password: md5(password)
             },
             callback(res) {
-                console.log(res)
+                console.log('res',res.data)
                 if (res.data.success) {
                     localDown(res.data.data.token)
+                    localStorage.setItem('users',JSON.stringify(res.data.data));
                     setUserInfo(res.data.data)
                     navigate(settings.router.homePath);
+                
                 } else {
                     setLoading(false)
                 }
@@ -162,7 +164,7 @@ const Login = () => {
                         <div className="login-form">
                             {/* <div className="login-header">
                                 <img src={lionImg} alt="Logo" />
-                                <div>CMS</div>
+                                <div>CMS</div> 
                             </div> */}
                             <div className="login-title">Hey, Welcome back!</div>
                             <div className="login-subtitle"> </div>

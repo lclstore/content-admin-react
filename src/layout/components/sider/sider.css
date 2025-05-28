@@ -10,3 +10,53 @@
     cursor: pointer;
     width: fit-content;
 }
+
+.Profile {
+    width: fit-content;
+    /* padding: 16px; */
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    background-color: #243636;
+    display: flex;
+    cursor: pointer;
+}
+.mask{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    
+}
+.Profile:hover .mask{
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.Profile-avatar {
+    margin-top: 16px;
+    margin-left: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #fff;
+    margin-right: 10px;
+}
+
+
+
+.Profile-usename {
+    font-size: 13px;
+    margin-bottom: 2px;
+    line-height: 1.3;
+    font-family: Poppins;
+    color: #fff;
+    font-weight: 700;
+    line-height: 17px;
+}
+
+.Profile-eamil {
+    font-size: 13px;
+    line-height: 1.3;
+    font-family: Poppins;
+    color: rgb(136, 158, 158);
+    line-height: 13px;
+}

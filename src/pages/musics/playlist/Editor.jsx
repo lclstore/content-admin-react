@@ -132,7 +132,7 @@ export default function UserEditorWithCommon() {
 
             //文件上传后修改name
             onChange: (value, file, form) => {
-                debugger
+                // debugger
                 form.setFieldsValue({
                     name: file?.name || '',
                 });

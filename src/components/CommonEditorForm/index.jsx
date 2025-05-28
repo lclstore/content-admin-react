@@ -588,7 +588,7 @@ export default function CommonEditor(props) {
                 }
             }
         });
-        const structure = fields.find(field => field.dataKey);
+        const structure = fields.find(field => field?.dataKey&&field.dataKey);
         //数组帮定处理
         if (structure && Array.isArray(obj[structure.dataKey])) {
             console.log(1213123);

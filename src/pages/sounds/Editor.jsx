@@ -13,17 +13,19 @@ export default function UserEditorWithCommon() {
         {
             type: 'upload',
             name: 'femaleAudioUrl', // 视频文件
+            durationName: 'femaleAudioDuration',
             label: 'Audio',
             required: true,
-            maxFileSize: 1024 * 1024 * 5,
+            maxFileSize: 1024 * 5,
             acceptedFileTypes: 'mp3',
         },
         {
             type: 'upload',
             name: 'maleAudioUrl', // 视频文件
+            durationName: 'maleAudioDuration',
             label: 'Male Audio',
             required: true,
-            maxFileSize: 1024 * 1024 * 5,
+            maxFileSize: 1024 * 5,
             acceptedFileTypes: 'mp3',
         },
         {

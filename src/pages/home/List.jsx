@@ -187,7 +187,7 @@ export default function Home() {
             type: 'upload',
             name: 'appIcon',
             label: 'App Icon',
-            maxFileSize: 1024 * 1024 * 1,
+            maxFileSize: 1024 * 1,
             acceptedFileTypes: 'png,webp',
             maxCount: 1,
         },

@@ -221,7 +221,6 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Switch
                     key={switchKey}
-
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑
@@ -236,6 +235,7 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Select
                     name={field.name}
+                    disabled={field.disabled}
                     mode={field.mode}
                     style={field.style || {}}
                     placeholder={field.placeholder || `Please select ${field.label}`}

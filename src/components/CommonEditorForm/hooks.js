@@ -126,14 +126,13 @@ export const useHeaderConfig = (params) => {
         getLatestValues,
         initialValues = {} // 确保初始值可用
     } = params;
-
     const location = useLocation();
 
     // 创建ref存储最新的collapseFormConfig
     const collapseFormConfigRef = useRef(fields);
     // 更新ref值确保始终是最新的
     useEffect(() => {
-        collapseFormConfigRef.current = fields;
+        collapseFormConfigRef.current = fields || formFields;
     }, [fields]);
 
     // 状态选择弹框状态
@@ -241,7 +240,18 @@ export const useHeaderConfig = (params) => {
 
     // 执行保存操作
     const executeSave = async (dataToSave, status = null) => {
+
         setLoading(true);
+        //统一处理密码字段--加密
+        const passwordField = collapseFormConfigRef.current.find(field => field.type === 'password');
+        if (passwordField) {
+            dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
+        }
+        //统一处理switch值
+        const switchFields = collapseFormConfigRef.current.filter(field => field.type === 'switch');
+        switchFields.forEach(field => {
+            dataToSave[field.name] = dataToSave[field.name] ? 1 : 0;
+        });
 
         try {
             if (!dataToSave.status) {
@@ -299,8 +309,7 @@ export const useHeaderConfig = (params) => {
                 await form.validateFields(fieldsToValidate);
                 const dataToSave = form.getFieldsValue(true);
                 dataToSave.status = statusValue;
-                const saveResult = await executeSave(dataToSave);
-
+                const saveResult = await executeSave(dataToSave) || {};
                 if (saveResult.success) {
                     setIsFormDirty(false);
                     if (isBack) {
@@ -366,11 +375,6 @@ export const useHeaderConfig = (params) => {
                     dataToSave[dataKey] = dataListValues;
                 }
 
-                //处理密码字段--加密
-                const passwordField = currentFormFields.find(field => field.type === 'password');
-                if (passwordField) {
-                    dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
-                }
                 // 确保状态值正确
                 dataToSave.status = statusValue;
                 const saveResult = await executeSave(dataToSave);//执行保存

@@ -6,37 +6,26 @@ export default function UserEditorWithCommon() {
 
     // 初始用户数据状态--可设默认值
     const initialValues = {
-
+        translation: true,
     }
     // 表单字段配置
     const formFields = useMemo(() => [
         {
             type: 'upload',
-            // required: true,
             name: 'femaleAudioUrl', // 视频文件
+            durationName: 'femaleAudioDuration',
             label: 'Audio',
-            // maxFileSize: 1024 * 1024 * 10,
-
-            style: {
-                width: '290px',
-                height: '140px',
-            },
-            // required: true,
+            required: true,
+            maxFileSize: 1024 * 5,
             acceptedFileTypes: 'mp3',
         },
         {
             type: 'upload',
-            // required: true,
             name: 'maleAudioUrl', // 视频文件
+            durationName: 'maleAudioDuration',
             label: 'Male Audio',
-            // maxFileSize: 1024 * 1024 * 10,
-
-            //文件上传后修改name
-            style: {
-                width: '290px',
-                height: '140px',
-            },
-            // required: true,
+            required: true,
+            maxFileSize: 1024 * 5,
             acceptedFileTypes: 'mp3',
         },
         {
@@ -60,7 +49,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'textarea',
-            name: 'Script',
+            name: 'script',
             label: 'Script',
             required: true,
             maxLength: 1000,
@@ -69,7 +58,7 @@ export default function UserEditorWithCommon() {
             content: ({ getFieldValue }) => {      // content 支持函数
                 const layoutType = getFieldValue('translation');
                 console.log('layoutType', layoutType)
-                return layoutType === 1
+                return layoutType
                     ? true
                     : false;
             },
@@ -81,7 +70,7 @@ export default function UserEditorWithCommon() {
 
     return (
         <CommonEditorForm
-
+            enableDraft={true}
             formType="basic"
             moduleKey="sound"
             config={{ formName: 'Sound' }}

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { Button } from 'antd';
 import { useNavigate } from 'react-router';
-import { PlusOutlined } from '@ant-design/icons';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
-import { HeaderContext } from '@/contexts/HeaderContext';
 import { validateEmail, validatePassword } from '@/utils';
 import { SaveOutlined, LogoutOutlined } from '@ant-design/icons';
 
@@ -14,11 +13,7 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        // layoutType: 1,
-        // status2: [1, 2],
-        // status: 1, // 确保status有默认值1
-        // // 为联动选择器设置默认值 - 使用数字类型
-        // contentStyle: 'style1'
+
     }
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -28,7 +23,6 @@ export default function UserEditorWithCommon() {
             name: 'profilePicture', // 遵循命名规范，使用Url后缀
             label: 'Profile Picture',
             uploadButtonText: "Change",
-            // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'jpg,png,jpeg',
             maxFileSize: 2 * 1024,
         },
@@ -49,7 +43,9 @@ export default function UserEditorWithCommon() {
             maxLength: 100,
             label: 'Email',
             required: true,
+            disabled: true,
             placeholder: 'Enter email...',
+            buttons: ['Edit', 'Save'],
             rules: [
                 { required: true, message: 'Please input Email.' },
                 { max: 100, message: 'Email cannot exceed 100 characters' },
@@ -69,6 +65,8 @@ export default function UserEditorWithCommon() {
             name: 'userPassword',
             label: 'Password',
             required: true,
+            buttons: ['Edit', 'Save'],
+            disabled: true,
             placeholder: 'Enter password...',
             rules: [
                 { required: true, message: 'Please input passowrd.' },
@@ -111,24 +109,7 @@ export default function UserEditorWithCommon() {
             layoutType: values.layoutType,
             contentStyle: values.contentStyle
         };
-        //  if (!account) {
-        //     setAccountError("Email cannot be empty.");
-        //     hasError = true;
-        // } else if (!validateEmail(account)) {
-        //     setAccountError("Email is not valid.");
-        //     hasError = true;
-        // }
 
-        // if (!password) {
-        //     setPasswordError("Password cannot be empty.");
-        //     hasError = true;
-        // }
-
-        // if (hasError) {
-        //     return false;
-        // }
-        // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
-        // 实际应用中，这里应该是异步请求
 
         // 成功处理
         messageApi.success('用户数据保存成功！');
@@ -149,16 +130,7 @@ export default function UserEditorWithCommon() {
             icon: <SaveOutlined />,
             type: 'primary',
             onClick: () => {
-                
-            },
-        },
-        {
-            key: 'logout',
-            text: 'SIGN OUT',
-            icon: <LogoutOutlined />,
-            type: 'default',
-            onClick: () => {
-                navigate('/login');
+
             },
         }
     ]
@@ -179,13 +151,23 @@ export default function UserEditorWithCommon() {
         });
     };
     return (
-        <CommonEditorForm
-            initFormData={initFormData}
-            formType="basic"
-            config={{ formName: 'Profile', title: 'Profile', headerButtons }}
-            fields={formFields}
-            initialValues={initialValues}
-            onSave={handleSaveUser}
-        />
+        <div >
+            <CommonEditorForm
+                initFormData={initFormData}
+                formType="basic"
+                config={{ formName: 'Profile', title: 'Profile', headerButtons }}
+                fields={formFields}
+                initialValues={initialValues}
+                onSave={handleSaveUser}
+            />
+            <div style={{ maxWidth: '765px', margin: '-20px auto', paddingLeft: '20px' }}>
+                <Button
+                    block
+                    onClick={() => navigate('/login')}
+                >
+                    SIGN OUT
+                </Button>
+            </div >
+        </div >
     );
 } 

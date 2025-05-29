@@ -6,28 +6,6 @@ import { HeaderContext } from '@/contexts/HeaderContext';
 
 import './header.css';
 
-/**
- * 状态选择下拉内容组件
- */
-const StatusSelectContent = ({ statusList, onConfirm }) => {
-    return (
-        <div style={{ backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', borderRadius: '8px', padding: '12px' }}>
-            <div style={{ fontSize: '16px', fontWeight: 500, marginBottom: '16px' }}>请选择内容状态:</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-                {statusList.map(status => (
-                    <Button
-                        style={{ padding: '10px 20px' }}
-                        key={status.value}
-                        type="default"
-                        onClick={() => onConfirm(status.value)}
-                    >
-                        {status.name}
-                    </Button>
-                ))}
-            </div>
-        </div>
-    );
-};
 
 /**
  * Header组件 - 应用全局头部
@@ -49,7 +27,7 @@ export default function Header() {
     ), [currentPath]);
 
     // 获取页面标题，优先使用自定义标题
-    const pageTitle = customPageTitle || currentMenu?.title || '内容管理系统';
+    const pageTitle = customPageTitle || currentMenu?.title || 'Content Management System';
 
     // 处理Dropdown可见性变化
     const handleDropdownOpenChange = (visible, button) => {

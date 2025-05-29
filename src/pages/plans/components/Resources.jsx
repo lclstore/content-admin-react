@@ -435,11 +435,6 @@ export default function Resources() {
         selectedRowKeys,
         onChange: onSelectChange,
         columnWidth: 60,
-        selections: [
-            Table.SELECTION_ALL,
-            Table.SELECTION_INVERT,
-            Table.SELECTION_NONE,
-        ],
     };
 
     // 处理表格变更（排序、筛选、分页）

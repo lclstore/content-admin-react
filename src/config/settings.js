@@ -6,66 +6,62 @@ import {
   CopyOutlined,
   DeleteOutlined,
 } from '@ant-design/icons';
-import {del, disable, enable} from "./api.js"
-import {useStore} from "@/store/index.js";
+import { del, disable, enable } from "./api.js"
+import { useStore } from "@/store/index.js";
 import { router } from "@/utils"
-import {uploadFile} from "@/config/api.js"
-//文件上传
-// const uploadFileFn = async ({ file }) => {
-//   let fileUrl = await fileApi.uploadFile(file, settings.file.dirname)
-//   return fileUrl
-// }
+import { uploadFile } from "@/config/api.js"
+
 
 const settings = {
   // 请求设置
-  request:{
+  request: {
     tokenName: 'template-cms-token',
-    interceptors:(config) => { config.headers['token'] = localStorage.getItem(settings.request.tokenName) },
-    resInit:(res) => {
+    interceptors: (config) => { config.headers['token'] = localStorage.getItem(settings.request.tokenName) },
+    resInit: (res) => {
       res.tokenError = (res.data.errCode && res.data.errCode === "USR001")
       return res
     }
   },
   // List page
-  listConfig:{
-    rowButtonsPublic:[
+  listConfig: {
+    rowButtonsPublic: [
       {
-        key:"enable",
+        key: "enable",
         icon: CheckCircleOutlined,
-        click:async ({selectList,moduleKey,getData}) => {
-          await enable({moduleKey, idList: selectList.map(item => item.id)})
+        click: async ({ selectList, moduleKey, getData }) => {
+          await enable({ moduleKey, idList: selectList.map(item => item.id) })
           await getData()
         }
       },
       {
-        key:"disable",
+        key: "disable",
         icon: StopOutlined,
-        click:async ({selectList,moduleKey,getData})=> {
-          await disable({moduleKey, idList: selectList.map(item => item.id)})
+        click: async ({ selectList, moduleKey, getData }) => {
+          await disable({ moduleKey, idList: selectList.map(item => item.id) })
           await getData()
         }
       },
       {
-        key:"delete",
+        key: "delete",
         icon: DeleteOutlined,
-        click:async ({selectList,moduleKey,getData}) => {
-          await del({moduleKey, idList: selectList.map(item => item.id)})
+        click: async ({ selectList, moduleKey, getData }) => {
+          await del({ moduleKey, idList: selectList.map(item => item.id) })
           await getData()
         }
       },
-        {
-        key:"edit",
+      {
+        key: "edit",
         icon: EditOutlined,
-        click:({selectList}) => router().push(`editor?id=${ selectList[0].id }`)
+        click: ({ selectList }) => router().push(`editor?id=${selectList[0].id}`)
       },
-        {
-        key:"duplicate",
+      {
+        key: "duplicate",
         icon: CopyOutlined,
-        click:({selectList}) => router().push(`editor?id=${ selectList[0].id }&duplicate=true`)
+        click: ({ selectList }) => router().push(`editor?id=${selectList[0].id}&duplicate=true`)
       },
     ],
-    rowClickPublic:({rowData}) => {
-      router().push(`editor?id=${ rowData.id }`)
+    rowClickPublic: ({ rowData }) => {
+      router().push(`editor?id=${rowData.id}`)
     }
   },
   // 布局设置
@@ -83,10 +79,10 @@ const settings = {
     baseURL: import.meta.env.VITE_FILE_PREVIEW_URL,
     // 文件目录
     dirname: 'test',
-    uploadFile:   ({ file }) => {
-      
-      return   uploadFile({
+    uploadFile: ({ file, dirKey }) => {
+      return uploadFile({
         file,
+        dirKey: dirKey,
       });
     }
   },
@@ -101,10 +97,18 @@ const settings = {
   menu: {
     // 菜单顺序映射表（值越小越靠前）
     menuOrder: {
-      'exercises': 1,
-      'workouts': 2,
-      'users': 3,
-      'profile-settings': 4
+      'home': 1,
+      'publish': 2,
+      'sounds': 3,
+      'exercises': 4,
+      'workoutSettings': 5,
+      'workouts': 6,
+      'collections': 7,
+      'plans': 8,
+      'musics': 9,
+      'operationRecords': 10,
+      'users': 11,
+      'profile': 12,
     },
   },
 
@@ -187,8 +191,8 @@ const settings = {
         itemHoverColor: '#243636',       // hover时颜色
         itemSelectedColor: '#243636',    // 被选中tab文字颜色（等于 itemActiveColor）
       },
-      Collapse:{
-        colorTextHeading:"rgba(0,0,0,0.7)"
+      Collapse: {
+        colorTextHeading: "rgba(0,0,0,0.7)"
       }
     }
   }

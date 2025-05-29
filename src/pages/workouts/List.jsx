@@ -188,7 +188,7 @@ export default function WorkoutsList() {
                 width: 220,
                 visibleColumn: 1
             },
-            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 1 },
+            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 2 },
             { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
             { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
             { title: 'Injured', dataIndex: 'injured', key: 'injured', width: 200, visibleColumn: 1 },
@@ -463,11 +463,6 @@ export default function WorkoutsList() {
         selectedRowKeys,
         onChange: onSelectChange,
         columnWidth: 60,
-        selections: [
-            Table.SELECTION_ALL,
-            Table.SELECTION_INVERT,
-            Table.SELECTION_NONE,
-        ],
     };
 
     // 处理表格变更（排序、筛选、分页）
@@ -480,14 +475,15 @@ export default function WorkoutsList() {
     }, [performSearch, searchValue]);
 
     // 9. 渲染 - 组件UI呈现
+    // 渲染 - 组件UI呈现
     return (
-        <div>
+        <div className="usersContainer">
             {/* 消息上下文提供器 */}
             {contextHolder}
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'workoutsList'}
+                uniqueId={'categoryList'}
                 columns={allColumnDefinitions}
                 dataSource={filteredDataForTable}
                 rowKey="id"
@@ -495,7 +491,7 @@ export default function WorkoutsList() {
                 onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
-                    placeholder: "Search name or ID...",
+                    placeholder: "Search name or email...",
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}
@@ -505,23 +501,18 @@ export default function WorkoutsList() {
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
-                leftToolbarItems={leftToolbarItems}
-                rowSelection={rowSelection}
-                tableProps={{
-                    onChange: handleTableChange
-                }}
             />
 
             {/* 删除确认弹窗 */}
             <Modal
-                title="Confirm Deletion"
+                title="Confirm Delete"
                 open={isDeleteModalVisible}
                 onOk={() => {
                     setActionInProgress(true);
                     setDataSource(current => current.filter(item => item.id !== currentRecord.id));
                     setActionInProgress(false);
                     setIsDeleteModalVisible(false);
-                    messageApi.success(`Successfully deleted "${currentRecord.name}"`);
+                    messageApi.success(`Successfully deleted user "${currentRecord.name}"`);
                 }}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 okText="Delete"
@@ -532,62 +523,7 @@ export default function WorkoutsList() {
                 }}
                 cancelButtonProps={{ disabled: actionInProgress }}
             >
-                <p>Are you sure you want to delete "{currentRecord?.name}"? This action cannot be undone.</p>
-            </Modal>
-
-            {/* 批量创建文件 Modal */}
-            <Modal
-                title="Batch Create Files"
-                open={isBatchCreateModalVisible}
-                onOk={handleBatchCreateModalOk}
-                onCancel={handleBatchCreateModalCancel}
-                confirmLoading={batchCreateLoading}
-                okText="OK"
-                cancelText="Cancel"
-            >
-                <Form
-                    style={{ width: '350px', height: '200px', padding: '20px 50px' }}
-                    form={batchCreateForm}
-                    layout="vertical"
-                    name="batch_create_form"
-                    initialValues={{ files: ['Video-M3U8'], lang: ['EN'] }}
-                >
-                    <Form.Item
-                        style={{ marginBottom: '26px' }}
-                        name="files"
-                        label="File"
-                        rules={[{ required: true, message: 'Please select at least one file!' }]}
-                    >
-                        <TagSelector
-                            options={BATCH_FILE_OPTIONS.map(opt => opt.value)}
-                            mode="multiple"
-                            placeholder="Select file"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        noStyle
-                        shouldUpdate={(prevValues, currentValues) => prevValues.files !== currentValues.files}
-                    >
-                        {(form) => {
-                            const filesValue = form.getFieldValue('files') || [];
-                            const showLang = filesValue.includes('Audio-JSON');
-                            return showLang ? (
-                                <Form.Item
-                                    name="lang"
-                                    label="Lang (Required for Audio-JSON)"
-                                    rules={[{ required: true, message: 'Please select at least one language for Audio!' }]}
-                                >
-                                    <TagSelector
-                                        options={MOCK_LANG_OPTIONS.map(opt => opt.value)}
-                                        mode="multiple"
-                                        placeholder="Select languages"
-                                    />
-                                </Form.Item>
-                            ) : null;
-                        }}
-                    </Form.Item>
-                </Form>
+                <p>Are you sure you want to delete user "{currentRecord?.name}"? This action cannot be undone.</p>
             </Modal>
         </div>
     );

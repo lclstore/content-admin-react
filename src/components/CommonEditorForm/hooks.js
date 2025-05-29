@@ -104,6 +104,7 @@ export const useHeaderConfig = (params) => {
         statusList = optionsConstants.displayStatus,//状态列表
         config,
         moduleKey,
+        operationName,
         id,
         isFormDirty,
         form,
@@ -125,19 +126,21 @@ export const useHeaderConfig = (params) => {
         getLatestValues,
         initialValues = {} // 确保初始值可用
     } = params;
-
     const location = useLocation();
 
     // 创建ref存储最新的collapseFormConfig
     const collapseFormConfigRef = useRef(fields);
     // 更新ref值确保始终是最新的
     useEffect(() => {
-        collapseFormConfigRef.current = fields;
+        collapseFormConfigRef.current = fields || formFields;
     }, [fields]);
 
     // 状态选择弹框状态
     const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
     const [pendingSaveData, setPendingSaveData] = useState(null);
+
+    // 添加状态来管理按钮
+    const [buttons, setButtons] = useState([]);
 
     //处理表单字段和自定义表单验证
     const processFields = (fields = [], dataToSave = {}, parent = null) => {
@@ -237,11 +240,22 @@ export const useHeaderConfig = (params) => {
 
     // 执行保存操作
     const executeSave = async (dataToSave, status = null) => {
+
         setLoading(true);
+        //统一处理密码字段--加密
+        const passwordField = collapseFormConfigRef.current.find(field => field.type === 'password');
+        if (passwordField) {
+            dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
+        }
+        //统一处理switch值
+        const switchFields = collapseFormConfigRef.current.filter(field => field.type === 'switch');
+        switchFields.forEach(field => {
+            dataToSave[field.name] = dataToSave[field.name] ? 1 : 0;
+        });
 
         try {
             if (!dataToSave.status) {
-                dataToSave.status = 'ENABLE';
+                dataToSave.status = 'ENABLED';
             }
 
             if (onSave) {
@@ -252,7 +266,8 @@ export const useHeaderConfig = (params) => {
                 const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
                 const systemList = ['user'];//系统级别操作对应update/add  业务层操作对应save
                 const isSystem = systemList.includes(module);
-                const apiUrl = `/${module}/${isSystem ? id ? 'update' : 'add' : 'save'}`; // 完整的API路径
+                const operation = operationName || (isSystem ? id ? 'update' : 'add' : 'save');
+                const apiUrl = `/${module}/${operation}`; // 完整的API路径
                 // 使用新的命名调用
                 const ret = await savePublicFormData(dataToSave, apiUrl, 'post');
                 return ret;
@@ -267,7 +282,7 @@ export const useHeaderConfig = (params) => {
         if (!form) return;
 
         // 获取当前表单值中的状态，如果没有则使用初始状态
-        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLE';
+        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLED';
         // 如果启用草稿功能，先弹出状态选择框，否则直接使用当前状态
         if (enableDraft) {
             setPendingSaveData({});
@@ -281,7 +296,7 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 处理状态选择确认
-    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLE', load = true) => {
+    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLED', load = true) => {
         setIsStatusModalVisible(false);
 
         try {
@@ -294,15 +309,14 @@ export const useHeaderConfig = (params) => {
                 await form.validateFields(fieldsToValidate);
                 const dataToSave = form.getFieldsValue(true);
                 dataToSave.status = statusValue;
-                const saveResult = await executeSave(dataToSave);
-
+                const saveResult = await executeSave(dataToSave) || {};
                 if (saveResult.success) {
                     setIsFormDirty(false);
-                    if (config.navigateAfterSave) {
+                    if (isBack) {
                         navigate(config.afterSaveUrl || -1);
                     }
                 } else {
-                    messageApi.error(saveResult.message || '保存失败');
+                    messageApi.error(saveResult.errMessage || 'Save failed!');
                 }
                 return saveResult; // 返回保存结果
             } else {
@@ -361,11 +375,6 @@ export const useHeaderConfig = (params) => {
                     dataToSave[dataKey] = dataListValues;
                 }
 
-                //处理密码字段--加密
-                const passwordField = currentFormFields.find(field => field.type === 'password');
-                if (passwordField) {
-                    dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
-                }
                 // 确保状态值正确
                 dataToSave.status = statusValue;
                 const saveResult = await executeSave(dataToSave);//执行保存
@@ -379,7 +388,7 @@ export const useHeaderConfig = (params) => {
                         navigate(config.afterSaveUrl || -1);
                     }
                 } else {
-                    messageApi.error(saveResult.message || 'Save failed!');
+                    messageApi.error(saveResult.errMessage || 'Save failed!');
                 }
 
                 return saveResult; // 返回保存结果
@@ -452,6 +461,23 @@ export const useHeaderConfig = (params) => {
         setIsStatusModalVisible(false);
         setPendingSaveData(null);
     };
+    const visibleStatusList = (button) => {
+        let visibleStatusList = [];
+        // 如果没有传入button参数，返回所有状态
+        if (!button) {
+            return statusList;
+        }
+
+        switch (button.status) {
+            case 'DISABLED':
+            case 'ENABLED':
+                visibleStatusList = statusList.filter(status => status.value === 'DRAFT');
+                break;
+            default:
+                visibleStatusList = statusList;
+        }
+        return visibleStatusList;
+    }
 
     // 返回按钮处理函数
     const handleBackClick = useCallback(() => {
@@ -470,8 +496,22 @@ export const useHeaderConfig = (params) => {
         navigate
     ]);
 
-    // 头部按钮配置
-    let headerButtons = useMemo(() => {
+    // 添加更新按钮状态的方法
+    const setHeaderButtons = useCallback((formData) => {
+        // 根据表单数据状态过滤可用的状态列表
+        const getVisibleStatusList = (status) => {
+            let filteredStatusList = [];
+            switch (status) {
+                case 'DISABLED':
+                case 'ENABLED':
+                    filteredStatusList = statusList.filter(status => status.value !== 'DRAFT');
+                    break;
+                default:
+                    filteredStatusList = statusList;
+            }
+            return filteredStatusList;
+        };
+
         const saveButton = {
             key: 'save',
             hidden: config.hideSaveButton,
@@ -479,11 +519,10 @@ export const useHeaderConfig = (params) => {
             icon: React.createElement(SaveOutlined),
             type: 'primary',
             onClick: handleSaveChanges,
-            disabled: !config.allowEmptySave,
-            // 添加状态选择的相关props
+            disabled: false,
             statusModalProps: enableDraft ? {
                 visible: isStatusModalVisible,
-                statusList,
+                statusList: getVisibleStatusList(formData?.status), // 使用过滤后的状态列表
                 onConfirm: handleStatusModalConfirm,
                 onCancel: handleStatusModalCancel
             } : null
@@ -497,40 +536,37 @@ export const useHeaderConfig = (params) => {
             onClick: handleBackClick,
         };
 
-        return [saveButton, backButton];
-    }, [
-        config.saveButtonText,
-        config.backButtonText,
-        config.allowEmptySave,
-        isFormDirty,
-        handleSaveChanges,
-        handleBackClick,
-        enableDraft,
-        isStatusModalVisible,
-        statusList
-    ]);
+        let newButtons = [saveButton, backButton];
 
-    if (config.headerButtons) {
-        config.headerButtons.forEach(button => {
-            if (button.key === 'save') {
-                button.onClick = handleSaveChanges;
-                // 添加状态选择的相关props
-                if (enableDraft) {
-                    button.statusModalProps = {
-                        visible: isStatusModalVisible,
-                        statusList,
-                        onConfirm: handleStatusModalConfirm,
-                        onCancel: handleStatusModalCancel
-                    };
+        if (config.headerButtons) {
+            config.headerButtons.forEach(button => {
+                if (button.key === 'save') {
+                    button.onClick = handleSaveChanges;
+                    button.disabled = false;
+                    if (enableDraft) {
+                        button.statusModalProps = {
+                            visible: isStatusModalVisible,
+                            statusList: getVisibleStatusList(formData?.status), // 使用过滤后的状态列表
+                            onConfirm: handleStatusModalConfirm,
+                            onCancel: handleStatusModalCancel
+                        };
+                    }
                 }
-            }
-        });
-        headerButtons = config.headerButtons;
-    }
+            });
+            newButtons = config.headerButtons;
+        }
+
+        setButtons(newButtons);
+
+        if (headerContext.setButtons) {
+            headerContext.setButtons(newButtons);
+        }
+    }, [config, enableDraft, handleSaveChanges, handleBackClick, handleStatusModalConfirm, handleStatusModalCancel, isStatusModalVisible, statusList, headerContext]);
 
     return {
-        headerButtons,
+        headerButtons: buttons,
         handleStatusModalConfirm,
-        handleSaveChanges // 导出 handleSaveChanges 函数
+        handleSaveChanges,
+        setHeaderButtons // 导出设置按钮的方法
     };
 }; 

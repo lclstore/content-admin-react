@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { getMediaDurationByUrl } from '@/utils';
+import { useLocation } from 'react-router';
 import {
     Input,
     DatePicker,
@@ -84,7 +86,7 @@ export const renderFormControl = (field, options = {}) => {
         disabled = false,
         width,
     } = field;
-    const { form, formConnected, initialValues, mounted } = options;
+    const { form, formConnected, initialValues, mounted, moduleKey } = options;
 
     // 获取字段值，仅用于显示，不在渲染中更新状态
     let fieldValue = '';
@@ -203,10 +205,16 @@ export const renderFormControl = (field, options = {}) => {
         case 'switch':
             field.checkedChildren = field.checkedChildren || 'Enabled';
             field.unCheckedChildren = field.unCheckedChildren || 'Disabled';
-            // 确保初始值为0或1
+
+            // 转换初始值为布尔值
+            const initialChecked = fieldValue ? true : false;
+
+            // 使用useEffect处理初始值设置
             useEffect(() => {
-                form.setFieldValue(name, fieldValue === 1 || fieldValue === true ? 1 : 0);
-            }, []);
+                if (fieldValue !== undefined) {
+                    form.setFieldValue(name, initialChecked ? 1 : 0);
+                }
+            }, []);  // 仅在组件挂载时执行一次
 
             // 提取key属性，确保不会传递给Switch组件
             const { key: switchKey, ...switchRest } = field;
@@ -214,7 +222,6 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Switch
                     key={switchKey}
-                    defaultChecked={field.defaultChecked || false}
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑
@@ -229,6 +236,7 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Select
                     name={field.name}
+                    disabled={field.disabled}
                     mode={field.mode}
                     style={field.style || {}}
                     placeholder={field.placeholder || `Please select ${field.label}`}
@@ -284,14 +292,22 @@ export const renderFormControl = (field, options = {}) => {
                 key: uploadKey,
                 ...uploadRest
             } = field;
+            const dirName = moduleKey || useLocation().pathname.split('/')[1];
+
             // 从options中解构出form对象
             // FileUpload 组件不需要在这里添加 Form.Item，因为 renderFormItem 已经创建了一个
             return (
                 <FileUpload
+                    dirKey={dirName}
                     form={options.form}
                     key={uploadKey}
                     value={fieldValue}
-                    onChange={(value, file) => {
+                    onChange={async (value, file) => {
+                        //获取远程音频或视频 URL 的时长（单位：秒）
+                        if (field.durationName) {
+                            const duration = value ? await getMediaDurationByUrl(value) : null;//获取远程音频或视频 URL 的时长（单位：秒）
+                            options.form.setFieldValue(field.durationName, duration * 1000); // 转换为毫秒
+                        }
                         if (field.onChange) {
                             field.onChange(value, file, form);
                         }
@@ -302,7 +318,6 @@ export const renderFormControl = (field, options = {}) => {
                     uploadSuccessMessage={uploadSuccessMessage}
                     uploadFailMessage={uploadFailMessage}
                     uploadErrorMessage={uploadErrorMessage}
-                    dirKey={dirKey}
                     uploadFn={uploadFn}
                     field={field}
                     style={style}
@@ -314,12 +329,9 @@ export const renderFormControl = (field, options = {}) => {
         case 'inputGroup':
             const { inputConfig } = field;
             return (
-                <Form.Item
-                    className='inputGroup'
-                >
+                <Form.Item className='inputGroup'>
                     <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
                         {inputConfig.map((config, index) => {
-                            // 处理每个子项的验证规则
                             const itemRules = processValidationRules(config.rules || [], {
                                 required: config.required,
                                 label: config.label || label,
@@ -336,7 +348,7 @@ export const renderFormControl = (field, options = {}) => {
                                         required={config.required}
                                         rules={itemRules}
                                     >
-                                        {renderFormControl(config)}
+                                        {renderFormControl(config, options)}
                                     </Form.Item>
                                 </div>
                             );
@@ -344,6 +356,8 @@ export const renderFormControl = (field, options = {}) => {
                     </div>
                 </Form.Item>
             );
+
+
         //数字步进器
         case 'numberStepper':
             // 提取key属性，确保其不会通过展开运算符传递

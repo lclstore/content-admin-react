@@ -4,60 +4,36 @@ import { PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDate } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { statusIconMap } from '@/constants';
 import UserEditorWithCommon from './Editor';
 import request from "@/request";
 
 export default function UsersList() {
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const [dataSource, setDataSource] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchValue, setSearchValue] = useState('');
     const [actionClicked, setActionClicked] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
     const [isEditorModalVisible, setIsEditorModalVisible] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
     const [editorActionsRef, setEditorActionsRef] = useState(null);
-
-
+    const [refreshKey, setRefreshKey] = useState(0); // 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
     // 编辑处理
     const handleEdit = useCallback((record) => {
         setEditingUserId(record?.id || null);
         setIsEditorModalVisible(true);
+        setRefreshKey(null);// 清空刷新
     }, []);
 
-    // 状态变更处理
-    const handleStatusChange = useCallback((record, newStatus) => {
-        setActionInProgress(true);
-        const updatedRecord = { ...record, status: newStatus };
-        setDataSource(current =>
-            current.map(item =>
-                item.id === record.id ? updatedRecord : item
-            )
-        );
-        setActionInProgress(false);
-        messageApi.success(`Successfully ${newStatus} user "${record.name}"`);
-    }, [messageApi]);
 
-    // 处理按钮点击事件
-    const handleActionClick = useCallback((actionName, record, event) => {
-        if (event) event.stopPropagation();
-        setCurrentRecord(record);
-        if (actionName === 'edit') {
-            handleEdit(record);
-        } else {
-            handleStatusChange(record, actionName);
-        }
-    }, [handleEdit, handleStatusChange]);
 
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
-        if (status === 'ENABLE' && ['DISABLE'].includes(btnName)) return true;
-        if (status === 'DISABLE' && ['ENABLE'].includes(btnName)) return true;
+        if (status === 'ENABLED' && ['disable'].includes(btnName)) return true;
+        if (status === 'DISABLE' && ['enable'].includes(btnName)) return true;
         return false;
     }, []);
 
+    // 用户单元格渲染
     const UserCell = ({ record }) => {
         const [imgError, setImgError] = useState(false);
 
@@ -113,8 +89,7 @@ export default function UsersList() {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
-                iconOptions: statusIconMap,
-                options: 'userStatus',
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
@@ -139,37 +114,14 @@ export default function UsersList() {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-                actionButtons: ['ENABLE', 'DISABLE'],
+                actionButtons: ['enable', 'disable'],
                 isShow: isButtonVisible,
-                onActionClick: handleActionClick
             }
         ];
-    }, [isButtonVisible, handleActionClick]);
+    }, [isButtonVisible]);
 
-    // 搜索处理
-    const handleSearchInputChange = useCallback((e) => {
-        const { value } = e.target;
-        setSearchValue(value);
-        getData(value);
-    }, []);
 
-    // 获取数据
-    const getData = useCallback((searchText = '') => {
-        return new Promise(resolve => {
-            request.get({
-                url: "/user/page",
-                load: true,
-                data: {
-                    pageSize: 20,
-                    searchText
-                },
-                callback(res) {
-                    setDataSource(res.data.data)
-                    resolve()
-                }
-            })
-        })
-    }, [])
+
 
     // 处理行点击
     const handleRowClick = useCallback((record, event) => {
@@ -190,13 +142,13 @@ export default function UsersList() {
     const handleModalSubmit = async () => {
         if (editorActionsRef && editorActionsRef.triggerSave) {
             const currentRecord = dataSource.find(user => user.id === editingUserId);
-            const statusToSave = currentRecord?.status || 'ENABLE'; // 默认为 ENABLE
+            const statusToSave = currentRecord?.status || 'ENABLED'; // 默认为 ENABLED
             let ret = await editorActionsRef.triggerSave(statusToSave, false);// 返回保存结果
             if (ret.success) {
                 messageApi.success(ret.message || 'Save successful!');
                 setIsEditorModalVisible(false);
                 setEditingUserId(null);
-                getData(); // 刷新列表数据
+                setRefreshKey(editingUserId ? 1 : 2); // 1. 表示当前页面刷新 2. 表示全局刷新
             }
         }
     };
@@ -215,14 +167,11 @@ export default function UsersList() {
                 onClick: () => handleEdit(),
             }
         ]);
-
-        getData();
-
         return () => {
             setButtons([]);
             setCustomPageTitle && setCustomPageTitle(null);
         };
-    }, [setButtons, setCustomPageTitle, handleEdit, getData]);
+    }, [setButtons, setCustomPageTitle, handleEdit, refreshKey]);
 
     useEffect(() => {
         const handleGlobalClick = () => setActionClicked(false);
@@ -243,23 +192,17 @@ export default function UsersList() {
     return (
         <div className="usersContainer page-list">
             {contextHolder}
-
             <ConfigurableTable
-                uniqueId={'usersList'}
+                refreshKey={refreshKey}
                 moduleKey={'user'}
                 columns={allColumnDefinitions}
-                rowKey="id"
-                loading={loading}
                 showColumnSettings={false}
                 onRowClick={handleRowClick}
-                actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or email...",
-                    searchValue: searchValue,
-                    onSearchChange: handleSearchInputChange,
                 }}
             />
-
+            {/* 编辑弹窗 */}
             <Modal
                 title={editingUserId ? "Edit User" : "Add User"}
                 open={isEditorModalVisible}
@@ -272,7 +215,7 @@ export default function UsersList() {
                         Confirm
                     </Button>
                 ]}
-                width={800}
+                width={850}
                 destroyOnClose
             >
                 <UserEditorWithCommon

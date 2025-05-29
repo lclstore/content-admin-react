@@ -97,10 +97,18 @@ const settings = {
   menu: {
     // 菜单顺序映射表（值越小越靠前）
     menuOrder: {
-      'exercises': 1,
-      'workouts': 2,
-      'users': 3,
-      'profile-settings': 4
+      'home': 1,
+      'publish': 2,
+      'sounds': 3,
+      'exercises': 4,
+      'workoutSettings': 5,
+      'workouts': 6,
+      'collections': 7,
+      'plans': 8,
+      'musics': 9,
+      'operationRecords': 10,
+      'users': 11,
+      'profile': 12,
     },
   },
 

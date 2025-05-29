@@ -234,7 +234,7 @@ const CollapseForm = ({
     onCopyItem,
     onReplaceItem,
 }) => {
-    debugger
+    // debugger
     const newField = fields.find(item => item.isShowAdd);
     // 表单连接状态
     const formConnected = !!form;

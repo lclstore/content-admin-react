@@ -24,11 +24,13 @@ export default function UserEditorWithCommon() {
     }
     // 表单字段配置
     const formFields = useMemo(() => [
+
         {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
             label: 'Name',
             maxLength: 100,
+            width: '40%',
             required: true,
             placeholder: 'Enter name',
             rules: [
@@ -36,18 +38,11 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            type: 'upload',
-            name: 'image', // 遵循命名规范，使用Url后缀
-            label: 'Image',
-            // uploadFn: fileSettings.uploadFile,
-            acceptedFileTypes: 'png,webp',
-            maxFileSize: 2 * 1024,
-        },
-        {
             type: 'numberStepper',
             name: 'met',
             label: 'MET',
             required: true,
+            width: "60%",
             min: 1,
             max: 12,
             step: 1,
@@ -58,7 +53,8 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'structureType',
             label: 'Structure Type',
-            disabled: true,
+            // disabled: true,
+            width: "40%",
             options: [
                 { name: 'Warm Up', value: 'Warm_Up' },
                 { name: 'Main', value: 'Main' },
@@ -71,6 +67,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'gender',
             label: 'Gender',
+            width: "60%",
             options: [
                 { name: 'Female', value: 'Female' },
                 { name: 'Male', value: 'Male' },
@@ -80,8 +77,21 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
+            name: 'equipment',
+            label: 'Equipment',
+            width: "40%",
+            options: [
+                { name: 'No equipment', value: 'noEquipment' },
+                { name: 'Chair', value: 'Chair' },
+            ],
+            required: true,
+        },
+        {
+            type: 'select',
+            mode: 'single',
             name: 'difficulty',
             label: 'Difficulty',
+            width: "60%",
             options: [
                 { name: 'Beginner', value: 'Beginner' },
                 { name: 'Intermediate', value: 'Intermediate' },
@@ -92,19 +102,9 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'equipment',
-            label: 'Equipment',
-            options: [
-                { name: 'No equipment', value: 'noEquipment' },
-                { name: 'Chair', value: 'Chair' },
-            ],
-            required: true,
-        },
-        {
-            type: 'select',
-            mode: 'single',
             name: 'position',
             label: 'Position',
+            width: "40%",
             options: [
                 { name: 'Standing', value: 'Standing' },
                 { name: 'Seated', value: 'Seated' },
@@ -116,8 +116,8 @@ export default function UserEditorWithCommon() {
             type: 'select',
             mode: 'multiple',
             name: 'injured',
-            disabled: true,
             label: 'Injured',
+            width: "60%",
             options: [
                 { name: 'Shoulder', value: 'Shoulder' },
                 { name: 'Back', value: 'Back' },
@@ -147,9 +147,16 @@ export default function UserEditorWithCommon() {
             placeholder: 'Guidance Script',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
-            ]
+            ],
         },
-
+        {
+            type: 'upload',
+            name: 'image', // 遵循命名规范，使用Url后缀
+            label: 'Image',
+            // uploadFn: fileSettings.uploadFile,
+            acceptedFileTypes: 'png,webp',
+            maxFileSize: 2 * 1024,
+        },
         {
             type: 'upload',
             // required: true,
@@ -160,10 +167,7 @@ export default function UserEditorWithCommon() {
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-            style: {
-                width: '290px',
-                height: '140px',
-            },
+           
             acceptedFileTypes: 'mp3',
         },
         {
@@ -176,12 +180,10 @@ export default function UserEditorWithCommon() {
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-            style: {
-                width: '290px',
-                height: '140px',
-            },
+           
             acceptedFileTypes: 'mp3',
         },
+
         {
             type: 'upload',
             // required: true,
@@ -192,10 +194,7 @@ export default function UserEditorWithCommon() {
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-            style: {
-                width: '290px',
-                height: '140px',
-            },
+           
             acceptedFileTypes: 'mp3',
         },
         {
@@ -208,11 +207,8 @@ export default function UserEditorWithCommon() {
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-            style: {
-                width: '290px',
-                height: '140px',
-            },
-            acceptedFileTypes: 'mp3',
+           
+            acceptedFileTypes: 'mp4',
         },
         {
             type: 'upload',
@@ -224,11 +220,8 @@ export default function UserEditorWithCommon() {
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-            style: {
-                width: '290px',
-                height: '140px',
-            },
-            acceptedFileTypes: 'mp3',
+           
+            acceptedFileTypes: 'mp4',
         },
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
@@ -295,6 +288,7 @@ export default function UserEditorWithCommon() {
             formType="basic"
             config={{ formName: 'Exercise', headerButtons: null }}
             fields={formFields}
+            moduleKey='exercise'
             initialValues={initialValues}
             onSave={handleSaveUser}
         />

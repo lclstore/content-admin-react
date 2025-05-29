@@ -29,7 +29,7 @@
     position: relative;
     color: #fff;
     text-align: left;
-    background: linear-gradient(135deg, #4158d0, #2b8aff);
+    /* background: linear-gradient(135deg, #4158d0, #2b8aff); */
     overflow: hidden;
 }
 

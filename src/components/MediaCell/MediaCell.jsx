@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, memo, useMemo } from 'react';
 import { Image, Modal } from 'antd';
-import { FileImageOutlined, PlayCircleOutlined, EyeOutlined, LockFilled, CaretRightFilled } from '@ant-design/icons';
+import { FileImageOutlined, CaretRightOutlined, EyeOutlined, LockFilled, CaretRightFilled, CloseOutlined } from '@ant-design/icons';
 import { formatDuration } from '@/utils'; // 从 @/utils/index.js 导入
 import styles from './MediaCell.module.less'; // 导入 CSS Modules
 import { getFullUrl } from '@/utils';
@@ -34,10 +34,10 @@ const MediaTags = memo(({ showNewTag, showLockIcon }) => {
 });
 
 // 视频媒体组件
-const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) => {
+const VideoMedia = memo(({ src, posterImage, duration, onPreview, mediaType }) => {
     if (!src) {
         return <div className={`${styles.videoContainer} ${styles.mediaCell}`}>
-            <img style={{width:"100%",height:"100%"}} src={mediaType === 'video' ? videoError : audioError} alt=""/>
+            <img style={{ width: "100%", height: "100%" }} src={mediaType === 'video' ? videoError : audioError} alt="" />
         </div>;
     }
 
@@ -49,28 +49,12 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) =>
             className={`${styles.videoContainer} ${styles.mediaCell}`}
             onClick={(e) => onPreview(e, fullSrc)}
         >
-            {/*<video*/}
-            {/*    poster={fullPosterImage || undefined}*/}
-            {/*    src={fullSrc}*/}
-            {/*    className={styles.tabVideo}*/}
-            {/*    preload="none"*/}
-            {/*    loading="lazy"*/}
-            {/*    muted*/}
-            {/*    playsInline*/}
-            {/*    onClick={(e) => e.stopPropagation()}*/}
-            {/*/>*/}
             <div className={`${styles.videoOverlay} ${styles.videoPlayIconOverlay}`}>
-                <PlayCircleOutlined />
+                <CaretRightOutlined />
             </div>
-            {duration !== undefined && (
-                <div className={styles.videoDurationOverlay}>
-                    {formatDuration(duration)}
-                </div>
-            )}
-            {/*<div className={`${styles.videoOverlay} ${styles.videoPreviewHintOverlay}`}>*/}
-            {/*    <EyeOutlined />*/}
-            {/*    <span style={{ marginLeft: '5px' }}>Preview</span>*/}
-            {/*</div>*/}
+            <div className={styles.videoDurationOverlay}>
+                {formatDuration(duration)}
+            </div>
         </div>
     );
 });
@@ -78,7 +62,9 @@ const VideoMedia = memo(({ src, posterImage, duration, onPreview,mediaType }) =>
 // 音频媒体组件
 const AudioMedia = memo(({ src, onPreview }) => {
     if (!src) {
-        return <div className={`${styles.audioContainer} ${styles.mediaCell}`}></div>;
+        return <div className={`${styles.audioContainer} ${styles.mediaCell}`}>
+            <img style={{ width: "100%", height: "100%" }} src={audioError} alt="" />
+        </div>;
     }
 
     const fullSrc = getFullUrl(src);
@@ -106,7 +92,7 @@ const ImageMedia = memo(({ src, name, onImageError, onPreviewVisibleChange }) =>
                 alt={`${name || 'Media'}'s image`}
                 preview={{
                     onVisibleChange: onPreviewVisibleChange,
-                    maskClassName:"no-mask"
+                    maskClassName: "no-mask"
                 }}
                 onError={onImageError}
                 loading="lazy"
@@ -127,8 +113,6 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
     const modalContainerRef = React.useRef(null);
 
     const isVideo = type === 'video';
-    const title = isVideo ? "Video Preview" : "Audio Preview";
-
     // 处理关闭按钮点击事件
     const handleCloseClick = useCallback((e) => {
         // 阻止事件冒泡但不阻止默认行为
@@ -140,7 +124,6 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
 
     return (
         <Modal
-            title={title}
             open={visible}
             onCancel={handleCloseClick}
             footer={null}
@@ -148,33 +131,66 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
             centered
             width={800}
             maskClosable={true}
-            closeIcon={<span className="custom-close-icon" data-media-modal-close="true">×</span>}
+            closeIcon={
+                <CloseOutlined style={{ fontSize: '30px', color: '#fff' }} />
+            }
             wrapClassName="media-preview-modal-wrap prevent-row-click"
             styles={{
-                mask: { pointerEvents: 'auto' },
+                mask: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                    pointerEvents: 'auto'
+                },
                 wrapper: { pointerEvents: 'auto' },
-                closeButton: { pointerEvents: 'auto', zIndex: 1001 }
+                content: {
+                    background: 'transparent',
+                    boxShadow: 'none',
+                },
+                body: {
+                    padding: '20px',
+                    background: 'transparent'
+                },
+                header: {
+                    borderBottom: 'none',
+                    background: 'transparent',
+                    color: '#fff',
+                    padding: '16px 20px',
+                    height: 'auto',
+                    fontSize: '50px'
+                },
+                closeButton: {
+                    pointerEvents: 'auto',
+                    zIndex: 1001,
+                    color: '#fff',
+                    fontSize: '50px',
+                    top: '50px',
+                    right: '50px',
+                    position: 'fixed'
+                }
             }}
         >
-            {isVideo ? (
-                <video
-                    src={fullUrl}
-                    controls
-                    style={{ width: '100%', display: 'block' }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    Your browser does not support the video tag.
-                </video>
-            ) : (
-                <audio
-                    src={fullUrl}
-                    controls
-                    style={{ width: '100%', display: 'block' }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    Your browser does not support the audio tag.
-                </audio>
-            )}
+            <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                {isVideo ? (
+                    <div className={styles.videoPlayer}>
+                        <video
+                            src={fullUrl}
+                            controls
+                            style={{ width: '100%', display: 'block', height: '100%', minWidth: '720px' }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                ) : (
+                    <div className={styles.audioPlayer}>
+                        <audio
+                            src={fullUrl}
+                            controls
+                            className={styles.audio}
+                        >
+                        </audio>
+                    </div>
+                )}
+            </div>
         </Modal>
     );
 });
@@ -320,35 +336,18 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                             duration={duration}
                             onPreview={handleVideoPreview}
                         />
-                        {/*{tags}*/}
-                        {/*{previewState.visible && (*/}
-                        {/*    <MediaPreviewModal*/}
-                        {/*        type={previewState.type}*/}
-                        {/*        url={previewState.url}*/}
-                        {/*        visible={previewState.visible}*/}
-                        {/*        onCancel={handleMediaPreviewClose}*/}
-                        {/*    />*/}
-                        {/*)}*/}
                     </>
                 );
 
             case 'audio':
                 return (
                     <>
-                        <VideoMedia
+                        <AudioMedia
                             src={mediaSrc}
                             mediaType={mediaType}
                             onPreview={handleAudioPreview}
                         />
                         {tags}
-                        {/*{previewState.visible && (*/}
-                        {/*    <MediaPreviewModal*/}
-                        {/*        type={previewState.type}*/}
-                        {/*        url={previewState.url}*/}
-                        {/*        visible={previewState.visible}*/}
-                        {/*        onCancel={handleMediaPreviewClose}*/}
-                        {/*    />*/}
-                        {/*)}*/}
                     </>
                 );
 
@@ -368,7 +367,19 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
         }
     };
 
-    return renderMediaByType();
+    return (
+        <>
+            {renderMediaByType()}
+            {previewState.visible && (
+                <MediaPreviewModal
+                    type={previewState.type}
+                    url={previewState.url}
+                    visible={previewState.visible}
+                    onCancel={handleMediaPreviewClose}
+                />
+            )}
+        </>
+    );
 });
 
 export default WorkoutMediaCell; 

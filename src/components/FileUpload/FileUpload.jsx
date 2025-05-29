@@ -4,10 +4,11 @@ import { Upload, Button, Image, Spin, Typography, message } from 'antd';
 import {
     PlusOutlined,
     DownloadOutlined,
-    CloseCircleFilled,
+    CloseOutlined,
     FileOutlined,
     CaretRightOutlined,
     ReloadOutlined,
+    PauseOutlined,
 } from '@ant-design/icons';
 import { getFullUrl } from '@/utils';
 import settings from '@/config/settings';
@@ -16,6 +17,25 @@ import styles from './FileUpload.module.css';
 import Hls from 'hls.js';
 
 const { Text } = Typography;
+
+// 添加全局音频管理
+const audioManager = {
+    currentAudio: null,
+    currentCallback: null,
+    stopCurrent: function () {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            if (this.currentCallback) {
+                this.currentCallback(false);
+            }
+        }
+    },
+    setCurrentAudio: function (audio, callback) {
+        this.stopCurrent();
+        this.currentAudio = audio;
+        this.currentCallback = callback;
+    }
+};
 
 /**
  * @description 自定义文件上传控件
@@ -70,6 +90,11 @@ const FileUpload = ({
     // HLS 相关状态
     const [hlsLoading, setHlsLoading] = useState(false);
     const [hlsError, setHlsError] = useState(null);
+
+    // 添加音频相关状态
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [audioDuration, setAudioDuration] = useState('');
+    const audioRef = useRef(null);
 
     // 当外部 value 变化时更新内部状态
     useEffect(() => {
@@ -206,7 +231,14 @@ const FileUpload = ({
 
         // 文件大小限制描述
         if (maxFileSize && typeof maxFileSize === 'number') {
-            parts.push(`Max ${maxFileSize}KB`);
+            if (maxFileSize >= 1024) {
+                const sizeInMB = (maxFileSize / 1024);
+                // 如果是整数则不显示小数点，如果有小数则保留一位小数
+                const formattedSize = Number.isInteger(sizeInMB) ? sizeInMB.toString() : sizeInMB.toFixed(1);
+                parts.push(`Max ${formattedSize}MB`);
+            } else {
+                parts.push(`Max ${maxFileSize}KB`);
+            }
         }
 
         return parts.join(', '); // 生成描述文本
@@ -727,6 +759,106 @@ const FileUpload = ({
         }, 100);
     }, [displayValue, messageApi, getFileType]);
 
+    // 修改格式化时间函数
+    const formatTime = (seconds) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        const milliseconds = Math.floor((seconds % 1) * 1000);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`;
+    };
+
+    // 添加获取时长的函数
+    const getDuration = useCallback(async (url) => {
+        return new Promise((resolve) => {
+            const audio = new Audio(url);
+            audio.addEventListener('loadedmetadata', () => {
+                const duration = formatTime(audio.duration);
+                resolve(duration);
+                audio.remove(); // 清理临时音频元素
+            });
+            audio.addEventListener('error', () => {
+                resolve('00:00:00,000'); // 加载失败时返回默认值
+                audio.remove(); // 清理临时音频元素
+            });
+        });
+    }, [formatTime]);
+
+    // 添加初始化时获取时长的效果
+    useEffect(() => {
+        if (displayValue && (getFileType === 'audio' || getFileType === 'video')) {
+            getDuration(displayValue).then(duration => {
+                setAudioDuration(duration);
+            });
+        } else {
+            setAudioDuration('');
+        }
+    }, [displayValue, getFileType, getDuration]);
+
+    // 处理音频加载完成
+    const handleAudioLoaded = useCallback(() => {
+        if (audioRef.current) {
+            const duration = formatTime(audioRef.current.duration);
+            setAudioDuration(duration);
+        }
+    }, []);
+
+    // 处理音频播放结束
+    const handleAudioEnded = useCallback(() => {
+        setIsPlaying(false);
+        audioManager.currentAudio = null;
+        audioManager.currentCallback = null;
+    }, []);
+
+    // 处理音频播放/暂停
+    const handleAudioToggle = useCallback(() => {
+        if (!audioRef.current) {
+            // 如果音频元素不存在，创建一个新的
+            audioRef.current = new Audio(displayValue);
+            audioRef.current.addEventListener('loadedmetadata', handleAudioLoaded);
+            audioRef.current.addEventListener('ended', handleAudioEnded);
+        }
+
+        if (isPlaying) {
+            audioRef.current.pause();
+            audioManager.currentAudio = null;
+            audioManager.currentCallback = null;
+        } else {
+            // 停止其他正在播放的音频
+            audioManager.stopCurrent();
+            // 设置当前音频为活动音频
+            audioManager.setCurrentAudio(audioRef.current, setIsPlaying);
+            audioRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    }, [isPlaying, displayValue, handleAudioLoaded, handleAudioEnded]);
+
+    // 清理音频资源
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.removeEventListener('loadedmetadata', handleAudioLoaded);
+                audioRef.current.removeEventListener('ended', handleAudioEnded);
+                audioRef.current.pause();
+                if (audioManager.currentAudio === audioRef.current) {
+                    audioManager.currentAudio = null;
+                    audioManager.currentCallback = null;
+                }
+                audioRef.current = null;
+            }
+        };
+    }, [handleAudioLoaded, handleAudioEnded]);
+
+    // 当文件改变时重置音频状态
+    useEffect(() => {
+        setIsPlaying(false);
+        setAudioDuration('');
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
+    }, [displayValue]);
+
     // 渲染文件预览
     const renderFilePreview = () => {
         if (!hasFile) return null;
@@ -744,8 +876,14 @@ const FileUpload = ({
             case 'audio':
                 return (
                     <div className={styles.audioPreview}>
-                        <div className={styles.audioPreview_box}>
-                            <CaretRightOutlined />
+                        <div
+                            className={styles.audioPreview_box}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleAudioToggle();
+                            }}
+                        >
+                            {isPlaying ? <PauseOutlined /> : <CaretRightOutlined />}
                         </div>
                     </div>
                 );
@@ -912,13 +1050,30 @@ const FileUpload = ({
                             )}
                         </div>
 
-                        {/* 清除按钮 */}
+                        {/* 文件信息 */}
+                        <div className={styles.uploadInfo} style={{ flex: '1', minWidth: 0 }}>
+                            <div className={`${styles.uploadLabel} ${field?.required ? styles.uploadLabelRequired : ''}`}>
+                                {field?.label}
+                            </div>
+                            <Text type="secondary" className={styles.uploadDescription}>
+                                {uploadDescription || generatedUploadDescription}
+                            </Text>
+                            <div>
+                                <Text type="secondary" className={styles.uploadDescription}>
+                                    {audioDuration || ''}
+                                </Text>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 右侧区域：操作按钮 */}
+                    <div className={styles.uploadActions}>
                         {hasFile && !uploading && (
                             <Button
-                                icon={<CloseCircleFilled />}
+                                icon={<CloseOutlined />}
                                 type="text"
                                 danger
-                                size="small"
+                                color="default" variant="filled"
                                 className={styles.clearButton}
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -928,20 +1083,6 @@ const FileUpload = ({
                                 title="Remove file"
                             />
                         )}
-
-                        {/* 文件信息 */}
-                        <div className={styles.uploadInfo} style={{ flex: '1', minWidth: 0 }}>
-                            <div className={`${styles.uploadLabel} ${field?.required ? styles.uploadLabelRequired : ''}`}>
-                                {field?.label}
-                            </div>
-                            <Text type="secondary" className={styles.uploadDescription}>
-                                {uploadDescription || generatedUploadDescription}
-                            </Text>
-                        </div>
-                    </div>
-
-                    {/* 右侧区域：操作按钮 */}
-                    <div className={styles.uploadActions}>
                         {/* 下载按钮 */}
                         {hasFile && !uploading && (
                             <Button

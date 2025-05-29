@@ -104,6 +104,7 @@ export const useHeaderConfig = (params) => {
         statusList = optionsConstants.displayStatus,//状态列表
         config,
         moduleKey,
+        operationName,
         id,
         isFormDirty,
         form,
@@ -125,14 +126,13 @@ export const useHeaderConfig = (params) => {
         getLatestValues,
         initialValues = {} // 确保初始值可用
     } = params;
-
     const location = useLocation();
 
     // 创建ref存储最新的collapseFormConfig
     const collapseFormConfigRef = useRef(fields);
     // 更新ref值确保始终是最新的
     useEffect(() => {
-        collapseFormConfigRef.current = fields;
+        collapseFormConfigRef.current = fields || formFields;
     }, [fields]);
 
     // 状态选择弹框状态
@@ -240,11 +240,22 @@ export const useHeaderConfig = (params) => {
 
     // 执行保存操作
     const executeSave = async (dataToSave, status = null) => {
+
         setLoading(true);
+        //统一处理密码字段--加密
+        const passwordField = collapseFormConfigRef.current.find(field => field.type === 'password');
+        if (passwordField) {
+            dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
+        }
+        //统一处理switch值
+        const switchFields = collapseFormConfigRef.current.filter(field => field.type === 'switch');
+        switchFields.forEach(field => {
+            dataToSave[field.name] = dataToSave[field.name] ? 1 : 0;
+        });
 
         try {
             if (!dataToSave.status) {
-                dataToSave.status = 'ENABLE';
+                dataToSave.status = 'ENABLED';
             }
 
             if (onSave) {
@@ -255,7 +266,8 @@ export const useHeaderConfig = (params) => {
                 const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
                 const systemList = ['user'];//系统级别操作对应update/add  业务层操作对应save
                 const isSystem = systemList.includes(module);
-                const apiUrl = `/${module}/${isSystem ? id ? 'update' : 'add' : 'save'}`; // 完整的API路径
+                const operation = operationName || (isSystem ? id ? 'update' : 'add' : 'save');
+                const apiUrl = `/${module}/${operation}`; // 完整的API路径
                 // 使用新的命名调用
                 const ret = await savePublicFormData(dataToSave, apiUrl, 'post');
                 return ret;
@@ -270,7 +282,7 @@ export const useHeaderConfig = (params) => {
         if (!form) return;
 
         // 获取当前表单值中的状态，如果没有则使用初始状态
-        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLE';
+        const currentStatus = form.getFieldValue('status') || initialValues.status || 'ENABLED';
         // 如果启用草稿功能，先弹出状态选择框，否则直接使用当前状态
         if (enableDraft) {
             setPendingSaveData({});
@@ -284,7 +296,7 @@ export const useHeaderConfig = (params) => {
     ]);
 
     // 处理状态选择确认
-    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLE', load = true) => {
+    const handleStatusModalConfirm = useCallback(async (statusValue = 'ENABLED', load = true) => {
         setIsStatusModalVisible(false);
 
         try {
@@ -297,8 +309,7 @@ export const useHeaderConfig = (params) => {
                 await form.validateFields(fieldsToValidate);
                 const dataToSave = form.getFieldsValue(true);
                 dataToSave.status = statusValue;
-                const saveResult = await executeSave(dataToSave);
-
+                const saveResult = await executeSave(dataToSave) || {};
                 if (saveResult.success) {
                     setIsFormDirty(false);
                     if (isBack) {
@@ -364,11 +375,6 @@ export const useHeaderConfig = (params) => {
                     dataToSave[dataKey] = dataListValues;
                 }
 
-                //处理密码字段--加密
-                const passwordField = currentFormFields.find(field => field.type === 'password');
-                if (passwordField) {
-                    dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
-                }
                 // 确保状态值正确
                 dataToSave.status = statusValue;
                 const saveResult = await executeSave(dataToSave);//执行保存
@@ -463,8 +469,8 @@ export const useHeaderConfig = (params) => {
         }
 
         switch (button.status) {
-            case 'DISABLE':
-            case 'ENABLE':
+            case 'DISABLED':
+            case 'ENABLED':
                 visibleStatusList = statusList.filter(status => status.value === 'DRAFT');
                 break;
             default:
@@ -496,8 +502,8 @@ export const useHeaderConfig = (params) => {
         const getVisibleStatusList = (status) => {
             let filteredStatusList = [];
             switch (status) {
-                case 'DISABLE':
-                case 'ENABLE':
+                case 'DISABLED':
+                case 'ENABLED':
                     filteredStatusList = statusList.filter(status => status.value !== 'DRAFT');
                     break;
                 default:

@@ -141,7 +141,7 @@ export function randomString(length = 8) {
 }
 
 // 格式化时长 (秒 -> MM:SS)
-export const formatDuration = (seconds) => {
+export const formatDuration = (seconds = 0) => {
   if (isNaN(seconds) || seconds < 0) {
     return '00:00';
   }
@@ -214,3 +214,34 @@ export const md5Encrypt = (value) => {
   return md5(value || '')
 }
 
+/**
+ * 验证版本号格式是否正确
+ * @param {string} version - 版本号字符串
+ * @returns {boolean} - 是否是有效的版本号
+ */
+export const validateVersion = (version) => {
+  // 版本号格式：主版本号.次版本号.修订号 (如：1.0.0)
+  const versionPattern = /^\d+\.\d+\.\d+$/;
+  return versionPattern.test(version);
+};
+
+/**
+ * 获取音频或视频 URL 的时长（单位：秒）
+ * @param {string} url - 媒体文件的 URL 地址
+ * @returns {Promise<number>} - 返回原始时长 秒
+ */
+export function getMediaDurationByUrl(url) {
+  return new Promise((resolve, reject) => {
+    const media = document.createElement('video');
+    media.preload = 'metadata';
+    media.src = url;
+
+    media.onloadedmetadata = () => {
+      resolve(Number(media.duration.toFixed(3))); // 保留最多3位小数
+    };
+
+    media.onerror = () => {
+      reject(0);
+    };
+  });
+}

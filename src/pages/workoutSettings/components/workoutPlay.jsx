@@ -16,7 +16,9 @@ import {
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
     // 初始用户数据状态--可设默认值
-    const initialValues = {}
+    const initialValues = {
+        contentDuration: 0,
+    }
     const mockUsers = [{
         id: 1,
         name: 'John Doe',
@@ -225,11 +227,10 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
+                            name: 'contentDuration',
                             label: 'Countdown Seconds (s)',
                             required: true,
                             maxLength: 100,
-                            defaultValue:0,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Please enter a valid URL'
@@ -319,7 +320,7 @@ export default function UserEditorWithCommon() {
                             name: 'Countdown Seconds (s)',
                             label: 'Start Seconds',
                             required: true,
-                            defaultValue:0.1,
+                            defaultValue: 0.1,
                             maxLength: 100,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
@@ -391,7 +392,7 @@ export default function UserEditorWithCommon() {
                             name: 'Countdown Seconds (s)',
                             label: 'Start Seconds',
                             required: true,
-                            defaultValue:3.1,
+                            defaultValue: 3.1,
                             maxLength: 100,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
@@ -462,7 +463,7 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'Countdown Seconds (s)',
                             label: 'Start Seconds',
-                            defaultValue:3.1,
+                            defaultValue: 3.1,
                             required: true,
                             maxLength: 100,
                             rules: [{
@@ -534,7 +535,7 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'Countdown Seconds (s)',
                             label: 'Start Seconds',
-                            defaultValue:3.1,
+                            defaultValue: 3.1,
                             required: true,
                             maxLength: 100,
                             rules: [{
@@ -609,7 +610,7 @@ export default function UserEditorWithCommon() {
                             label: 'Start Seconds',
                             required: true,
                             maxLength: 100,
-                            defaultValue:6.1,
+                            defaultValue: 6.1,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Please enter a valid URL'
@@ -628,7 +629,7 @@ export default function UserEditorWithCommon() {
 
                     ]
                 },
-                 {
+                {
 
                     type: 'inputGroup',
                     name: 'warmUp',
@@ -682,7 +683,7 @@ export default function UserEditorWithCommon() {
                             label: 'Start Seconds',
                             required: true,
                             maxLength: 100,
-                            defaultValue:3,
+                            defaultValue: 3,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Please enter a valid URL'
@@ -772,7 +773,7 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'Countdown Seconds (s)',
                             label: 'Countdown Seconds (s)',
-                            defaultValue:3,
+                            defaultValue: 3,
                             required: true,
                             maxLength: 100,
                             rules: [{
@@ -844,7 +845,7 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'Countdown Seconds (s)',
                             label: 'Countdown Seconds (s)',
-                            defaultValue:0.1,
+                            defaultValue: 0.1,
                             required: true,
                             maxLength: 100,
                             rules: [{
@@ -917,7 +918,7 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'Countdown Seconds (s)',
                             label: 'Countdown Seconds (s)',
-                            defaultValue:2.1,
+                            defaultValue: 2.1,
                             required: true,
                             maxLength: 100,
                             rules: [{
@@ -990,7 +991,7 @@ export default function UserEditorWithCommon() {
                             name: 'Countdown Seconds (s)',
                             label: 'Countdown Seconds (s)',
                             required: true,
-                            defaultValue:30.1,
+                            defaultValue: 30.1,
                             maxLength: 100,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
@@ -1062,7 +1063,7 @@ export default function UserEditorWithCommon() {
                             name: 'Countdown Seconds (s)',
                             label: 'Countdown Seconds (s)',
                             required: true,
-                            defaultValue:4,
+                            defaultValue: 4,
                             maxLength: 100,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
@@ -1135,7 +1136,7 @@ export default function UserEditorWithCommon() {
                             label: 'Countdown Seconds (s)',
                             required: true,
                             maxLength: 100,
-                            defaultValue:1,
+                            defaultValue: 1,
                             rules: [{
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Please enter a valid URL'
@@ -1231,25 +1232,24 @@ export default function UserEditorWithCommon() {
     };
 
     return (
-     <div 
-     style={{overflow:'auto',height:"500px"}}
-     >
-           <CommonEditorForm
-            // 传递当前formFields状态
-            fields={formFields}
-            // 提供更新配置项回调
-            onFormFieldsChange={handleFormFieldsChange}
-            // 提供折叠面板展开回调
-            onCollapseChange={handleCollapseChange}
-            // 其他基本配置
-            // renderItemMata={renderItemMata}
-            isCollapse={true}
-            initFormData={initFormData}
-            formType="advanced"
-            config={{ formName: 'Collections' }}
-            initialValues={initialValues}
-            onSave={handleSaveUser}
-        />
-     </div>
+        <div
+        >
+            <CommonEditorForm
+                // 传递当前formFields状态
+                fields={formFields}
+                // 提供更新配置项回调
+                onFormFieldsChange={handleFormFieldsChange}
+                // 提供折叠面板展开回调
+                onCollapseChange={handleCollapseChange}
+                // 其他基本配置
+                // renderItemMata={renderItemMata}
+                isCollapse={true}
+                initFormData={initFormData}
+                formType="advanced"
+                config={{ formName: 'Collections' }}
+                initialValues={initialValues}
+                onSave={handleSaveUser}
+            />
+        </div>
     );
 } 

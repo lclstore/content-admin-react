@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { getMediaDurationByUrl } from '@/utils';
 import { useLocation } from 'react-router';
 import {
     Input,
@@ -221,7 +222,6 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Switch
                     key={switchKey}
-
                     onChange={(checked) => {
                         const newValue = checked ? 1 : 0;
                         // 回传表单或状态更新逻辑
@@ -236,6 +236,7 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <Select
                     name={field.name}
+                    disabled={field.disabled}
                     mode={field.mode}
                     style={field.style || {}}
                     placeholder={field.placeholder || `Please select ${field.label}`}
@@ -301,7 +302,12 @@ export const renderFormControl = (field, options = {}) => {
                     form={options.form}
                     key={uploadKey}
                     value={fieldValue}
-                    onChange={(value, file) => {
+                    onChange={async (value, file) => {
+                        //获取远程音频或视频 URL 的时长（单位：秒）
+                        if (field.durationName) {
+                            const duration = value ? await getMediaDurationByUrl(value) : null;//获取远程音频或视频 URL 的时长（单位：秒）
+                            options.form.setFieldValue(field.durationName, duration * 1000); // 转换为毫秒
+                        }
                         if (field.onChange) {
                             field.onChange(value, file, form);
                         }

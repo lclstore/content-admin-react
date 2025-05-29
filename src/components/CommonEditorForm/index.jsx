@@ -44,11 +44,13 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {string} props.moduleKey 模块key
  * @param {boolean} props.isBack 是否返回上一级
  * @param {boolean} props.isTabs 是否为标签页
+ * @param {string} props.operationName 操作名称
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
+        operationName,
         isTabs = false,
         isBack = true,
         moduleKey,
@@ -226,6 +228,7 @@ export default function CommonEditor(props) {
         isBack,
         id: id || idFromUrl,
         moduleKey,
+        operationName,
         onSubmit: onSubmitCallback,
         fieldsToValidate,
         enableDraft,
@@ -913,6 +916,7 @@ export default function CommonEditor(props) {
                         {renderBasicForm(fields, {
                             form,
                             moduleKey,
+                            operationName,
                             selectedItemFromList: selectedItemFromList,
                             onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
@@ -992,6 +996,7 @@ export default function CommonEditor(props) {
                                         fields={internalFormFields}
                                         form={form}
                                         moduleKey={moduleKey}
+                                        operationName={operationName}
                                         renderItemMata={renderItemMata}
                                         commonListConfig={commonListConfig}
                                         selectedItemFromList={effectiveSelectedItem}

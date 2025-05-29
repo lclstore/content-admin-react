@@ -45,10 +45,12 @@ import { debounce, times } from 'lodash';
  * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
  * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
+ * @param {noDataTip} [props.noDataTip] // 没有数据时的提示信息
  */
 function ConfigurableTable({
     columns, // 所有列的定义
     dataSource = [],
+    noDataTip,
     refreshKey = 0,
     rowKey = 'id',
     loading = false,
@@ -181,7 +183,7 @@ function ConfigurableTable({
     const columnSettingsSection = useMemo(() => {
         // 创建选项数组，每个选项包含key、value、label
         const options = columns
-            .filter(col => col.key !== 'actions')
+            // .filter(col => col.key !== 'actions')
             .map(col => {
                 const key = col.key || col.dataIndex;
                 return {
@@ -575,8 +577,8 @@ function ConfigurableTable({
                         const status = record.status;
                         // 简单的状态-按钮映射关系
                         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-                        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-                        if (status === 'ENABLE' && ['edit', 'duplicate'].includes(btnName)) return true;
+                        if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+                        if (status === 'ENABLED' && ['edit', 'duplicate'].includes(btnName)) return true;
                         return false;
                     };
                     const defaultActionClick = async (key, rowData) => {
@@ -678,8 +680,8 @@ function ConfigurableTable({
                 }
                 // default
                 else {
-                    processedCol.render = (text, record) => {
-                        return (<>{text}</>)
+                    processedCol.render = (text, record, index) => {
+                        return (<div key={`${record[rowKey] || index}-default-${processedCol.key || processedCol.dataIndex}`}>{text}</div>)
                     };
                 }
                 // 添加最小宽度
@@ -690,8 +692,9 @@ function ConfigurableTable({
             processedCol.render = (text, record, index) => {
                 if (!record) return null; // 如果record不存在，返回null
                 const C = childrenRender(text, record, index);
+                const key = `${record[rowKey] || index}-${processedCol.key || processedCol.dataIndex}-cell`;
                 return (
-                    <div key={`${record[rowKey] || index}-${processedCol.key || processedCol.dataIndex}`} className="td-cell">
+                    <div key={key} className="td-cell">
                         {C}
                     </div>
                 )
@@ -749,8 +752,10 @@ function ConfigurableTable({
                 <div className={styles.customEmptyImageWrapper}>
                     <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
                 </div>
-                <div className={styles.customEmptyTitle}>Start Building Your Content </div>
-                <div className={styles.customEmptyDescription}>Create your first program.</div>
+                <div className={styles.customEmptyTitle}>{
+                    noDataTip || `You don't have any ${pathname} yet`
+                } </div>
+                {/* <div className={styles.customEmptyDescription}>Create your first program.</div> */}
             </div>
             :
             <div className={styles.configurableTableContainer}>

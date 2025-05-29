@@ -128,7 +128,7 @@ export default function UserEditorWithCommon() {
         //     mode: 'single',
         //     name: 'layoutType',
         //     label: 'layoutType',
-        //     options: 'status',
+        //     options: 'statusList',
         //     required: true,
         // },
         // {
@@ -289,7 +289,7 @@ export default function UserEditorWithCommon() {
             disabled: false,
             name: 'status2',
             label: 'Status2',
-            options: 'status',
+            options: 'statusList',
             required: true,
 
         },

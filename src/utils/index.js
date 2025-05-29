@@ -225,3 +225,23 @@ export const validateVersion = (version) => {
   return versionPattern.test(version);
 };
 
+/**
+ * 获取音频或视频 URL 的时长（单位：秒）
+ * @param {string} url - 媒体文件的 URL 地址
+ * @returns {Promise<number>} - 返回原始时长 秒
+ */
+export function getMediaDurationByUrl(url) {
+  return new Promise((resolve, reject) => {
+    const media = document.createElement('video');
+    media.preload = 'metadata';
+    media.src = url;
+
+    media.onloadedmetadata = () => {
+      resolve(Number(media.duration.toFixed(3))); // 保留最多3位小数
+    };
+
+    media.onerror = () => {
+      reject(0);
+    };
+  });
+}

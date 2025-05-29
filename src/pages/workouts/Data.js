@@ -32,6 +32,11 @@ export const filterSections = [
         options: ['Draft', 'Enabled', 'Disabled'],
     },
     {
+        title: 'Structure Type',
+        key: 'structureType',
+        options: ['Warm Up', 'Main', 'Cool Down'],
+    },
+    {
         title: 'Gender',
         key: 'gender',
         options: ['Female', 'Male'],
@@ -47,6 +52,11 @@ export const filterSections = [
         options: ['Standing',  'Seated'],
     },
     {
+        title: 'Injured',
+        key: 'injured',
+        options: ['Shoulder',  'Back','Wrist','Knee','Ankle','Hip','None'],
+    },
+    {
         title: 'Equipment',
         key: 'equipment',
         options: ['Dumbbells', 'Resistance band', 'None'],
@@ -60,7 +70,7 @@ export const filterSections = [
     }
 ];
 
-// --- 以下是从 WorkoutsEditor.jsx 移动并整理的数据 ---
+// --以下是从 WorkoutsEditor.jsx 移动并整理的数据 ---
 
 // 模拟 Workout 列表数据 (保持原名 mockWorkoutsForList，以防列表页直接使用)
 export const mockWorkoutsForList = [

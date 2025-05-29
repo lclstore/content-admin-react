@@ -17,6 +17,7 @@ import {
     AudioOutlined,
     FileOutlined,
     SyncOutlined,
+    FormOutlined
 } from '@ant-design/icons';
 // 状态图标
 export const statusIconMap = {
@@ -47,7 +48,8 @@ export const menuIconMap = {
     plans: FileOutlined,
     profile: EditOutlined,
     publish: SyncOutlined,
-    sounds: AudioOutlined
+    sounds: AudioOutlined,
+    workoutSettings:FormOutlined
 
 };
 

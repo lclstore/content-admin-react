@@ -4,17 +4,136 @@ import { PlusOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/ic
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { statusIconMap, optionsConstants } from '@/constants';
-import { statusOrder, filterSections, listData } from './Data';
+import { statusOrder, listData } from './Data';
 
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import request from "@/request";
 
 export default () => {
+    // 定义筛选器配置
+    var filterSections = [
+        {
+            title: 'Status',
+            key: 'status',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [{
+                label: 'Draft',
+                value: 'DRAFT'
+            }, {
+                label: 'Enabled',
+                value: 'ENABLED'
+            }, {
+                label: 'Disabled',
+                value: 'DISABLED'
+            }],
+        },
+        {
+            title: 'Structure Type',
+            key: 'structureTypeCode',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [{
+                label: 'Warm Up',
+                value: 'WARM_UP'
+            }, {
+                label: 'Main',
+                value: 'MAIN'
+            }, {
+                label: 'Cool Down',
+                value: 'COOL_DOWN'
+            }]
+        },
+        {
+            title: 'Gender',
+            key: 'genderCode',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Male',
+                    value: 'MALE'
+                }, {
+                    label: 'Female',
+                    value: 'FEMALE'
+                }
+            ]
+        },
+        {
+            title: 'Difficulty',
+            key: 'difficultyCode',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Beginner',
+                    value: 'BEGINNER'
+                }, {
+                    label: 'Intermediate',
+                    value: 'INTERMEDIATE'
+                }, {
+                    label: 'Advanced',
+                    value: 'ADVANCED'
+                }
+            ]
+        },
+        {
+            title: 'Equipment',
+            key: 'equipmentCode',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'No equipment',
+                    value: 'NO_EQUIPMENT'
+                }, {
+                    label: 'Chair',
+                    value: 'CHAIR'
+                },
+            ]
+        },
+        {
+            title: 'Position',
+            key: 'positionCode',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Seated',
+                    value: 'SEATED'
+                }, {
+                    label: 'Standing',
+                    value: 'STANDING'
+                },
+            ],
+        },
+        {
+            title: 'Injured',
+            key: 'injuredCodes',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Shoulder',
+                    value: 'SHOULDER'
+                }, {
+                    label: 'Back',
+                    value: 'BACK'
+                }, {
+                    label: 'Wrist',
+                    value: 'WRIST'
+                }, {
+                    label: 'Knee',
+                    value: 'KNEE'
+                }, {
+                    label: 'Ankle',
+                    value: 'ANKLE'
+                }, {
+                    label: 'Hip',
+                    value: 'HIP'
+                }, {
+                    label: 'None',
+                    value: 'NONE'
+                },
+            ],
+        }
+    ];
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
-    const [dataSource, setDataSource] = useState(listData); // 表格数据源
-    const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [], createUser: [] }); // 筛选条件
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // 删除确认弹窗
@@ -92,11 +211,11 @@ export default () => {
                 title: 'Image',
                 width: 120,
                 mediaType: 'image',
-                dataIndex: 'imageCoverUrl',
-                key: 'imageCoverUrl',
+                dataIndex: 'coverImgUrl',
+                key: 'coverImgUrl',
                 visibleColumn: 0
             },
-            { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80 },
+            // { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80 },
 
             {
                 title: 'Name',
@@ -110,6 +229,16 @@ export default () => {
                 key: 'status',
                 iconOptions: statusIconMap,
                 options: 'displayStatus',
+                options: [{
+                    label: 'Draft',
+                    value: 'DRAFT'
+                }, {
+                    label: 'Enabled',
+                    value: 'ENABLED'
+                }, {
+                    label: 'Disabled',
+                    value: 'DISABLED'
+                }],
                 width: 120,
                 visibleColumn: 0
             },
@@ -123,43 +252,124 @@ export default () => {
             },
             {
                 title: 'Structure Type',
-                dataIndex: 'structureType',
+                dataIndex: 'structureTypeCode',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 2,
-                key: 'structureType'
+                options: [{
+                    label: 'Warm Up',
+                    value: 'WARM_UP'
+                }, {
+                    label: 'Main',
+                    value: 'MAIN'
+                }, {
+                    label: 'Cool Down',
+                    value: 'COOL_DOWN'
+                }],
+                key: 'structureTypeCode'
+            },
+            {
+                title: 'Gender',
+                dataIndex: 'genderCode',
+                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                width: 120,
+                visibleColumn: 1,
+                options: [
+                    {
+                        label: 'Male',
+                        value: 'MALE'
+                    }, {
+                        label: 'Female',
+                        value: 'FEMALE'
+                    }
+                ],
+                key: 'genderCode'
             },
             {
                 title: 'Difficulty',
-                dataIndex: 'difficulty',
+                dataIndex: 'difficultyCode',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key: 'difficulty'
+                options: [
+                    {
+                        label: 'Beginner',
+                        value: 'BEGINNER'
+                    }, {
+                        label: 'Intermediate',
+                        value: 'INTERMEDIATE'
+                    }, {
+                        label: 'Advanced',
+                        value: 'ADVANCED'
+                    }
+                ],
+                key: 'difficultyCode'
             },
             {
                 title: 'Equipment',
-                dataIndex: 'equipment',
+                dataIndex: 'equipmentCode',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key: 'equipment'
+                options: [
+                    {
+                        label: 'No equipment',
+                        value: 'NO_EQUIPMENT'
+                    }, {
+                        label: 'Chair',
+                        value: 'CHAIR'
+                    },
+                ],
+                key: 'equipmentCode'
             },
             {
                 title: 'Position',
-                dataIndex: 'position',
+                dataIndex: 'positionCode',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key: 'position'
+                options: [
+                    {
+                        label: 'Seated',
+                        value: 'SEATED'
+                    }, {
+                        label: 'Standing',
+                        value: 'STANDING'
+                    },
+                ],
+                key: 'positionCode'
             },
             {
                 title: 'Injured',
-                dataIndex: 'injured',
+                dataIndex: 'injuredCodes',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
-                key: 'injured'
+                options: [
+                    {
+                        label: 'Shoulder',
+                        value: 'SHOULDER'
+                    }, {
+                        label: 'Back',
+                        value: 'BACK'
+                    }, {
+                        label: 'Wrist',
+                        value: 'WRIST'
+                    }, {
+                        label: 'Knee',
+                        value: 'KNEE'
+                    }, {
+                        label: 'Ankle',
+                        value: 'ANKLE'
+                    }, {
+                        label: 'Hip',
+                        value: 'HIP'
+                    }, {
+                        label: 'None',
+                        value: 'NONE'
+                    },
+                ],
+                key: 'injuredCodes'
             },
             {
                 title: 'Front Video Status',
@@ -345,17 +555,14 @@ export default () => {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                uniqueId={'exerciseList'}
+                moduleKey="exercise"
                 columns={allColumnDefinitions}
-                dataSource={dataSource}
-                rowKey="id"
-                loading={loading}
-                actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or id...",
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}
+                showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,
                     activeFilters: selectedFilters,

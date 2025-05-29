@@ -174,7 +174,7 @@ export default function UserEditorWithCommon() {
                     max: 5,
                     step: 1,
                     formatter: (value) => value, // 格式化显示为 0:XX
-                    name: 'reps', // 修改字段名避免重复
+                    name: 'introVideoReps', // 修改字段名避免重复
                     label: 'numberStepper',
                     required: true,
                 },

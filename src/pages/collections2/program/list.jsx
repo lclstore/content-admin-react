@@ -276,7 +276,7 @@ export default () => {
 
     // 渲染 - 组件UI呈现
     return (
-        <div className="usersContainer">
+        <div>
             {/* 消息上下文提供器 */}
             {contextHolder}
 
@@ -287,7 +287,6 @@ export default () => {
                 dataSource={filteredDataForTable}
                 rowKey="id"
                 loading={loading}
-                onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or email...",

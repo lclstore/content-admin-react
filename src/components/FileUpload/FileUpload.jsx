@@ -1007,9 +1007,9 @@ const FileUpload = ({
                 return (
                     <div className={styles.filePreview}>
                         <FileOutlined style={{ fontSize: '42px' }} />
-                        <div className={styles.fileExtension}>
+                        {/* <div className={styles.fileExtension}>
                             {getFileName(displayValue).split('.').pop()?.toUpperCase() || 'FILE'}
-                        </div>
+                        </div> */}
                     </div>
                 );
         }

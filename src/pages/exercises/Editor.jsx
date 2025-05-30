@@ -11,20 +11,15 @@ export default function UserEditorWithCommon() {
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        structureType: 'Main',
-        gender: 'Male',
-        difficulty: 'Beginner',
-        equipment: 'Chair',
-        position: "Seated"
-        // layoutType: 1,
-        // status2: [1, 2],
-        // status: 1, // 确保status有默认值1
-        // // 为联动选择器设置默认值 - 使用数字类型
-        // contentStyle: 'style1'
+        structureTypeCode: 'MAIN',
+        genderCode: 'MALE',
+        difficultyCode: 'BEGINNER',
+        equipmentCode: 'CHAIR',
+        positionCode: 'SEATED',
+        injuredCodes: ['ANKLE']
     }
     // 表单字段配置
     const formFields = useMemo(() => [
-
         {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
@@ -40,7 +35,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'numberStepper',
             name: 'met',
-            label: 'MET',
+            label: 'Met',
             required: true,
             width: "60%",
             min: 1,
@@ -51,88 +46,125 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'structureType',
+            name: 'structureTypeCode',
             label: 'Structure Type',
             // disabled: true,
             width: "40%",
-            options: [
-                { name: 'Warm Up', value: 'Warm_Up' },
-                { name: 'Main', value: 'Main' },
-                { name: 'Cool Down', value: 'Cool_Down' },
-            ],
+            options: [{
+                label: 'Warm Up',
+                value: 'WARM_UP'
+            }, {
+                label: 'Main',
+                value: 'MAIN'
+            }, {
+                label: 'Cool Down',
+                value: 'COOL_DOWN'
+            }],
             required: true,
         },
         {
             type: 'select',
             mode: 'single',
-            name: 'gender',
+            name: 'genderCode',
             label: 'Gender',
             width: "60%",
             options: [
-                { name: 'Female', value: 'Female' },
-                { name: 'Male', value: 'Male' },
+                {
+                    label: 'Male',
+                    value: 'MALE'
+                }, {
+                    label: 'Female',
+                    value: 'FEMALE'
+                }
             ],
             required: true,
         },
         {
             type: 'select',
             mode: 'single',
-            name: 'equipment',
+            name: 'equipmentCode',
             label: 'Equipment',
             width: "40%",
             options: [
-                { name: 'No equipment', value: 'noEquipment' },
-                { name: 'Chair', value: 'Chair' },
+                {
+                    label: 'No equipment',
+                    value: 'NO_EQUIPMENT'
+                }, {
+                    label: 'Chair',
+                    value: 'CHAIR'
+                },
             ],
             required: true,
         },
         {
             type: 'select',
             mode: 'single',
-            name: 'difficulty',
+            name: 'difficultyCode',
             label: 'Difficulty',
             width: "60%",
             options: [
-                { name: 'Beginner', value: 'Beginner' },
-                { name: 'Intermediate', value: 'Intermediate' },
-                { name: 'Advanced', value: 'Advanced' },
+                {
+                    label: 'Beginner',
+                    value: 'BEGINNER'
+                }, {
+                    label: 'Intermediate',
+                    value: 'INTERMEDIATE'
+                }, {
+                    label: 'Advanced',
+                    value: 'ADVANCED'
+                }
             ],
             required: true,
         },
         {
             type: 'select',
-            mode: 'single',
-            name: 'position',
-            label: 'Position',
+            name: 'positionCode',
+            label: 'position',
             width: "40%",
             options: [
-                { name: 'Standing', value: 'Standing' },
-                { name: 'Seated', value: 'Seated' },
-
+                {
+                    label: 'Seated',
+                    value: 'SEATED'
+                }, {
+                    label: 'Standing',
+                    value: 'STANDING'
+                },
             ],
             required: true,
         },
         {
             type: 'select',
             mode: 'multiple',
-            name: 'injured',
+            name: 'injuredCodes',
             label: 'Injured',
             width: "60%",
             options: [
-                { name: 'Shoulder', value: 'Shoulder' },
-                { name: 'Back', value: 'Back' },
-                { name: 'Wrist', value: 'Wrist' },
-                { name: 'Knee', value: 'Knee' },
-                { name: 'Ankle', value: 'Ankle' },
-                { name: 'Hip', value: 'Hip' },
-
-            ]
+                {
+                    label: 'Shoulder',
+                    value: 'SHOULDER'
+                }, {
+                    label: 'Back',
+                    value: 'BACK'
+                }, {
+                    label: 'Wrist',
+                    value: 'WRIST'
+                }, {
+                    label: 'Knee',
+                    value: 'KNEE'
+                }, {
+                    label: 'Ankle',
+                    value: 'ANKLE'
+                }, {
+                    label: 'Hip',
+                    value: 'HIP'
+                }
+            ],
         },
         {
             type: 'textarea',
             name: 'howtodoScript', // 遵循命名规范，使用驼峰命名
             label: 'Howtodo Script',
-            maxLength: 1000, 
+            maxLength: 1000,
             placeholder: 'Howtodo Script',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
@@ -151,7 +183,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            name: 'image', // 遵循命名规范，使用Url后缀
+            name: 'coverImgUrl', // 遵循命名规范，使用Url后缀
             label: 'Image',
             // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'png,webp',
@@ -160,67 +192,67 @@ export default function UserEditorWithCommon() {
         {
             type: 'upload',
             // required: true,
-            name: 'nameAudio', // 视频文件
+            name: 'nameAudioUrl', // 视频文件
             label: 'Name Audio',
             // maxFileSize: 1024 * 1024 * 10,
 
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-           
+
             acceptedFileTypes: 'mp3',
         },
         {
             type: 'upload',
             // required: true,
-            name: 'guidanceAudio', // 视频文件
+            name: 'guidanceAudioUrl', // 视频文件
             label: 'Guidance Audio',
             // maxFileSize: 1024 * 1024 * 10,
 
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-           
+
             acceptedFileTypes: 'mp3',
         },
 
         {
             type: 'upload',
             // required: true,
-            name: 'howtodoAudio', // 视频文件
+            name: 'howtodoAudioUrl', // 视频文件
             label: 'Howtodo Audio',
             // maxFileSize: 1024 * 1024 * 10,
 
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-           
+
             acceptedFileTypes: 'mp3',
         },
         {
             type: 'upload',
             // required: true,
-            name: 'frontVideo', // 视频文件
+            name: 'frontVideoUrl', // 视频文件
             label: 'Front Video',
             // maxFileSize: 1024 * 1024 * 10,
 
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-           
+
             acceptedFileTypes: 'mp4',
         },
         {
             type: 'upload',
             // required: true,
-            name: 'sideVideo', // 视频文件
+            name: 'sideVideoUrl', // 视频文件
             label: 'Side Video',
             // maxFileSize: 1024 * 1024 * 10,
 
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
-           
+
             acceptedFileTypes: 'mp4',
         },
 
@@ -284,13 +316,12 @@ export default function UserEditorWithCommon() {
     };
     return (
         <CommonEditorForm
-            initFormData={initFormData}
+            enableDraft={true}
             formType="basic"
+            moduleKey='exercise'
             config={{ formName: 'Exercise', headerButtons: null }}
             fields={formFields}
-            moduleKey='exercise'
             initialValues={initialValues}
-            onSave={handleSaveUser}
         />
     );
 } 

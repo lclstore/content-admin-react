@@ -6,6 +6,7 @@ import request from "@/request";
 
 export default function Sider() {
     const [users, setUser] = useState('');
+    const navigate = useNavigate();
     const getUser = async () => {
         return new Promise(resolve => {
             request.get({
@@ -23,15 +24,17 @@ export default function Sider() {
     }, []);
 
     const handleCreateWorkout = () => {
+
         navigate('/exercises/editor')
+    }
+    const goProfile = () => {
+        navigate('/profile/list')
     }
     return (
         <div style={{ height: '100vh', overflow: "hidden" }}>
             <div className="createWorkoutBtn" onClick={handleCreateWorkout}>CREATE WORKOUT</div>
             <SideMenu />
-            <div className='Profile' onClick={(res) => {
-                navigate('/profile/list')
-            }} >
+            <div className='Profile' onClick={goProfile} >
                 <div className='Profile-avatar'></div>
                 <div className='mask'>
                     <img src={users?.avatar} alt="" />

@@ -18,10 +18,10 @@ export const optionsConstants = {
         { name: <div><CloseOutlined style={{ color: "#ff4d4f", fontSize: '18px' }} /></div>, value: 0 },
     ],
     testStatus: ['Draft1', 'Enabled1', 'Disabled1'],//用于测试后期删除
-    status: [
-        { name: 'Draft', value: 'DRAFT' },
-        { name: 'Enabled', value: 'ENABLED' },
-        { name: 'Disabled', value: 'DISABLED' },
+    statusList: [
+        { label: 'Draft', value: 'DRAFT' },
+        { label: 'Enabled', value: 'ENABLED' },
+        { label: 'Disabled', value: 'DISABLED' },
     ],
     difficulty: [
         { name: 'Beginner', value: 0 },

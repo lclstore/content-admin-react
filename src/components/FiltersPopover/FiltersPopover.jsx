@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Space, Popover, Badge } from 'antd';
 import { FilterOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import styles from './FiltersPopover.module.css';
-
+import { optionsConstants } from '@/constants/options';
 /**
  * 通用过滤器/设置 Popover 组件
  * @param {Array<Object>} filterSections - 过滤器区域配置 (仅过滤器类型需要)
@@ -128,38 +128,45 @@ const FiltersPopover = ({
     const content = (
         <div className={styles.filterContent}>
             <div className={styles.scrollContent}>
-                {filterSections.map((section, index) => (
-                    <React.Fragment key={index}>
-                        <div className={styles.filterSectionItem}>
-                            <div className={styles.filterSectionTitle}>{section.title}</div>
-                            <div className={styles.filterSection}>
-                                {section.options.map((option, optionIndex) => {
-                                    const optionValue = option.value || option;
-                                    const optionLabel = option.label || option;
+                {filterSections.map((section, index) => {
+                    // 处理字符串类型的 options
+                    if (typeof section.options === 'string') {
+                        section.options = optionsConstants[section.options];
+                    }
 
-                                    let isSelected;
-                                    if (section.type === 'single') {
-                                        isSelected = tempSelectedValues[section.key] === optionValue;
-                                    } else {
-                                        isSelected = Array.isArray(tempSelectedValues[section.key]) &&
-                                            tempSelectedValues[section.key]?.includes(optionValue);
-                                    }
+                    return (
+                        <React.Fragment key={index}>
+                            <div className={styles.filterSectionItem}>
+                                <div className={styles.filterSectionTitle}>{section.title}</div>
+                                <div className={styles.filterSection}>
+                                    {section.options.map((option, optionIndex) => {
+                                        const optionValue = option.value || option;
+                                        const optionLabel = option.label || option;
 
-                                    return (
-                                        <div
-                                            key={optionIndex}
-                                            onClick={() => handleOptionClick(section, optionValue, option.disabled)}
-                                            className={`${styles.filterButton} ${isSelected ? styles.active : ''} ${option.disabled ? styles.disabled : ''}`}
-                                        >
-                                            {optionLabel}
-                                        </div>
-                                    );
-                                })}
+                                        let isSelected;
+                                        if (section.type === 'single') {
+                                            isSelected = tempSelectedValues[section.key] === optionValue;
+                                        } else {
+                                            isSelected = Array.isArray(tempSelectedValues[section.key]) &&
+                                                tempSelectedValues[section.key]?.includes(optionValue);
+                                        }
+
+                                        return (
+                                            <div
+                                                key={optionIndex}
+                                                onClick={() => handleOptionClick(section, optionValue, option.disabled)}
+                                                className={`${styles.filterButton} ${isSelected ? styles.active : ''} ${option.disabled ? styles.disabled : ''}`}
+                                            >
+                                                {optionLabel}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                        {index < filterSections.length - 1 && <hr className={styles.divider} />}
-                    </React.Fragment>
-                ))}
+                            {index < filterSections.length - 1 && <hr className={styles.divider} />}
+                        </React.Fragment>
+                    );
+                })}
             </div>
 
             {shouldShowFooter && (

@@ -8,6 +8,7 @@ import { statusIconMap } from '@/constants/index.js';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
+import {router} from "@/utils/index.js";
 
 export default () => {
     // 1. 状态定义 - 组件内部状态管理
@@ -227,25 +228,6 @@ export default () => {
         performSearch('', {});
     }, [performSearch]);
 
-    /**
-     * 处理行点击
-     */
-    const handleRowClick = useCallback((record, event) => {
-        // 如果操作按钮被点击，不处理行点击
-        if (actionClicked) {
-            setActionClicked(false);
-            return;
-        }
-
-        // 检查是否点击了操作区域
-        const isActionClick = event.target.closest('.actions-container');
-        if (isActionClick) {
-            return;
-        }
-
-        // 正常导航到编辑页面
-        navigate(`/collections/editor?id=${record.id}`);
-    }, [navigate, actionClicked]);
 
     // 副作用 - 组件生命周期相关处理
 
@@ -271,7 +253,7 @@ export default () => {
 
     // 渲染 - 组件UI呈现
     return (
-        <div className="usersContainer">
+        <div>
             {/* 消息上下文提供器 */}
             {contextHolder}
 
@@ -282,7 +264,6 @@ export default () => {
                 dataSource={filteredDataForTable}
                 rowKey="id"
                 loading={loading}
-                onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or email...",

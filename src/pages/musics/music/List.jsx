@@ -1,13 +1,11 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table, Switch, Space, Button } from 'antd';
+import { Form, } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import TagSelector from '@/components/TagSelector/TagSelector';
-import { statusIconMap, optionsConstants } from '@/constants';
 
 //查询条件数组
 const filterSections = [
@@ -15,25 +13,13 @@ const filterSections = [
         title: 'Status',
         key: 'statusList',
         type: 'multiple', // 单选 //multiple 多选
-        options: [{
-            label: 'Draft',
-            value: 'DRAFT'
-        }, {
-            label: 'Enabled',
-            value: 'ENABLED'
-        }, {
-            label: 'Disabled',
-            value: 'DISABLED'
-        }],
+        options: 'statusList'
     }
 ];
 export default function Musics() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
-    const [searchValue, setSearchValue] = useState(''); // 搜索关键词
-    const [selectedFilters, setSelectedFilters] = useState({ status: [] }); // 筛选条件
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行
 
     // 批量创建文件 Modal 状态
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
@@ -73,19 +59,19 @@ export default function Musics() {
                 key: 'id',
                 width: 60,
                 visibleColumn: 1,
-                sorter: true
             },
             {
                 title: 'Name',
                 sorter: true,
+                showSorterTooltip: false,
                 dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1
             },
             {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
-                iconOptions: statusIconMap,
                 sorter: true,
+                showSorterTooltip: false,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
@@ -96,7 +82,7 @@ export default function Musics() {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-                // 定义所有可能的按钮
+
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
@@ -116,7 +102,7 @@ export default function Musics() {
                 text: 'Add Music',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/musics/musicsEditor'),
+                onClick: () => navigate('/musics/music/editor'),
             }
         ]);
 

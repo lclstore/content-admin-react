@@ -132,7 +132,7 @@ export default function UserEditorWithCommon() {
             type: 'textarea',
             name: 'howtodoScript', // 遵循命名规范，使用驼峰命名
             label: 'Howtodo Script',
-            maxLength: 1000,
+            maxLength: 1000, 
             placeholder: 'Howtodo Script',
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }

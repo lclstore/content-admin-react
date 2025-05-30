@@ -21,7 +21,7 @@ export default function WorkoutsList() {
                 value: 'DRAFT'
             }, {
                 label: 'Enabled',
-                value: 'ENABLED'
+                value: 'ENABLED' 
             }, {
                 label: 'Disabled',
                 value: 'DISABLED'

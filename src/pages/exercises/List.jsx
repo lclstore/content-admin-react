@@ -14,7 +14,7 @@ export default () => {
     var filterSections = [
         {
             title: 'Status',
-            key: 'status',
+            key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
             options: [{
                 label: 'Draft',
@@ -29,7 +29,7 @@ export default () => {
         },
         {
             title: 'Structure Type',
-            key: 'structureTypeCode',
+            key: 'structureTypeCodeList',
             type: 'multiple', // 单选 //multiple 多选
             options: [{
                 label: 'Warm Up',
@@ -44,7 +44,7 @@ export default () => {
         },
         {
             title: 'Gender',
-            key: 'genderCode',
+            key: 'genderCodeList',
             type: 'multiple', // 单选 //multiple 多选
             options: [
                 {
@@ -58,7 +58,7 @@ export default () => {
         },
         {
             title: 'Difficulty',
-            key: 'difficultyCode',
+            key: 'difficultyCodeList',
             type: 'multiple', // 单选 //multiple 多选
             options: [
                 {
@@ -75,7 +75,7 @@ export default () => {
         },
         {
             title: 'Equipment',
-            key: 'equipmentCode',
+            key: 'equipmentCodeList',
             type: 'multiple', // 单选 //multiple 多选
             options: [
                 {
@@ -89,7 +89,7 @@ export default () => {
         },
         {
             title: 'Position',
-            key: 'positionCode',
+            key: 'positionCodeList',
             type: 'multiple', // 单选 //multiple 多选
             options: [
                 {
@@ -103,7 +103,7 @@ export default () => {
         },
         {
             title: 'Injured',
-            key: 'injuredCodes',
+            key: 'injuredCodeList',
             type: 'multiple', // 单选 //multiple 多选
             options: [
                 {
@@ -135,7 +135,6 @@ export default () => {
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
-    const [selectedFilters, setSelectedFilters] = useState({ status: [], createUser: [] }); // 筛选条件
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // 删除确认弹窗
     const [currentRecord, setCurrentRecord] = useState(null); // 当前操作的记录
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
@@ -439,29 +438,14 @@ export default () => {
     /**
      * 搜索输入变化处理
      */
-    const handleSearchInputChange = useCallback((e) => {
-        const { value } = e.target;
-        setSearchValue(value);
-        performSearch(value, selectedFilters);
-    }, [performSearch, selectedFilters]);
 
     /**
      * 筛选更新处理
      */
-    const handleFilterUpdate = useCallback((newFilters) => {
-        setSelectedFilters(newFilters);
-        performSearch(searchValue, newFilters);
-    }, [performSearch, searchValue]);
 
     /**
      * 重置筛选器处理
      */
-    const handleFilterReset = useCallback(() => {
-        console.log('1111')
-        setSelectedFilters({});
-        setSearchValue('');
-        performSearch('', {});
-    }, [performSearch]);
 
     /**
      * 处理行点击
@@ -560,39 +544,13 @@ export default () => {
                 searchConfig={{
                     placeholder: "Search name or id...",
                     searchValue: searchValue,
-                    onSearchChange: handleSearchInputChange,
+                    // onSearchChange: handleSearchInputChange,
                 }}
                 showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,
-                    activeFilters: selectedFilters,
-                    onUpdate: handleFilterUpdate,
-                    onReset: handleFilterReset,
                 }}
             />
-
-            {/* 删除确认弹窗 */}
-            <Modal
-                title="Confirm Delete"
-                open={isDeleteModalVisible}
-                onOk={() => {
-                    setActionInProgress(true);
-                    setDataSource(current => current.filter(item => item.id !== currentRecord.id));
-                    setActionInProgress(false);
-                    setIsDeleteModalVisible(false);
-                    messageApi.success(`Successfully deleted user "${currentRecord.name}"`);
-                }}
-                onCancel={() => setIsDeleteModalVisible(false)}
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{
-                    danger: true,
-                    loading: actionInProgress
-                }}
-                cancelButtonProps={{ disabled: actionInProgress }}
-            >
-                <p>Are you sure you want to delete user "{currentRecord?.name}"? This action cannot be undone.</p>
-            </Modal>
         </div>
     );
 }

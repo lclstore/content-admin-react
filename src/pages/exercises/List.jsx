@@ -7,7 +7,6 @@ import { statusIconMap, optionsConstants } from '@/constants';
 import { statusOrder, listData } from './Data';
 
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import request from "@/request";
 
 export default () => {
     // 定义筛选器配置
@@ -131,7 +130,6 @@ export default () => {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
     const navigate = useNavigate();
-    const [messageApi, contextHolder] = message.useMessage();
 
 
     // 3. 表格渲染配置项
@@ -152,11 +150,12 @@ export default () => {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
-            // { title: 'Audio', mediaType: 'audio', dataIndex: 'audioUrl', key: 'audioUrl', width: 80 },
 
             {
                 title: 'Name',
                 dataIndex: 'name',
+                sorter: true,
+                width: 120,
                 visibleColumn: 0,
                 key: 'name'
             },
@@ -164,24 +163,14 @@ export default () => {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
-                iconOptions: statusIconMap,
-                options: [{
-                    label: 'Draft',
-                    value: 'DRAFT'
-                }, {
-                    label: 'Enabled',
-                    value: 'ENABLED'
-                }, {
-                    label: 'Disabled',
-                    value: 'DISABLED'
-                }],
+                sorter: true,
                 width: 120,
                 visibleColumn: 0
             },
             {
                 title: 'MET',
                 dataIndex: 'met',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 2,
                 key: 'met'
@@ -189,7 +178,7 @@ export default () => {
             {
                 title: 'Structure Type',
                 dataIndex: 'structureTypeCode',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 2,
                 options: [{
@@ -207,7 +196,7 @@ export default () => {
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 1,
                 options: [
@@ -224,7 +213,7 @@ export default () => {
             {
                 title: 'Difficulty',
                 dataIndex: 'difficultyCode',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 1,
                 options: [
@@ -244,7 +233,6 @@ export default () => {
             {
                 title: 'Equipment',
                 dataIndex: 'equipmentCode',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
                 options: [
@@ -261,7 +249,7 @@ export default () => {
             {
                 title: 'Position',
                 dataIndex: 'positionCode',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 1,
                 options: [
@@ -278,7 +266,6 @@ export default () => {
             {
                 title: 'Injured',
                 dataIndex: 'injuredCodes',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
                 width: 120,
                 visibleColumn: 1,
                 options: [
@@ -325,13 +312,13 @@ export default () => {
                 title: 'Actions',
                 key: 'actions',
                 fixed: 'right',
+                width: 70,
                 align: 'center',
-                // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable', 'edit', 'duplicate', 'delete'],
-                // 控制按钮显示规则
-            }
+                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
+
+            },
         ];
-    },[]);
+    }, []);
 
 
 
@@ -378,14 +365,10 @@ export default () => {
 
     // 渲染 - 组件UI呈现
     return (
-        <div>
-            {/* 消息上下文提供器 */}
-            {contextHolder}
-
-            {/* 可配置表格组件 */}
+        <div className="workoutsContainer page-list">
             <ConfigurableTable
-                moduleKey="exercise"
                 columns={allColumnDefinitions}
+                moduleKey="exercise"
                 searchConfig={{
                     placeholder: "Search name or id...",
                 }}

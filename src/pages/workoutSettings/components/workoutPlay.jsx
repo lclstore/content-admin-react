@@ -7,11 +7,11 @@ import {
     ThunderboltOutlined,
     TagsOutlined,
     PictureOutlined,
-    VideoCameraOutlined,
+    VideoCameraOutlined, 
     SettingOutlined,
     PlayCircleOutlined,
     PauseCircleOutlined
-} from '@ant-design/icons';
+} from '@ant-design/icons'; 
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();

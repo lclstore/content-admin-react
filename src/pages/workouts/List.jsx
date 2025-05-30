@@ -19,6 +19,134 @@ import {
 } from './Data';
 
 export default function WorkoutsList() {
+
+    // 定义筛选器配置
+    var filterSections = [
+        {
+            title: 'Status',
+            key: 'statusList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [{
+                label: 'Draft',
+                value: 'DRAFT'
+            }, {
+                label: 'Enabled',
+                value: 'ENABLED'
+            }, {
+                label: 'Disabled',
+                value: 'DISABLED'
+            }],
+        },
+        {
+            title: 'Structure Type',
+            key: 'structureTypeCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [{
+                label: 'Warm Up',
+                value: 'WARM_UP'
+            }, {
+                label: 'Main',
+                value: 'MAIN'
+            }, {
+                label: 'Cool Down',
+                value: 'COOL_DOWN'
+            }]
+        },
+        {
+            title: 'Gender',
+            key: 'genderCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Male',
+                    value: 'MALE'
+                }, {
+                    label: 'Female',
+                    value: 'FEMALE'
+                }
+            ]
+        },
+        {
+            title: 'Difficulty',
+            key: 'difficultyCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Beginner',
+                    value: 'BEGINNER'
+                }, {
+                    label: 'Intermediate',
+                    value: 'INTERMEDIATE'
+                }, {
+                    label: 'Advanced',
+                    value: 'ADVANCED'
+                }
+            ]
+        },
+        {
+            title: 'Position',
+            key: 'positionCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Seated',
+                    value: 'SEATED'
+                }, {
+                    label: 'Standing',
+                    value: 'STANDING'
+                },
+            ],
+        },
+        {
+            title: 'Injured',
+            key: 'injuredCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Shoulder',
+                    value: 'SHOULDER'
+                }, {
+                    label: 'Back',
+                    value: 'BACK'
+                }, {
+                    label: 'Wrist',
+                    value: 'WRIST'
+                }, {
+                    label: 'Knee',
+                    value: 'KNEE'
+                }, {
+                    label: 'Ankle',
+                    value: 'ANKLE'
+                }, {
+                    label: 'Hip',
+                    value: 'HIP'
+                }, {
+                    label: 'None',
+                    value: 'NONE'
+                }
+            ],
+        },
+        {
+            title: 'File Status',
+            key: 'fileStatus',
+            type: 'multiple', // 单选 //multiple 多选
+            options: [
+                {
+                    label: 'Succeeded',
+                    value: 'Succeeded'
+                }, {
+                    label: 'Running',
+                    value: 'Running'
+                }, {
+                    label: 'Failed',
+                    value: 'Failed'
+                },
+            ],
+        },
+    ];
+
+
+
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -150,24 +278,63 @@ export default function WorkoutsList() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 1 },
-            { title: 'Cover Image', showNewBadge: true, showLock: true, mediaType: 'video', width: 120, dataIndex: 'coverImage', key: 'image' },
-            { title: 'Detail Image', mediaType: 'audio', dataIndex: 'detailImage', key: 'detailImage', width: 80, visibleColumn: 1 },
-            { title: 'Thumbnail Image', mediaType: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', width: 130, visibleColumn: 1 },
-            { title: 'Complete Image', mediaType: 'image', dataIndex: 'completeImage', key: 'completeImage', width: 130, visibleColumn: 1 },
+            {
+                title: 'Cover ImgUrl',
+                width: 120,
+                mediaType: 'image',
+                dataIndex: 'coverImgUrl',
+                key: 'coverImgUrl',
+                visibleColumn: 0
+            },
+            {
+                title: 'Detail ImgUrl',
+                width: 120,
+                mediaType: 'image',
+                dataIndex: 'detailImgUrl',
+                key: 'detailImgUrl',
+                visibleColumn: 0
+            },
+            {
+                title: 'Thumbnail ImgUrl',
+                width: 120,
+                mediaType: 'image',
+                dataIndex: 'thumbnailImgUrl',
+                key: 'thumbnailImgUrl',
+                visibleColumn: 0
+            },
+            {
+                title: 'Complete ImgUrl',
+                width: 120,
+                mediaType: 'image',
+                dataIndex: 'completeImgUrl',
+                key: 'completeImgUrl',
+                visibleColumn: 0
+            },
+
             { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0 },
             {
-                title: 'Status', dataIndex: 'status', key: 'status',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                options: 'displayStatus',
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
+                sorter: true,
                 width: 120,
                 visibleColumn: 0
             },
 
-
-
-            { title: 'Premium', align: 'center', dataIndex: 'isSubscription', key: 'subscription', width: 120, options: 'defaultStatus', visibleColumn: 2 },
             {
-                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
+                title: 'Premium',
+                align: 'center',
+                dataIndex: 'Premium',
+                key: 'Premium',
+                width: 120,
+                options: 'defaultStatus',
+                visibleColumn: 2
+            },
+            {
+                title: 'Duration (Min)',
+                align: 'center',
+                dataIndex: 'duration',
+                key: 'duration',
                 sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
                 width: 150,
                 visibleColumn: 2,
@@ -178,22 +345,119 @@ export default function WorkoutsList() {
                     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
             },
-            { title: 'Calorie (Kcal)', align: 'center', dataIndex: 'calorie', key: 'calorie', sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0), width: 150, visibleColumn: 2 },
+            {
+                title: 'Calorie (Kcal)',
+                align: 'center',
+                dataIndex: 'calorie',
+                key: 'calorie',
+                sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0),
+                width: 150,
+                visibleColumn: 2
+            },
             {
                 title: 'New Date',
-                key: 'newDate',
+                key: 'newStartTime',
                 render: (text, record) => {
                     return formatDateRange(record.newStartTime, record.newEndTime);
                 },
                 width: 220,
                 visibleColumn: 1
             },
-            { title: 'Difficulty', dataIndex: 'difficulty', key: 'difficulty', sorter: (a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty], width: 100, visibleColumn: 2 },
-            { title: 'Equipment', dataIndex: 'equipment', key: 'equipment', width: 200, visibleColumn: 1 },
-            { title: 'Position', dataIndex: 'position', key: 'position', options: 'position', sorter: (a, b) => (a.position || '').localeCompare(b.position || ''), width: 100, visibleColumn: 1 },
-            { title: 'Injured', dataIndex: 'injured', key: 'injured', width: 200, visibleColumn: 1 },
-            { title: 'Audio Lang', dataIndex: 'audioLang', key: 'audioLang', width: 120, visibleColumn: 1 },
-            { title: 'Exercise Num', align: 'center', dataIndex: 'exerciseNum', key: 'exerciseNum', sorter: (a, b) => (a.exerciseNum || 0) - (b.exerciseNum || 0), width: 130, visibleColumn: 1 },
+            {
+                title: 'Gender',
+                dataIndex: 'genderCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 2,
+                options: [
+                    {
+                        label: 'Male',
+                        value: 'MALE'
+                    }, {
+                        label: 'Female',
+                        value: 'FEMALE'
+                    }
+                ],
+                key: 'genderCode'
+            },
+
+
+            {
+                title: 'Difficulty',
+                dataIndex: 'difficultyCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 2,
+                options: [
+                    {
+                        label: 'Beginner',
+                        value: 'BEGINNER'
+                    }, {
+                        label: 'Intermediate',
+                        value: 'INTERMEDIATE'
+                    }, {
+                        label: 'Advanced',
+                        value: 'ADVANCED'
+                    }
+                ],
+                key: 'difficultyCode'
+            },
+
+            {
+                title: 'Position',
+                dataIndex: 'positionCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 1,
+                options: [
+                    {
+                        label: 'Seated',
+                        value: 'SEATED'
+                    }, {
+                        label: 'Standing',
+                        value: 'STANDING'
+                    },
+                ],
+                key: 'positionCode'
+            },
+            {
+                title: 'Injured',
+                dataIndex: 'injuredCodes',
+                width: 120,
+                visibleColumn: 1,
+                options: [
+                    {
+                        label: 'Shoulder',
+                        value: 'SHOULDER'
+                    }, {
+                        label: 'Back',
+                        value: 'BACK'
+                    }, {
+                        label: 'Wrist',
+                        value: 'WRIST'
+                    }, {
+                        label: 'Knee',
+                        value: 'KNEE'
+                    }, {
+                        label: 'Ankle',
+                        value: 'ANKLE'
+                    }, {
+                        label: 'Hip',
+                        value: 'HIP'
+                    }, {
+                        label: 'None',
+                        value: 'NONE'
+                    },
+                ],
+                key: 'injuredCodes'
+            },
+            {
+                title: 'Audio Lang',
+                dataIndex: 'audioLang',
+                key: 'audioLang',
+                width: 120,
+                visibleColumn: 1
+            },
             {
                 title: 'File Status', dataIndex: 'fileStatus', key: 'fileStatus',
                 width: 120,
@@ -201,8 +465,6 @@ export default function WorkoutsList() {
                 options: 'fileStatus',
                 visibleColumn: 1
             },
-            { title: 'Gender', dataIndex: 'gender', key: 'gender', width: 130, visibleColumn: 1 },
-            // { title: 'Target', dataIndex: 'target', key: 'target', width: 200, visibleColumn: 1 },
 
 
 
@@ -476,55 +738,20 @@ export default function WorkoutsList() {
 
     // 9. 渲染 - 组件UI呈现
     // 渲染 - 组件UI呈现
+    // 渲染 - 组件UI呈现
     return (
-        <div className="usersContainer">
-            {/* 消息上下文提供器 */}
-            {contextHolder}
-
-            {/* 可配置表格组件 */}
+        <div className="workoutsContainer page-list">
             <ConfigurableTable
-                uniqueId={'categoryList'}
                 columns={allColumnDefinitions}
-                dataSource={filteredDataForTable}
-                rowKey="id"
-                loading={loading}
-                onRowClick={handleRowClick}
-                actionColumnKey="actions"
+                moduleKey="workout"
                 searchConfig={{
-                    placeholder: "Search name or email...",
-                    searchValue: searchValue,
-                    onSearchChange: handleSearchInputChange,
+                    placeholder: "Search name or id...",
                 }}
+                showColumnSettings={true}
                 filterConfig={{
                     filterSections: filterSections,
-                    activeFilters: selectedFilters,
-                    onUpdate: handleFilterUpdate,
-                    onReset: handleFilterReset,
                 }}
             />
-
-            {/* 删除确认弹窗 */}
-            <Modal
-                title="Confirm Delete"
-                open={isDeleteModalVisible}
-                onOk={() => {
-                    setActionInProgress(true);
-                    setDataSource(current => current.filter(item => item.id !== currentRecord.id));
-                    setActionInProgress(false);
-                    setIsDeleteModalVisible(false);
-                    messageApi.success(`Successfully deleted user "${currentRecord.name}"`);
-                }}
-                onCancel={() => setIsDeleteModalVisible(false)}
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{
-                    danger: true,
-                    loading: actionInProgress
-                }}
-                cancelButtonProps={{ disabled: actionInProgress }}
-            >
-                <p>Are you sure you want to delete user "{currentRecord?.name}"? This action cannot be undone.</p>
-            </Modal>
         </div>
     );
 }   

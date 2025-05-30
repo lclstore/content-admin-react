@@ -47,9 +47,11 @@
 
       .ant-table-cell {
         //padding: 16px 8px;
+
         padding: 0;
 
         .td-cell {
+
           min-height: 79px;
           box-sizing: border-box;
           margin: 0 8px;
@@ -57,6 +59,9 @@
           align-items: center;
           position: relative;
           word-break: break-word;
+          font-weight: 400;
+          font-size: 13px !important;
+          color: rgb(36, 54, 54);
 
           .actions-container {
             display: flex;
@@ -82,10 +87,13 @@
             justify-content: flex-start;
 
             .ant-table-column-title {
+
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
               flex: none;
+              color: rgb(136, 158, 158);
+              font-size: 10px;
             }
           }
         }
@@ -112,6 +120,7 @@
 
         /* 多选表格选中效果 */
         .ant-table-row.ant-table-row-selected>.ant-table-cell {
+          // font-size: 13px;
           background: #e6f4ff;
         }
 

@@ -453,7 +453,9 @@ function ConfigurableTable({
             if (dataSource.length === 0) {
                 res = await fetchTableData(moduleKey, {
                     ...paginationParams.current,
-                    ...activeFilters.current
+                    ...activeFilters.current,
+                    orderBy:'id',
+                    orderDirection:'DESC',
                 }, { signal: abortControllerRef.current.signal });
             }
 

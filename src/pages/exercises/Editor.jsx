@@ -15,8 +15,7 @@ export default function UserEditorWithCommon() {
         genderCode: 'MALE',
         difficultyCode: 'BEGINNER',
         equipmentCode: 'CHAIR',
-        positionCode: 'SEATED',
-        injuredCodes: ['ANKLE']
+        positionCode: 'SEATED'
     }
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -25,7 +24,7 @@ export default function UserEditorWithCommon() {
             name: 'name', // 遵循命名规范，使用驼峰命名
             label: 'Name',
             maxLength: 100,
-            width: '40%',
+            width: '50%',
             required: true,
             placeholder: 'Enter name',
             rules: [
@@ -37,7 +36,7 @@ export default function UserEditorWithCommon() {
             name: 'met',
             label: 'Met',
             required: true,
-            width: "60%",
+            width: "50%",
             min: 1,
             max: 12,
             step: 1,
@@ -49,7 +48,7 @@ export default function UserEditorWithCommon() {
             name: 'structureTypeCode',
             label: 'Structure Type',
             // disabled: true,
-            width: "40%",
+            width: "50%",
             options: [{
                 label: 'Warm Up',
                 value: 'WARM_UP'
@@ -67,7 +66,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'genderCode',
             label: 'Gender',
-            width: "60%",
+            width: "50%",
             options: [
                 {
                     label: 'Male',
@@ -84,7 +83,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'equipmentCode',
             label: 'Equipment',
-            width: "40%",
+            width: "50%",
             options: [
                 {
                     label: 'No equipment',
@@ -101,7 +100,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'difficultyCode',
             label: 'Difficulty',
-            width: "60%",
+            width: "50%",
             options: [
                 {
                     label: 'Beginner',
@@ -120,7 +119,7 @@ export default function UserEditorWithCommon() {
             type: 'select',
             name: 'positionCode',
             label: 'position',
-            width: "40%",
+            width: "50%",
             options: [
                 {
                     label: 'Seated',
@@ -137,7 +136,7 @@ export default function UserEditorWithCommon() {
             mode: 'multiple',
             name: 'injuredCodes',
             label: 'Injured',
-            width: "60%",
+            width: "50%",
             options: [
                 {
                     label: 'Shoulder',
@@ -185,13 +184,14 @@ export default function UserEditorWithCommon() {
             type: 'upload',
             name: 'coverImgUrl', // 遵循命名规范，使用Url后缀
             label: 'Image',
+            required: true,
             // uploadFn: fileSettings.uploadFile,
             acceptedFileTypes: 'png,webp',
             maxFileSize: 2 * 1024,
         },
         {
             type: 'upload',
-            // required: true,
+            required: true,
             name: 'nameAudioUrl', // 视频文件
             label: 'Name Audio',
             // maxFileSize: 1024 * 1024 * 10,
@@ -204,7 +204,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            // required: true,
+            required: true,
             name: 'guidanceAudioUrl', // 视频文件
             label: 'Guidance Audio',
             // maxFileSize: 1024 * 1024 * 10,
@@ -218,7 +218,7 @@ export default function UserEditorWithCommon() {
 
         {
             type: 'upload',
-            // required: true,
+            required: true,
             name: 'howtodoAudioUrl', // 视频文件
             label: 'Howtodo Audio',
             // maxFileSize: 1024 * 1024 * 10,
@@ -231,7 +231,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            // required: true,
+            required: true,
             name: 'frontVideoUrl', // 视频文件
             label: 'Front Video',
             // maxFileSize: 1024 * 1024 * 10,
@@ -244,7 +244,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            // required: true,
+            required: true,
             name: 'sideVideoUrl', // 视频文件
             label: 'Side Video',
             // maxFileSize: 1024 * 1024 * 10,

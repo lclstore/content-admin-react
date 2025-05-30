@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import React, { useState, useMemo, useEffect } from 'react';
+import { data, useNavigate } from 'react-router';
 
 import CommonEditorForm from '@/components/CommonEditorForm';
-import { commonListData, filterSections } from '@/pages/Data';
+import { commonListData } from '@/pages/Data';
+import request from "@/request";
+
 import {
     ThunderboltOutlined,
     TagsOutlined,
@@ -12,7 +14,16 @@ import {
 } from '@ant-design/icons';
 
 export default function UserEditorWithCommon() {
-    const navigate = useNavigate();
+
+     const filterSections = [
+        {
+            title: 'Status',
+            key: 'statusList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'statusList'
+        },
+        
+    ];
     // 初始用户数据状态--可设默认值
     const initialValues = {}
     const mockUsers = [{
@@ -249,41 +260,6 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            label: 'Duration Settings',
-            name: 'durationSettings',
-            icon: <SettingOutlined />,
-            fields: [
-                {
-                    type: 'numberStepper',
-                    min: 0,
-                    max: 10,
-                    step: 10,
-                    formatter: (value) => `0:${String(value).padStart(2, '0')}`, // 格式化显示为 0:XX
-                    name: 'introDuration', // 修改字段名避免重复
-                    label: 'Intro Duration',
-
-                },
-                {
-                    type: 'numberStepper',
-                    min: 0,
-                    max: 10,
-                    step: 10,
-                    formatter: (value) => `0:${String(value).padStart(2, '0')}`, // 格式化显示为 0:XX
-                    name: 'exercisePreviewDuration', // 修改字段名避免重复
-                    label: 'Exercise Preview Duration',
-                },
-                {
-                    type: 'numberStepper',
-                    min: 10,
-                    max: 40,
-                    step: 10,
-                    formatter: (value) => `0:${String(value).padStart(2, '0')}`, // 格式化显示为 0:XX
-                    name: 'exerciseExecutionDuration', // 修改字段名避免重复
-                    label: 'Exercise Execution Duration',
-                }
-            ]
-        },
-        {
 
             title: 'Structure',
             label: 'Structure Settings',
@@ -348,15 +324,7 @@ export default function UserEditorWithCommon() {
         setFormFields(updatedFields);
     };
 
-    //请求列表数据方法
-    const initCommonListData = (params) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                resolve(commonListData.filter(item => item.status === "ENABLE"));
-            }, 1000);
-        });
-    }
+
 
     // 自定义渲染列表项展示
     const renderItemMata = (item) => {
@@ -409,6 +377,16 @@ export default function UserEditorWithCommon() {
 
 
     };
+    const initCommonListData = (params) => {
+            return new Promise(resolve => {
+                request.get({
+                    url: `/exercise/page`,
+                    load: false,
+                    data: params,
+                    callback: res => resolve(res?.data)
+                });
+            })
+        }
 
     return (
         <CommonEditorForm
@@ -428,7 +406,8 @@ export default function UserEditorWithCommon() {
             isCollapse={true}
             initFormData={initFormData}
             formType="advanced"
-            config={{ formName: 'Collections' }}
+            fieldsToValidate={['name', 'birthday']}
+            config={{ formName: 'Workouts' }}
             initialValues={initialValues}
             onSave={handleSaveUser}
         />

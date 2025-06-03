@@ -76,9 +76,11 @@ export default function UserEditorWithCommon() {
             options: 'statusList'
         }
     ];
-    const saveBeforeTransform = (dataList, formValues) => {
-        if (dataList && dataList.length > 0) {
-            return dataList.map(item => {
+    const saveBeforeTransform = (info) => {
+        const { formFields, formValues } = info;
+        const musicListField = formFields.find(field => field.type === 'structureList');
+        if (musicListField) {
+            formValues.musicList = musicListField.dataList.map(item => {
                 return {
                     bizMusicId: item.id,
                     displayName: item.name,
@@ -86,6 +88,7 @@ export default function UserEditorWithCommon() {
                 }
             });
         }
+        return formValues;
     }
 
     return (

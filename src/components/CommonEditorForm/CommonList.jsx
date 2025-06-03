@@ -13,7 +13,8 @@ import {
     SearchOutlined,
     PlusOutlined,
     FilterOutlined,
-    CaretRightOutlined
+    CaretRightOutlined,
+    LoadingOutlined
 } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import { optionsConstants } from '@/constants/options';
@@ -112,17 +113,26 @@ const CommonList = ({
             const { success, data, totalCount } = await initCommonListData(params);
 
             if (success) {
+                let newData = []
                 if (params.pageIndex === 1) {
+                    newData = data || [];
                     // 如果是第一页，直接设置数据
-                    setInternalListData(data || []);
+                    setInternalListData(newData);
+                    // 将滚动位置重置到顶部
+                    if (scrollableContainerRef.current) {
+                        scrollableContainerRef.current.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    }
                 } else {
                     // 如果不是第一页，追加数据到现有数据后面
-                    const newData = [...internalListData, ...(data || [])];
+                    newData = [...internalListData, ...(data || [])];
                     setInternalListData(newData); // 更新内部数据
                 }
-
+                console.log('totalCount', newData.length < totalCount);
                 // 根据当前显示的数据长度和总数来判断是否还有更多数据
-                setHasMore(internalListData.length < totalCount);
+                setHasMore(newData.length < totalCount);
             }
         } catch (error) {
             console.error('获取列表数据失败:', error);
@@ -320,8 +330,16 @@ const CommonList = ({
                     dataLength={internalListData.length}
                     next={loadMoreItems}
                     hasMore={hasMore}
+                    loader={
+                        currentPage > 1 && (
+                            <div style={{ textAlign: 'center', padding: '10px', color: '#999', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <LoadingOutlined style={{ fontSize: '16px' }} />
+                                loading more...
+                            </div>
+                        )
+                    }
                     endMessage={
-                        internalListData.length > 0 && (
+                        !hasMore && (
                             <div style={{ textAlign: 'center', padding: '10px', color: '#999' }}>
                                 no more data
                             </div>

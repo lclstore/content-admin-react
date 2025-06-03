@@ -84,7 +84,7 @@ const settings = {
         file,
         dirKey: dirKey,
       });
-    }
+    },
   },
 
   // 路由重定向设置

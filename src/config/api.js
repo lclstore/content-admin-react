@@ -90,6 +90,17 @@ export const savePublicFormData = (params, url) => {
         });
     });
 };
+// 公共生成
+export const publicGenerate = (params, url) => {
+    return new Promise(resolve => {
+        request.post({
+            url: url,
+            load: true,
+            data: params,
+            callback: res => resolve(res?.data)
+        });
+    })
+}
 // 公共启用/禁用数据
 export const publicUpdateStatus = (params, url) => {
     return new Promise(resolve => {
@@ -136,6 +147,25 @@ export const del = async ({ moduleKey, idList }) => {
             url: `/${moduleKey}/del`,
             data: { idList },
             callback: res => resolve(res)
+        });
+    })
+}
+export const getEnumList = async () => {
+    return new Promise(resolve => {
+        request.get({
+            url: `/enum/list`,
+            data:{},
+            callback: (res) => {
+                const enumList = {}
+                res.data.data.forEach(i => {
+                    enumList[i.displayName] = i.datas.map(data => ({
+                            value: data.enumName,
+                            label: data.displayName,
+                            ...data
+                        }))
+                })
+                resolve(enumList)
+            }
         });
     })
 }

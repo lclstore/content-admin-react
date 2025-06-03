@@ -48,7 +48,7 @@ export const HeaderProvider = ({ children }) => {
     const [buttons, setButtonsState] = useState([]);
 
     // 自定义页面标题状态
-    const [customPageTitle, setCustomPageTitleState] = useState("1");
+    const [customPageTitle, setCustomPageTitleState] = useState("");
 
     // 更新整个按钮数组
     const setButtons = useCallback((newButtons) => {

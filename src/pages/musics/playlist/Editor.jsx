@@ -60,7 +60,7 @@ export default function UserEditorWithCommon() {
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
-    const initCommonListData = (params) => {
+    const initCommonListData = (params) => { 
         return new Promise(resolve => {
             request.get({
                 url: `/music/page`,

@@ -45,6 +45,7 @@ import { useStore } from "@/store/index.js";
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
+ * @param {string} [props.operationName] - 操作名称
  * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
  * @param {noDataTip} [props.noDataTip] // 没有数据时的提示信息
  * @param {boolean} [props.showPagination=true] // 是否显示分页
@@ -71,7 +72,8 @@ function ConfigurableTable({
     showColumnSettings = true,//当为true时显示列设置按钮
     leftToolbarItems = [], // 左侧工具栏按钮
     getTableList,
-    moduleKey
+    moduleKey,
+    operationName = 'page'
 }) {
     const optionsBase = useStore(i => i.optionsBase)
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
@@ -456,7 +458,7 @@ function ConfigurableTable({
             console.log('请求参数', activeFilters.current)
             //外部传入优先使用外部传入的
             if (dataSource.length === 0) {
-                res = await fetchTableData(moduleKey, {
+                res = await fetchTableData(moduleKey, operationName, {
                     ...paginationParams.current,
                     ...activeFilters.current,
                     orderBy: 'id',

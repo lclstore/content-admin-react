@@ -1,60 +1,49 @@
-import Programs from './components/Programs.jsx';
-import Category from './components/Category.jsx'
-// import Categories from './Categories';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import React, { useContext, useEffect, useState } from "react";
-import { PlusOutlined } from "@ant-design/icons";
-import {Navigate, useNavigate,Outlet} from 'react-router';
+import React, { useEffect, useState } from "react";
+import { useNavigate, Outlet, useLocation } from 'react-router';
 import { Tabs } from 'antd';
 import StickyBox from "react-sticky-box";
 
 export default function CollectionsList() {
-    // 本地存储token
-    const localDown = (defaultActiveKey) => {
-        localStorage.setItem('collections', defaultActiveKey);
-    };
-
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
+    const [showTab, setShowTab] = useState(true)
     const navigate = useNavigate(); // 路由导航
     const tabItems = [
         {
-            key: '1',
+            key: 'category/list',
             label: 'Category',
-            children: <Category />,
         },
         {
-            key: '2',
-            label: 'Program',
-            children: <Programs />,
+            key: 'programs/list',
+            label: 'Programs',
         },
     ];
     const [defaultTabItem, setDefaultTabItem] = useState(tabItems[0]);
+    const location = useLocation();
+    // 路由监听
     useEffect(() => {
-
-        const plansKey = localStorage.getItem('collections');
-        if (plansKey) {
-            setDefaultTabItem(tabItems[plansKey - 1])
-            console.log('defaultTabItem',defaultTabItem)
-            localDown(1)
-
-        }
-
-    }, []);
+        setShowTab(!location.pathname.includes("editor"))
+    }, [location]);
     function onChange(key) {
-        localDown(key)
-        const tabBarName = tabItems.find(item => item.key === key).label;
-        setDefaultTabItem(tabItems.find(item => item.key == key))
-        setCustomPageTitle(`${tabBarName} List`);
+        setDefaultTabItem(tabItems.find(item => item.key === key))
+        navigate("/collections/" + key, { replace: true })
     }
+    useEffect(() => {
+        console.log(location.pathname);
+        const currentTab = tabItems.find(item => location.pathname.includes(item.key)) || tabItems[0];
+        setDefaultTabItem(currentTab);
+        // 初始加载自动跳转到默认的tab
+        navigate(currentTab.key)
+    }, []);
     const renderTabBar = (props, DefaultTabBar) => (
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
             <DefaultTabBar {...props} />
-        </StickyBox>
+        </StickyBox> 
     );
     return (
-        <><Tabs style={{ backgroundColor: 'white',flex:1 }} activeKey={defaultTabItem.key}
-                 renderTabBar={renderTabBar}
-                 items={tabItems.map(i => ({ ...i, children: <div style={{ padding: '20px' }}>{i.children}</div> }))}
-                 onChange={onChange} /> <Outlet/>
-            </>)
+        <>
+            <Tabs style={{ backgroundColor: 'white', display: `${showTab ? "block" : "none"}` }} activeKey={defaultTabItem.key}
+                renderTabBar={renderTabBar}
+                items={tabItems.map(i => ({ ...i, children: <div>{i.children}</div> }))}
+                onChange={onChange} />
+            <div style={{ padding: '20px', position: 'relative', flex: 1 }}><Outlet /></div>
+        </>)
 }

@@ -5,6 +5,11 @@ export const optionsConstants = {
         { name: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Enabled</div>, value: 'ENABLED' },
         { name: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Disabled</div>, value: 'DISABLED' },
     ],
+    displayStatus1: [
+        { name: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Save as Draft</div>, value: 'DRAFT' },
+        { name: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Save as Enabled</div>, value: 'ENABLED' },
+        { name: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Save as Disabled</div>, value: 'DISABLED' },
+    ],
     userStatus: [
         { name: <div>Enabled <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },
         { name: <div>Disabled <CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>, value: 2 },

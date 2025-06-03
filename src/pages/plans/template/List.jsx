@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { useStore } from "@/store/index.js";
+import { router } from "@/utils/index.js";
+
 export default function WorkoutsList() {
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -19,15 +21,18 @@ export default function WorkoutsList() {
             key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
             options: "status",
+        },
+        {
+            title: 'Duration (Min)',
+            key: 'durationCode',
+            type: 'multiple',
+            options: "BizTemplateDurationEnums",
         }
     ];
 
     // 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-
-            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', width: 50, visibleColumn: 0 },
-            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', width: 50, visibleColumn: 0 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             {
                 title: 'Name',
@@ -38,33 +43,16 @@ export default function WorkoutsList() {
                 width: 350,
                 visibleColumn: 1
             },
+            { title: "Duration (Min)",dataIndex: "durationCode",options: 'BizTemplateDurationEnums',sorter: true, },
             {
                 title: 'Status',
                 dataIndex: 'status',
-                key: 'status',
                 sorter: true,
-                showSorterTooltip: false,
                 options: 'displayStatus',
                 width: 120,
-                visibleColumn: 0
             },
-            {
-                title: 'Has a Script',
-                sorter: true,
-                showSorterTooltip: false,
-                align: 'center',
-                dataIndex: 'translation',
-                key: 'translation',
-                width: 120,
-                visibleColumn: 2,
-                render: (text, record) => {
-                    return (
-                        <Space direction="vertical">
-                            <Switch disabled={true} checked={text} />
-                        </Space>
-                    );
-                }
-            },
+            { title: "Duration (Min)",dataIndex: "durationCode",options: 'BizTemplateDurationEnums',sorter: true, },
+            { title: "Workout Num",dataIndex: "durationCode",options: 'BizTemplateDurationEnums',sorter: true, },
             {
                 title: 'Actions',
                 key: 'actions',
@@ -72,7 +60,19 @@ export default function WorkoutsList() {
                 width: 70,
                 align: 'center',
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
-
+                // isShow(record, key){
+                //     let btnType = btn.sign
+                //     let status = rowData.status
+                //     let state = false
+                //     if (
+                //         (status === 0 && (btnType === "enable" || btnType === "delete" || btnType === "duplication")) ||
+                //         (status === 1 && (btnType === "disabled" || btnType === "duplication")) ||
+                //         (status === 2 && (btnType === "enable" || btnType === "duplication"))
+                //     ) {
+                //         state = true
+                //     }
+                //     return state
+                // }
             },
         ];
     }, []);
@@ -82,16 +82,16 @@ export default function WorkoutsList() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Sounds');
+        setCustomPageTitle('Template');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Add Sound',
+                text: 'Add Template',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('editor'),
+                onClick: () => router().push('editor'),
             }
         ]);
 

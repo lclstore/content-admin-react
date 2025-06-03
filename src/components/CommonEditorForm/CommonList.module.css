@@ -56,40 +56,14 @@
 /* 头像和播放图标样式 */
 .itemAvatar {
     position: relative;
-    width: 64px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border-radius: 4px;
 }
 
 .playIcon {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 32px;
-    height: 32px;
-    background: var(--active-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    opacity: 0.9;
-}
-
-.playIcon:hover {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
-}
-
-.playIcon :global(.anticon) {
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
     color: #fff;
-    font-size: 20px;
 }
 
 /* 选中状态样式 */
@@ -106,4 +80,17 @@
 /* 列表项悬停效果 */
 .item:hover {
     background-color: rgba(0, 0, 0, 0.02);
+}
+
+.audioPreview_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    color: #11cc88;
+    border: 2px solid #11cc88;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
 }

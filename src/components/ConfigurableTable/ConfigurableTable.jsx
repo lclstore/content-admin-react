@@ -628,6 +628,8 @@ function ConfigurableTable({
                     }
                     processedCol.render = (text, record, index) => {
                         if (!record) return null; // 如果record不存在，返回null
+                        console.log(listConfig.rowButtonsPublic);
+
                         let DropdownItems = listConfig.rowButtonsPublic
                             .filter(i => processedCol.actionButtons.includes(i.key))
                             .filter(({ key }) => processedCol.isShow ? processedCol.isShow(record, key) : defaultIsButtonVisible(record, key))

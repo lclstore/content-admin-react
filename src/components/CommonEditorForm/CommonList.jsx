@@ -43,6 +43,24 @@ const useDebounce = (value, delay) => {
 
 const { Text } = Typography;
 
+// 添加全局音频管理
+const audioManager = {
+    currentAudio: null,
+    currentCallback: null,
+    stopCurrent: function () {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            if (this.currentCallback) {
+                this.currentCallback(false);
+            }
+        }
+    },
+    setCurrentAudio: function (audio, callback) {
+        this.stopCurrent();
+        this.currentAudio = audio;
+        this.currentCallback = callback;
+    }
+};
 
 /**
  * 通用列表组件，支持搜索、筛选、无限滚动
@@ -86,54 +104,9 @@ const CommonList = ({
     const scrollableContainerRef = useRef(null);
     const [internalListData, setInternalListData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1); // 添加当前页码状态
+    const [currentPlayingItem, setCurrentPlayingItem] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
-    const [currentPlayingUrl, setCurrentPlayingUrl] = useState(null);
-
-    // 处理音频播放/暂停
-    const handleAudioToggle = useCallback((url) => {
-        if (!url) return;
-
-        if (currentPlayingUrl === url) {
-            // 如果点击的是当前正在播放的音频
-            if (isPlaying) {
-                audioRef.current?.pause();
-            } else {
-                audioRef.current?.play();
-            }
-            setIsPlaying(!isPlaying);
-        } else {
-            // 如果点击的是新的音频
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.src = url;
-                audioRef.current.play();
-                setCurrentPlayingUrl(url);
-                setIsPlaying(true);
-            } else {
-                // 如果还没有创建audio元素，创建一个新的
-                const audio = new Audio(url);
-                audio.addEventListener('ended', () => {
-                    setIsPlaying(false);
-                    setCurrentPlayingUrl(null);
-                });
-                audioRef.current = audio;
-                audio.play();
-                setCurrentPlayingUrl(url);
-                setIsPlaying(true);
-            }
-        }
-    }, [isPlaying, currentPlayingUrl]);
-
-    // 组件卸载时清理音频
-    useEffect(() => {
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-        };
-    }, []);
 
     // 默认的搜索方法
     const defaultSearchCommonListData = () => {
@@ -246,6 +219,139 @@ const CommonList = ({
         }
     }, [onFilterChange]);
 
+    // 处理音频播放结束
+    const handleAudioEnded = useCallback(() => {
+        setIsPlaying(false);
+        audioManager.currentAudio = null;
+        audioManager.currentCallback = null;
+    }, []);
+
+    // 播放新音频的辅助函数
+    const playNewAudio = useCallback((item) => {
+        // 清理当前音频
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.removeEventListener('ended', handleAudioEnded);
+        }
+
+        // 创建新的音频实例
+        const audio = new Audio(item.audioUrl);
+
+        // 设置事件监听器
+        audio.addEventListener('ended', handleAudioEnded);
+
+        audioRef.current = audio;
+
+        // 停止其他正在播放的音频
+        audioManager.stopCurrent();
+
+        // 设置当前音频为活动音频
+        audioManager.setCurrentAudio(audio, (playing) => {
+            if (!playing) {
+                setIsPlaying(false);
+            }
+        });
+
+        // 开始播放
+        setIsPlaying(true);
+        audio.play().catch(error => {
+            console.error('播放失败:', error);
+            setIsPlaying(false);
+        });
+    }, [handleAudioEnded]);
+
+    // 处理音频播放/暂停
+    const handleAudioToggle = useCallback((item) => {
+        if (!item || !item.audioUrl) {
+            // 如果点击了一个无效的项目，并且当前有音频在播放，则停止当前音频
+            if (isPlaying) {
+                audioManager.stopCurrent(); // 这会暂停音频并通过回调将 isPlaying 设置为 false
+                setCurrentPlayingItem(null); // 清除当前播放项目
+            }
+            return;
+        }
+
+        // 如果点击的是当前正在播放的音频项目
+        if (currentPlayingItem?.id === item.id && isPlaying) {
+            audioManager.stopCurrent(); // 暂停当前音频，isPlaying 将通过回调变为 false
+            // currentPlayingItem 保持不变，但由于 isPlaying 变为 false，图标会更新
+        } else {
+            // 否则 (点击了不同的项目，或当前项目未在播放，或没有项目在播放)
+            // 播放点击的项目。playNewAudio 会处理停止其他任何音频。
+            playNewAudio(item); // playNewAudio 会将 isPlaying 设置为 true
+            setCurrentPlayingItem(item); // 设置当前激活的音频项目
+        }
+    }, [isPlaying, currentPlayingItem, playNewAudio, setCurrentPlayingItem, audioManager]);
+
+    // 修改点击事件处理
+    const handleAudioClick = useCallback((e, item) => {
+        handleAudioToggle(item);
+    }, [handleAudioToggle]);
+
+    // 清理音频资源
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.removeEventListener('ended', handleAudioEnded);
+                audioRef.current.pause();
+                if (audioManager.currentAudio === audioRef.current) {
+                    audioManager.currentAudio = null;
+                    audioManager.currentCallback = null;
+                }
+                audioRef.current = null;
+            }
+            setCurrentPlayingItem(null);
+            setIsPlaying(false);
+        };
+    }, [handleAudioEnded]);
+
+    // 修改默认的列表项渲染函数中的音频预览部分
+    const defaultRenderItemMeta = useCallback((item) => {
+        return <List.Item.Meta style={{ alignItems: 'center' }}
+            avatar={
+                getFileCategoryFromUrl(item.audioUrl || item.animationPhoneUrl) === 'audio' ?
+                    <div className={styles.audioPreview}>
+                        <div
+                            className={styles.audioPreview_box}
+                            onClick={(e) => handleAudioClick(e, item)}
+                        >
+                            {(currentPlayingItem?.id === item.id && isPlaying) ? (
+                                <PauseOutlined style={{ fontSize: '20px' }} />
+                            ) : (
+                                <CaretRightOutlined style={{ fontSize: '20px' }} />
+                            )}
+                        </div>
+                    </div>
+                    :
+                    <div className={styles.itemAvatar}>
+                        <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
+                        <CaretRightOutlined
+                            className={styles.playIcon}
+                        />
+                    </div>
+            }
+            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.name || item.displayName || item.title}</Text>}
+            description={
+                <div>
+                    <div>
+                        <Text
+                            type="secondary"
+                            style={{ fontSize: '12px' }}
+                            ellipsis={{ tooltip: item.status }}
+                        >
+                            {optionsConstants.statusList.find(status => status.value === item.status).label}
+                        </Text>
+                    </div>
+                    <div>
+                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                            {item.functionType || item.type}
+                        </Text>
+                    </div>
+                </div>
+            }
+        />
+    }, [currentPlayingItem, isPlaying, handleAudioClick, styles]);
+
     // 列表项渲染函数
     const renderListItem = useCallback((item) => {
         if (!item || !item.id) return null;
@@ -310,54 +416,7 @@ const CommonList = ({
                 {renderItemMata ? renderItemMata(item) : defaultRenderItemMeta(item)}
             </List.Item>
         );
-    }, [onAddItem, selectionMode, selectedItemId, styles]);
-    // 默认的列表项渲染函数
-    const defaultRenderItemMeta = useCallback((item) => {
-        // 获取文件类型
-        const fileType = getFileCategoryFromUrl(item.audioUrl || item.animationPhoneUrl);
-        const fileUrl = item.audioUrl || item.animationPhoneUrl;
-
-        return <List.Item.Meta
-            avatar={
-                <div className={styles.itemAvatar}>
-                    <Avatar shape="square" size={64} src={fileUrl} />
-                    {fileType === 'audio' && (
-                        <div
-                            className={styles.playIcon}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleAudioToggle(fileUrl);
-                            }}
-                        >
-                            {currentPlayingUrl === fileUrl && isPlaying ?
-                                <PauseOutlined style={{ fontSize: '24px' }} /> :
-                                <CaretRightOutlined style={{ fontSize: '24px' }} />
-                            }
-                        </div>
-                    )}
-                </div>
-            }
-            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.name || item.displayName || item.title}</Text>}
-            description={
-                <div>
-                    <div>
-                        <Text
-                            type="secondary"
-                            style={{ fontSize: '12px' }}
-                            ellipsis={{ tooltip: item.status }}
-                        >
-                            {optionsConstants.statusList.find(status => status.value === item.status).label}
-                        </Text>
-                    </div>
-                    <div>
-                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                            {item.functionType || item.type}
-                        </Text>
-                    </div>
-                </div>
-            }
-        />
-    }, [renderListItem, handleAudioToggle, currentPlayingUrl, isPlaying]);
+    }, [onAddItem, selectionMode, selectedItemId, styles, defaultRenderItemMeta]);
 
     return (
 

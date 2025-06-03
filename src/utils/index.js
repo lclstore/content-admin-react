@@ -251,24 +251,23 @@ export function getMediaDurationByUrl(url) {
  * @param {string} url - 文件地址
  * @returns { 'audio' | 'video' | 'image' | 'other' }
  */
-export function getFileCategoryFromUrl(url) {
+export function getFileCategoryFromUrl(url = '') {
   const audioTypes = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a']
   const videoTypes = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv']
   const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
 
-  try {
-    const urlObj = new URL(url)
-    const nameMatch = urlObj.search.match(/name=([^&]+)/)
-    let filename = nameMatch ? nameMatch[1] : urlObj.pathname.split("/").pop()
+  // 无效 URL 直接返回 audio
+  if (!url || !/^https?:\/\//.test(url)) return 'audio'
 
-    const ext = filename.split('.').pop().toLowerCase()
+  const urlObj = new URL(url)
+  const nameMatch = urlObj.search.match(/name=([^&]+)/)
+  let filename = nameMatch ? nameMatch[1] : urlObj.pathname.split("/").pop()
 
-    if (audioTypes.includes(ext)) return 'audio'
-    if (videoTypes.includes(ext)) return 'video'
-    if (imageTypes.includes(ext)) return 'image'
-    return 'other'
-  } catch (err) {
-    console.error("Invalid URL:", err)
-    return 'other'
-  }
+  const ext = filename.split('.').pop().toLowerCase()
+
+  if (audioTypes.includes(ext)) return 'audio'
+  if (videoTypes.includes(ext)) return 'video'
+  if (imageTypes.includes(ext)) return 'image'
+
+  return 'audio' // 默认归类为 audio
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Space, Popover, Badge } from 'antd';
 import { FilterOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import styles from './FiltersPopover.module.css';
+import { useStore } from "@/store/index.js";
 
 /**
  * 通用过滤器/设置 Popover 组件
@@ -40,7 +41,7 @@ const FiltersPopover = ({
     const [isVisible, setIsVisible] = useState(false);
     const prevActiveFiltersRef = useRef(activeFilters);
     const prevIsVisibleRef = useRef(isVisible);
-
+    const optionsBase = useStore(i => i.optionsBase)
     useEffect(() => {
         if (!prevIsVisibleRef.current && isVisible) {
             console.log('[FiltersPopover] Opening, received activeFilters:', JSON.stringify(activeFilters));
@@ -133,7 +134,7 @@ const FiltersPopover = ({
                         <div className={styles.filterSectionItem}>
                             <div className={styles.filterSectionTitle}>{section.title}</div>
                             <div className={styles.filterSection}>
-                                {section.options.map((option, optionIndex) => {
+                                {(typeof section.options === "string"?optionsBase[section.options]:section.options).map((option, optionIndex) => {
                                     const optionValue = option.value || option;
                                     const optionLabel = option.label || option;
 

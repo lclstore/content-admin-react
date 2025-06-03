@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import CommonEditorForm from '@/components/CommonEditorForm';
-import { mockUsers } from './components/Data';
-import { validateEmail, validatePassword } from '@/utils';
+import CommonEditorForm from '@/components/CommonEditorForm/index.jsx';
+import { mockUsers } from './Data.js';
+import { validateEmail, validatePassword } from '@/utils/index.js';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();

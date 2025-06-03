@@ -21,6 +21,7 @@ import { getPublicTableList, publicUpdateStatus, publicDeleteData } from "@/conf
 import settings from "@/config/settings.js"
 import noDataImg from '@/assets/images/no-data.png';
 import { debounce, times } from 'lodash';
+import {useStore} from "@/store/index.js";
 /**
  * 可配置表格组件
  *
@@ -70,6 +71,7 @@ function ConfigurableTable({
     getTableList,
     moduleKey
 }) {
+    const optionsBase = useStore(i => i.optionsBase)
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
     const routeLevel = pathSegments.length;
     let pathUrl = useLocation().pathname.split('/')[1];
@@ -449,6 +451,7 @@ function ConfigurableTable({
                 success: true,
                 totalCount: dataSource.length
             }
+            console.log('请求参数', activeFilters.current)
             //外部传入优先使用外部传入的
             if (dataSource.length === 0) {
                 res = await fetchTableData(moduleKey, {
@@ -554,7 +557,7 @@ function ConfigurableTable({
 
                 // 如果列有  options 属性，设置渲染逻辑
                 else if (processedCol.options) {
-                    const options = typeof processedCol.options === 'string' ? optionsConstants[processedCol.options] : processedCol.options;
+                    const options = typeof processedCol.options === 'string' ? optionsBase[processedCol.options] : processedCol.options;
 
                     processedCol.render = (text, record, index) => {
                         if (!record) return null; // 如果record不存在，返回null

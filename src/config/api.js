@@ -139,3 +139,22 @@ export const del = async ({ moduleKey, idList }) => {
         });
     })
 }
+export const getEnumList = async () => {
+    return new Promise(resolve => {
+        request.get({
+            url: `/enum/list`,
+            data:{},
+            callback: (res) => {
+                const enumList = {}
+                res.data.data.forEach(i => {
+                    enumList[i.displayName] = i.datas.map(data => ({
+                            value: data.enumName,
+                            label: data.displayName,
+                            ...data
+                        }))
+                })
+                resolve(enumList)
+            }
+        });
+    })
+}

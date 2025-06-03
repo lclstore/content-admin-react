@@ -6,26 +6,19 @@ import {
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-
+import { useStore } from "@/store/index.js";
 export default function WorkoutsList() {
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
+    const optionsBase = useStore(state => state.optionsBase)
+    console.log("optionsBase",optionsBase)
     //查询条件数组
     const filterSections = [
         {
             title: 'Status',
             key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [{
-                label: 'Draft',
-                value: 'DRAFT'
-            }, {
-                label: 'Enabled',
-                value: 'ENABLED'
-            }, {
-                label: 'Disabled',
-                value: 'DISABLED'
-            }],
+            options: "status",
         }
     ];
 
@@ -98,7 +91,7 @@ export default function WorkoutsList() {
                 text: 'Add Sound',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/sounds/editor'),
+                onClick: () => navigate('editor'),
             }
         ]);
 
@@ -111,16 +104,16 @@ export default function WorkoutsList() {
 
     //渲染表格组件
     return (
-            <ConfigurableTable
-                columns={allColumnDefinitions}
-                moduleKey="sound"
-                searchConfig={{
-                    placeholder: "Search name or ID...",
-                }}
-                showColumnSettings={false}
-                filterConfig={{
-                    filterSections: filterSections,
-                }}
-            />
+        <ConfigurableTable
+            columns={allColumnDefinitions}
+            moduleKey="template"
+            searchConfig={{
+                placeholder: "Search name or ID...",
+            }}
+            showColumnSettings={false}
+            filterConfig={{
+                filterSections: filterSections,
+            }}
+        />
     );
 }   

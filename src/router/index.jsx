@@ -7,7 +7,7 @@ import { createHashRouter,Navigate,useLocation } from "react-router"
 import menus from '@/config/menu';
 import settings from '@/config/settings';
 import AppLayout from '@/layout';
-import { useStore } from '@/store';
+import { useStore } from '@/store/index.js';
 /**
  * 组件懒加载包装
  */
@@ -17,11 +17,12 @@ const SuspenseWrapper = ({ component }) => (
   </Suspense>
 );
 // 路由守卫
+// eslint-disable-next-line react-refresh/only-export-components
 const AuthGuard = ({ children }) => {
   const location = useLocation();
-  const setLocation = useStore(i => i.setLocation);
+  const setLocation = useStore(i => i?.setLocation);
   // 更新当前路由信息
-  setLocation(location)
+  setLocation && setLocation(location)
   if (!localStorage.getItem(settings.request.tokenName)) {
     // 如果未登录，重定向到登录页，并记录原路径
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;

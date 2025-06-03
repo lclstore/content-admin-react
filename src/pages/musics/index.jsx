@@ -36,7 +36,7 @@ export default function CollectionsList() {
     const renderTabBar = (props, DefaultTabBar) => (
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>
             <DefaultTabBar {...props} />
-        </StickyBox>
+        </StickyBox> 
     );
     return (
         <>

@@ -717,7 +717,7 @@ export default function WorkoutsList() {
             disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
-
+ 
     /**
      * 行选择配置
      */
@@ -746,8 +746,7 @@ export default function WorkoutsList() {
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}
                 confirmLoading={batchCreateLoading}
-
-                
+                 rowSelection={rowSelection}
                 columns={allColumnDefinitions}
                 leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"

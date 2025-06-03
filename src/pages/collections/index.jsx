@@ -12,8 +12,8 @@ export default function CollectionsList() {
             label: 'Category',
         },
         {
-            key: 'playlist/list',
-            label: 'Playlist',
+            key: 'programs/list',
+            label: 'Programs',
         },
     ];
     const [defaultTabItem, setDefaultTabItem] = useState(tabItems[0]);
@@ -24,7 +24,7 @@ export default function CollectionsList() {
     }, [location]);
     function onChange(key) {
         setDefaultTabItem(tabItems.find(item => item.key === key))
-        navigate("/musics/" + key, { replace: true })
+        navigate("/collections/" + key, { replace: true })
     }
     useEffect(() => {
         console.log(location.pathname);

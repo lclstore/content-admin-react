@@ -62,17 +62,27 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Show Type',
+                title: 'Duration(Week)',
                 dataIndex: 'showTypeCode',
                 sorter: true,
-                options:[
+                width: 120,
+                visibleColumn: 0
+            },
+            {
+                title: 'Difficulty',
+                dataIndex: 'difficultyCode',
+                sorter: true,
+                options: [
                     {
-                    label: 'Horizontal',
-                    value: 'HORIZONTAL'
-                }, {
-                    label: 'Card',
-                    value: 'CARD'
-                }
+                        label: 'Beginner',
+                        value: 'BEGINNER'
+                    }, {
+                        label: 'Intermediate',
+                        value: 'INTERMEDIATE'
+                    }, {
+                        label: 'Advanced',
+                        value: 'ADVANCED'
+                    }
                 ],
                 width: 120,
                 visibleColumn: 0
@@ -145,7 +155,7 @@ export default () => {
 
             {/* 可配置表格组件 */}
             <ConfigurableTable
-                moduleKey={'category'}
+                moduleKey={'program'}
                 operationName={'list'}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}

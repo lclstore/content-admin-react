@@ -249,7 +249,7 @@ export const useHeaderConfig = (params) => {
 
         // 处理数组列表相关数据格式和验证
         hasDataListFields.map(formField => {
-            dataToSave[formField.name] = formField.formterList ? formField.formterList(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
+            dataToSave[formField.name] = formField.saveBeforeTransform ? formField.saveBeforeTransform(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
         });
 
 

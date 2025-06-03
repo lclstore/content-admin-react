@@ -14,6 +14,9 @@ export default function UserEditorWithCommon() {
             acceptedFileTypes: 'mp3',
         },
         {
+            type: 'line',
+        },
+        {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
             label: 'Name',

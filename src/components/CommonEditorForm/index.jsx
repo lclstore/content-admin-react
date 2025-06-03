@@ -742,6 +742,19 @@ export default function CommonEditor(props) {
                     response.data.id = null;//重制id
                     response.data.status = null;//重制状态
                 }
+                // 如果fields存在，则将数据中的dataList设置为fields中的dataList
+                const allFields = fields || formFields;
+                allFields.map(field => {
+                    if (field.dataList) {
+                        field.dataList = response.data[field.name]
+
+                    }
+                })
+                // 通知父组件
+                if (onFormFieldsChange) {
+                    onFormFieldsChange(allFields);
+                }
+
                 response = response.data;
             }
         }

@@ -37,10 +37,10 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'structureList',
-            name: 'musicIdList',
+            name: 'musicList',
             // renderItemMata: renderItemMata,
             label: 'Musics',
-            formterList: (dataList, formValues) => {
+            saveBeforeTransform: (dataList, formValues) => {
                 if (dataList && dataList.length > 0) {
                     return dataList.map(item => {
                         return {

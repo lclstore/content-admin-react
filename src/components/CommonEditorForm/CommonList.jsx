@@ -128,7 +128,7 @@ const CommonList = ({
             const params = {
                 ...defaultQueryParams,
                 ...(filters || selectedFilters),
-                keyword: debouncedKeyword,
+                keywords: debouncedKeyword,
                 pageIndex: page,  // 添加页码参数
                 pageSize: defaultQueryParams.pageSize
             };

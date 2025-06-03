@@ -518,7 +518,7 @@ const CollapseForm = ({
     const renderFieldGroup = (fieldGroup) => {
         // 确保每个field都有name作为key，如果没有name则使用索引
         return fieldGroup.map((field, index) => {
-            return renderField({ ...field });
+            return renderFormItem({ ...field });
         });
     };
 

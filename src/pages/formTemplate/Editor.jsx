@@ -158,6 +158,7 @@ export default function UserEditorWithCommon() {
             label: '',
             dependencies: ['status221'],           // 声明依赖
             content: ({ getFieldValue }) => {      // content 支持函数
+                console.log('1111111111111111')
                 const status = getFieldValue('status221');
                 return status
                     ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'

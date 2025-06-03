@@ -65,14 +65,14 @@ export default () => {
                 title: 'Show Type',
                 dataIndex: 'showTypeCode',
                 sorter: true,
-                options:[
+                options: [
                     {
-                    label: 'Horizontal',
-                    value: 'HORIZONTAL'
-                }, {
-                    label: 'Card',
-                    value: 'CARD'
-                }
+                        label: 'Horizontal',
+                        value: 'HORIZONTAL'
+                    }, {
+                        label: 'Card',
+                        value: 'CARD'
+                    }
                 ],
                 width: 120,
                 visibleColumn: 0
@@ -118,7 +118,7 @@ export default () => {
                 text: 'Create Category',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/collections/Editor'),
+                onClick: () => navigate('/collections/category/editor'),
             }
         ]);
 

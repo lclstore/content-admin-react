@@ -123,6 +123,9 @@ export default () => {
                 }, {
                     label: 'Hip',
                     value: 'HIP'
+                }, {
+                    label: 'None',
+                    value: 'NONE'
                 }
             ],
         }
@@ -164,6 +167,8 @@ export default () => {
                 dataIndex: 'status',
                 key: 'status',
                 sorter: true,
+                showSorterTooltip: false,
+                options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },

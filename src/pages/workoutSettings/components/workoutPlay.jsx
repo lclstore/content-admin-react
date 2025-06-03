@@ -175,7 +175,7 @@ export default function UserEditorWithCommon() {
                     step: 1,
                     formatter: (value) => value, // 格式化显示为 0:XX
                     name: 'introVideoReps', // 修改字段名避免重复
-                    label: 'numberStepper',
+                    label: 'Intro Video Reps',
                     required: true,
                 },
                 {
@@ -187,7 +187,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'Audio',
+                            name: 'introAudioBizSoundId',
                             label: 'Audio',
                             // style: {
                             //     width: '300px',
@@ -227,8 +227,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'contentDuration',
-                            label: 'Countdown Seconds (s)',
+                            name: 'introAudioStartTime',
+                            label: 'Start Seconds',
                             required: true,
                             maxLength: 100,
                             rules: [{
@@ -240,7 +240,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'introAudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -264,7 +264,7 @@ export default function UserEditorWithCommon() {
                     max: 5,
                     step: 1,
                     formatter: (value) => value, // 格式化显示为 0:XX
-                    name: 'reps', // 修改字段名避免重复
+                    name: 'previewVideoReps', // 修改字段名避免重复
                     label: 'Preview Video Reps',
                     required: true,
                 },
@@ -278,7 +278,7 @@ export default function UserEditorWithCommon() {
                         {
                             type: 'antdSelect',
                             name: 'Audio',
-                            label: 'Audio',
+                            label: 'previewRestAudioBizSoundId',
                             // style: {
                             //     width: '300px',
                             // },
@@ -317,7 +317,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
+                            name: 'previewRestAudioStartTime',
                             label: 'Start Seconds',
                             required: true,
                             defaultValue: 0.1,
@@ -331,7 +331,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'previewRestAudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -349,7 +349,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'Audio',
+                            name: 'previewFirstAudioBizSoundId',
                             label: 'Audio',
                             // style: {
                             //     width: '300px',
@@ -389,7 +389,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
+                            name: 'previewFirstAudioStartTime',
                             label: 'Start Seconds',
                             required: true,
                             defaultValue: 3.1,
@@ -403,7 +403,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'previewFirstAudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -421,7 +421,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'Audio',
+                            name: 'previewNextAudioBizSoundId',
                             label: 'Audio',
                             // style: {
                             //     width: '300px',
@@ -461,7 +461,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
+                            name: 'previewNextAudioStartTime',
                             label: 'Start Seconds',
                             defaultValue: 3.1,
                             required: true,
@@ -475,7 +475,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'previewNextAudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -488,12 +488,12 @@ export default function UserEditorWithCommon() {
 
                     type: 'inputGroup',
                     name: 'warmUp',
-                    label: 'PreviewLast Audio',
+                    label: 'Preview Last Audio',
                     // required: true,
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'Audio',
+                            name: 'previewLastAudioBizSoundId',
                             label: 'Audio',
                             // style: {
                             //     width: '300px',
@@ -533,7 +533,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
+                            name: 'previewLastAudioStartTime',
                             label: 'Start Seconds',
                             defaultValue: 3.1,
                             required: true,
@@ -547,7 +547,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'previewLastAudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -565,8 +565,8 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'Audio',
-                            label: 'Audio1',
+                            name: 'previewNameAudioStartTime',
+                            label: 'Audio',
                             // style: {
                             //     width: '300px',
                             // },
@@ -605,22 +605,8 @@ export default function UserEditorWithCommon() {
                             required: true,
                         },
                         {
-                            type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Start Seconds',
-                            required: true,
-                            maxLength: 100,
-                            defaultValue: 6.1,
-                            rules: [{
-                                pattern: /^\d+(\.\d+)?$/,
-                                message: 'Please enter a valid URL'
-                            }],
-                            width: '200px',
-                            showCount: true,
-                        },
-                        {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'previewNameAudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -638,8 +624,8 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'Audio',
-                            label: 'Audio1',
+                            name: 'previewThree21AudioBizSoundId',
+                            label: 'Audio',
                             // style: {
                             //     width: '300px',
                             // },
@@ -679,7 +665,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
+                            name: 'previewThree21AudioStartTime',
                             label: 'Start Seconds',
                             required: true,
                             maxLength: 100,
@@ -693,7 +679,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'switch',
-                            name: 'isSelected',
+                            name: 'previewThree21AudioClosed',
                             label: 'Can it be closed?',
                             required: true,
                         }
@@ -725,7 +711,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'executionVideoReps',
                     label: 'Execution Go Audio',
                     // required: true,
                     inputConfig: [
@@ -771,8 +757,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Countdown Seconds (s)',
+                            name: '',
+                            label: '',
                             defaultValue: 3,
                             required: true,
                             maxLength: 100,
@@ -843,8 +829,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Countdown Seconds (s)',
+                            name: '',
+                            label: '',
                             defaultValue: 0.1,
                             required: true,
                             maxLength: 100,
@@ -916,8 +902,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Countdown Seconds (s)',
+                            name: '',
+                            label: '',
                             defaultValue: 2.1,
                             required: true,
                             maxLength: 100,
@@ -988,8 +974,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Countdown Seconds (s)',
+                            name: '',
+                            label: '',
                             required: true,
                             defaultValue: 30.1,
                             maxLength: 100,
@@ -1060,8 +1046,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Countdown Seconds (s)',
+                            name: '',
+                            label: '',
                             required: true,
                             defaultValue: 4,
                             maxLength: 100,
@@ -1132,8 +1118,8 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'Countdown Seconds (s)',
-                            label: 'Countdown Seconds (s)',
+                            name: '',
+                            label: '',
                             required: true,
                             maxLength: 100,
                             defaultValue: 1,

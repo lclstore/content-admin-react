@@ -698,7 +698,7 @@ export default function WorkoutsList() {
     /**
      * 筛选后的表格数据
      */
-    const filteredDataForTable = useMemo(() => {
+    const filteredDataForTable = useMemo(() =>  {
         setLoading(true);
         let tempData = [...dataSource];
         setLoading(false);
@@ -742,7 +742,14 @@ export default function WorkoutsList() {
     return (
         <div className="workoutsContainer page-list">
             <ConfigurableTable
+                open={isBatchCreateModalVisible}
+                onOk={handleBatchCreateModalOk}
+                onCancel={handleBatchCreateModalCancel}
+                confirmLoading={batchCreateLoading}
+
+                
                 columns={allColumnDefinitions}
+                leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"
                 searchConfig={{
                     placeholder: "Search name or id...",

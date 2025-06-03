@@ -74,7 +74,7 @@ export default function UserEditorWithCommon() {
             formType="basic"
             moduleKey="sound"
             config={{ formName: 'Sound' }}
-            fields={formFields} 
+            fields={formFields}  
             initialValues={initialValues}
         />
     );

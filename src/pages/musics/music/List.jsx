@@ -116,9 +116,10 @@ export default function Musics() {
 
     //渲染表格
     return (
-        <div className="workoutsContainer page-list"  >
+        <div className="workoutsContainer "   >
             <ConfigurableTable
                 moduleKey={'music'}
+                paddingTop={50}
                 columns={allColumnDefinitions}
                 searchConfig={{
                     placeholder: "Search content name or ID...",

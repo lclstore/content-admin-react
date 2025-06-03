@@ -107,6 +107,8 @@ const CommonList = ({
             };
 
             const { success, data } = await initCommonListData(params);
+            console.log(data);
+
             if (success) {
                 setInternalListData(data || []);
             }
@@ -259,13 +261,13 @@ const CommonList = ({
         return <List.Item.Meta
             avatar={
                 <div className={styles.itemAvatar}>
-                    <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
+                    <Avatar shape="square" size={64} src={item.audioUrl || item.animationPhoneUrl} />
                     <CaretRightOutlined
                         className={styles.playIcon}
                     />
                 </div>
             }
-            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.displayName || item.title || '未命名项目'}</Text>}
+            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.name || item.displayName || item.title}</Text>}
             description={
                 <div>
                     <div>
@@ -274,12 +276,12 @@ const CommonList = ({
                             style={{ fontSize: '12px' }}
                             ellipsis={{ tooltip: item.status }}
                         >
-                            {optionsConstants.statusList.find(status => status.value === item.status)?.name || '-'}
+                            {optionsConstants.statusList.find(status => status.value === item.status).label}
                         </Text>
                     </div>
                     <div>
                         <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                            {item.functionType || item.type || '-'}
+                            {item.functionType || item.type}
                         </Text>
                     </div>
                 </div>

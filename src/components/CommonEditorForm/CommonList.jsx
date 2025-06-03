@@ -78,7 +78,6 @@ const CommonList = ({
     // 使用防抖hook，延迟500ms
     const debouncedKeyword = useDebounce(keyword, 500);
     const [selectedFilters, setSelectedFilters] = useState({ ...activeFilters }); // 筛选条件
-    const [displayedItems, setDisplayedItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const scrollableContainerRef = useRef(null);
@@ -113,46 +112,29 @@ const CommonList = ({
             const { success, data, totalCount } = await initCommonListData(params);
 
             if (success) {
-                if (page === 1) {
+                if (params.pageIndex === 1) {
                     // 如果是第一页，直接设置数据
                     setInternalListData(data || []);
-                    setDisplayedItems(data || []);
                 } else {
                     // 如果不是第一页，追加数据到现有数据后面
-                    const newData = [...displayedItems, ...(data || [])];
-                    setInternalListData(newData);
-                    setDisplayedItems(newData);
+                    const newData = [...internalListData, ...(data || [])];
+                    setInternalListData(newData); // 更新内部数据
                 }
 
                 // 根据当前显示的数据长度和总数来判断是否还有更多数据
-                setHasMore((displayedItems.length + (data || []).length) < totalCount);
+                setHasMore(internalListData.length < totalCount);
             }
         } catch (error) {
             console.error('获取列表数据失败:', error);
             if (page === 1) {
                 setInternalListData([]);
-                setDisplayedItems([]);
             }
         } finally {
             setLoading(false);
         }
     };
 
-    // 使用内部获取的数据
-    const currentListData = useMemo(() => {
-        return internalListData;
-    }, [internalListData]);
-    // 初始加载和数据变化时更新显示项 - 使用useMemo简化
-    useEffect(() => {
-        if (!currentListData) return;
 
-        const initialItems = (currentListData || []).slice(0, defaultQueryParams.pageSize);
-        setDisplayedItems(initialItems);
-
-        if (scrollableContainerRef.current) {
-            scrollableContainerRef.current.scrollTop = 0;
-        }
-    }, [currentListData]);
 
     // 监听防抖后的关键词和筛选条件变化,请求数据
     useEffect(() => {
@@ -335,11 +317,11 @@ const CommonList = ({
                 className={styles.scrollContainer}
             >
                 <InfiniteScroll
-                    dataLength={displayedItems.length}
+                    dataLength={internalListData.length}
                     next={loadMoreItems}
                     hasMore={hasMore}
                     endMessage={
-                        displayedItems.length > 0 && (
+                        internalListData.length > 0 && (
                             <div style={{ textAlign: 'center', padding: '10px', color: '#999' }}>
                                 no more data
                             </div>
@@ -350,7 +332,7 @@ const CommonList = ({
                     <Spin spinning={loading} tip="Loading...">
                         <List
                             itemLayout="horizontal"
-                            dataSource={displayedItems}
+                            dataSource={internalListData}
                             className="common-list"
                             renderItem={renderListItem}
                         />

@@ -68,7 +68,7 @@ const CommonList = ({
     renderItemMata,
     activeFilters = {},// 外部传入的默认选中的筛选条件
     defaultQueryParams = {
-        page: 1,
+        pageIndex: 1,
         pageSize: 10,
         status: 'ENABLED'
     }
@@ -106,8 +106,10 @@ const CommonList = ({
                 keyword: debouncedKeyword
             };
 
-            const data = await initCommonListData(params);
-            setInternalListData(data || []);
+            const { success, data } = await initCommonListData(params);
+            if (success) {
+                setInternalListData(data || []);
+            }
         } catch (error) {
             console.error('获取列表数据失败:', error);
             setInternalListData([]);
@@ -120,7 +122,6 @@ const CommonList = ({
     const currentListData = useMemo(() => {
         return internalListData;
     }, [internalListData]);
-
     // 初始加载和数据变化时更新显示项 - 使用useMemo简化
     useEffect(() => {
         if (!currentListData) return;
@@ -273,7 +274,7 @@ const CommonList = ({
                             style={{ fontSize: '12px' }}
                             ellipsis={{ tooltip: item.status }}
                         >
-                            {optionsConstants.status.find(status => status.value === item.status)?.name || '-'}
+                            {optionsConstants.statusList.find(status => status.value === item.status)?.name || '-'}
                         </Text>
                     </div>
                     <div>

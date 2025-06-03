@@ -21,7 +21,7 @@ export default function WorkoutsList() {
                 value: 'DRAFT'
             }, {
                 label: 'Enabled',
-                value: 'ENABLED'
+                value: 'ENABLED' 
             }, {
                 label: 'Disabled',
                 value: 'DISABLED'
@@ -71,7 +71,7 @@ export default function WorkoutsList() {
                         </Space>
                     );
                 }
-            },
+            },  
             {
                 title: 'Actions',
                 key: 'actions',
@@ -87,7 +87,7 @@ export default function WorkoutsList() {
     /**
      * 设置导航栏按钮
      */
-    useEffect(() => {
+    useEffect(() => { 
         // 设置自定义页面标题
         setCustomPageTitle('Sounds');
 

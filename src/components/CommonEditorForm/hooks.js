@@ -101,7 +101,7 @@ export const useHeaderConfig = (params) => {
         setLoading,
         isBack,
         enableDraft = false,
-        statusList = optionsConstants.displayStatus,//状态列表
+        statusList = optionsConstants.displayStatus1,//状态列表
         config,
         moduleKey,
         operationName,

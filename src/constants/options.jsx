@@ -6,6 +6,11 @@ export const optionsConstants = {
         { name: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Enabled</div>, value: 'ENABLED' },
         { name: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Disabled</div>, value: 'DISABLED' },
     ],
+    displayStatus1: [
+        { name: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Save as Draft</div>, value: 'DRAFT' },
+        { name: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Save as Enabled</div>, value: 'ENABLED' },
+        { name: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Save as Disabled</div>, value: 'DISABLED' },
+    ],
     userStatus: [
         { name: <div>Enabled <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },
         { name: <div>Disabled <CloseCircleFilled style={{ marginLeft: '5px', color: "#ff4d4f" }} /></div>, value: 2 },
@@ -19,10 +24,10 @@ export const optionsConstants = {
         { name: <div><CloseOutlined style={{ color: "#ff4d4f", fontSize: '18px' }} /></div>, value: 0 },
     ],
     testStatus: ['Draft1', 'Enabled1', 'Disabled1'],//用于测试后期删除
-    status: [
-        { name: 'Draft', value: 'DRAFT' },
-        { name: 'Enabled', value: 'ENABLED' },
-        { name: 'Disabled', value: 'DISABLED' },
+    statusList: [
+        { label: 'Draft', value: 'DRAFT' },
+        { label: 'Enabled', value: 'ENABLED' },
+        { label: 'Disabled', value: 'DISABLED' },
     ],
     difficulty: [
         { name: 'Beginner', value: 0 },

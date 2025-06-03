@@ -456,7 +456,9 @@ function ConfigurableTable({
             if (dataSource.length === 0) {
                 res = await fetchTableData(moduleKey, {
                     ...paginationParams.current,
-                    ...activeFilters.current
+                    ...activeFilters.current,
+                    orderBy:'id',
+                    orderDirection:'DESC',
                 }, { signal: abortControllerRef.current.signal });
             }
 
@@ -564,7 +566,7 @@ function ConfigurableTable({
                         const key = text;
                         const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
                         // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
-                        const DisplayText = optionConfig ? (optionConfig.name ?? text) : text;
+                        const DisplayText = optionConfig ? (optionConfig.name || optionConfig.label || text) : text;
                         // 如果 iconOptions 和 options 都没有为当前 key 提供配置，则返回原始文本
                         if (!optionConfig) {
                             return text;

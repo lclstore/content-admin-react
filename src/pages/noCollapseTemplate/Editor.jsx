@@ -6,7 +6,7 @@ import { commonListData, filterSections } from '@/pages/Data';
 import {
     ThunderboltOutlined,
     TagsOutlined,
-    PictureOutlined,
+    PictureOutlined, 
     VideoCameraOutlined,
     SettingOutlined
 } from '@ant-design/icons';
@@ -128,7 +128,7 @@ export default function UserEditorWithCommon() {
         //     mode: 'single',
         //     name: 'layoutType',
         //     label: 'layoutType',
-        //     options: 'status',
+        //     options: 'statusList',
         //     required: true,
         // },
         // {
@@ -289,7 +289,7 @@ export default function UserEditorWithCommon() {
             disabled: false,
             name: 'status2',
             label: 'Status2',
-            options: 'status',
+            options: 'statusList',
             required: true,
 
         },
@@ -393,7 +393,7 @@ export default function UserEditorWithCommon() {
                 filterSections: filterSections,
             }}
             // isCollapse={true}
-            initFormData={initFormData}
+            initFormData={initFormData} 
             formType="advanced"
             enableDraft={true}
             fieldsToValidate={['name', 'birthday']}

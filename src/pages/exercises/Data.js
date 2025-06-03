@@ -182,44 +182,7 @@ export const DEFAULT_VISIBLE_COLUMN_KEYS = [
 // 定义 Equipment 选项 (用于编辑器)
 export const equipmentOptions = ['Dumbbell', 'Resistance band', 'None', 'Bodyweight', 'Kettlebells', 'Yoga mat', 'Chair', 'Bed', 'Cycling Bike']; // Added more based on mock data, adjust as needed
 
-// 定义筛选器配置
-export const filterSections = [
-    {
-        title: 'Status',
-        key: 'status',
-        options: ['Draft', 'Enabled', 'Disabled'],
-    },
-    {
-        title: 'Structure Type',
-        key: 'structureType',
-        options: ['Warm Up', 'Main', 'Cool Down']
-    },
-    {
-        title: 'Gender',
-        key: 'gender',
-        options: ['Female', 'Male']
-    },
-    {
-        title: 'Difficulty',
-        key: 'difficulty',
-        options: ['Beginner', 'Intermediate', 'Advanced']
-    },
-    {
-        title: 'Equipment',
-        key: 'equipment',
-        options: ['No equipment', 'Chair']
-    },
-    {
-        title: 'Position',
-        key: 'position',
-        options: ['Standing', 'Seated'],
-    },
-    {
-        title: 'Injured',
-        key: 'injured',
-        options: ['Shoulder', 'Back', 'Wrist', 'Ankle', 'Hip', 'None'],
-    }
-];
+
 
 // 用于编辑器"结构(Structure)"部分的模拟数据
 // 恢复为直接的数组结构

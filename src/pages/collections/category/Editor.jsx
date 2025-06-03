@@ -174,7 +174,7 @@ export default function UserEditorWithCommon() {
                     content: ({ getFieldValue }) => {      // content 支持函数
                         console.log('11111111')
                         const status = getFieldValue('showTypeCode');
-                        console.log('status',status)
+                        console.log('status', status)
                         // return status
                         //     ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
                         //     : null;
@@ -217,19 +217,27 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            label: 'Workout Data',
+            label: 'Workout',
             name: 'workoutData',
             fields: [
                 {
-                    type: 'displayText',
-                    name: 'duration',
-                    label: 'Duration (Min):',
-                },
-                {
-                    type: 'displayText',
-                    name: 'calorie',
-                    label: 'Calorie:',
-
+                    type: 'structureList',
+                    name: 'musicIdList',
+                    // renderItemMata: renderItemMata,
+                    label: 'Musics',
+                    formterList: (dataList, formValues) => {
+                        return dataList.map(item => {
+                            return {
+                                bizMusicId: item.id,
+                                displayName: item.name,
+                                premium: formValues.premium,
+                            }
+                        });
+                    },
+                    dataList: [],
+                    rules: [
+                        { required: true, message: 'Please add at least one music' },
+                    ]
                 },
             ]
         }
@@ -249,53 +257,6 @@ export default function UserEditorWithCommon() {
     const renderItemMata = (item) => {
         return <div>{item.displayName}</div>
     }
-    //折叠面板展开
-    const handleCollapseChange = (activeKeys, form) => {
-        // 如果在此函数内更新了 formFields，可以在更新回调中获取最新值
-        if (activeKeys[0] == 'workoutData') {
-            setFormFields(prevFields => {
-                const newFields = [...prevFields]; // 进行某些更新操作、
-                const formValues = form.getFieldsValue(true);//表单数据
-                const preview = formValues.exercisePreviewDuration || 0;
-                const execution = formValues.exerciseExecutionDuration || 0;
-                const introDuration = formValues.introDuration || 0;
-
-                let loopCount = 0;
-                let workoutCalorie = 0;
-                const MET = 1
-
-                const structureList = newFields.filter(item => Array.isArray(item.dataList) && item.dataList.length > 0);
-                if (structureList.length > 0) {
-                    structureList.forEach((item, index) => {
-                        const reps = formValues[`reps${index == 0 ? '' : index}`] | 0;
-                        loopCount = reps * item.dataList.length;
-                        const calories = MET * 75 / 3600 * execution * reps * item.dataList.length;
-                        workoutCalorie += calories
-                    })
-                    const workOutTime = (preview + execution) * loopCount;
-                    const workoutDurationRaw = introDuration + workOutTime;
-                    // 如果时长小于30，则向下取整，否则向上取整
-                    const workoutDuration = workoutDurationRaw < 30
-                        ? Math.floor(workoutDurationRaw)
-                        : Math.ceil(workoutDurationRaw);
-                    form.setFieldsValue({
-                        duration: workoutDuration,
-                        calorie: Math.ceil(workoutCalorie)//向上取整
-                    });
-                } else {
-                    form.setFieldsValue({
-                        duration: 0,
-                        calorie: 0
-                    });
-                }
-                console.log(newFields);
-
-                return newFields;
-            });
-        }
-
-
-    };
     const initCommonListData = (params) => {
         return new Promise(resolve => {
             request.get({
@@ -313,8 +274,6 @@ export default function UserEditorWithCommon() {
             fields={formFields}
             // 提供更新配置项回调
             onFormFieldsChange={handleFormFieldsChange}
-            // 提供折叠面板展开回调
-            onCollapseChange={handleCollapseChange}
             // 其他基本配置
             // renderItemMata={renderItemMata}
             commonListConfig={{

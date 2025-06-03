@@ -4,11 +4,10 @@ import {
     PlusOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import TagSelector from '@/components/TagSelector/TagSelector';
-import { statusIconMap } from '@/constants';
-// import { STATUS_ICON_MAP, RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
+import { HeaderContext } from '@/contexts/HeaderContext.jsx';
+import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable.jsx';
+import TagSelector from '@/components/TagSelector/TagSelector.jsx';
+// import { STATUS_ICON_MAP, statusIconMap,RESULT_ICON_MAP, FILE_STATUS_ICON_MAP } from '@/constants/app';
 import {
     statusOrder,
     difficultyOrder,
@@ -16,9 +15,9 @@ import {
     filterSections,
     BATCH_FILE_OPTIONS,
     MOCK_LANG_OPTIONS
-} from './Data';
+} from './Data.js';
 
-export default function Temlates() {
+export default function () {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -37,6 +36,16 @@ export default function Temlates() {
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
     const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
     const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
+
+    const filterSections1 = [
+        {
+            title: 'Status',
+            key: 'statusList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: "status",
+        }
+    ];
+
 
     // 在Modal打开时重置表单
     useEffect(() => {
@@ -69,7 +78,7 @@ export default function Temlates() {
      * 导航到训练计划编辑页面
      */
     const handleEdit = useCallback((record) => {
-        navigate(`/plans/temolatesEditor?id=${record.id}`);
+        navigate(`/plans/resourcesEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -77,7 +86,7 @@ export default function Temlates() {
      * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
      */
     const handleDuplicate = useCallback((record) => {
-        navigate(`/plans/temolatesEditor?id=${record.id}`);
+        navigate(`/plans/resourcesEditor?id=${record.id}`);
     }, [navigate]);
 
     /**
@@ -151,36 +160,30 @@ export default function Temlates() {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             { title: 'Name', sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status], dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            // {
+            //     title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
+            //     sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
+            //     width: 150,
+            //     visibleColumn: 2,
+            //     render: (duration) => {
+            //         if (!duration) return '-';
+            //         const minutes = Math.floor(duration / 60);
+            //         const seconds = duration % 60;
+            //         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            //     }
+            // },
             {
-                title: 'Duration (Min)', align: 'center', dataIndex: 'duration', key: 'duration',
-                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
-                width: 150,
-                visibleColumn: 2,
-                render: (duration) => {
-                    if (!duration) return '-';
-                    const minutes = Math.floor(duration / 60);
-                    const seconds = duration % 60;
-                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }
-            },
-            {
-                title: 'Status',
-                dataIndex: 'status',
-                key: 'status',
+                title: 'Status', dataIndex: 'status', key: 'status',
                 sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
-                iconOptions: statusIconMap,
                 options: 'displayStatus',
                 width: 120,
                 visibleColumn: 0
             },
-            {
-                title: 'Generate Status', dataIndex: 'generateStatus', key: 'generateStatus',
-                options: 'displayStatus',
-                width: 120,
-                visibleColumn: 0
-            },
-            { title: 'Workout Num', dataIndex: 'workoutNum', key: 'workoutNum', width: 350, visibleColumn: 1 },
-
+            { title: 'Application', dataIndex: 'application', key: 'application', width: 130, visibleColumn: 1 },
+            { title: 'Cover Image', mediaType: 'image', dataIndex: 'coverImage', key: 'coverImage', width: 130, visibleColumn: 1 },
+            { title: 'Detail Image', mediaType: 'image', dataIndex: 'detailImage', key: 'detailImage', width: 130, visibleColumn: 1 },
+            { title: 'Thumbnail Image', mediaType: 'image', dataIndex: 'thumbnailImage', key: 'thumbnailImage', width: 130, visibleColumn: 1 },
+            { title: 'Complete Image', mediaType: 'image', dataIndex: 'completeImage', key: 'completeImage', width: 130, visibleColumn: 1 },
             {
                 title: 'Actions',
                 key: 'actions',
@@ -196,6 +199,7 @@ export default function Temlates() {
             },
         ];
     }, [isButtonVisible, handleActionClick]);
+
     /**
      * 处理行选择变化
      * 用于批量操作功能
@@ -326,7 +330,7 @@ export default function Temlates() {
         }
 
         // 正常导航到编辑页面
-        navigate(`/plans/temolatesEditor?id=${record.id}`);
+        navigate(`/plans/resourcesEditor?id=${record.id}`);
     }, [navigate, actionClicked]);
 
     /**
@@ -377,16 +381,16 @@ export default function Temlates() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Temlates');
+        setCustomPageTitle('Resources');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Temlates',
+                text: 'Create Resources',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/plans/temolatesEditor'),
+                onClick: () => navigate('/plans/resourcesEditor'),
             }
         ]);
 
@@ -461,7 +465,6 @@ export default function Temlates() {
                 dataSource={filteredDataForTable}
                 rowKey="id"
                 loading={loading}
-                onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
                     placeholder: "Search name or ID...",
@@ -470,7 +473,7 @@ export default function Temlates() {
                 }}
                 showColumnSettings={false}
                 filterConfig={{
-                    filterSections: filterSections,
+                    filterSections: filterSections1,
                     activeFilters: selectedFilters,
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,

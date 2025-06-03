@@ -29,7 +29,7 @@ export default function CollectionsList() {
     // 路由监听
     useEffect(() => {
         setShowTab(!location.pathname.includes("editor"))
-    }, [location]);
+    }, [location.pathname]);
     function onChange(key) {
         // localDown(key)
         // const tabBarName = tabItems.find(item => item.key === key).label;

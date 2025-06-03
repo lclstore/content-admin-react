@@ -25,6 +25,7 @@ import TagSelector from '@/components/TagSelector/TagSelector';//标签选择器
 import StructureList from '@/components/StructureList/StructureList';//结构化排序列表组件
 import styles from './style.module.css';
 import { dateRangeKeys } from '@/constants/app';
+import { useStore } from "@/store/index.js";
 import { optionsConstants } from '@/constants';
 import settings from '@/config/settings';
 const { file: fileSettings } = settings;
@@ -74,6 +75,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
  * @returns {ReactNode} 渲染的表单控件
  */
 export const renderFormControl = (field, options = {}) => {
+    const optionsBase = useStore(i => i.optionsBase)
     // 删除不必要的console.log
 
     // 表单字段的标准属性
@@ -254,7 +256,7 @@ export const renderFormControl = (field, options = {}) => {
             //选项处理使用统一的options映射
             const fieldCopy = JSON.parse(JSON.stringify(field));
             if (field.options && typeof field.options === 'string') {
-                fieldCopy.options = optionsConstants[field.options];
+                fieldCopy.options = optionsBase[field.options];
             }
 
             // 确保完全移除key属性

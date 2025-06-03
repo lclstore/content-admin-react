@@ -41,13 +41,15 @@ export default function UserEditorWithCommon() {
             // renderItemMata: renderItemMata,
             label: 'Musics',
             formterList: (dataList, formValues) => {
-                return dataList.map(item => {
-                    return {
-                        bizMusicId: item.id,
-                        displayName: item.name,
-                        premium: formValues.premium,
-                    }
-                });
+                if (dataList && dataList.length > 0) {
+                    return dataList.map(item => {
+                        return {
+                            bizMusicId: item.id,
+                            displayName: item.name,
+                            premium: formValues.premium,
+                        }
+                    });
+                }
             },
             dataList: [],
             rules: [

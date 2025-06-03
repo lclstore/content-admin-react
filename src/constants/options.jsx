@@ -1,4 +1,5 @@
 import { EditFilled, CheckCircleFilled, CloseCircleFilled, LoadingOutlined, CheckOutlined, CloseOutlined, SyncOutlined } from '@ant-design/icons';
+
 export const optionsConstants = {
     displayStatus: [
         { name: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Draft</div>, value: 'DRAFT' },

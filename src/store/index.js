@@ -1,16 +1,20 @@
 import { create } from 'zustand'
+import { optionsConstants } from "./options.jsx"
 
 export const useStore= create((set) => ({
   // 全局loading
   loadingGlobal: false,
-  setLoadingGlobal: (data) => set({ loadingGlobal: data }),
+  setLoadingGlobal: (loadingGlobal) => set({ loadingGlobal }),
   // 全局的 navigate
   navigate:null,
-  setNavigate: (data) => set({ navigate: data }),
+  setNavigate: (navigate) => set({ navigate }),
   // 全局的 Location 信息
   location:null,
-  setLocation: (data) => set({ location: data }),
+  setLocation: (location) => set({ location }),
   // user message 用户信息
   userInfo: {},
-  setUserInfo: (data) => set({ userInfo: data }),
+  setUserInfo: (userInfo) => set({ userInfo }),
+  // 映射表信息
+  optionsBase:{...optionsConstants},
+  optionsBaseAdd:(optionsBase) => set((state) => ({ optionsBase:{...state.optionsBase,  ...optionsBase} })),
 }))

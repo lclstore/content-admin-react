@@ -1,7 +1,7 @@
 import axios from 'axios'
 import settings from "@/config/settings.js";
-import { message as Message } from "antd"
-import { useStore } from "@/store"
+import {message as Message} from "antd"
+import {useStore} from "@/store/index.js"
 // 从环境变量获取数据
 const VITE_ENV = import.meta.env.VITE_ENV;
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -12,7 +12,7 @@ const axios_default = axios.create({
     timeout: 0,
 })
 // const Loading = useStore(state => state.setLoadingGlobal);
-const { setLoadingGlobal } = useStore.getState();
+const {setLoadingGlobal} = useStore.getState();
 const Loading = setLoadingGlobal;
 
 // message弹窗管理器
@@ -39,6 +39,7 @@ class MessageC {
 }
 
 let message = new MessageC()
+
 // load是否要load状态 ，customBox是否进行返回提示
 /**
  * @param {String} url - 请求地址
@@ -55,7 +56,8 @@ class Request {
     constructor(config) {
         this.config = {
             ...config,
-            callback: config.callback || (() => { }),
+            callback: config.callback || (() => {
+            }),
             warningPoint: config.warningPoint ? config.warningPoint : true,
             success: config.success,
             method: config.method || 'post',
@@ -63,11 +65,20 @@ class Request {
             url: (config.baseUrl || baseUrl) + config.url,
         }
     }
+
     send() {
         return new Promise((resolve, reject) => {
             let loading = Loading, config = this.config;
             if (config.load) {
                 loading(true)
+            }
+            // get 请求做一些处理,array 转化为字符串 array
+            if(config.method === 'get' && config.data){
+                Object.keys(config.data).some(item => {
+                    if (config.data[item] && config.data[item].constructor === Array) {
+                        config.data[item] = config.data[item].toString();
+                    }
+                });
             }
             // resInit init
             const resInit = config.resInit || settings.request.resInit;
@@ -85,7 +96,7 @@ class Request {
                     useStore.getState().navigate('/login')
                 }
                 if (res.data.success) {
-                    config.point && message.open({ content: "success", type: 'success' }, 'success')
+                    config.point && message.open({content: "success", type: 'success'}, 'success')
                     config.success && config.success(res)
                 } else {
                     // error
@@ -102,16 +113,32 @@ class Request {
                 if (config.load) {
                     loading(false)
                 }
-                message.open({ content: err, type: 'error' }, 'error')
-                config.callback({ error: err })
+                message.open({content: err, type: 'error'}, 'error')
+                config.callback({error: err})
                 console.log(err)
             })
         })
     }
-    async post() { this.config.method = "post"; await this.send() }
-    async get() { this.config.method = "get"; await this.send() }
-    async put() { this.config.method = "put"; await this.send() }
-    async delete() { this.config.method = "post"; await this.send() }
+
+    async post() {
+        this.config.method = "post";
+        await this.send()
+    }
+
+    async get() {
+        this.config.method = "get";
+        await this.send()
+    }
+
+    async put() {
+        this.config.method = "put";
+        await this.send()
+    }
+
+    async delete() {
+        this.config.method = "post";
+        await this.send()
+    }
 }
 
 axios_default.interceptors.request.use(config => {

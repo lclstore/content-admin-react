@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Space, Popover, Badge } from 'antd';
 import { FilterOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import styles from './FiltersPopover.module.css';
-import { optionsConstants } from '@/constants/options';
+import { useStore } from "@/store/index.js";
+
 /**
  * 通用过滤器/设置 Popover 组件
  * @param {Array<Object>} filterSections - 过滤器区域配置 (仅过滤器类型需要)
@@ -40,7 +41,7 @@ const FiltersPopover = ({
     const [isVisible, setIsVisible] = useState(false);
     const prevActiveFiltersRef = useRef(activeFilters);
     const prevIsVisibleRef = useRef(isVisible);
-
+    const optionsBase = useStore(i => i.optionsBase)
     useEffect(() => {
         if (!prevIsVisibleRef.current && isVisible) {
             console.log('[FiltersPopover] Opening, received activeFilters:', JSON.stringify(activeFilters));
@@ -131,7 +132,7 @@ const FiltersPopover = ({
                 {filterSections.map((section, index) => {
                     // 处理字符串类型的 options
                     if (typeof section.options === 'string') {
-                        section.options = optionsConstants[section.options];
+                        section.options = optionsBase[section.options];
                     }
 
                     return (

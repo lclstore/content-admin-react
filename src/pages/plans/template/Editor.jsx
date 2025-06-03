@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import CommonEditorForm from '@/components/CommonEditorForm';
-import { mockUsers } from './Data';
-import { validateEmail, validatePassword } from '@/utils';
+import CommonEditorForm from '@/components/CommonEditorForm/index.jsx';
+import { mockUsers } from './Data.js';
+import { validateEmail, validatePassword } from '@/utils/index.js';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
@@ -12,6 +12,7 @@ export default function UserEditorWithCommon() {
     // 初始用户数据状态--可设默认值
     const initialValues = {
         layoutType: 1,
+        days:28
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
         // // 为联动选择器设置默认值 - 使用数字类型
@@ -45,12 +46,18 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'duration',
             label: 'Duration (Min)',
-            options: [
-                { name: '10-15', value: '10-15' },
-                { name: '15-25', value: '15-25' },
-                { name: '25+', value: '25+' },
-            ],
+            options: "BizTemplateDurationEnums",
             required: true,
+        },
+        {
+            type: 'numberStepper',
+            name: 'days',
+            label: 'Days',
+            required: true,
+            min: 1,
+            max: 30,
+            step: 1,
+            formatter: (value) => `${value}`,
         },
         {
             type: 'inputGroup',

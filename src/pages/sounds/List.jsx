@@ -111,7 +111,6 @@ export default function WorkoutsList() {
 
     //渲染表格组件
     return (
-        <div className="workoutsContainer page-list">
             <ConfigurableTable
                 columns={allColumnDefinitions}
                 moduleKey="sound"
@@ -123,6 +122,5 @@ export default function WorkoutsList() {
                     filterSections: filterSections,
                 }}
             />
-        </div>
     );
 }   

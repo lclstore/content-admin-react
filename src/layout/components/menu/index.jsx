@@ -14,29 +14,30 @@ export default function SideMenu() {
         let targetKey = null;
 
         // 1. 处理根路径
-        if (pathname === '/') {
-            const defaultMenu = menuItems.find(item => item.path === '/exercises');
-            if (defaultMenu) {
-                targetKey = defaultMenu.key;
-            }
-        } else {
-            // 2. 尝试查找直接匹配的可见菜单项
-            const directMatch = menuItems.find(item => item.path === pathname && !item.hideInMenu);
-            if (directMatch) {
-                targetKey = directMatch.key;
-            } else {
-                // 3. 如果没有直接匹配，尝试查找关联的 List 菜单项 (针对 editor/detail 页)
-                const pathParts = pathname.match(/^\/([a-zA-Z0-9-]+)-(editor|detail)$/);
-                if (pathParts && pathParts[1]) {
-                    const baseName = pathParts[1]; // 例如从 "/users-editor" 提取 "users"
-                    const listPath = `/${baseName}-list`;
-                    const listMenu = menuItems.find(item => item.path === listPath);
-                    if (listMenu) {
-                        targetKey = listMenu.key; // 高亮对应的 List 菜单项
-                    }
-                }
-            }
-        }
+        // if (pathname === '/') {
+        //     const defaultMenu = menuItems.find(item => item.path === '/exercises');
+        //     if (defaultMenu) {
+        //         targetKey = defaultMenu.key;
+        //     }
+        // } else {
+        //     // 2. 尝试查找直接匹配的可见菜单项
+        //     const directMatch = menuItems.find(item => item.path === pathname && !item.hideInMenu);
+        //     if (directMatch) {
+        //         targetKey = directMatch.key;
+        //     } else {
+        //         // 3. 如果没有直接匹配，尝试查找关联的 List 菜单项 (针对 editor/detail 页)
+        //         const pathParts = pathname.match(/^\/([a-zA-Z0-9-]+)-(editor|detail)$/);
+        //         if (pathParts && pathParts[1]) {
+        //             const baseName = pathParts[1]; // 例如从 "/users-editor" 提取 "users"
+        //             const listPath = `/${baseName}-list`;
+        //             const listMenu = menuItems.find(item => item.path === listPath);
+        //             if (listMenu) {
+        //                 targetKey = listMenu.key; // 高亮对应的 List 菜单项
+        //             }
+        //         }
+        //     }
+        // }
+        targetKey = menuItems.find(item => pathname.startsWith(item.active))?.key;
 
         // 4. 设置选中的 Key
         if (targetKey) {

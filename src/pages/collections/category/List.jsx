@@ -80,21 +80,21 @@ export default () => {
             {
                 title: 'Show Type',
                 dataIndex: 'met',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 0
             },
             {
                 title: 'New Start Time',
                 dataIndex: 'structureType',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 0
             },
             {
                 title: 'New End Time',
                 dataIndex: 'difficulty',
-                sorter: (a, b) => statusOrder[a.status] - statusOrder[b.status],
+                sorter: true,
                 width: 120,
                 visibleColumn: 0
             },
@@ -153,6 +153,7 @@ export default () => {
             {/* 可配置表格组件 */}
             <ConfigurableTable
                 moduleKey={'category'}
+                operationName={'list'}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}
             />

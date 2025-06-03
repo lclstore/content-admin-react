@@ -44,8 +44,8 @@ import { debounce, times } from 'lodash';
  * @param {boolean} [props.isInteractionBlockingRowClick] - 接收状态
  * @param {function} [props.getTableList] - 获取表格数据的回调函数
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
+ * @param {string} [props.operationName] - 操作名称
  * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
- * @param {noDataTip} [props.noDataTip] // 没有数据时的提示信息
  */
 function ConfigurableTable({
     columns, // 所有列的定义
@@ -68,7 +68,8 @@ function ConfigurableTable({
     showColumnSettings = true,//当为true时显示列设置按钮
     leftToolbarItems = [], // 左侧工具栏按钮
     getTableList,
-    moduleKey
+    moduleKey,
+    operationName = 'page'
 }) {
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
     const routeLevel = pathSegments.length;
@@ -451,11 +452,11 @@ function ConfigurableTable({
             }
             //外部传入优先使用外部传入的
             if (dataSource.length === 0) {
-                res = await fetchTableData(moduleKey, {
+                res = await fetchTableData(moduleKey, operationName, {
                     ...paginationParams.current,
                     ...activeFilters.current,
-                    orderBy:'id',
-                    orderDirection:'DESC',
+                    orderBy: 'id',
+                    orderDirection: 'DESC',
                 }, { signal: abortControllerRef.current.signal });
             }
 

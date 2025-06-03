@@ -124,7 +124,9 @@ export const useHeaderConfig = (params) => {
         setIsFormDirty,
         fieldsToValidate,
         getLatestValues,
-        initialValues = {} // 确保初始值可用
+        initialValues = {}, // 确保初始值可用
+        getDataAfter,
+        saveBeforeTransform
     } = params;
     const location = useLocation();
 
@@ -249,7 +251,7 @@ export const useHeaderConfig = (params) => {
 
         // 处理数组列表相关数据格式和验证
         hasDataListFields.map(formField => {
-            dataToSave[formField.name] = formField.saveBeforeTransform ? formField.saveBeforeTransform(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
+            dataToSave[formField.name] = saveBeforeTransform ? saveBeforeTransform(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
         });
 
 

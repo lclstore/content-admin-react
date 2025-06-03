@@ -6,6 +6,7 @@ import {useNavigate} from 'react-router';
 import {HeaderContext} from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import {router} from "@/utils/index.js";
+import request from "@/request/index.js";
 
 export default function WorkoutsList() {
     const {setButtons, setCustomPageTitle} = useContext(HeaderContext); // 更新为新的API
@@ -13,22 +14,22 @@ export default function WorkoutsList() {
     //查询条件数组
     const filterSections = [
         {
-            title: 'Status',
-            key: 'statusList',
-            type: 'multiple', // 单选 //multiple 多选
-            options: "statusList",
-        },
-        {
-            title: 'Application',
-            key: 'applicationCodeList',
-            type: 'multiple',
-            options: "BizResourceApplicationEnums",
-        },
-        {
             title: 'Gender',
             key: 'genderCode',
             type: 'multiple',
             options: "BizExerciseGenderEnums",
+        },
+        {
+            title: 'Injured',
+            key: 'applicationCodeList',
+            type: 'multiple',
+            options: "BizExerciseInjuredEnums",
+        },
+        {
+            title: 'File Status',
+            key: 'applicationCodeList',
+            type: 'multiple',
+            options: "BizGenerateTaskStatusEnums",
         },
     ];
 
@@ -37,7 +38,7 @@ export default function WorkoutsList() {
         return [
             {title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1},
             {
-                title: 'Name',
+                title: 'Audio language',
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
@@ -46,18 +47,19 @@ export default function WorkoutsList() {
                 visibleColumn: 1
             },
             {
-                title: 'Status',
+                title: 'File Status',
                 dataIndex: 'status',
                 sorter: true,
                 options: 'displayStatus',
                 width: 120,
             },
             {
-                title: 'Application',
+                title: 'Duration',
                 dataIndex: 'applicationCode',
                 options: 'BizResourceApplicationEnums',
                 width: 120,
             },
+            { title: "Calorie",dataIndex: "calorie" },
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
@@ -65,26 +67,21 @@ export default function WorkoutsList() {
                 options: 'BizExerciseGenderEnums',
                 width: 120,
             },
-            {title: "Cover Image", dataIndex: "coverImgUrl",mediaType: 'image',},
-            {title: "Detail Image", dataIndex: "detailImgUrl",mediaType: 'image',},
-            {title: "Thumbnail Image", dataIndex: "thumbnailImgUrl",mediaType: 'image',},
-            {title: "Complete Image", dataIndex: "completeImgUrl",mediaType: 'image',},
             {
-                title: 'Actions',
-                key: 'actions',
-                fixed: 'right',
-                width: 70,
-                align: 'center',
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'delete'],
-                isShow(record, btnName){
-                    const status = record.status;
-                    // 简单的状态-按钮映射关系
-                    if (status === 'DRAFT' && ['edit', 'duplicate'].includes(btnName)) return true;
-                    if (status === 'DISABLED' && ['edit', 'duplicate', 'enable'].includes(btnName)) return true;
-                    if (status === 'ENABLED' && ['edit','duplicate', 'disable'].includes(btnName)) return true;
-                    return false;
-                }
+                title: 'Injured (Query Param)',
+                dataIndex: 'genderCode',
+                sorter: true,
+                options: 'BizExerciseGenderEnums',
+                width: 120,
             },
+            {
+                title: 'Injured (Actual Result)',
+                dataIndex: 'genderCode',
+                sorter: true,
+                options: 'BizExerciseGenderEnums',
+                width: 120,
+            },
+            {title: "Create Time", dataIndex: "createTime"},
         ];
     }, []);
 
@@ -118,7 +115,7 @@ export default function WorkoutsList() {
         <>
             <ConfigurableTable
                 columns={allColumnDefinitions}
-                moduleKey="resource"
+                moduleKey="workout"
                 searchConfig={{
                     placeholder: "Search name or ID...",
                 }}
@@ -129,4 +126,4 @@ export default function WorkoutsList() {
             />
         </>
     );
-}   
+}

@@ -75,7 +75,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
  * @returns {ReactNode} 渲染的表单控件
  */
 export const renderFormControl = (field, options = {}) => {
-    const optionsBase = useStore(i => i.optionsBase)
+    const optionsBase = useStore.getState().optionsBase;
     // 删除不必要的console.log
 
     // 表单字段的标准属性

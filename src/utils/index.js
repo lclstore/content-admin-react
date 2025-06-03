@@ -245,3 +245,30 @@ export function getMediaDurationByUrl(url) {
     };
   });
 }
+
+/**
+ * 提取 URL 文件扩展名并归类为 audio / video / image / other
+ * @param {string} url - 文件地址
+ * @returns { 'audio' | 'video' | 'image' | 'other' }
+ */
+export function getFileCategoryFromUrl(url) {
+  const audioTypes = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a']
+  const videoTypes = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv']
+  const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
+
+  try {
+    const urlObj = new URL(url)
+    const nameMatch = urlObj.search.match(/name=([^&]+)/)
+    let filename = nameMatch ? nameMatch[1] : urlObj.pathname.split("/").pop()
+
+    const ext = filename.split('.').pop().toLowerCase()
+
+    if (audioTypes.includes(ext)) return 'audio'
+    if (videoTypes.includes(ext)) return 'video'
+    if (imageTypes.includes(ext)) return 'image'
+    return 'other'
+  } catch (err) {
+    console.error("Invalid URL:", err)
+    return 'other'
+  }
+}

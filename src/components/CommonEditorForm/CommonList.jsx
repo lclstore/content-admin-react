@@ -14,10 +14,12 @@ import {
     PlusOutlined,
     FilterOutlined,
     CaretRightOutlined,
-    LoadingOutlined
+    LoadingOutlined,
+    PauseOutlined
 } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import { optionsConstants } from '@/constants/options';
+import { getFileCategoryFromUrl } from '@/utils';
 import styles from './CommonList.module.css';
 
 // 创建防抖hook
@@ -84,6 +86,54 @@ const CommonList = ({
     const scrollableContainerRef = useRef(null);
     const [internalListData, setInternalListData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1); // 添加当前页码状态
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef(null);
+    const [currentPlayingUrl, setCurrentPlayingUrl] = useState(null);
+
+    // 处理音频播放/暂停
+    const handleAudioToggle = useCallback((url) => {
+        if (!url) return;
+
+        if (currentPlayingUrl === url) {
+            // 如果点击的是当前正在播放的音频
+            if (isPlaying) {
+                audioRef.current?.pause();
+            } else {
+                audioRef.current?.play();
+            }
+            setIsPlaying(!isPlaying);
+        } else {
+            // 如果点击的是新的音频
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = url;
+                audioRef.current.play();
+                setCurrentPlayingUrl(url);
+                setIsPlaying(true);
+            } else {
+                // 如果还没有创建audio元素，创建一个新的
+                const audio = new Audio(url);
+                audio.addEventListener('ended', () => {
+                    setIsPlaying(false);
+                    setCurrentPlayingUrl(null);
+                });
+                audioRef.current = audio;
+                audio.play();
+                setCurrentPlayingUrl(url);
+                setIsPlaying(true);
+            }
+        }
+    }, [isPlaying, currentPlayingUrl]);
+
+    // 组件卸载时清理音频
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, []);
 
     // 默认的搜索方法
     const defaultSearchCommonListData = () => {
@@ -263,13 +313,28 @@ const CommonList = ({
     }, [onAddItem, selectionMode, selectedItemId, styles]);
     // 默认的列表项渲染函数
     const defaultRenderItemMeta = useCallback((item) => {
+        // 获取文件类型
+        const fileType = getFileCategoryFromUrl(item.audioUrl || item.animationPhoneUrl);
+        const fileUrl = item.audioUrl || item.animationPhoneUrl;
+
         return <List.Item.Meta
             avatar={
                 <div className={styles.itemAvatar}>
-                    <Avatar shape="square" size={64} src={item.audioUrl || item.animationPhoneUrl} />
-                    <CaretRightOutlined
-                        className={styles.playIcon}
-                    />
+                    <Avatar shape="square" size={64} src={fileUrl} />
+                    {fileType === 'audio' && (
+                        <div
+                            className={styles.playIcon}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleAudioToggle(fileUrl);
+                            }}
+                        >
+                            {currentPlayingUrl === fileUrl && isPlaying ?
+                                <PauseOutlined style={{ fontSize: '24px' }} /> :
+                                <CaretRightOutlined style={{ fontSize: '24px' }} />
+                            }
+                        </div>
+                    )}
                 </div>
             }
             title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.name || item.displayName || item.title}</Text>}
@@ -292,7 +357,7 @@ const CommonList = ({
                 </div>
             }
         />
-    }, [renderListItem]);
+    }, [renderListItem, handleAudioToggle, currentPlayingUrl, isPlaying]);
 
     return (
 

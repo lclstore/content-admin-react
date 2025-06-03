@@ -113,23 +113,19 @@ const CommonList = ({
             const { success, data, totalCount } = await initCommonListData(params);
 
             if (success) {
-                let newData = [];
                 if (page === 1) {
                     // 如果是第一页，直接设置数据
-                    newData = data || [];
-                    setInternalListData(newData);
-                    setDisplayedItems(newData);
+                    setInternalListData(data || []);
+                    setDisplayedItems(data || []);
                 } else {
-                    // 如果不是第一页，追加数据
-                    newData = [...internalListData, ...(data || [])];
+                    // 如果不是第一页，追加数据到现有数据后面
+                    const newData = [...displayedItems, ...(data || [])];
                     setInternalListData(newData);
                     setDisplayedItems(newData);
                 }
-                // 调试日志
-                console.log('当前数据长度:', newData.length, '总数据量:', totalCount, '是否还有更多:', newData.length < totalCount);
 
-                // 根据当前数据长度和总数来判断是否还有更多数据
-                setHasMore(newData.length < totalCount);
+                // 根据当前显示的数据长度和总数来判断是否还有更多数据
+                setHasMore((displayedItems.length + (data || []).length) < totalCount);
             }
         } catch (error) {
             console.error('获取列表数据失败:', error);
@@ -342,21 +338,16 @@ const CommonList = ({
                     dataLength={displayedItems.length}
                     next={loadMoreItems}
                     hasMore={hasMore}
-                    loader={
-                        <div style={{ textAlign: 'center', padding: '10px' }}>
-                            <Spin size="small" /> Loading...
-                        </div>
-                    }
                     endMessage={
-                        !loading && !hasMore && displayedItems.length > 0 && (
-                            <div style={{ textAlign: 'center', padding: '10px', color: '#aaa' }}>
-                                No more data
+                        displayedItems.length > 0 && (
+                            <div style={{ textAlign: 'center', padding: '10px', color: '#999' }}>
+                                no more data
                             </div>
                         )
                     }
                     scrollableTarget={scrollableId}
                 >
-                    <Spin spinning={loading}>
+                    <Spin spinning={loading} tip="Loading...">
                         <List
                             itemLayout="horizontal"
                             dataSource={displayedItems}

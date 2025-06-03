@@ -45,7 +45,7 @@ const SortableItemRenderer = React.memo(({
     const wrapperClassName = `structure-list-item item-wrapper${isExpanded ? ' expanded' : ''}`;
 
     const defaultRenderItemMeta = useCallback((currentItem) => {
-        const statusObj = optionsConstants.status.find(status => status.value === currentItem.status);
+        const statusObj = optionsConstants.statusList.find(status => status.value === currentItem.status);
         const statusName = statusObj ? statusObj.name : '-';
 
         return (
@@ -222,6 +222,7 @@ const StructureList = ({
 
     // 处理CommonList中选中项变更
     const handleCommonListItemSelect = useCallback((selectedItem) => {
+        debugger
         // 更新临时选中的项
         setTempSelectedItem(selectedItem);
     }, []);
@@ -289,8 +290,6 @@ const StructureList = ({
 
     useEffect(() => {
         if (selectedItemFromList && typeof onItemAdded === 'function') {
-            console.log('selectedItemFromList', selectedItemFromList);
-
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态
             if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
@@ -301,7 +300,6 @@ const StructureList = ({
     }, [selectedItemFromList]);
 
     if (!Array.isArray(dataList) || dataList.length === 0) return null;
-
     return (
         <>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event) => handleDragEnd(event, name)}>

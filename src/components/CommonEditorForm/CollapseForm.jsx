@@ -377,7 +377,6 @@ const CollapseForm = ({
 
     // 接收左侧列表添加item数据
     useEffect(() => {
-        console.log('selectedItemFromList', selectedItemFromList);
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
             // 查找所有具有 isListData 属性的面板

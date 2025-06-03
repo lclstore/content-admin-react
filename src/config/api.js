@@ -56,10 +56,10 @@ export const uploadFile = async function ({ file, dirKey }) {
     return returnData
 }
 // 获取公共table列表
-export const getPublicTableList = async (moduleKey, params) => {
+export const getPublicTableList = async (moduleKey, operationName, params) => {
     return new Promise(resolve => {
         request.get({
-            url: `/${moduleKey}/page`,
+            url: `/${moduleKey}/${operationName}`,
             load: true,
             data: params,
             callback: res => resolve(res?.data)

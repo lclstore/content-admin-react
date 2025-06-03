@@ -66,3 +66,53 @@
     font-size: 18px;
     color: #fff;
 }
+
+/* 音频播放器和头像样式 */
+.item-avatar {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.item-avatar .ant-avatar {
+    display: block;
+}
+
+.play-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
+    color: #fff;
+    pointer-events: none;
+}
+
+.audio-preview {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.audio-preview-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    color: #11cc88;
+    border: 2px solid #11cc88;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.audio-preview-box:hover {
+    border-color: #0faa77;
+    color: #0faa77;
+}

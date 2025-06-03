@@ -242,6 +242,20 @@ export const useHeaderConfig = (params) => {
     const executeSave = async (dataToSave, status = null) => {
 
         setLoading(true);
+        // 处理数组列表相关数据格式和验证
+        const hasDataListFields = collapseFormConfigRef.current.filter(
+            formField => Array.isArray(formField.dataList)
+        );
+
+        // 处理数组列表相关数据格式和验证
+        hasDataListFields.map(formField => {
+            dataToSave[formField.name] = formField.formterList ? formField.formterList(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
+        });
+
+
+        console.log(dataToSave);
+
+
         //统一处理密码字段--加密
         const passwordField = collapseFormConfigRef.current.find(field => field.type === 'password');
         if (passwordField) {
@@ -344,36 +358,36 @@ export const useHeaderConfig = (params) => {
                 hasStructureListFields.forEach(formField => {
                     dataListValidate(formField, setActiveCollapseKeys);
                 });
-                // 处理数组列表相关数据格式和验证
-                const hasDataListFields = currentFormFields.filter(
-                    formField => Array.isArray(formField.dataList)
-                );
+                // // 处理数组列表相关数据格式和验证
+                // const hasDataListFields = currentFormFields.filter(
+                //     formField => Array.isArray(formField.dataList)
+                // );
 
 
-                // 处理数组列表相关数据格式和验证
-                const dataListValues = hasDataListFields.map(formField => {
-                    const dataListObject = {
-                        [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)
-                    };
+                // // 处理数组列表相关数据格式和验证
+                // const dataListValues = hasDataListFields.map(formField => {
+                //     const dataListObject = {
+                //         [formField.dataKey]: formField.formterList ? formField.formterList(formField.dataList) : formField.dataList.map(item => item.id)
+                //     };
 
-                    if (formField.length > 0) {
-                        formField.fields.forEach(subField => {
-                            const baseName = subField.name.replace(/\d+$/, '');
-                            const value = dataToSave[subField.name];
-                            if (value !== undefined) {
-                                dataListObject[baseName] = value;
-                                delete dataToSave[subField.name];
-                            }
-                        });
-                    }
+                //     if (formField.length > 0) {
+                //         formField.fields.forEach(subField => {
+                //             const baseName = subField.name.replace(/\d+$/, '');
+                //             const value = dataToSave[subField.name];
+                //             if (value !== undefined) {
+                //                 dataListObject[baseName] = value;
+                //                 delete dataToSave[subField.name];
+                //             }
+                //         });
+                //     }
 
-                    return dataListObject;
-                });
+                //     return dataListObject;
+                // });
 
-                if (dataListValues.length > 0) {
-                    const dataKey = hasDataListFields[0].dataKey;
-                    dataToSave[dataKey] = dataListValues;
-                }
+                // if (dataListValues.length > 0) {
+                //     const dataKey = hasDataListFields[0].dataKey;
+                //     dataToSave[dataKey] = dataListValues;
+                // }
 
                 // 确保状态值正确
                 dataToSave.status = statusValue;

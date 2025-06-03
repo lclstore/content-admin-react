@@ -29,17 +29,26 @@ export default function UserEditorWithCommon() {
             name: 'type',
             label: 'Type',
             options: [
-                { label: 'Regular', value: 'Regular' },
-                { label: 'Yoga', value: 'Yoga' },
-                { label: 'Dance', value: 'Dance' },
+                { label: 'Regular', value: 'REGULAR' },
+                { label: 'Yoga', value: 'YOGA' },
+                { label: 'Dance', value: 'DANCE' },
             ],
             required: true,
         },
         {
             type: 'structureList',
-            name: 'musics',
+            name: 'musicIdList',
             // renderItemMata: renderItemMata,
             label: 'Musics',
+            formterList: (dataList, formValues) => {
+                return dataList.map(item => {
+                    return {
+                        bizMusicId: item.id,
+                        displayName: item.name,
+                        premium: formValues.premium,
+                    }
+                });
+            },
             dataList: [],
             rules: [
                 { required: true, message: 'Please add at least one music' },

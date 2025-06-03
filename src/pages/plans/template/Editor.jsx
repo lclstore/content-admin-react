@@ -56,7 +56,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'WARM_UP_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -65,7 +65,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'WARM_UP_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -75,7 +75,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'WARM_UP_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
@@ -94,7 +94,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'MAIN_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -103,7 +103,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'MAIN_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -113,7 +113,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'MAIN_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
@@ -132,7 +132,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'COOL_DOWN_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -141,7 +141,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'COOL_DOWN_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -151,13 +151,12 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'COOL_DOWN_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
                     max: 5,
                     step: 1,
-
                     formatter: (value) => `${value}`,
                 },
 

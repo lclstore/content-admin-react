@@ -83,6 +83,8 @@ const CommonList = ({
     const [hasMore, setHasMore] = useState(true);
     const scrollableContainerRef = useRef(null);
     const [internalListData, setInternalListData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1); // 添加当前页码状态
+
     // 默认的搜索方法
     const defaultSearchCommonListData = () => {
         return new Promise((resolve) => {
@@ -96,25 +98,45 @@ const CommonList = ({
         initCommonListData = defaultSearchCommonListData;
     }
     // 数据请求
-    const fetchData = async (filters) => {
+    const fetchData = async (filters, page = 1) => {
         setLoading(true);
         try {
             // 优先使用传入的filters，如果没有则使用组件内部的selectedFilters
             const params = {
                 ...defaultQueryParams,
                 ...(filters || selectedFilters),
-                keyword: debouncedKeyword
+                keyword: debouncedKeyword,
+                pageIndex: page,  // 添加页码参数
+                pageSize: defaultQueryParams.pageSize
             };
 
-            const { success, data } = await initCommonListData(params);
-            console.log(data);
+            const { success, data, totalCount } = await initCommonListData(params);
 
             if (success) {
-                setInternalListData(data || []);
+                let newData = [];
+                if (page === 1) {
+                    // 如果是第一页，直接设置数据
+                    newData = data || [];
+                    setInternalListData(newData);
+                    setDisplayedItems(newData);
+                } else {
+                    // 如果不是第一页，追加数据
+                    newData = [...internalListData, ...(data || [])];
+                    setInternalListData(newData);
+                    setDisplayedItems(newData);
+                }
+                // 调试日志
+                console.log('当前数据长度:', newData.length, '总数据量:', totalCount, '是否还有更多:', newData.length < totalCount);
+
+                // 根据当前数据长度和总数来判断是否还有更多数据
+                setHasMore(newData.length < totalCount);
             }
         } catch (error) {
             console.error('获取列表数据失败:', error);
-            setInternalListData([]);
+            if (page === 1) {
+                setInternalListData([]);
+                setDisplayedItems([]);
+            }
         } finally {
             setLoading(false);
         }
@@ -130,7 +152,6 @@ const CommonList = ({
 
         const initialItems = (currentListData || []).slice(0, defaultQueryParams.pageSize);
         setDisplayedItems(initialItems);
-        setHasMore((currentListData || []).length > defaultQueryParams.pageSize);
 
         if (scrollableContainerRef.current) {
             scrollableContainerRef.current.scrollTop = 0;
@@ -139,22 +160,18 @@ const CommonList = ({
 
     // 监听防抖后的关键词和筛选条件变化,请求数据
     useEffect(() => {
-        fetchData();
+        setCurrentPage(1); // 重置页码
+        fetchData(selectedFilters, 1);
     }, [selectedFilters, debouncedKeyword]);
 
-    // 加载更多数据
+    // 修改加载更多数据的方法
     const loadMoreItems = useCallback(() => {
         if (loading || !hasMore) return;
 
-        setLoading(true);
-        setTimeout(() => {
-            const currentLength = displayedItems.length;
-            const nextItems = (currentListData || []).slice(currentLength, currentLength + defaultQueryParams.pageSize);
-            setDisplayedItems(prevItems => [...prevItems, ...nextItems]);
-            setHasMore((currentListData || []).length > currentLength + nextItems.length);
-            setLoading(false);
-        }, 500);
-    }, [loading, hasMore, displayedItems, currentListData]);
+        const nextPage = currentPage + 1;
+        setCurrentPage(nextPage);
+        fetchData(selectedFilters, nextPage);
+    }, [loading, hasMore, currentPage, selectedFilters]);
     // 判断是否有激活的筛选器
     const hasActiveFilters = useMemo(() => {
         return selectedFilters && Object.keys(selectedFilters).length > 0
@@ -331,11 +348,11 @@ const CommonList = ({
                         </div>
                     }
                     endMessage={
-                        !loading && !hasMore && displayedItems.length > 0 ? (
+                        !loading && !hasMore && displayedItems.length > 0 && (
                             <div style={{ textAlign: 'center', padding: '10px', color: '#aaa' }}>
-                                No more data available
+                                No more data
                             </div>
-                        ) : null
+                        )
                     }
                     scrollableTarget={scrollableId}
                 >

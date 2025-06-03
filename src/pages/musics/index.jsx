@@ -44,6 +44,6 @@ export default function CollectionsList() {
                 renderTabBar={renderTabBar}
                 items={tabItems.map(i => ({ ...i, children: <div>{i.children}</div> }))}
                 onChange={onChange} />
-            <div style={{ padding: '20px', position: 'relative', flex: 1 }}><Outlet /></div>
+            <Outlet />
         </>)
 }

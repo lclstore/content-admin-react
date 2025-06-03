@@ -260,7 +260,7 @@ export default function UserEditorWithCommon() {
     const initCommonListData = (params) => {
         return new Promise(resolve => {
             request.get({
-                url: `/exercise/page`,
+                url: `/workout/page`,
                 load: false,
                 data: params,
                 callback: res => resolve(res?.data)

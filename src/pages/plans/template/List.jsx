@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState, useMemo, useCallback} from 'react';
-import {message, Form, Switch, Space,Checkbox,Modal,Button} from 'antd';
+import {message, Form, Switch, Space, Checkbox, Modal, Button} from 'antd';
 import {
     CopyOutlined,
     PlusOutlined,
@@ -13,11 +13,11 @@ import request from "@/request/index.js";
 import {useImmer} from "use-immer";
 
 export default function WorkoutsList() {
-    const [generateModal,updateGenerateModal] = useImmer({
+    const [generateModal, updateGenerateModal] = useImmer({
         id: null,
-        loading:false,
+        loading: false,
         cleanWorkout: 0,
-        modalShow:false
+        modalShow: false
     })
     const {setButtons, setCustomPageTitle} = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -29,7 +29,7 @@ export default function WorkoutsList() {
             title: 'Status',
             key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
-            options: "status",
+            options: "statusList",
         },
         {
             title: 'Duration (Min)',
@@ -61,7 +61,7 @@ export default function WorkoutsList() {
                 width: 120,
             },
             {title: "Generate Status", dataIndex: "generateStatus", options: 'BizGenerateTaskStatusEnums'},
-            {title: "Workout Num", dataIndex: "workoutCount"},
+            {title: "Workout Num", dataIndex: "workoutCount",render: (text) => <div onClick={() => router().push("workout")}>{text}</div>},
             {
                 title: 'Actions',
                 key: 'actions',
@@ -73,7 +73,7 @@ export default function WorkoutsList() {
                     {
                         key: "generate",
                         icon: CopyOutlined,
-                        click: ({ selectList }) => {
+                        click: ({selectList}) => {
                             updateGenerateModal(draft => {
                                 draft.id = selectList[0].id
                                 draft.modalShow = true
@@ -81,12 +81,12 @@ export default function WorkoutsList() {
                         }
                     }
                 ],
-                isShow(record, btnName){
+                isShow(record, btnName) {
                     const status = record.status;
                     // 简单的状态-按钮映射关系
                     if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-                    if (status === 'DISABLED' && ['edit', 'duplicate', 'enable','generate', 'delete'].includes(btnName)) return true;
-                    if (status === 'ENABLED' && ['disable','generate', 'duplicate'].includes(btnName)) return true;
+                    if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'generate', 'delete'].includes(btnName)) return true;
+                    if (status === 'ENABLED' && ['disable', 'generate', 'duplicate'].includes(btnName)) return true;
                     return false;
                 }
             },
@@ -97,9 +97,11 @@ export default function WorkoutsList() {
         return new Promise(resolve => {
             request.post({
                 url: `/template/generate`,
-                data:generateModal,
-                point:true,
-                callback(){ resolve() }
+                data: generateModal,
+                point: true,
+                callback() {
+                    resolve()
+                }
             })
         })
     }
@@ -145,28 +147,28 @@ export default function WorkoutsList() {
             />
             <Modal
                 title="Generate"
-                styles={{ content: {width:'300px'} }}
+                styles={{content: {width: '300px'}}}
                 open={generateModal.modalShow}
                 footer={[
                     <Button key="submit" type="primary" loading={generateModal.loading} onClick={
                         () => {
-                            updateGenerateModal(draft => {draft.loading = true})
-                            generate().then(() => { updateGenerateModal(draft => {
-                                draft.modalShow = false
-                                draft.loading = false
-                            }) })
+                            updateGenerateModal(draft => {
+                                draft.loading = true
+                            })
+                            generate().then(() => {
+                                updateGenerateModal(draft => {
+                                    draft.modalShow = false
+                                    draft.loading = false
+                                })
+                            })
                         }
                     }>
                         Generate
                     </Button>
                 ]}
-                onCancel={() => updateGenerateModal(draft => {
-                    draft.modalShow = false
-                })}
+                onCancel={() => updateGenerateModal(draft => void (draft.modalShow = false))}
             >
-                <Checkbox onChange={() => updateGenerateModal(draft => {
-                    draft.cleanWorkout = generateModal.cleanWorkout === 0 ? 1 : 0
-                })}>Checkbox</Checkbox>
+                <Checkbox onChange={() => updateGenerateModal(draft => void (draft.cleanWorkout = generateModal.cleanWorkout === 0 ? 1 : 0))}>Checkbox</Checkbox>
             </Modal>
         </>
     );

@@ -513,7 +513,7 @@ export const renderFormItem = (field, options = {}) => {
     if (dependencies) {
         const newField = JSON.parse(JSON.stringify(field));
         delete newField.dependencies;
-
+        debugger
         return (
             <Form.Item
                 noStyle

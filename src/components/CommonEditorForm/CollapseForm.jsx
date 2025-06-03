@@ -85,7 +85,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
                             style={{ fontSize: '12px' }}
                             ellipsis={{ tooltip: item.status }}
                         >
-                            {optionsConstants.status.find(status => status.value === item.status)?.name || '-'}
+                            {optionsConstants.statusList.find(status => status.value === item.status)?.name || '-'}
                         </Text>
                     </div>
                     <div>

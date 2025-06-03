@@ -1,19 +1,28 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { message, Form, Switch, Space, } from 'antd';
+import React, {useContext, useEffect, useState, useMemo, useCallback} from 'react';
+import {message, Form, Switch, Space,Checkbox,Modal,Button} from 'antd';
 import {
+    CopyOutlined,
     PlusOutlined,
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
-import { HeaderContext } from '@/contexts/HeaderContext';
+import {useNavigate} from 'react-router';
+import {HeaderContext} from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { useStore } from "@/store/index.js";
-import { router } from "@/utils/index.js";
+import {useStore} from "@/store/index.js";
+import {router} from "@/utils/index.js";
+import request from "@/request/index.js";
+import {useImmer} from "use-immer";
 
 export default function WorkoutsList() {
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
+    const [generateModal,updateGenerateModal] = useImmer({
+        id: null,
+        loading:false,
+        cleanWorkout: 0,
+        modalShow:false
+    })
+    const {setButtons, setCustomPageTitle} = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const optionsBase = useStore(state => state.optionsBase)
-    console.log("optionsBase",optionsBase)
+    console.log("optionsBase", optionsBase)
     //查询条件数组
     const filterSections = [
         {
@@ -33,7 +42,7 @@ export default function WorkoutsList() {
     // 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
+            {title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1},
             {
                 title: 'Name',
                 sorter: true,
@@ -43,7 +52,7 @@ export default function WorkoutsList() {
                 width: 350,
                 visibleColumn: 1
             },
-            { title: "Duration (Min)",dataIndex: "durationCode",options: 'BizTemplateDurationEnums',sorter: true, },
+            {title: "Duration (Min)", dataIndex: "durationCode", options: 'BizTemplateDurationEnums', sorter: true,},
             {
                 title: 'Status',
                 dataIndex: 'status',
@@ -51,31 +60,49 @@ export default function WorkoutsList() {
                 options: 'displayStatus',
                 width: 120,
             },
-            { title: "Duration (Min)",dataIndex: "durationCode",options: 'BizTemplateDurationEnums',sorter: true, },
-            { title: "Workout Num",dataIndex: "durationCode",options: 'BizTemplateDurationEnums',sorter: true, },
+            {title: "Generate Status", dataIndex: "generateStatus", options: 'BizGenerateTaskStatusEnums'},
+            {title: "Workout Num", dataIndex: "workoutCount"},
             {
                 title: 'Actions',
                 key: 'actions',
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
-                // isShow(record, key){
-                //     let btnType = btn.sign
-                //     let status = rowData.status
-                //     let state = false
-                //     if (
-                //         (status === 0 && (btnType === "enable" || btnType === "delete" || btnType === "duplication")) ||
-                //         (status === 1 && (btnType === "disabled" || btnType === "duplication")) ||
-                //         (status === 2 && (btnType === "enable" || btnType === "duplication"))
-                //     ) {
-                //         state = true
-                //     }
-                //     return state
-                // }
+                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'generate', 'delete'],
+                customButtons: [
+                    {
+                        key: "generate",
+                        icon: CopyOutlined,
+                        click: ({ selectList }) => {
+                            updateGenerateModal(draft => {
+                                draft.id = selectList[0].id
+                                draft.modalShow = true
+                            })
+                        }
+                    }
+                ],
+                isShow(record, btnName){
+                    const status = record.status;
+                    // 简单的状态-按钮映射关系
+                    if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+                    if (status === 'DISABLED' && ['edit', 'duplicate', 'enable','generate', 'delete'].includes(btnName)) return true;
+                    if (status === 'ENABLED' && ['disable','generate', 'duplicate'].includes(btnName)) return true;
+                    return false;
+                }
             },
         ];
     }, []);
+    // 生成方法
+    const generate = async () => {
+        return new Promise(resolve => {
+            request.post({
+                url: `/template/generate`,
+                data:generateModal,
+                point:true,
+                callback(){ resolve() }
+            })
+        })
+    }
 
     /**
      * 设置导航栏按钮
@@ -89,7 +116,7 @@ export default function WorkoutsList() {
             {
                 key: 'create',
                 text: 'Add Template',
-                icon: <PlusOutlined />,
+                icon: <PlusOutlined/>,
                 type: 'primary',
                 onClick: () => router().push('editor'),
             }
@@ -104,16 +131,43 @@ export default function WorkoutsList() {
 
     //渲染表格组件
     return (
-        <ConfigurableTable
-            columns={allColumnDefinitions}
-            moduleKey="template"
-            searchConfig={{
-                placeholder: "Search name or ID...",
-            }}
-            showColumnSettings={false}
-            filterConfig={{
-                filterSections: filterSections,
-            }}
-        />
+        <>
+            <ConfigurableTable
+                columns={allColumnDefinitions}
+                moduleKey="template"
+                searchConfig={{
+                    placeholder: "Search name or ID...",
+                }}
+                showColumnSettings={false}
+                filterConfig={{
+                    filterSections: filterSections,
+                }}
+            />
+            <Modal
+                title="Generate"
+                styles={{ content: {width:'300px'} }}
+                open={generateModal.modalShow}
+                footer={[
+                    <Button key="submit" type="primary" loading={generateModal.loading} onClick={
+                        () => {
+                            updateGenerateModal(draft => {draft.loading = true})
+                            generate().then(() => { updateGenerateModal(draft => {
+                                draft.modalShow = false
+                                draft.loading = false
+                            }) })
+                        }
+                    }>
+                        Generate
+                    </Button>
+                ]}
+                onCancel={() => updateGenerateModal(draft => {
+                    draft.modalShow = false
+                })}
+            >
+                <Checkbox onChange={() => updateGenerateModal(draft => {
+                    draft.cleanWorkout = generateModal.cleanWorkout === 0 ? 1 : 0
+                })}>Checkbox</Checkbox>
+            </Modal>
+        </>
     );
 }   

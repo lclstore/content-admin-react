@@ -90,6 +90,17 @@ export const savePublicFormData = (params, url) => {
         });
     });
 };
+// 公共生成
+export const publicGenerate = (params, url) => {
+    return new Promise(resolve => {
+        request.post({
+            url: url,
+            load: true,
+            data: params,
+            callback: res => resolve(res?.data)
+        });
+    })
+}
 // 公共启用/禁用数据
 export const publicUpdateStatus = (params, url) => {
     return new Promise(resolve => {

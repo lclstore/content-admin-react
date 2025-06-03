@@ -73,7 +73,7 @@ class Request {
                 loading(true)
             }
             // get 请求做一些处理,array 转化为字符串 array
-            if(config.method === 'get'){
+            if(config.method === 'get' && config.data){
                 Object.keys(config.data).some(item => {
                     if (config.data[item] && config.data[item].constructor === Array) {
                         config.data[item] = config.data[item].toString();

@@ -17,7 +17,7 @@ import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
-import { getPublicTableList, publicUpdateStatus, publicDeleteData } from "@/config/api.js";
+import {getPublicTableList, publicUpdateStatus, publicDeleteData, publicGenerate} from "@/config/api.js";
 import settings from "@/config/settings.js"
 import noDataImg from '@/assets/images/no-data.png';
 import { debounce, times } from 'lodash';
@@ -586,10 +586,13 @@ function ConfigurableTable({
                         if (status === 'ENABLED' && ['edit', 'duplicate'].includes(btnName)) return true;
                         return false;
                     };
-                    const defaultActionClick = async (key, rowData) => {
+                    const defaultActionClick = async (key, rowData,e,click) => {
 
                         switch (key) {
-
+                            // generate 特殊处理下
+                            case 'generate':
+                                click && click({ selectList: [rowData] })
+                                break;
                             // 编辑
                             case 'edit':
                                 // 获取当前路径并分割成数组
@@ -621,7 +624,6 @@ function ConfigurableTable({
                                 break;
                             // 弃用
                             case 'deprecate':
-
                                 break;
                             default:
                                 break;
@@ -629,7 +631,7 @@ function ConfigurableTable({
                     }
                     processedCol.render = (text, record, index) => {
                         if (!record) return null; // 如果record不存在，返回null
-                        let DropdownItems = listConfig.rowButtonsPublic
+                        let DropdownItems = [...listConfig.rowButtonsPublic,...(processedCol.customButtons || [])]
                             .filter(i => processedCol.actionButtons.includes(i.key))
                             .filter(({ key }) => processedCol.isShow ? processedCol.isShow(record, key) : defaultIsButtonVisible(record, key))
                             // 添加排序步骤，按照 actionButtons 中的顺序排序
@@ -653,7 +655,7 @@ function ConfigurableTable({
                                             processedCol.onActionClick(key, record, e, click)
                                         } else {
                                             // 默认的处理方法
-                                            defaultActionClick(key, record, e)
+                                            defaultActionClick(key, record, e,click)
                                         }
                                     }
                                 };

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import request from '@/request';
 import { validateEmail, validatePassword } from '@/utils';
@@ -6,7 +6,7 @@ import { validateEmail, validatePassword } from '@/utils';
 export default function UserEditorWithCommon() {
 
     // 表单字段配置
-    const formFields = useMemo(() => [
+    const initialFormFields = useMemo(() => [
         {
             type: 'input',
             name: 'name',
@@ -29,17 +29,26 @@ export default function UserEditorWithCommon() {
             name: 'type',
             label: 'Type',
             options: [
-                { label: 'Regular', value: 'Regular' },
-                { label: 'Yoga', value: 'Yoga' },
-                { label: 'Dance', value: 'Dance' },
+                { label: 'Regular', value: 'REGULAR' },
+                { label: 'Yoga', value: 'YOGA' },
+                { label: 'Dance', value: 'DANCE' },
             ],
             required: true,
         },
         {
             type: 'structureList',
-            name: 'musics',
+            name: 'musicIdList',
             // renderItemMata: renderItemMata,
             label: 'Musics',
+            formterList: (dataList, formValues) => {
+                return dataList.map(item => {
+                    return {
+                        bizMusicId: item.id,
+                        displayName: item.name,
+                        premium: formValues.premium,
+                    }
+                });
+            },
             dataList: [],
             rules: [
                 { required: true, message: 'Please add at least one music' },
@@ -59,6 +68,15 @@ export default function UserEditorWithCommon() {
             });
         })
     }
+    // 使用新设计：只维护一个formFields状态，并提供更新回调
+    const [formFields, setFormFields] = useState(initialFormFields);
+
+    // 处理formFields变更的回调
+    const handleFormFieldsChange = (updatedFields) => {
+        // console.log('updatedFields', updatedFields);
+
+        setFormFields(updatedFields);
+    };
     const filterSections = [
         {
             title: 'Status',
@@ -77,6 +95,7 @@ export default function UserEditorWithCommon() {
             }}
             formType="advanced"
             enableDraft={true}
+            onFormFieldsChange={handleFormFieldsChange}
             config={{ formName: 'Playlist', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
         />

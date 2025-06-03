@@ -116,6 +116,7 @@ export default function Playlists() {
             {/* 可配置表格组件 */}
             <ConfigurableTable
                 moduleKey="playlist"
+                paddingTop={50}
                 columns={allColumnDefinitions}
                 searchConfig={{
                     placeholder: "Search name or ID...",

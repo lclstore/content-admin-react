@@ -394,7 +394,7 @@ export const renderFormControl = (field, options = {}) => {
 
                 return () => clearInterval(timer);
             }, []);
-
+            console.log('field', field);
             return (
                 <div>
                     <div className='structureList-title'>{`${field.dataList.length} ${field?.label}`}</div>

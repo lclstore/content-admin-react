@@ -591,7 +591,7 @@ export default function CommonEditor(props) {
                 }
             }
         });
-        const structure = fields.find(field => field?.dataKey&&field.dataKey);
+        const structure = fields.find(field => field?.dataKey && field.dataKey);
         //数组帮定处理
         if (structure && Array.isArray(obj[structure.dataKey])) {
             console.log(1213123);
@@ -739,7 +739,8 @@ export default function CommonEditor(props) {
             if (response.data) {
                 if (isDuplicate) {
                     // 如果是复制，则将数据中的id设置为null
-                    response.data.id = null;
+                    response.data.id = null;//重制id
+                    response.data.status = null;//重制状态
                 }
                 response = response.data;
             }

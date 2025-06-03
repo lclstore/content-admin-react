@@ -13,10 +13,13 @@ import {
     SearchOutlined,
     PlusOutlined,
     FilterOutlined,
-    CaretRightOutlined
+    CaretRightOutlined,
+    LoadingOutlined,
+    PauseOutlined
 } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import { optionsConstants } from '@/constants/options';
+import { getFileCategoryFromUrl } from '@/utils';
 import styles from './CommonList.module.css';
 
 // 创建防抖hook
@@ -40,6 +43,24 @@ const useDebounce = (value, delay) => {
 
 const { Text } = Typography;
 
+// 添加全局音频管理
+const audioManager = {
+    currentAudio: null,
+    currentCallback: null,
+    stopCurrent: function () {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            if (this.currentCallback) {
+                this.currentCallback(false);
+            }
+        }
+    },
+    setCurrentAudio: function (audio, callback) {
+        this.stopCurrent();
+        this.currentAudio = audio;
+        this.currentCallback = callback;
+    }
+};
 
 /**
  * 通用列表组件，支持搜索、筛选、无限滚动
@@ -78,11 +99,15 @@ const CommonList = ({
     // 使用防抖hook，延迟500ms
     const debouncedKeyword = useDebounce(keyword, 500);
     const [selectedFilters, setSelectedFilters] = useState({ ...activeFilters }); // 筛选条件
-    const [displayedItems, setDisplayedItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const scrollableContainerRef = useRef(null);
     const [internalListData, setInternalListData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1); // 添加当前页码状态
+    const [currentPlayingItem, setCurrentPlayingItem] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef(null);
+
     // 默认的搜索方法
     const defaultSearchCommonListData = () => {
         return new Promise((resolve) => {
@@ -96,63 +121,68 @@ const CommonList = ({
         initCommonListData = defaultSearchCommonListData;
     }
     // 数据请求
-    const fetchData = async (filters) => {
+    const fetchData = async (filters, page = 1) => {
         setLoading(true);
         try {
             // 优先使用传入的filters，如果没有则使用组件内部的selectedFilters
             const params = {
                 ...defaultQueryParams,
                 ...(filters || selectedFilters),
-                keyword: debouncedKeyword
+                keyword: debouncedKeyword,
+                pageIndex: page,  // 添加页码参数
+                pageSize: defaultQueryParams.pageSize
             };
 
-            const { success, data } = await initCommonListData(params);
+            const { success, data, totalCount } = await initCommonListData(params);
+
             if (success) {
-                setInternalListData(data || []);
+                let newData = []
+                if (params.pageIndex === 1) {
+                    newData = data || [];
+                    // 如果是第一页，直接设置数据
+                    setInternalListData(newData);
+                    // 将滚动位置重置到顶部
+                    if (scrollableContainerRef.current) {
+                        scrollableContainerRef.current.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    }
+                } else {
+                    // 如果不是第一页，追加数据到现有数据后面
+                    newData = [...internalListData, ...(data || [])];
+                    setInternalListData(newData); // 更新内部数据
+                }
+                console.log('totalCount', newData.length < totalCount);
+                // 根据当前显示的数据长度和总数来判断是否还有更多数据
+                setHasMore(newData.length < totalCount);
             }
         } catch (error) {
             console.error('获取列表数据失败:', error);
-            setInternalListData([]);
+            if (page === 1) {
+                setInternalListData([]);
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    // 使用内部获取的数据
-    const currentListData = useMemo(() => {
-        return internalListData;
-    }, [internalListData]);
-    // 初始加载和数据变化时更新显示项 - 使用useMemo简化
-    useEffect(() => {
-        if (!currentListData) return;
 
-        const initialItems = (currentListData || []).slice(0, defaultQueryParams.pageSize);
-        setDisplayedItems(initialItems);
-        setHasMore((currentListData || []).length > defaultQueryParams.pageSize);
-
-        if (scrollableContainerRef.current) {
-            scrollableContainerRef.current.scrollTop = 0;
-        }
-    }, [currentListData]);
 
     // 监听防抖后的关键词和筛选条件变化,请求数据
     useEffect(() => {
-        fetchData();
+        setCurrentPage(1); // 重置页码
+        fetchData(selectedFilters, 1);
     }, [selectedFilters, debouncedKeyword]);
 
-    // 加载更多数据
+    // 修改加载更多数据的方法
     const loadMoreItems = useCallback(() => {
         if (loading || !hasMore) return;
 
-        setLoading(true);
-        setTimeout(() => {
-            const currentLength = displayedItems.length;
-            const nextItems = (currentListData || []).slice(currentLength, currentLength + defaultQueryParams.pageSize);
-            setDisplayedItems(prevItems => [...prevItems, ...nextItems]);
-            setHasMore((currentListData || []).length > currentLength + nextItems.length);
-            setLoading(false);
-        }, 500);
-    }, [loading, hasMore, displayedItems, currentListData]);
+        const nextPage = currentPage + 1;
+        setCurrentPage(nextPage);
+        fetchData(selectedFilters, nextPage);
+    }, [loading, hasMore, currentPage, selectedFilters]);
     // 判断是否有激活的筛选器
     const hasActiveFilters = useMemo(() => {
         return selectedFilters && Object.keys(selectedFilters).length > 0
@@ -189,13 +219,145 @@ const CommonList = ({
         }
     }, [onFilterChange]);
 
+    // 处理音频播放结束
+    const handleAudioEnded = useCallback(() => {
+        setIsPlaying(false);
+        audioManager.currentAudio = null;
+        audioManager.currentCallback = null;
+    }, []);
+
+    // 播放新音频的辅助函数
+    const playNewAudio = useCallback((item) => {
+        // 清理当前音频
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.removeEventListener('ended', handleAudioEnded);
+        }
+
+        // 创建新的音频实例
+        const audio = new Audio(item.audioUrl);
+
+        // 设置事件监听器
+        audio.addEventListener('ended', handleAudioEnded);
+
+        audioRef.current = audio;
+
+        // 停止其他正在播放的音频
+        audioManager.stopCurrent();
+
+        // 设置当前音频为活动音频
+        audioManager.setCurrentAudio(audio, (playing) => {
+            if (!playing) {
+                setIsPlaying(false);
+            }
+        });
+
+        // 开始播放
+        setIsPlaying(true);
+        audio.play().catch(error => {
+            console.error('播放失败:', error);
+            setIsPlaying(false);
+        });
+    }, [handleAudioEnded]);
+
+    // 处理音频播放/暂停
+    const handleAudioToggle = useCallback((item) => {
+        if (!item || !item.audioUrl) {
+            // 如果点击了一个无效的项目，并且当前有音频在播放，则停止当前音频
+            if (isPlaying) {
+                audioManager.stopCurrent(); // 这会暂停音频并通过回调将 isPlaying 设置为 false
+                setCurrentPlayingItem(null); // 清除当前播放项目
+            }
+            return;
+        }
+
+        // 如果点击的是当前正在播放的音频项目
+        if (currentPlayingItem?.id === item.id && isPlaying) {
+            audioManager.stopCurrent(); // 暂停当前音频，isPlaying 将通过回调变为 false
+            // currentPlayingItem 保持不变，但由于 isPlaying 变为 false，图标会更新
+        } else {
+            // 否则 (点击了不同的项目，或当前项目未在播放，或没有项目在播放)
+            // 播放点击的项目。playNewAudio 会处理停止其他任何音频。
+            playNewAudio(item); // playNewAudio 会将 isPlaying 设置为 true
+            setCurrentPlayingItem(item); // 设置当前激活的音频项目
+        }
+    }, [isPlaying, currentPlayingItem, playNewAudio, setCurrentPlayingItem, audioManager]);
+
+    // 修改点击事件处理
+    const handleAudioClick = useCallback((e, item) => {
+        handleAudioToggle(item);
+    }, [handleAudioToggle]);
+
+    // 清理音频资源
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.removeEventListener('ended', handleAudioEnded);
+                audioRef.current.pause();
+                if (audioManager.currentAudio === audioRef.current) {
+                    audioManager.currentAudio = null;
+                    audioManager.currentCallback = null;
+                }
+                audioRef.current = null;
+            }
+            setCurrentPlayingItem(null);
+            setIsPlaying(false);
+        };
+    }, [handleAudioEnded]);
+
+    // 修改默认的列表项渲染函数中的音频预览部分
+    const defaultRenderItemMeta = useCallback((item) => {
+        return <List.Item.Meta style={{ alignItems: 'center' }}
+            avatar={
+                getFileCategoryFromUrl(item.audioUrl || item.animationPhoneUrl) === 'audio' ?
+                    <div className={styles.audioPreview}>
+                        <div
+                            className={styles.audioPreview_box}
+                            onClick={(e) => handleAudioClick(e, item)}
+                        >
+                            {(currentPlayingItem?.id === item.id && isPlaying) ? (
+                                <PauseOutlined style={{ fontSize: '20px' }} />
+                            ) : (
+                                <CaretRightOutlined style={{ fontSize: '20px' }} />
+                            )}
+                        </div>
+                    </div>
+                    :
+                    <div className={styles.itemAvatar}>
+                        <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
+                        <CaretRightOutlined
+                            className={styles.playIcon}
+                        />
+                    </div>
+            }
+            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.name || item.displayName || item.title}</Text>}
+            description={
+                <div>
+                    <div>
+                        <Text
+                            type="secondary"
+                            style={{ fontSize: '12px' }}
+                            ellipsis={{ tooltip: item.status }}
+                        >
+                            {optionsConstants.statusList.find(status => status.value === item.status).label}
+                        </Text>
+                    </div>
+                    <div>
+                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                            {item.functionType || item.type}
+                        </Text>
+                    </div>
+                </div>
+            }
+        />
+    }, [currentPlayingItem, isPlaying, handleAudioClick, styles]);
+
     // 列表项渲染函数
     const renderListItem = useCallback((item) => {
         if (!item || !item.id) return null;
 
         let actions = [];
         const isDisabled = selectionMode === 'replace' && item.status !== defaultQueryParams.status;
-
         if (selectionMode === 'add') {
             if (item.status === defaultQueryParams.status) {
                 actions.push(
@@ -253,39 +415,7 @@ const CommonList = ({
                 {renderItemMata ? renderItemMata(item) : defaultRenderItemMeta(item)}
             </List.Item>
         );
-    }, [onAddItem, selectionMode, selectedItemId, styles]);
-    // 默认的列表项渲染函数
-    const defaultRenderItemMeta = useCallback((item) => {
-        return <List.Item.Meta
-            avatar={
-                <div className={styles.itemAvatar}>
-                    <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
-                    <CaretRightOutlined
-                        className={styles.playIcon}
-                    />
-                </div>
-            }
-            title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.displayName || item.title || '未命名项目'}</Text>}
-            description={
-                <div>
-                    <div>
-                        <Text
-                            type="secondary"
-                            style={{ fontSize: '12px' }}
-                            ellipsis={{ tooltip: item.status }}
-                        >
-                            {optionsConstants.statusList.find(status => status.value === item.status)?.name || '-'}
-                        </Text>
-                    </div>
-                    <div>
-                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                            {item.functionType || item.type || '-'}
-                        </Text>
-                    </div>
-                </div>
-            }
-        />
-    }, [renderListItem]);
+    }, [onAddItem, selectionMode, selectedItemId, styles, defaultRenderItemMeta]);
 
     return (
 
@@ -320,27 +450,30 @@ const CommonList = ({
                 className={styles.scrollContainer}
             >
                 <InfiniteScroll
-                    dataLength={displayedItems.length}
+                    dataLength={internalListData.length}
                     next={loadMoreItems}
                     hasMore={hasMore}
                     loader={
-                        <div style={{ textAlign: 'center', padding: '10px' }}>
-                            <Spin size="small" /> Loading...
-                        </div>
+                        currentPage > 1 && (
+                            <div style={{ textAlign: 'center', padding: '10px', color: '#999', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <LoadingOutlined style={{ fontSize: '16px' }} />
+                                loading more...
+                            </div>
+                        )
                     }
                     endMessage={
-                        !loading && !hasMore && displayedItems.length > 0 ? (
-                            <div style={{ textAlign: 'center', padding: '10px', color: '#aaa' }}>
-                                No more data available
+                        !hasMore && (
+                            <div style={{ textAlign: 'center', padding: '10px', color: '#999' }}>
+                                no more data
                             </div>
-                        ) : null
+                        )
                     }
                     scrollableTarget={scrollableId}
                 >
-                    <Spin spinning={loading}>
+                    <Spin spinning={loading} tip="Loading...">
                         <List
                             itemLayout="horizontal"
-                            dataSource={displayedItems}
+                            dataSource={internalListData}
                             className="common-list"
                             renderItem={renderListItem}
                         />

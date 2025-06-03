@@ -46,10 +46,13 @@ import { debounce, times } from 'lodash';
  * @param {String} [props.moduleKey] - 业务功能相关的key，用于公共接口传参和业务逻辑判断
  * @param {string} [props.operationName] - 操作名称
  * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
+ * @param {noDataTip} [props.noDataTip] // 没有数据时的提示信息
+ * @param {boolean} [props.showPagination=true] // 是否显示分页
  */
 function ConfigurableTable({
     columns, // 所有列的定义
     dataSource = [],
+    paddingTop = 20,
     noDataTip,
     refreshKey = 0,
     rowKey = 'id',
@@ -627,6 +630,8 @@ function ConfigurableTable({
                     }
                     processedCol.render = (text, record, index) => {
                         if (!record) return null; // 如果record不存在，返回null
+                        console.log(listConfig.rowButtonsPublic);
+
                         let DropdownItems = listConfig.rowButtonsPublic
                             .filter(i => processedCol.actionButtons.includes(i.key))
                             .filter(({ key }) => processedCol.isShow ? processedCol.isShow(record, key) : defaultIsButtonVisible(record, key))
@@ -761,7 +766,7 @@ function ConfigurableTable({
                 {/* <div className={styles.customEmptyDescription}>Create your first program.</div> */}
             </div>
             :
-            <div className={styles.configurableTableContainer}>
+            <div className={styles.configurableTableContainer} style={{ paddingTop: paddingTop }}>
                 {/* 工具栏 */}
                 {contextHolder}
                 <div className="configurable-table-toolbar"

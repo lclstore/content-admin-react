@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { List, Avatar, Space, Row, Col, Typography, Button, Modal, notification } from 'antd';
-import { MenuOutlined, RetweetOutlined, CopyOutlined, DeleteOutlined, CaretRightOutlined } from '@ant-design/icons';
+import { MenuOutlined, RetweetOutlined, CopyOutlined, DeleteOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
 import {
     DndContext,
     closestCenter,
@@ -14,6 +14,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { optionsConstants } from '@/constants';
 import './StructureList.css';
 import CommonList from '../CommonEditorForm/CommonList';
+import { getFileCategoryFromUrl } from '../../utils';
+import audioManager from '../../utils/audioManager';
 
 const { Text } = Typography;
 
@@ -27,7 +29,10 @@ const SortableItemRenderer = React.memo(({
     renderItemMeta,
     onCopyItem,
     onDeleteItem,
-    onSortItems
+    onSortItems,
+    currentPlayingItem,
+    isPlaying,
+    onAudioClick
 }) => {
     const {
         attributes,
@@ -45,47 +50,64 @@ const SortableItemRenderer = React.memo(({
     const wrapperClassName = `structure-list-item item-wrapper${isExpanded ? ' expanded' : ''}`;
 
     const defaultRenderItemMeta = useCallback((currentItem) => {
-        const statusObj = optionsConstants.status.find(status => status.value === currentItem.status);
+        const statusObj = optionsConstants.statusList.find(status => status.value === currentItem.status);
         const statusName = statusObj ? statusObj.name : '-';
+
+        const itemCategory = getFileCategoryFromUrl(currentItem.audioUrl || currentItem.animationPhoneUrl);
 
         return (
             <List.Item.Meta
                 style={{
                     display: 'flex',
                     alignItems: 'center',
+                    cursor: 'pointer',
                 }}
                 avatar={
-                    <div className="content-library-item-avatar">
-                        <Avatar shape="square" size={64} src={currentItem.imageUrl || currentItem.animationPhoneUrl} />
-                        <CaretRightOutlined className="content-library-item-play-icon" />
-                    </div>
+                    itemCategory === 'audio' ? (
+                        <div className="audio-preview">
+                            <div
+                                className="audio-preview-box"
+                                onClick={(e) => {
+                                    onAudioClick && onAudioClick(e, currentItem);
+                                }}
+                                onPointerDown={e => e.stopPropagation()}
+                            >
+                                {(currentPlayingItem?.id === currentItem.id && isPlaying) ? (
+                                    <PauseOutlined style={{ fontSize: '20px' }} />
+                                ) : (
+                                    <CaretRightOutlined style={{ fontSize: '20px' }} />
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="item-avatar">
+                            <Avatar shape="square" size={64} src={currentItem.imageUrl || currentItem.animationPhoneUrl} />
+                            <CaretRightOutlined className="play-icon" />
+                        </div>
+                    )
                 }
-                title={<Text ellipsis={{ tooltip: currentItem.displayName || currentItem.title }}>{currentItem.displayName || currentItem.title || '未命名项目'}</Text>}
+                title={<Text ellipsis={{ tooltip: currentItem.name || currentItem.title }}>{currentItem.name || currentItem.title}</Text>}
                 description={
                     <div>
                         <div>
                             <Text
                                 type="secondary"
                                 style={{ fontSize: '12px' }}
-                                ellipsis={{ tooltip: currentItem.status }}
+                                ellipsis={{ tooltip: item.status }}
                             >
-                                {statusName}
+                                {optionsConstants.statusList.find(status => status.value === item.status)?.label}
                             </Text>
                         </div>
                         <div>
-                            <Text
-                                type="secondary"
-                                style={{ fontSize: '12px' }}
-                                ellipsis={{ tooltip: currentItem.functionType || currentItem.type }}
-                            >
-                                {currentItem.functionType || currentItem.type || '-'}
+                            <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                                {item.functionType || item.type}
                             </Text>
                         </div>
                     </div>
                 }
             />
         );
-    }, []);
+    }, [currentPlayingItem, isPlaying, onAudioClick]);
 
     return (
         <div style={wrapperStyle} className={wrapperClassName}>
@@ -106,6 +128,7 @@ const SortableItemRenderer = React.memo(({
                     <Space className="structure-item-actions">
                         {onOpenReplaceModal && (
                             <Button
+                                style={{ fontSize: '15px', color: '#1c8' }}
                                 type="text"
                                 icon={<RetweetOutlined />}
                                 onClick={e => { e.stopPropagation(); onOpenReplaceModal(panelId, item.id, itemIndex); }}
@@ -115,6 +138,7 @@ const SortableItemRenderer = React.memo(({
                         )}
                         {onCopyItem && (
                             <Button
+                                style={{ fontSize: '15px', color: '#1c8' }}
                                 type="text"
                                 icon={<CopyOutlined />}
                                 onClick={e => { e.stopPropagation(); onCopyItem(panelId, item.id); }}
@@ -124,6 +148,7 @@ const SortableItemRenderer = React.memo(({
                         )}
                         {onDeleteItem && (
                             <Button
+                                style={{ fontSize: '15px', color: '#1c8' }}
                                 type="text"
                                 danger
                                 icon={<DeleteOutlined />}
@@ -134,6 +159,7 @@ const SortableItemRenderer = React.memo(({
                         )}
                         <Button
                             type="text"
+                            style={{ fontSize: '15px', color: '#1c8' }}
                             icon={<MenuOutlined />}
                             className="sort-handle"
                             onClick={e => e.stopPropagation()}
@@ -177,6 +203,90 @@ const StructureList = ({
     });
     // 在替换弹框中临时选中的项
     const [tempSelectedItem, setTempSelectedItem] = useState(null);
+
+    // 音频播放相关状态和引用
+    const audioRef = useRef(null);
+    const [currentPlayingItem, setCurrentPlayingItem] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // 处理音频播放结束
+    const handleAudioEnded = useCallback(() => {
+        setIsPlaying(false);
+        if (audioManager.currentAudio === audioRef.current) {
+            audioManager.currentAudio = null;
+            audioManager.currentCallback = null;
+        }
+    }, []);
+
+    // 播放新音频的辅助函数
+    const playNewAudio = useCallback((item) => {
+        const audioUrl = item.audioUrl || item.animationPhoneUrl;
+        if (!audioUrl) {
+            notification.error({ message: '播放失败', description: '未找到音频链接。' });
+            return;
+        }
+
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.removeEventListener('ended', handleAudioEnded);
+        }
+
+        const newAudio = new Audio(audioUrl);
+        newAudio.addEventListener('ended', handleAudioEnded);
+        audioRef.current = newAudio;
+
+        audioManager.setCurrentAudio(newAudio, (playingStatus) => {
+            if (!playingStatus) {
+                setIsPlaying(false);
+            }
+        });
+
+        newAudio.play().then(() => {
+            setIsPlaying(true);
+        }).catch(error => {
+            console.error('音频播放失败:', error);
+            notification.error({ message: '播放失败', description: error.message || '无法播放音频文件。' });
+            setIsPlaying(false);
+            audioManager.clearCurrentAudio(newAudio);
+        });
+    }, [handleAudioEnded]);
+
+    // 处理音频播放/暂停切换
+    const handleAudioToggle = useCallback((item) => {
+        if (!item || !(item.audioUrl || item.animationPhoneUrl)) {
+            if (isPlaying && audioRef.current) {
+                audioManager.stopCurrent();
+                setCurrentPlayingItem(null);
+            }
+            return;
+        }
+
+        if (currentPlayingItem?.id === item.id && isPlaying && audioRef.current) {
+            audioManager.stopCurrent();
+        } else {
+            playNewAudio(item);
+            setCurrentPlayingItem(item);
+        }
+    }, [isPlaying, currentPlayingItem, playNewAudio]);
+
+    // 这个函数现在是传递给 SortableItemRenderer 的 onAudioClick
+    const handleAudioClick = useCallback((event, item) => {
+        handleAudioToggle(item);
+    }, [handleAudioToggle]);
+
+    // 组件卸载时清理音频资源
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.removeEventListener('ended', handleAudioEnded);
+                audioManager.clearCurrentAudio(audioRef.current);
+                audioRef.current = null;
+            }
+            setCurrentPlayingItem(null);
+            setIsPlaying(false);
+        };
+    }, [handleAudioEnded]);
 
     // 处理展开/折叠项目的函数
     const handleToggleExpandItem = useCallback((panelId, itemId) => {
@@ -222,7 +332,6 @@ const StructureList = ({
 
     // 处理CommonList中选中项变更
     const handleCommonListItemSelect = useCallback((selectedItem) => {
-        // 更新临时选中的项
         setTempSelectedItem(selectedItem);
     }, []);
 
@@ -246,6 +355,7 @@ const StructureList = ({
         // 清除临时选中项
         setTempSelectedItem(null);
     }, [onReplaceItem, currentReplaceItem, tempSelectedItem]);
+
     // 拖拽结束处理程序
     const handleDragEnd = (event, panelId) => {
         const { active, over } = event;
@@ -281,6 +391,7 @@ const StructureList = ({
             console.log('拖拽没有改变位置或不满足条件', { active, over });
         }
     }
+
     // 判断确认按钮是否应该禁用
     const isConfirmButtonDisabled = useMemo(() => {
         // 如果没有临时选中项，或者临时选中项的ID与当前项ID相同，则禁用按钮
@@ -289,8 +400,6 @@ const StructureList = ({
 
     useEffect(() => {
         if (selectedItemFromList && typeof onItemAdded === 'function') {
-            console.log('selectedItemFromList', selectedItemFromList);
-
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态
             if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
@@ -301,7 +410,6 @@ const StructureList = ({
     }, [selectedItemFromList]);
 
     if (!Array.isArray(dataList) || dataList.length === 0) return null;
-
     return (
         <>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event) => handleDragEnd(event, name)}>
@@ -324,6 +432,9 @@ const StructureList = ({
                                 renderItemMeta={renderItemMeta}
                                 onItemChange={onItemChange}
                                 onSortItems={onSortItems}
+                                currentPlayingItem={currentPlayingItem}
+                                isPlaying={isPlaying}
+                                onAudioClick={handleAudioClick}
                             />
                         ))}
                     </div>

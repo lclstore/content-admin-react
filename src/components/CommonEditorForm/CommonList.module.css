@@ -47,10 +47,12 @@
 .item :global(.ant-list-item-action>li) {
     padding-left: 8px;
 }
-.ant-list-item-meta{
+
+.ant-list-item-meta {
     display: flex;
     align-items: center;
 }
+
 /* 头像和播放图标样式 */
 .itemAvatar {
     position: relative;
@@ -78,4 +80,17 @@
 /* 列表项悬停效果 */
 .item:hover {
     background-color: rgba(0, 0, 0, 0.02);
+}
+
+.audioPreview_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    color: #11cc88;
+    border: 2px solid #11cc88;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
 }

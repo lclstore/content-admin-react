@@ -128,7 +128,7 @@ export default () => {
                 text: 'Create Category',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/programs/Editor'),
+                onClick: () => navigate('/collections/programs/Editor'),
             }
         ]);
 

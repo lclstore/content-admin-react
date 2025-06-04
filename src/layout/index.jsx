@@ -1,27 +1,16 @@
 import { Layout, Spin } from 'antd'
+import { Layout, Spin } from 'antd'
 import AppSider from './components/sider'
 import AppHeader from './components/header'
 import React, { useCallback, useEffect, useState } from 'react'
 import settings from '@/config/settings'
 import './layout.css';
-import { Outlet } from 'react-router-dom'
-import { useStore } from "@/store/index.js";
-import { useNavigate } from "react-router";
-import { getEnumList } from "@/config/api.js";
-import { UpSquareOutlined } from '@ant-design/icons';
+import {Outlet} from 'react-router-dom'
+import {useStore} from "@/store/index.js";
+import {useNavigate} from "react-router";
+import {getEnumList} from "@/config/api.js";
 
-const { Header, Sider, Content } = Layout
-
-const style = {
-    height: 40,
-    width: 40,
-    lineHeight: '40px',
-    borderRadius: 4,
-    backgroundColor: '#1088e9',
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 14,
-};
+const {Header, Sider, Content} = Layout
 
 export default function AppLayout() {
     const [collapsed, setCollapsed] = useState(false);
@@ -74,8 +63,7 @@ export default function AppLayout() {
                         position: 'relative',
                     }}
                 >
-
-                    {resouseLoaded && <Outlet />}
+                    {resouseLoaded && <Outlet/>}
                 </Content>
                 
             </Layout>

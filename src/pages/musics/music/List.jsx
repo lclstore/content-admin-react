@@ -63,6 +63,7 @@ export default function Musics() {
             {
                 title: 'Name',
                 sorter: true,
+                width: 350,
                 showSorterTooltip: false,
                 dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1
             },
@@ -73,7 +74,6 @@ export default function Musics() {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'displayStatus',
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -82,7 +82,6 @@ export default function Musics() {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,

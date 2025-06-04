@@ -925,6 +925,9 @@ export default function CommonEditor(props) {
         return (
             <div className={`${styles.basicEditorForm} ${!isCollapse && formType == 'advanced' && styles.advancedBasicForm}`}>
                 <Spin spinning={loading}>
+                    {
+                        config.title && <div className={styles.title}>{`${config.title}`}</div>
+                    }
                     <Form
                         form={form}
                         name={config.formName || 'basicForm'}

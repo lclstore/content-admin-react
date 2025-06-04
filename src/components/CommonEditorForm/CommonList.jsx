@@ -43,6 +43,20 @@ const useDebounce = (value, delay) => {
 
 const { Text } = Typography;
 
+// 获取状态对应的颜色
+const getStatusColor = (status) => {
+    switch (status) {
+        case 'DRAFT':
+            return '#889e9e';
+        case 'ENABLED':
+            return '#52c41a';
+        case 'DISABLED':
+            return '#ff4d4f';
+        default:
+            return '#889e9e';
+    }
+};
+
 // 添加全局音频管理
 const audioManager = {
     currentAudio: null,
@@ -75,6 +89,7 @@ const audioManager = {
  * @param {string} [selectedItemId=null] - 当前选中的项目 ID
  * @param {function} renderItemMata - 自定义渲染列表项的函数
  * @param {object} defaultQueryParams - 默认查询参数
+ * @param {string} title - 列表标题
  */
 const CommonList = ({
     initCommonListData,
@@ -92,7 +107,8 @@ const CommonList = ({
         pageIndex: 1,
         pageSize: 10,
         status: 'ENABLED'
-    }
+    },
+    title
 }) => {
     const [scrollableId] = useState(() => `commonListScrollableDiv-${Math.random().toString(36).substring(2, 9)}`);
     const [keyword, setKeyword] = useState(searchValue);
@@ -336,17 +352,22 @@ const CommonList = ({
                     <div>
                         <Text
                             type="secondary"
-                            style={{ fontSize: '12px' }}
+                            style={{
+                                fontSize: '12px',
+                                color: getStatusColor(item.status)
+                            }}
                             ellipsis={{ tooltip: item.status }}
                         >
                             {optionsConstants.statusList.find(status => status.value === item.status)?.label}
                         </Text>
                     </div>
-                    <div>
-                        <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                            {item.functionType || item.type}
-                        </Text>
-                    </div>
+                    {
+                        (item.functionType || item.type) && <div>
+                            <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                                {item.functionType || item.type}
+                            </Text>
+                        </div>
+                    }
                 </div>
             }
         />
@@ -421,6 +442,9 @@ const CommonList = ({
 
         <div className={styles.commonList}>
             <div className={styles.search}>
+                <div className={styles.titleContainer}  >
+                    <div className={styles.title}>{title}</div>
+                </div>
                 <Input
                     prefix={<SearchOutlined />}
                     placeholder={placeholder}

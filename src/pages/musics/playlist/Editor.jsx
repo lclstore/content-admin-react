@@ -98,6 +98,7 @@ export default function UserEditorWithCommon() {
                 initCommonListData: initCommonListData,
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
+                title: 'Musics',
             }}
             initialValues={{
                 type: 'REGULAR',
@@ -106,7 +107,7 @@ export default function UserEditorWithCommon() {
             formType="advanced"
             enableDraft={true}
             onFormFieldsChange={handleFormFieldsChange}
-            config={{ formName: 'Playlist', hideSaveButton: false, hideBackButton: false }}
+            config={{ formName: 'Playlist', hideSaveButton: false, hideBackButton: false, title: 'Playlist details' }}
             fields={formFields}
         />
     );

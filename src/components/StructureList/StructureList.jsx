@@ -148,7 +148,7 @@ const SortableItemRenderer = React.memo(({
                         )}
                         {onDeleteItem && (
                             <Button
-                                style={{ fontSize: '15px', color: '#1c8' }}
+                                style={{ fontSize: '15px', color: '#ff5252' }}
                                 type="text"
                                 danger
                                 icon={<DeleteOutlined />}

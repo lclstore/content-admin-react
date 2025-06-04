@@ -16,12 +16,15 @@ export default function UserEditorWithCommon() {
             placeholder: 'Music name',
         },
         {
-            type: 'switch',
+            type: 'select',
             name: 'premium',
             label: 'Premium',
-            checkedChildren: "Yes",
-            unCheckedChildren: 'No'
-
+            required: true,
+            setDefaultValue: 0,
+            options: [
+                { label: 'Yes', value: 1 },
+                { label: 'No', value: 0 },
+            ],
         },
         {
             type: 'select',
@@ -127,6 +130,7 @@ export default function UserEditorWithCommon() {
             }}
             initialValues={{
                 type: 'REGULAR',
+                premium: 0,
             }}
             saveBeforeTransform={saveBeforeTransform}
             formType="advanced"

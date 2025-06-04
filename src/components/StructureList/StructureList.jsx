@@ -100,7 +100,19 @@ const SortableItemRenderer = React.memo(({
     };
     const wrapperStyle = { opacity: isDragging ? 0.5 : 1 };
     const wrapperClassName = `structure-list-item item-wrapper${isExpanded ? ' expanded' : ''}`;
-
+    // 获取状态对应的颜色
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'DRAFT':
+                return '#889e9e';
+            case 'ENABLED':
+                return '#52c41a';
+            case 'DISABLED':
+                return '#ff4d4f';
+            default:
+                return '#889e9e';
+        }
+    };
     const defaultRenderItemMeta = useCallback((currentItem) => {
         const statusObj = optionsConstants.statusList.find(status => status.value === currentItem.status);
         const statusName = statusObj ? statusObj.name : '-';
@@ -144,17 +156,19 @@ const SortableItemRenderer = React.memo(({
                         <div>
                             <Text
                                 type="secondary"
-                                style={{ fontSize: '12px' }}
+                                style={{ fontSize: '12px', color: getStatusColor(item.status) }}
                                 ellipsis={{ tooltip: item.status }}
                             >
                                 {optionsConstants.statusList.find(status => status.value === item.status)?.label}
                             </Text>
                         </div>
-                        <div>
-                            <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                                {item.functionType || item.type}
-                            </Text>
-                        </div>
+                        {
+                            (item.functionType || item.type) && <div>
+                                <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                                    {item.functionType || item.type}
+                                </Text>
+                            </div>
+                        }
                     </div>
                 }
             />
@@ -177,10 +191,10 @@ const SortableItemRenderer = React.memo(({
     }, [item, structureListFields, itemForm]);
 
     // 修改handleFieldChange函数
-    const handleFieldChange = useCallback((changedField, value, item) => {
+    const handleFieldChange = useCallback((name, value, item) => {
         const newItem = {
             ...item,
-            [changedField]: value
+            [name]: value
         }
 
         onUpdateItem && onUpdateItem("structureList", newItem, value);
@@ -264,20 +278,12 @@ const SortableItemRenderer = React.memo(({
                         // 获取字段的默认值
                         let fieldDefaultValue = null;
 
-                        // 如果存在默认值处理函数，则获取默认值
-                        if (field.setDefaultValue) {
-                            fieldDefaultValue = typeof field.setDefaultValue === 'function'
-                                ? field.setDefaultValue(item)
-                                : field.setDefaultValue;
+                        fieldDefaultValue = typeof field.setDefaultValue === 'function'
+                            ? field.setDefaultValue(item)
+                            : field.setDefaultValue;
+                        if (item[field.name] === undefined) {
+                            handleFieldChange(field.name, fieldDefaultValue, item);
                         }
-
-                        // 如果有默认值，设置到表单中
-                        if (fieldDefaultValue !== null) {
-                            itemForm.setFieldsValue({
-                                [field.name]: fieldDefaultValue
-                            });
-                        }
-
                         // 渲染表单项
                         return (
                             <Form.Item

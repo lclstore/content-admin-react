@@ -99,6 +99,9 @@ export default function UserEditorWithCommon() {
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
             }}
+            initialValues={{
+                type: 'REGULAR',
+            }}
             saveBeforeTransform={saveBeforeTransform}
             formType="advanced"
             enableDraft={true}

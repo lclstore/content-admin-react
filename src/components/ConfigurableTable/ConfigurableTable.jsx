@@ -587,7 +587,7 @@ function ConfigurableTable({
                 if (mediaTypes.includes(processedCol.mediaType)) {
                     // 为包含媒体类型的列添加特殊的className
                     processedCol.className = styles.mediaCell;
-                    processedCol.width = 95
+                    processedCol.width = processedCol.width || 95
                     // 添加 onCell 方法给单元格添加类名
                     processedCol.onCell = () => ({
                         className: 'media-cell', // 为单元格添加 media-cell 类名

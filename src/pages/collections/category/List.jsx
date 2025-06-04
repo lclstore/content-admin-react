@@ -21,10 +21,9 @@ export default () => {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 状态-按钮映射关系
-        if (status === 'enable' && ['disable'].includes(btnName)) return true;
-        if (status === 'disable' && ['enable'].includes(btnName)) return true;
-        if (btnName === 'edit' || btnName === 'duplicate') return true;  // 编辑按钮始终显示
-
+        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
         return false;
     }, []);
 
@@ -98,7 +97,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
+                actionButtons: ['enable', 'disable', 'edit', 'duplicate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数

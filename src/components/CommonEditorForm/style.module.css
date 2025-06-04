@@ -262,6 +262,10 @@
     margin-bottom: 24px !important;
 }
 
+:global(.editorform-item.not-margin) {
+    margin-bottom: 0 !important;
+}
+
 :global(.structureList-title) {
     font-size: 18px;
     font-weight: 700;

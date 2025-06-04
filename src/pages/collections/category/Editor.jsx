@@ -111,23 +111,7 @@ export default function UserEditorWithCommon() {
         });
     }
 
-    //请求列数据方法
-    const initFormData = (id) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                if (id) {
-                    // 查找对应用户
-                    // const user = mockUsers.find(u => u.id === parseInt(id, 10));
-                    const user = mockUsers[0]
-                    resolve(user || {});  // 找不到也返回空对象，避免 undefined
-                } else {
-                    // 新增场景：直接返回空对象
-                    resolve(initialValues);
-                }
-            }, 1000);
-        });
-    };
+
 
     const initialFormFields = useMemo(() => [
         {
@@ -142,6 +126,25 @@ export default function UserEditorWithCommon() {
                     required: true,
                     maxLength: 100,
                     showCount: true,
+                },
+                {
+                    type: 'displayImage',
+                    name: 'displayImage',
+                    label: '',
+                    dependencies: ['showTypeCode'],           // 声明依赖
+                    content: ({ getFieldValue }) => {      // content 支持函数
+                        console.log('11111111')
+                        const status = getFieldValue('showTypeCode');
+                        console.log('status', status)
+                        return status == 'CARD' ? 'https://amber.7mfitness.com/category/image/e4b580e4-31a3-4d33-b1bc-186ddabe0dbf.png?alt=media&name=a7fae5c5dcf844865a000838c5fd4a90.png' : null;
+                        // return status
+                        //     ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
+                        //     : null;
+                    },
+                    style: {
+                        width: '100px',
+                        height: '100px',
+                    },
                 },
                 {
                     type: 'textarea',
@@ -166,24 +169,7 @@ export default function UserEditorWithCommon() {
                         }
                     ],
                 },
-                {
-                    type: 'displayImage',
-                    name: 'displayImage',
-                    label: '',
-                    dependencies: ['showTypeCode'],           // 声明依赖
-                    content: ({ getFieldValue }) => {      // content 支持函数
-                        console.log('11111111')
-                        const status = getFieldValue('showTypeCode');
-                        console.log('status', status)
-                        // return status
-                        //     ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
-                        //     : null;
-                    },
-                    style: {
-                        width: '100px',
-                        height: '100px',
-                    },
-                },
+
 
                 {
                     type: 'dateRange',
@@ -281,8 +267,8 @@ export default function UserEditorWithCommon() {
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
             }}
+            moduleKey='category'
             isCollapse={true}
-            initFormData={initFormData}
             formType="advanced"
             fieldsToValidate={['name', 'birthday']}
             config={{ formName: 'Workouts' }}

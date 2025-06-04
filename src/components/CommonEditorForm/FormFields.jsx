@@ -525,7 +525,7 @@ export const renderFormItem = (field, options = {}) => {
                         : field.content;
                     // 处理图片展示字段
                     if (field.type === 'displayImage') {
-                        newField.content = content ? fileSettings.baseURL + content : null;
+                        newField.content = content || null;
                     }
 
                     // 渲染组件

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, Fragment, useState, useCallback } from 'reac
 import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, notification, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
-import { renderFormControl, processValidationRules } from './FormFields';
+import { renderFormControl, processValidationRules, renderFormItem } from './FormFields';
 import CommonList from './CommonList';
 import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
@@ -477,28 +477,65 @@ const CollapseForm = ({
             type: field.type,
             requiredMessage: field.requiredMessage
         });
-
+        const formItemRestProps = {
+            label: field.label,
+            labelCol: field.labelCol,
+            wrapperCol: field.wrapperCol,
+            // 确保 className 的拼接是安全的，并处理 field.type 对 className 的影响
+            className: `${field.className || ''} ${field.type === 'inputGroup' ? '' : 'editorform-item'}`.trim(),
+            hidden: field.hidden,
+            noStyle: field.noStyle,
+        };
+        // 处理表单验证规则 (仅对非展示型字段有意义)
+        const finalRules = processValidationRules(field.rules, {
+            required: field.required,
+            label: field.label,
+            type: field.type,
+            requiredMessage: field.requiredMessage
+        });
         // 渲染表单项 - key直接作为属性传递
         return (
+            // <Form.Item
+            //     name={field.name}
+            //     rules={itemRules}
+            //     className={styles.formItem}
+            //     required={field.required}
+            //     key={field.name}
+            //     label={
+            //         field.type === 'upload' || field.type === 'structureList'
+            //             ? null
+            //             : field.label
+            //     }
+
+            // >
+            //     {renderFormControl(field, {
+            //         form,
+            //         formConnected,
+            //         initialValues,
+            //         mounted,
+
+            //     })}
+            // </Form.Item>
             <Form.Item
-                name={field.name}
-                rules={itemRules}
-                className={styles.formItem}
-                required={field.required}
-                key={field.name}
+
+                key={field.name} // React key 直接传递
+                {...formItemRestProps} // 其余布局 props 展开
+                //上传控件隐藏label
                 label={
                     field.type === 'upload' || field.type === 'structureList'
                         ? null
                         : field.label
                 }
-
+                name={field.name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
+                rules={field.type === 'structureList' ? [] : finalRules}
+                valuePropName={field.type === 'structureList' ? 'value' : 'value'}
             >
-                {renderFormControl(field, {
+                {renderFormItem(field, {
                     form,
                     formConnected,
                     initialValues,
                     mounted,
-
+                    moduleKey
                 })}
             </Form.Item>
         );
@@ -518,7 +555,7 @@ const CollapseForm = ({
     const renderFieldGroup = (fieldGroup) => {
         // 确保每个field都有name作为key，如果没有name则使用索引
         return fieldGroup.map((field, index) => {
-            return renderFormItem({ ...field });
+            return renderField(field)
         });
     };
 

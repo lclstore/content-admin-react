@@ -34,7 +34,7 @@ export default function WorkoutsList() {
         {
             title: 'Duration (Min)',
             key: 'durationCode',
-            type: 'multiple',
+            type: 'single',
             options: "BizTemplateDurationEnums",
         }
     ];

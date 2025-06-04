@@ -33,14 +33,14 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'application',
+            name: 'applicationCode',
             label: 'Application',
             options:"BizResourceApplicationEnums",
             required: true,
         },
         {
             type: 'upload',
-            name: 'coverImage', // 遵循命名规范，使用Url后缀
+            name: 'coverImgUrl', // 遵循命名规范，使用Url后缀
             label: 'Cover Image',
             acceptedFileTypes: 'png,webp',
             //文件上传后修改name
@@ -56,7 +56,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            name: 'detailImage', // 遵循命名规范，使用Url后缀
+            name: 'detailImgUrl', // 遵循命名规范，使用Url后缀
             label: 'Detail Image',
             acceptedFileTypes: 'png,webp',
             onChange: (value, file, form) => {
@@ -71,7 +71,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            name: 'thumbnailImage', // 遵循命名规范，使用Url后缀
+            name: 'thumbnailImgUrl', // 遵循命名规范，使用Url后缀
             label: 'Thumbnail Image',
             acceptedFileTypes: 'png,webp',
             onChange: (value, file, form) => {
@@ -86,7 +86,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'upload',
-            name: 'completeImage', // 遵循命名规范，使用Url后缀
+            name: 'completeImgUrl', // 遵循命名规范，使用Url后缀
             label: 'Complete Image',
             acceptedFileTypes: 'png,webp',
             onChange: (value, file, form) => {
@@ -105,7 +105,8 @@ export default function UserEditorWithCommon() {
     return (
         <CommonEditorForm
             formType="basic"
-            config={{ formName: 'User', hideSaveButton: false, hideBackButton: false }}
+            moduleKey="resource"
+            config={{ formName: 'Resource', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}
         />

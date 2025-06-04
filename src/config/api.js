@@ -1,5 +1,4 @@
 import request from "@/request"
-import { uuid } from "@/utils/index.js";
 // s3上传
 /**
  *  @param {File} file - 文件
@@ -17,7 +16,7 @@ export const uploadFile = async function ({ file, dirKey }) {
     // 生成uuid作为名称
     const params = {
         dirKey: `${dirKey}-${fileType}`,
-        fileName: file.name.replace(/.+\./, uuid() + '.'),
+        fileName: file.name,
         contentType: file.type
     };
     let fileUrl = await new Promise(resolve => {
@@ -30,17 +29,6 @@ export const uploadFile = async function ({ file, dirKey }) {
         })
     })
 
-    // 对fileUrl进行处理,如果返回url路径包含name，把name的值替换为file.name,如果不包含name则在url添加name且值为file.name
-    function replaceName(url, name) {
-        let urlObj = new URL(url)
-        urlObj.searchParams.set('name', name)
-        return urlObj.toString()
-    }
-
-    // 使用正则替换file.name文件名为uuid
-    fileUrl.fileUrl = replaceName(fileUrl.fileUrl, file.name)
-    let origin = 'https://test.com/'
-    fileUrl.fileRelativeUrl = replaceName(origin + fileUrl.fileRelativeUrl, file.name).replace(origin, '')
     if (fileUrl !== 'error') {
         await fetch(fileUrl.uploadUrl, {
             method: 'PUT',

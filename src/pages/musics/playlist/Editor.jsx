@@ -15,17 +15,7 @@ export default function UserEditorWithCommon() {
             required: true,
             placeholder: 'Music name',
         },
-        {
-            type: 'select',
-            name: 'premium',
-            label: 'Premium',
-            required: true,
-            setDefaultValue: 0,
-            options: [
-                { label: 'Yes', value: 1 },
-                { label: 'No', value: 0 },
-            ],
-        },
+
         {
             type: 'select',
             mode: 'single',
@@ -37,6 +27,17 @@ export default function UserEditorWithCommon() {
                 { label: 'Dance', value: 'DANCE' },
             ],
             required: true,
+        },
+        {
+            type: 'select',
+            name: 'premium',
+            label: 'Premium',
+            required: true,
+            setDefaultValue: 0,
+            options: [
+                { label: 'Yes', value: 1 },
+                { label: 'No', value: 0 },
+            ],
         },
         {
             type: 'structureList',

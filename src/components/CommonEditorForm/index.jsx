@@ -1043,8 +1043,12 @@ export default function CommonEditor(props) {
                 }
                 {/* 渲染右侧表单 isCollapse 是否按照折叠方式展示 */}
                 {
+
                     isCollapse && <div className={`${styles.advancedEditorForm} ${commonListConfig ? '' : styles.withSidebar}`}>
                         <Spin spinning={loading}>
+                            {
+                                config.title && <div className={styles.title}>{`${config.title}`}</div>
+                            }
                             <Form
                                 form={form}
                                 name={config.formName || 'advancedForm'}

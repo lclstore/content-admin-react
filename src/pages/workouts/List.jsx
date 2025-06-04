@@ -698,7 +698,7 @@ export default function WorkoutsList() {
     /**
      * 筛选后的表格数据
      */
-    const filteredDataForTable = useMemo(() =>  {
+    const filteredDataForTable = useMemo(() => {
         setLoading(true);
         let tempData = [...dataSource];
         setLoading(false);
@@ -717,7 +717,7 @@ export default function WorkoutsList() {
             disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
- 
+
     /**
      * 行选择配置
      */
@@ -746,7 +746,7 @@ export default function WorkoutsList() {
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}
                 confirmLoading={batchCreateLoading}
-                 rowSelection={rowSelection}
+                rowSelection={rowSelection}
                 columns={allColumnDefinitions}
                 leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"

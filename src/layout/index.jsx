@@ -1,15 +1,27 @@
-import {Layout, Spin} from 'antd'
+import { Layout, Spin } from 'antd'
 import AppSider from './components/sider'
 import AppHeader from './components/header'
-import React, {useCallback, useEffect, useState} from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import settings from '@/config/settings'
 import './layout.css';
-import {Outlet} from 'react-router-dom'
-import {useStore} from "@/store/index.js";
-import {useNavigate} from "react-router";
-import {getEnumList} from "@/config/api.js";
+import { Outlet } from 'react-router-dom'
+import { useStore } from "@/store/index.js";
+import { useNavigate } from "react-router";
+import { getEnumList } from "@/config/api.js";
+import { UpSquareOutlined } from '@ant-design/icons';
 
-const {Header, Sider, Content} = Layout
+const { Header, Sider, Content } = Layout
+
+const style = {
+    height: 40,
+    width: 40,
+    lineHeight: '40px',
+    borderRadius: 4,
+    backgroundColor: '#1088e9',
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 14,
+};
 
 export default function AppLayout() {
     const [collapsed, setCollapsed] = useState(false);
@@ -28,23 +40,23 @@ export default function AppLayout() {
             getEnumList
         ]
         let state = 0
-        runScriptList.forEach((fun,index) => {
-             fun().then((res) => {
-                 state++;
-                 // getEnumList 获取枚举后加入optionsBase
-                 if(index === 0){ optionsBaseAdd(res) }
-                 if(state === runScriptList.length){
-                     setResouseLoaded(true)
-                 }
+        runScriptList.forEach((fun, index) => {
+            fun().then((res) => {
+                state++;
+                // getEnumList 获取枚举后加入optionsBase
+                if (index === 0) { optionsBaseAdd(res) }
+                if (state === runScriptList.length) {
+                    setResouseLoaded(true)
+                }
             })
         })
     }, []);
     return (
         <Layout className='layoutContainer'>
-            <Spin spinning={loadingGlobal} fullscreen tip="Loading..."/>
+            <Spin spinning={loadingGlobal} fullscreen tip="Loading..." />
             <Sider className='siderContainer' theme={settings.layout.theme} width={settings.layout.sidebarWidth}
-                   trigger={null} collapsible collapsed={collapsed}>
-                <AppSider/>
+                trigger={null} collapsible collapsed={collapsed}>
+                <AppSider />
             </Sider>
             <Layout>
                 <Header
@@ -53,7 +65,7 @@ export default function AppLayout() {
                     }}
                     className='headerContainer'
                 >
-                    <AppHeader/>
+                    <AppHeader />
                 </Header>
                 <Content
                     className='contentContainer'
@@ -62,8 +74,10 @@ export default function AppLayout() {
                         position: 'relative',
                     }}
                 >
-                    {resouseLoaded && <Outlet/>}
+
+                    {resouseLoaded && <Outlet />}
                 </Content>
+                
             </Layout>
         </Layout>
 

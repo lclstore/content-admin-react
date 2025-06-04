@@ -10,8 +10,15 @@
     cursor: pointer;
     width: fit-content;
 }
+.createWorkoutBtn1_box{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+   
+}
 .createWorkoutBtn1 {
-    margin: 20px auto;
     padding: var(--spacing-xs) var(--spacing-sm);
     text-align: center;
     font-size: 22px;
@@ -23,8 +30,8 @@
     width: fit-content;
 }
 .createWorkoutBtn1_img{
-    width: 100px;
-    /* height: 20px; */
+    /* width: 10px; */
+    height: 30px;
 }
 .Profile {
     width: fit-content;

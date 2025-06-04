@@ -260,21 +260,41 @@ const SortableItemRenderer = React.memo(({
                         handleFieldChange(changedField, changedValues[changedField], item);
                     }}
                 >
-                    {structureListFields?.map(field => (
-                        <Form.Item
-                            className='editorform-item'
-                            key={`${item.id}-${field.name}`}
-                            required={field.required}
-                            rules={field.rules}
-                            name={field.name}
-                            label={field.label}
-                        >
-                            {renderFormControl(field, {
-                                form: parentForm,
-                                formConnected: true,
-                            })}
-                        </Form.Item>
-                    ))}
+                    {structureListFields?.map(field => {
+                        // 获取字段的默认值
+                        let fieldDefaultValue = null;
+
+                        // 如果存在默认值处理函数，则获取默认值
+                        if (field.setDefaultValue) {
+                            fieldDefaultValue = typeof field.setDefaultValue === 'function'
+                                ? field.setDefaultValue(item)
+                                : field.setDefaultValue;
+                        }
+
+                        // 如果有默认值，设置到表单中
+                        if (fieldDefaultValue !== null) {
+                            itemForm.setFieldsValue({
+                                [field.name]: fieldDefaultValue
+                            });
+                        }
+
+                        // 渲染表单项
+                        return (
+                            <Form.Item
+                                key={`${item.id}-${field.name}`}
+                                className='editorform-item'
+                                required={field.required}
+                                rules={field.rules}
+                                name={field.name}
+                                label={field.label}
+                            >
+                                {renderFormControl(field, {
+                                    form: parentForm,
+                                    formConnected: true,
+                                })}
+                            </Form.Item>
+                        );
+                    })}
                 </Form>
             </div>
         </div>

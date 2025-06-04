@@ -45,6 +45,9 @@ export default function UserEditorWithCommon() {
                 {
                     type: 'input',
                     required: true,
+                    setDefaultValue: (data) => {
+                        return data.name
+                    },
                     name: 'displayName',
                     label: 'Display Name',
                 },
@@ -53,6 +56,7 @@ export default function UserEditorWithCommon() {
                     name: 'premium',
                     label: 'Premium',
                     required: true,
+                    setDefaultValue: 0,
                     options: [
                         { label: 'Yes', value: 1 },
                         { label: 'No', value: 0 },

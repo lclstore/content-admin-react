@@ -268,6 +268,7 @@ export const renderFormControl = (field, options = {}) => {
             return <TagSelector
                 key={selectKey}
                 {...selectRest}
+                defaultValue={field.defaultValue}
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {

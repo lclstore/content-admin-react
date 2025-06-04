@@ -1,5 +1,4 @@
 import { Layout, Spin } from 'antd'
-import { Layout, Spin } from 'antd'
 import AppSider from './components/sider'
 import AppHeader from './components/header'
 import React, { useCallback, useEffect, useState } from 'react'

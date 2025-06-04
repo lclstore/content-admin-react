@@ -751,7 +751,7 @@ export default function WorkoutsList() {
                 leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"
                 searchConfig={{
-                    placeholder: "Search name or id...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={true}
                 filterConfig={{

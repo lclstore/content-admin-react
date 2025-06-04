@@ -73,6 +73,7 @@
     .searchBar {
         flex-direction: column;
         align-items: flex-start;
+        
     }
 
     .searchInput {

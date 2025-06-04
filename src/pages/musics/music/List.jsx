@@ -65,7 +65,9 @@ export default function Musics() {
                 sorter: true,
                 width: 350,
                 showSorterTooltip: false,
-                dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1
+                dataIndex: 'name',
+                key: 'name',
+                visibleColumn: 1
             },
             {
                 title: 'Status',

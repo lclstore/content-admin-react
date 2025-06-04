@@ -233,7 +233,7 @@ function ConfigurableTable({
             type: 'multiple',
             title: 'Visible Columns',
             key: 'visibleColumns',
-            options: options // 使用过滤后的选项数组
+            options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
     console.log(columnSettingsSection);
@@ -560,6 +560,7 @@ function ConfigurableTable({
 
     // 筛选器 更新
     const filterUpdate = useCallback((newFilters) => {
+        paginationParams.current.pageIndex = 1;
         activeFilters.current = newFilters;
         searchTableData()// 查询 表格数据
     }, [paginationParams])

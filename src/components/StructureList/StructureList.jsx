@@ -30,6 +30,7 @@ const SortableItemRenderer = React.memo(({
     renderItemMeta,
     onCopyItem,
     onDeleteItem,
+    onUpdateItem,
     onSortItems,
     currentPlayingItem,
     isPlaying,
@@ -37,17 +38,10 @@ const SortableItemRenderer = React.memo(({
     structureListFields,
     dataItem,
     onItemChange,
+    name,
+    parentForm,
+    dataList,
 }) => {
-    // 创建独立的表单实例
-    const [itemForm] = Form.useForm();
-
-    // 在组件挂载时初始化表单数据
-    useEffect(() => {
-        if (isExpanded) {
-            itemForm.setFieldsValue(dataItem);
-        }
-    }, [isExpanded, dataItem, itemForm]);
-
     const {
         attributes,
         listeners,
@@ -64,10 +58,18 @@ const SortableItemRenderer = React.memo(({
     const moveThreshold = 5; // 移动阈值，超过这个距离就认为是拖拽
 
     const handleMouseDown = useCallback((e) => {
+        // 如果点击来自操作按钮，不设置mouseDownPos
+        if (e.target.closest('.structure-item-actions')) {
+            return;
+        }
         setMouseDownPos({ x: e.clientX, y: e.clientY });
     }, []);
 
     const handleMouseUp = useCallback((e) => {
+        // 如果点击来自操作按钮，不处理展开/折叠
+        if (e.target.closest('.structure-item-actions')) {
+            return;
+        }
         if (mouseDownPos) {
             const dx = Math.abs(e.clientX - mouseDownPos.x);
             const dy = Math.abs(e.clientY - mouseDownPos.y);
@@ -159,36 +161,31 @@ const SortableItemRenderer = React.memo(({
         );
     }, [currentPlayingItem, isPlaying, onAudioClick]);
 
-    // 渲染表单字段的函数
-    const renderFormField = useCallback((field) => {
-        const { type, name, label, options } = field;
-        const fieldValue = dataItem[name];
+    // 创建表单实例
+    const [itemForm] = Form.useForm();
 
-        const handleValueChange = (value) => {
-            const updatedItem = {
-                ...dataItem,
-                [name]: value
-            };
-            onItemChange && onItemChange(updatedItem);
-        };
+    // 当item变化时，更新表单的值
+    useEffect(() => {
+        if (item && structureListFields) {
+            // 从item中提取structureListFields中定义的字段值
+            const initialValues = {};
+            structureListFields.forEach(field => {
+                initialValues[field.name] = item[field.name];
+            });
+            itemForm.setFieldsValue(initialValues);
+        }
+    }, [item, structureListFields, itemForm]);
 
-        // 为每个字段添加唯一的key
-        const uniqueKey = `${item.id}-${name}`;
-        return <Form.Item
-            className='editorform-item'
-            key={uniqueKey}
-            required={field.required}
-            rules={field.rules}
-            name={field.name}
-            label={field.label}
-        >
-            {renderFormControl(field, {
-                form: itemForm,
-                formConnected: true,
-                onChange: handleValueChange
-            })}
-        </Form.Item>
-    }, [dataItem, onItemChange, item.id, itemForm]);
+    // 修改handleFieldChange函数
+    const handleFieldChange = useCallback((changedField, value, item) => {
+        const newItem = {
+            ...item,
+            [changedField]: value
+        }
+
+        onUpdateItem && onUpdateItem("structureList", newItem, value);
+
+    }, [onUpdateItem]);
 
     return (
         <div style={wrapperStyle} className={wrapperClassName}>
@@ -253,10 +250,31 @@ const SortableItemRenderer = React.memo(({
                 </Col>
             </Row>
             <div className='form-container' style={{ display: isExpanded ? 'block' : 'none' }}>
-                <Form form={itemForm} layout="vertical" onValuesChange={(changedValues, allValues) => {
-                    onItemChange && onItemChange({ ...dataItem, ...allValues });
-                }}>
-                    {structureListFields?.map(field => renderFormField(field))}
+                <Form
+                    form={itemForm}
+                    layout="vertical"
+                    onValuesChange={(changedValues, allValues) => {
+                        // 获取改变的字段名
+                        const changedField = Object.keys(changedValues)[0];
+                        // 调用handleFieldChange更新值
+                        handleFieldChange(changedField, changedValues[changedField], item);
+                    }}
+                >
+                    {structureListFields?.map(field => (
+                        <Form.Item
+                            className='editorform-item'
+                            key={`${item.id}-${field.name}`}
+                            required={field.required}
+                            rules={field.rules}
+                            name={field.name}
+                            label={field.label}
+                        >
+                            {renderFormControl(field, {
+                                form: parentForm,
+                                formConnected: true,
+                            })}
+                        </Form.Item>
+                    ))}
                 </Form>
             </div>
         </div>
@@ -282,8 +300,11 @@ const StructureList = ({
     selectedItemFromList,
     onSelectedItemProcessed,
     onSortItems,
-    structureListFields
+    structureListFields,
+    onUpdateItem
 }) => {
+    console.log('parentForm:', form.getFieldsValue());
+
     // 替换弹框状态
     const [replaceModalVisible, setReplaceModalVisible] = useState(false);
     // 当前选中的panel和item id
@@ -382,7 +403,7 @@ const StructureList = ({
         };
     }, [handleAudioEnded]);
 
-    // 处理展开/折叠项目的函数
+    // 简化展开/折叠处理函数
     const handleToggleExpandItem = useCallback((itemId) => {
         console.log('切换展开状态：', { itemId, currentExpanded: expandedItemId });
         setExpandedItemId(prevId => prevId === itemId ? null : itemId);
@@ -391,9 +412,10 @@ const StructureList = ({
     // 处理删除项目
     const handleDeleteItem = useCallback((panelName, itemIndex) => {
         if (externalDeleteItem) {
-            externalDeleteItem(panelName, itemIndex);
+            // 使用传入的 name 作为 panelName
+            externalDeleteItem(name, itemIndex);
         }
-    }, [externalDeleteItem]);
+    }, [externalDeleteItem, name]);
 
     // 处理复制项目
     const handleCopyItem = useCallback((panelName, itemId) => {
@@ -504,10 +526,11 @@ const StructureList = ({
 
     // 处理单个项目的值变更
     const handleItemChange = useCallback((updatedItem) => {
-        debugger
+        // 更新整个数据列表
         const updatedDataList = dataList.map(item =>
             item.id === updatedItem.id ? updatedItem : item
         );
+        // 通知父组件数据列表已更新
         onItemChange && onItemChange(updatedDataList);
     }, [dataList, onItemChange]);
 
@@ -533,7 +556,7 @@ const StructureList = ({
                         {dataList.map((item, index) => (
                             <SortableItemRenderer
                                 key={`${panelName}-item-${index}`}
-                                panelId={panelName}
+                                panelId={name}
                                 item={item}
                                 itemIndex={index}
                                 isExpanded={expandedItemId === item.id}
@@ -549,6 +572,10 @@ const StructureList = ({
                                 onAudioClick={handleAudioClick}
                                 structureListFields={structureListFields}
                                 dataItem={item}
+                                onUpdateItem={onUpdateItem}
+                                name={name}
+                                parentForm={form}
+                                dataList={dataList}
                             />
                         ))}
                     </div>

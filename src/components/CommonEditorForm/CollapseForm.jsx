@@ -25,7 +25,7 @@ import { CSS } from '@dnd-kit/utilities';
 const { Text } = Typography;
 
 // --- 可排序项渲染器组件 ---
-const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded, toggleExpandItem, onOpenReplaceModal, renderItemMata, onCopyItem, onDeleteItem, onItemChange }) => {
+const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded, toggleExpandItem, onOpenReplaceModal, renderItemMata, onCopyItem, onDeleteItem, onUpdateItem }) => {
     const {
         attributes,
         listeners,
@@ -207,6 +207,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
  * @param {Function} props.onSelectedItemProcessed 处理完选中项后的回调函数，用于清空选中状态
  * @param {Function} props.onSortItems 处理排序的回调函数
  * @param {Function} props.onDeleteItem 处理删除项的回调函数
+ * @param {Function} props.onUpdateItem 处理更新项的回调函数
  * @param {Function} props.onCopyItem 处理复制项的回调函数
  * @param {Function} props.onReplaceItem 处理替换项的回调函数
  * @param {Component} props.commonListConfig 替换弹框中显示的commonListConfig组件
@@ -231,6 +232,7 @@ const CollapseForm = ({
     // 添加新的回调函数
     onSortItems,
     onDeleteItem,
+    onUpdateItem,
     onCopyItem,
     onReplaceItem,
 }) => {

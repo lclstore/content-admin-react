@@ -487,6 +487,7 @@ export default function CommonEditor(props) {
 
     // 处理复制项的回调函数
     const handleCopyItem = (panelName, itemId) => {
+        debugger
         const updatedFields = internalFormFields.map(field => {
             if (field.name === panelName && Array.isArray(field.dataList)) {
                 // 找到要复制的项
@@ -520,8 +521,42 @@ export default function CommonEditor(props) {
         if (collapseFormConfig.onCopyItem) {
             collapseFormConfig.onCopyItem(panelName, itemId);
         }
+        // 如果父组件提供了onUpdateItem，也调用它（向后兼容）
+        if (collapseFormConfig.onUpdateItem) {
+            collapseFormConfig.onUpdateItem(panelName, itemId);
+        }
     };
+    const handleUpdateItem = (panelName, newItemData, itemId) => {
+        const updatedFields = internalFormFields.map(field => {
+            if (field.type === panelName && Array.isArray(field.dataList)) {
+                // 更新数据列表中的指定项
+                const updatedDataList = field.dataList.map(item => {
+                    if (item.id === newItemData.id) {
+                        return { ...item, ...newItemData };
+                    }
+                    return item;
+                });
 
+                return {
+                    ...field,
+                    dataList: updatedDataList
+                };
+            }
+            return field;
+        });
+        // 更新内部状态
+        setInternalFormFields(updatedFields);
+
+        // 通知父组件
+        if (onFormFieldsChange) {
+            onFormFieldsChange(updatedFields);
+        }
+
+        // 如果父组件提供了onUpdateItem，也调用它（向后兼容）
+        if (collapseFormConfig.onUpdateItem) {
+            collapseFormConfig.onUpdateItem(panelName, newItemData, itemId);
+        }
+    };
     // 处理替换项的回调函数
     const handleReplaceItem = (panelName, itemId, newItemId, newItem, itemIndex) => {
         //折叠面板
@@ -820,6 +855,7 @@ export default function CommonEditor(props) {
         onSortItems: configOnSortItems,
         onDeleteItem: configOnDeleteItem,
         onCopyItem: configOnCopyItem,
+        onUpdateItem: configOnUpdateItem,
         onReplaceItem: configOnReplaceItem
     } = collapseFormConfig;
 
@@ -839,6 +875,7 @@ export default function CommonEditor(props) {
         configOnSortItems: collapseFormConfig.onSortItems,
         configOnDeleteItem: collapseFormConfig.onDeleteItem,
         configOnCopyItem: collapseFormConfig.onCopyItem,
+        configOnUpdateItem: collapseFormConfig.onUpdateItem,
         configOnReplaceItem: collapseFormConfig.onReplaceItem
     }), [
         // 明确列出所有依赖项，避免依赖整个 collapseFormConfig 对象
@@ -854,6 +891,7 @@ export default function CommonEditor(props) {
         collapseFormConfig.onSortItems,
         collapseFormConfig.onDeleteItem,
         collapseFormConfig.onCopyItem,
+        collapseFormConfig.onUpdateItem,
         collapseFormConfig.onReplaceItem
     ]);
 
@@ -947,6 +985,7 @@ export default function CommonEditor(props) {
                             onReplaceItem: handleReplaceItem,
                             onCopyItem: handleCopyItem,
                             onSortItems: handleSortItems,
+                            onUpdateItem: handleUpdateItem,
                             onDeleteItem: handleDeleteItem,
                             commonListConfig: commonListConfig,
                             formConnected,
@@ -980,6 +1019,7 @@ export default function CommonEditor(props) {
             configOnSortItems: configOnSortItems,
             configOnDeleteItem: configOnDeleteItem,
             configOnCopyItem: configOnCopyItem,
+            configOnUpdateItem: configOnUpdateItem,
             configOnReplaceItem: configOnReplaceItem
         } = extractedConfig;
 
@@ -1036,6 +1076,7 @@ export default function CommonEditor(props) {
                                         onSortItems={handleSortItems}
                                         onDeleteItem={handleDeleteItem}
                                         onCopyItem={handleCopyItem}
+                                        onUpdateItem={handleUpdateItem}
                                         onReplaceItem={handleReplaceItem}
                                     />
                                 )}

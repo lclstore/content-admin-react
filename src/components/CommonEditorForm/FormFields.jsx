@@ -409,6 +409,7 @@ export const renderFormControl = (field, options = {}) => {
                         onReplaceItem={options.onReplaceItem}
                         onDeleteItem={options.onDeleteItem}
                         onCopyItem={options.onCopyItem}
+                        onUpdateItem={options.onUpdateItem}
                         onSortItems={options.onSortItems}
                         onSelectedItemProcessed={options.onSelectedItemProcessed}
                         commonListConfig={options.commonListConfig}
@@ -579,7 +580,7 @@ export const renderFormItem = (field, options = {}) => {
         }
 
         return (
-            field.type == 'line' ?
+            field.type == 'line' || field.type == 'structureList' ?
                 <div>{renderFormControl(field, options)}</div> :
                 <Form.Item
 
@@ -592,7 +593,7 @@ export const renderFormItem = (field, options = {}) => {
                             : label
                     }
                     name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
-                    rules={field.type === 'structureList' ? [] : finalRules}
+                    rules={finalRules}
                     valuePropName={finalValuePropName}
                 >
                     {renderFormControl(field, options)}

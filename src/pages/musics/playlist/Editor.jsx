@@ -54,8 +54,8 @@ export default function UserEditorWithCommon() {
                     label: 'Premium',
                     required: true,
                     options: [
-                        { label: 'Yes', value: 'YES' },
-                        { label: 'No', value: 'NO' },
+                        { label: 'Yes', value: 1 },
+                        { label: 'No', value: 0 },
                     ],
                 },
 
@@ -104,7 +104,8 @@ export default function UserEditorWithCommon() {
                 return {
                     bizMusicId: item.id,
                     displayName: item.name,
-                    premium: formValues.premium,
+                    displayName: item.displayName,
+                    premium: item.premium,
                 }
             });
         }

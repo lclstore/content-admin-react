@@ -41,6 +41,24 @@ export default function UserEditorWithCommon() {
             // renderItemMata: renderItemMata,
             label: 'Musics',
             dataList: [],
+            structureListFields: [
+                {
+                    type: 'input',
+                    name: 'displayName',
+                    label: 'Display Name',
+                },
+                {
+                    type: 'select',
+                    name: 'premium',
+                    label: 'Premium',
+                    options: [
+                        { label: 'Yes', value: 'YES' },
+                        { label: 'No', value: 'NO' },
+                    ],
+                },
+
+            ],
+
             rules: [
                 { required: true, message: 'Please add at least one music' },
             ]

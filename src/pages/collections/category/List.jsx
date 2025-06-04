@@ -210,22 +210,20 @@ export default () => {
                 title: 'New End Time',
                 dataIndex: 'newEndTime',
                 key: 'newEndTime',
-                width: 160
+                width: 160,
             }
         ];
 
         return (
-            <div style={{ margin: '20px' }}>
-                <Table
+            <Table
 
-                    columns={columns}
-                    dataSource={data}
-                    pagination={false}
-                    rowKey="id"
-                    size="small"
-                    bordered={true}
-                />
-            </div>
+                columns={columns}
+                dataSource={data}
+                pagination={false}
+                rowKey="id"
+                size="small"
+                bordered={false}
+            />
         );
     };
     // 渲染 - 组件UI呈现
@@ -240,8 +238,8 @@ export default () => {
                 operationName={'list'}
                 showPagination={false}
                 draggable={true}
-                expandable={true}
-                expandedRowRender={expandedRowRender}
+                // expandable={true}
+                // expandedRowRender={expandedRowRender}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}
             />

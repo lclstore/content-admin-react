@@ -846,15 +846,37 @@ function ConfigurableTable({
 
         return {
             expandedRowRender: (record) => {
-                return <div className={`${styles.expandedRowRender} ${styles.configurableTableContainer}`}>
-                    {expandedRowRender(record)}
-                </div>
+                // 获取展开行的内容
+                const expandedContent = expandedRowRender(record);
+
+                // 如果展开内容是Table组件，我们需要修改它的列配置
+                if (React.isValidElement(expandedContent) && expandedContent.type === Table) {
+                    // 克隆Table组件并修改它的columns配置
+                    const modifiedTable = React.cloneElement(expandedContent, {
+                        columns: expandedContent.props.columns.map(col => ({
+                            ...col,
+                            render: (text, record, index) => {
+                                // 保存原始的render函数
+                                const originalRender = col.render || ((text) => text);
+                                // 调用原始render获取内容
+                                const content = originalRender(text, record, index);
+                                // 用td-cell包装内容
+                                return <div className="td-cell">{content}</div>;
+                            }
+                        }))
+                    });
+
+                    // 用expandedRowRender类包裹修改后的表格
+                    return <div className={`${styles.expandedRowRender} ${styles.configurableTableContainer}`}>{modifiedTable}</div>;
+                }
+
+                // 如果不是Table组件，也用expandedRowRender类包裹
+                return <div className={`${styles.expandedRowRender} ${styles.configurableTableContainer}`}>{expandedContent}</div>;
             },
-            rowExpandable: (record) => true, // 默认所有行都可以展开
-            columnWidth: 50, // 设置展开图标列的宽度
-            fixed: 'left', // 固定展开图标列在左侧
-            indentSize: 20, // 展开行缩进大小
-            // 自定义展开图标
+            rowExpandable: (record) => true,
+            columnWidth: 50,
+            fixed: 'left',
+            indentSize: 20,
             expandIcon: ({ expanded, onExpand, record }) => {
                 const Icon = expanded ? DownOutlined : RightOutlined;
                 return (

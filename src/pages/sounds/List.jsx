@@ -41,6 +41,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
+                
                 key: 'name',
                 width: 350,
                 stye: {

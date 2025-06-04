@@ -212,23 +212,6 @@ export default () => {
                 key: 'structureTypeCode'
             },
             {
-                title: 'Gender',
-                dataIndex: 'genderCode',
-                sorter: true,
-                width: 120,
-                visibleColumn: 1,
-                options: [
-                    {
-                        label: 'Male',
-                        value: 'MALE'
-                    }, {
-                        label: 'Female',
-                        value: 'FEMALE'
-                    }
-                ],
-                key: 'genderCode'
-            },
-            {
                 title: 'Difficulty',
                 dataIndex: 'difficultyCode',
                 sorter: true,
@@ -248,6 +231,24 @@ export default () => {
                 ],
                 key: 'difficultyCode'
             },
+            {
+                title: 'Gender',
+                dataIndex: 'genderCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 1,
+                options: [
+                    {
+                        label: 'Male',
+                        value: 'MALE'
+                    }, {
+                        label: 'Female',
+                        value: 'FEMALE'
+                    }
+                ],
+                key: 'genderCode'
+            },
+            
             {
                 title: 'Equipment',
                 dataIndex: 'equipmentCode',

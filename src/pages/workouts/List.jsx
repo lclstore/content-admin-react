@@ -286,30 +286,30 @@ export default function WorkoutsList() {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
-            {
-                title: 'Detail ImgUrl',
-                width: 120,
-                mediaType: 'image',
-                dataIndex: 'detailImgUrl',
-                key: 'detailImgUrl',
-                visibleColumn: 0
-            },
-            {
-                title: 'Thumbnail ImgUrl',
-                width: 120,
-                mediaType: 'image',
-                dataIndex: 'thumbnailImgUrl',
-                key: 'thumbnailImgUrl',
-                visibleColumn: 0
-            },
-            {
-                title: 'Complete ImgUrl',
-                width: 120,
-                mediaType: 'image',
-                dataIndex: 'completeImgUrl',
-                key: 'completeImgUrl',
-                visibleColumn: 0
-            },
+            // {
+            //     title: 'Detail ImgUrl',
+            //     width: 120,
+            //     mediaType: 'image',
+            //     dataIndex: 'detailImgUrl',
+            //     key: 'detailImgUrl',
+            //     visibleColumn: 0
+            // },
+            // {
+            //     title: 'Thumbnail ImgUrl',
+            //     width: 120,
+            //     mediaType: 'image',
+            //     dataIndex: 'thumbnailImgUrl',
+            //     key: 'thumbnailImgUrl',
+            //     visibleColumn: 0
+            // },
+            // {
+            //     title: 'Complete ImgUrl',
+            //     width: 120,
+            //     mediaType: 'image',
+            //     dataIndex: 'completeImgUrl',
+            //     key: 'completeImgUrl',
+            //     visibleColumn: 0
+            // },
 
             { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0 },
             {
@@ -338,12 +338,12 @@ export default function WorkoutsList() {
                 sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
                 width: 150,
                 visibleColumn: 2,
-                render: (duration) => {
-                    if (!duration) return '-';
-                    const minutes = Math.floor(duration / 60);
-                    const seconds = duration % 60;
-                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }
+                // render: (duration) => {
+                //     if (!duration) return '-';
+                //     const minutes = Math.floor(duration / 60);
+                //     const seconds = duration % 60;
+                //     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                // }
             },
             {
                 title: 'Calorie (Kcal)',
@@ -368,7 +368,7 @@ export default function WorkoutsList() {
                 dataIndex: 'genderCode',
                 sorter: true,
                 width: 120,
-                visibleColumn: 2,
+                visibleColumn: 1,
                 options: [
                     {
                         label: 'Male',

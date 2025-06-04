@@ -66,6 +66,17 @@ export const getPublicTableList = async (moduleKey, operationName, params) => {
         });
     })
 }
+// 排序公共table列表
+export const sortPublicTableList = async (moduleKey, params) => {
+    return new Promise(resolve => {
+        request.post({
+            url: `/${moduleKey}/sort`,
+            load: true,
+            data: params,
+            callback: res => resolve(res?.data)
+        });
+    })
+}
 // 根据id获取表单数据
 export const getformDataById = (url) => {
     return new Promise((resolve, reject) => {
@@ -154,15 +165,15 @@ export const getEnumList = async () => {
     return new Promise(resolve => {
         request.get({
             url: `/enum/list`,
-            data:{},
+            data: {},
             callback: (res) => {
                 const enumList = {}
                 res.data.data.forEach(i => {
                     enumList[i.displayName] = i.datas.map(data => ({
-                            value: data.enumName,
-                            label: data.displayName,
-                            ...data
-                        }))
+                        value: data.enumName,
+                        label: data.displayName,
+                        ...data
+                    }))
                 })
                 resolve(enumList)
             }

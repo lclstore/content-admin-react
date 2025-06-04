@@ -259,6 +259,25 @@
         /* 尝试提高层级 */
       }
     }
+
+    // 添加拖拽相关样式
+    .drag-visible {
+      text-align: center;
+      cursor: move;
+      width: 50px;
+
+      .anticon {
+        color: #999;
+      }
+    }
+
+    tr.drop-over-downward td {
+      border-bottom: 2px dashed #1890ff;
+    }
+
+    tr.drop-over-upward td {
+      border-top: 2px dashed #1890ff;
+    }
   }
 }
 

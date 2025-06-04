@@ -148,6 +148,7 @@ export default () => {
                 moduleKey={'category'}
                 operationName={'list'}
                 showPagination={false}
+                draggable={true}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}
             />

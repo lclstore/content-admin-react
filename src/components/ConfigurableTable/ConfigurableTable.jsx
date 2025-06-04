@@ -11,17 +11,35 @@ import {
     DeleteOutlined,
     CheckCircleOutlined,
     StopOutlined,
-    EllipsisOutlined
+    EllipsisOutlined,
+    MenuOutlined
 } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
 import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
-import { getPublicTableList, publicUpdateStatus, publicDeleteData, publicGenerate } from "@/config/api.js";
+import { getPublicTableList, publicUpdateStatus, publicDeleteData, publicGenerate, sortPublicTableList } from "@/config/api.js";
 import settings from "@/config/settings.js"
 import noDataImg from '@/assets/images/no-data.png';
 import { debounce, times } from 'lodash';
 import { useStore } from "@/store/index.js";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 /**
  * 可配置表格组件
  *
@@ -49,6 +67,8 @@ import { useStore } from "@/store/index.js";
  * @param {number} [props.refreshKey=0] - 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
  * @param {noDataTip} [props.noDataTip] // 没有数据时的提示信息
  * @param {boolean} [props.showPagination=true] // 是否显示分页
+ * @param {boolean} [props.draggable=false] - 添加拖拽功能的开关
+ * @param {function} [props.onDragEnd] - 添加拖拽结束的回调函数
  */
 function ConfigurableTable({
     columns, // 所有列的定义
@@ -74,7 +94,9 @@ function ConfigurableTable({
     getTableList,
     moduleKey,
     operationName = 'page',
-    showPagination = true // 是否显示分页
+    showPagination = true, // 是否显示分页
+    draggable = false, // 添加拖拽功能的开关
+    onDragEnd, // 添加拖拽结束的回调函数
 }) {
     const optionsBase = useStore(i => i.optionsBase)
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
@@ -95,7 +117,9 @@ function ConfigurableTable({
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
-    const [tableData, setTableData] = useState(dataSource)
+    const [tableData, setTableData] = useState(dataSource);
+    const [items, setItems] = useState(dataSource);
+    const dataRef = useRef({ tableData, items });
     // 声明内部 loading，也可以接受外部传入
     const [loadingLocal, setLoadingLocal] = useState(loading)
     useEffect(() => { setLoadingLocal(loading) }, [loading]);
@@ -437,9 +461,23 @@ function ConfigurableTable({
         return config;
     }, [scrollX, totalVisibleWidth, tableHeight, tableProps?.scroll?.y]);
 
-    // 查询 表格数据
+    // 更新 ref 中的数据
+    useEffect(() => {
+        dataRef.current = { tableData, items };
+    }, [tableData, items]);
+
+    // 监听外部数据源变化
+    useEffect(() => {
+        if (dataSource && dataSource.length > 0 &&
+            JSON.stringify(dataSource) !== JSON.stringify(dataRef.current.tableData)) {
+            setTableData(dataSource);
+            setItems(dataSource);
+        }
+    }, [dataSource]);
+
+    // 查询表格数据
     const searchTableData = useCallback(async (isFirstSearch) => {
-        const fetchTableData = getTableList || getPublicTableList
+        const fetchTableData = getTableList || getPublicTableList;
 
         // 如果存在正在进行的请求，取消它
         if (abortControllerRef.current) {
@@ -451,19 +489,21 @@ function ConfigurableTable({
 
         try {
             setLoadingLocal(true);
-            let res = {
-                data: dataSource,
-                success: true,
-                totalCount: dataSource.length
-            }
-            console.log('请求参数', activeFilters.current)
-            //外部传入优先使用外部传入的
-            if (dataSource.length === 0) {
+            let res;
+
+            // 修改数据获取逻辑
+            if (dataSource && dataSource.length > 0) {
+                res = {
+                    data: dataSource,
+                    success: true,
+                    totalCount: dataSource.length
+                };
+            } else {
                 res = await fetchTableData(moduleKey, operationName, {
                     ...paginationParams.current,
                     ...activeFilters.current,
-                    orderBy: 'id',
-                    orderDirection: 'DESC',
+                    orderBy: paginationParams.current.orderBy || 'id',
+                    orderDirection: paginationParams.current.orderDirection || 'DESC',
                 }, { signal: abortControllerRef.current.signal });
             }
 
@@ -471,32 +511,35 @@ function ConfigurableTable({
             abortControllerRef.current = null;
 
             if (res && res.success) {
+                const newData = res.data || [];
+                setTableData(newData);
+                setItems(newData);
+                paginationParams.current.totalCount = res.totalCount;
 
-                setTableData(res.data);
-                paginationParams.current.totalCount = res.totalCount
                 if (isFirstSearch) {
-                    setIsEmptyTableData(res.data.length === 0)
+                    setIsEmptyTableData(newData.length === 0);
                 }
             } else {
-                paginationParams.current.totalCount = 0
-                setIsEmptyTableData(true)
+                paginationParams.current.totalCount = 0;
+                setIsEmptyTableData(true);
+                setTableData([]);
+                setItems([]);
             }
         } catch (error) {
-            // 如果是取消请求导致的错误，不做处理
             if (error.name === 'AbortError') {
                 console.log('Request cancelled');
                 return;
             }
-            // 其他错误正常处理
             console.error('Search error:', error);
             setIsEmptyTableData(true);
+            setTableData([]);
+            setItems([]);
         } finally {
-            // 如果不是被取消的请求，才设置 loading 为 false
             if (abortControllerRef.current === null) {
                 setLoadingLocal(false);
             }
         }
-    }, [currentlyVisibleColumns, dataSource, rowKey]);
+    }, [moduleKey, operationName, getTableList, dataSource]);
 
     // 搜索框 输入框 变化 (使用防抖)
     const debouncedSearch = useCallback(
@@ -758,6 +801,118 @@ function ConfigurableTable({
         }
     }, [storageKey, visibleColumnKeys]);
 
+    // 设置拖拽传感器
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // 处理拖拽结束
+    const handleDragEnd = useCallback((event) => {
+        const { active, over } = event;
+        if (active.id !== over.id) {
+            setItems((prevItems) => {
+                const oldIndex = prevItems.findIndex(item => item[rowKey] === active.id);
+                const newIndex = prevItems.findIndex(item => item[rowKey] === over.id);
+
+                const newItems = arrayMove(prevItems, oldIndex, newIndex);
+                // 排序公共table列表
+                sortPublicTableList(moduleKey, { idList: newItems.map(item => item[rowKey]) }).then(res => {
+                    if (res.success) {
+                        setTableData(newItems); // 同步更新 tableData
+                        if (onDragEnd) {
+                            onDragEnd(newItems);
+                        }
+                    }
+                });
+                return newItems;
+            });
+        }
+    }, [onDragEnd, rowKey]);
+
+    // 修改表格组件的渲染内容
+    const tableContent = useMemo(() => (
+        <Table
+            columns={draggable ? [
+                {
+                    title: 'Sort',
+                    dataIndex: 'sort',
+                    width: 50,
+                    className: 'drag-visible',
+                    render: () => <MenuOutlined style={{ cursor: 'move', color: '#999' }} />,
+                },
+                ...processedColumns,
+            ] : processedColumns}
+            dataSource={draggable ? items : tableData}
+            components={draggable ? {
+                body: {
+                    row: SortableRow,
+                },
+            } : undefined}
+            onRow={handleRow}
+            rowKey={rowKey}
+            ref={tableRef}
+            loading={loadingLocal}
+            pagination={showPagination ? {
+                current: paginationParams.current.pageIndex,
+                pageSize: paginationParams.current.pageSize,
+                total: paginationParams.current.totalCount,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                pageSizeOptions: ['10', '20', '50', '100', '200', '500', '1000'],
+                showTotal: (total, range) => `${total} items`,
+            } : false}
+            scroll={finalScrollConfig}
+            rowSelection={rowSelection}
+            virtual={tableVirtualConfig}
+            onChange={(pagination, filters, sorter) => {
+                // 判断是否发生了排序变化
+                const isSorterChanged =
+                    prevSorterRef.current?.field !== sorter.field ||
+                    prevSorterRef.current?.order !== sorter.order;
+
+                // 更新分页参数 
+                if (showPagination) {
+                    paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
+                    paginationParams.current.pageSize = pagination.pageSize;
+                }
+
+                // 更新排序参数 
+                const isAscending = sorter.order === 'ascend';
+                const orderBy = sorter.field;
+                const orderDirection = isAscending ? 'ASC' : 'DESC';
+                paginationParams.current.orderBy = orderBy;
+                paginationParams.current.orderDirection = orderDirection;
+
+                // 更新上一次的排序状态
+                prevSorterRef.current = { ...sorter };
+
+                searchTableData();// 查询表格数据
+            }}
+            {...tableProps}
+        />
+    ), [
+        draggable,
+        items,
+        tableData,
+        processedColumns,
+        handleRow,
+        rowKey,
+        showPagination,
+        paginationParams.current,
+        finalScrollConfig,
+        rowSelection,
+        tableVirtualConfig,
+        tableProps,
+        loadingLocal
+    ]);
+
     return (
         isEmptyTableData ?
             <div className={styles.customEmptyWrapper}>
@@ -850,51 +1005,23 @@ function ConfigurableTable({
                     </Space>
                 </div>
 
-                {/* 表格主体 (使用包含强制列的 currentlyVisibleColumns) */}
-                <Table
-                    columns={processedColumns}
-                    dataSource={tableData}
-                    rowKey={rowKey}
-                    onRow={handleRow}
-                    ref={tableRef}
-                    pagination={showPagination ? {
-                        current: paginationParams.current.pageIndex,//当前页码
-                        pageSize: paginationParams.current.pageSize,//每页条数
-                        total: paginationParams.current.totalCount,//总条数
-                        showSizeChanger: true,//显示分页器
-                        showQuickJumper: true,//显示快速跳转
-                        pageSizeOptions: ['10', '20', '50', '100', '200', '500', '1000'],//每页条数选项
-                        showTotal: (total, range) => `${total} items`,//显示总条数
-                    } : false}
-                    scroll={finalScrollConfig}
-                    rowSelection={rowSelection}
-                    virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
-                    onChange={(pagination, filters, sorter) => {
-                        // 判断是否发生了排序变化
-                        const isSorterChanged =
-                            prevSorterRef.current?.field !== sorter.field ||
-                            prevSorterRef.current?.order !== sorter.order;
-
-                        // 更新分页参数 
-                        if (showPagination) {
-                            paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
-                            paginationParams.current.pageSize = pagination.pageSize;
-                        }
-
-                        // 更新排序参数 
-                        const isAscending = sorter.order === 'ascend';
-                        const orderBy = sorter.field;
-                        const orderDirection = isAscending ? 'ASC' : 'DESC';
-                        paginationParams.current.orderBy = orderBy;
-                        paginationParams.current.orderDirection = orderDirection;
-
-                        // 更新上一次的排序状态
-                        prevSorterRef.current = { ...sorter };
-
-                        searchTableData();// 查询表格数据
-                    }}
-                    {...tableProps}
-                />
+                {/* 根据draggable属性决定是否启用拖拽功能 */}
+                {draggable ? (
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={items.map(item => item[rowKey])}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {tableContent}
+                        </SortableContext>
+                    </DndContext>
+                ) : (
+                    tableContent
+                )}
 
                 {/* 删除确认对话框 */}
                 <Modal
@@ -929,5 +1056,34 @@ function ConfigurableTable({
             </div>
     );
 }
+
+// 创建可排序的行组件
+const SortableRow = ({ children, ...props }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: props['data-row-key']
+    });
+
+    const style = {
+        ...props.style,
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        cursor: 'move',
+        touchAction: 'none'
+    };
+
+    return (
+        <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            {children}
+        </tr>
+    );
+};
 
 export default ConfigurableTable; 

@@ -12,7 +12,9 @@ import {
     CheckCircleOutlined,
     StopOutlined,
     EllipsisOutlined,
-    MenuOutlined
+    MenuOutlined,
+    RightOutlined,
+    DownOutlined
 } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
@@ -69,6 +71,7 @@ import { CSS } from '@dnd-kit/utilities';
  * @param {boolean} [props.showPagination=true] // 是否显示分页
  * @param {boolean} [props.draggable=false] - 添加拖拽功能的开关
  * @param {function} [props.onDragEnd] - 添加拖拽结束的回调函数
+ * @param {function} [props.expandedRowRender] - 展开行的渲染函数
  */
 function ConfigurableTable({
     columns, // 所有列的定义
@@ -97,6 +100,7 @@ function ConfigurableTable({
     showPagination = true, // 是否显示分页
     draggable = false, // 添加拖拽功能的开关
     onDragEnd, // 添加拖拽结束的回调函数
+    expandedRowRender, // 修改为直接接收展开行渲染函数
 }) {
     const optionsBase = useStore(i => i.optionsBase)
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
@@ -836,6 +840,41 @@ function ConfigurableTable({
         }
     }, [onDragEnd, rowKey]);
 
+    // 定义内部expandable配置
+    const expandableConfig = useMemo(() => {
+        if (!expandedRowRender) return undefined;
+
+        return {
+            expandedRowRender: (record) => {
+                return <div className={`${styles.expandedRowRender} ${styles.configurableTableContainer}`}>
+                    {expandedRowRender(record)}
+                </div>
+            },
+            rowExpandable: (record) => true, // 默认所有行都可以展开
+            columnWidth: 50, // 设置展开图标列的宽度
+            fixed: 'left', // 固定展开图标列在左侧
+            indentSize: 20, // 展开行缩进大小
+            // 自定义展开图标
+            expandIcon: ({ expanded, onExpand, record }) => {
+                const Icon = expanded ? DownOutlined : RightOutlined;
+                return (
+                    <Icon
+                        style={{
+                            padding: '30px 20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            color: '#0000004b'
+                        }}
+                        onClick={e => {
+                            onExpand(record, e);
+                            e.stopPropagation();
+                        }}
+                    />
+                );
+            }
+        };
+    }, [expandedRowRender]);
+
     // 修改表格组件的渲染内容
     const tableContent = useMemo(() => (
         <Table
@@ -871,6 +910,7 @@ function ConfigurableTable({
             scroll={finalScrollConfig}
             rowSelection={rowSelection}
             virtual={tableVirtualConfig}
+            expandable={expandableConfig} // 使用内部定义的expandable配置
             onChange={(pagination, filters, sorter) => {
                 // 判断是否发生了排序变化
                 const isSorterChanged =
@@ -910,7 +950,8 @@ function ConfigurableTable({
         rowSelection,
         tableVirtualConfig,
         tableProps,
-        loadingLocal
+        loadingLocal,
+        expandableConfig // 更新依赖
     ]);
 
     return (

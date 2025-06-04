@@ -147,6 +147,7 @@ export default () => {
             <ConfigurableTable
                 moduleKey={'category'}
                 operationName={'list'}
+                showPagination={false}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}
             />

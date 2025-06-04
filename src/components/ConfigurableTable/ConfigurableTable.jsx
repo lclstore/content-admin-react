@@ -73,7 +73,8 @@ function ConfigurableTable({
     leftToolbarItems = [], // 左侧工具栏按钮
     getTableList,
     moduleKey,
-    operationName = 'page'
+    operationName = 'page',
+    showPagination = true // 是否显示分页
 }) {
     const optionsBase = useStore(i => i.optionsBase)
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
@@ -856,7 +857,7 @@ function ConfigurableTable({
                     rowKey={rowKey}
                     onRow={handleRow}
                     ref={tableRef}
-                    pagination={{
+                    pagination={showPagination ? {
                         current: paginationParams.current.pageIndex,//当前页码
                         pageSize: paginationParams.current.pageSize,//每页条数
                         total: paginationParams.current.totalCount,//总条数
@@ -864,7 +865,7 @@ function ConfigurableTable({
                         showQuickJumper: true,//显示快速跳转
                         pageSizeOptions: ['10', '20', '50', '100', '200', '500', '1000'],//每页条数选项
                         showTotal: (total, range) => `${total} items`,//显示总条数
-                    }}
+                    } : false}
                     scroll={finalScrollConfig}
                     rowSelection={rowSelection}
                     virtual={tableVirtualConfig} // 只有在有效的配置下才启用虚拟滚动
@@ -875,8 +876,10 @@ function ConfigurableTable({
                             prevSorterRef.current?.order !== sorter.order;
 
                         // 更新分页参数 
-                        paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
-                        paginationParams.current.pageSize = pagination.pageSize;
+                        if (showPagination) {
+                            paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
+                            paginationParams.current.pageSize = pagination.pageSize;
+                        }
 
                         // 更新排序参数 
                         const isAscending = sorter.order === 'ascend';

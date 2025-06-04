@@ -621,15 +621,16 @@ const ConfigurableTable = forwardRef(({
 
                     processedCol.render = (text, record, index) => {
                         if (!record) return null; // 如果record不存在，返回null
-                        const key = text;
-                        const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
-                        // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
-                        const DisplayText = optionConfig ? (optionConfig.name || optionConfig.label || text) : text;
-                        // 如果 iconOptions 和 options 都没有为当前 key 提供配置，则返回原始文本
-                        if (!optionConfig) {
-                            return text;
+                        if(!options) return text
+                        if(Array.isArray(text)){
+                            text = text.map(enumVal => options.find(option => option.value === enumVal).label || enumVal ).toString()
                         }
-                        return DisplayText;
+                        else {
+                            const optionConfig = options.find(option => option.value === text); // 获取文本选项配置
+                            // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
+                            optionConfig && (text = (optionConfig.name || optionConfig.label || text)) ;
+                        }
+                        return text;
                     };
                 }
 

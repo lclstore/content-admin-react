@@ -116,3 +116,47 @@
     border-color: #0faa77;
     color: #0faa77;
 }
+
+/* .form-container {
+    padding: 16px 24px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #e8e8e8;
+    margin-top: 8px;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.form-field {
+    margin-bottom: 16px;
+}
+
+.form-field:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* 展开状态的动画 */
+.structure-list-item .form-container {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    opacity: 0;
+}
+
+.structure-list-item .form-container[style*="display: block"] {
+    max-height: 500px;
+    /* 根据实际内容调整 */
+    padding: 16px 24px;
+    margin-top: 8px;
+    opacity: 1;
+}
+
+*/

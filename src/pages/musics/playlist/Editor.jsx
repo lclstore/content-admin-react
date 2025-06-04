@@ -44,6 +44,7 @@ export default function UserEditorWithCommon() {
             structureListFields: [
                 {
                     type: 'input',
+                    required: true,
                     name: 'displayName',
                     label: 'Display Name',
                 },
@@ -51,6 +52,7 @@ export default function UserEditorWithCommon() {
                     type: 'select',
                     name: 'premium',
                     label: 'Premium',
+                    required: true,
                     options: [
                         { label: 'Yes', value: 'YES' },
                         { label: 'No', value: 'NO' },

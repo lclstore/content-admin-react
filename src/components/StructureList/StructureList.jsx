@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { List, Avatar, Space, Row, Col, Typography, Button, Modal, notification } from 'antd';
+import { List, Avatar, Space, Row, Col, Typography, Button, Modal, notification, Form, Input, Select } from 'antd';
 import { MenuOutlined, RetweetOutlined, CopyOutlined, DeleteOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
+import { renderFormControl } from '@/components/CommonEditorForm/FormFields';
 import {
     DndContext,
     closestCenter,
@@ -32,8 +33,21 @@ const SortableItemRenderer = React.memo(({
     onSortItems,
     currentPlayingItem,
     isPlaying,
-    onAudioClick
+    onAudioClick,
+    structureListFields,
+    dataItem,
+    onItemChange,
 }) => {
+    // 创建独立的表单实例
+    const [itemForm] = Form.useForm();
+
+    // 在组件挂载时初始化表单数据
+    useEffect(() => {
+        if (isExpanded) {
+            itemForm.setFieldsValue(dataItem);
+        }
+    }, [isExpanded, dataItem, itemForm]);
+
     const {
         attributes,
         listeners,
@@ -45,7 +59,43 @@ const SortableItemRenderer = React.memo(({
         data: { type: 'item', item, panelId, itemIndex },
     });
 
-    const rowStyle = { transform: CSS.Transform.toString(transform) };
+    // 添加鼠标事件相关状态
+    const [mouseDownPos, setMouseDownPos] = useState(null);
+    const moveThreshold = 5; // 移动阈值，超过这个距离就认为是拖拽
+
+    const handleMouseDown = useCallback((e) => {
+        setMouseDownPos({ x: e.clientX, y: e.clientY });
+    }, []);
+
+    const handleMouseUp = useCallback((e) => {
+        if (mouseDownPos) {
+            const dx = Math.abs(e.clientX - mouseDownPos.x);
+            const dy = Math.abs(e.clientY - mouseDownPos.y);
+
+            // 如果移动距离小于阈值，认为是点击
+            if (dx < moveThreshold && dy < moveThreshold && !isDragging) {
+                toggleExpandItem && toggleExpandItem(item.id);
+            }
+            setMouseDownPos(null);
+        }
+    }, [mouseDownPos, isDragging, toggleExpandItem, item.id]);
+
+    const handleMouseMove = useCallback((e) => {
+        if (mouseDownPos) {
+            const dx = Math.abs(e.clientX - mouseDownPos.x);
+            const dy = Math.abs(e.clientY - mouseDownPos.y);
+
+            // 如果移动距离超过阈值，清除mouseDownPos，避免触发点击
+            if (dx >= moveThreshold || dy >= moveThreshold) {
+                setMouseDownPos(null);
+            }
+        }
+    }, [mouseDownPos]);
+
+    const rowStyle = {
+        transform: CSS.Transform.toString(transform),
+        cursor: 'pointer'
+    };
     const wrapperStyle = { opacity: isDragging ? 0.5 : 1 };
     const wrapperClassName = `structure-list-item item-wrapper${isExpanded ? ' expanded' : ''}`;
 
@@ -109,6 +159,37 @@ const SortableItemRenderer = React.memo(({
         );
     }, [currentPlayingItem, isPlaying, onAudioClick]);
 
+    // 渲染表单字段的函数
+    const renderFormField = useCallback((field) => {
+        const { type, name, label, options } = field;
+        const fieldValue = dataItem[name];
+
+        const handleValueChange = (value) => {
+            const updatedItem = {
+                ...dataItem,
+                [name]: value
+            };
+            onItemChange && onItemChange(updatedItem);
+        };
+
+        // 为每个字段添加唯一的key
+        const uniqueKey = `${item.id}-${name}`;
+        return <Form.Item
+            className='editorform-item'
+            key={uniqueKey}
+            required={field.required}
+            rules={field.rules}
+            name={field.name}
+            label={field.label}
+        >
+            {renderFormControl(field, {
+                form: itemForm,
+                formConnected: true,
+                onChange: handleValueChange
+            })}
+        </Form.Item>
+    }, [dataItem, onItemChange, item.id, itemForm]);
+
     return (
         <div style={wrapperStyle} className={wrapperClassName}>
             <Row
@@ -119,7 +200,10 @@ const SortableItemRenderer = React.memo(({
                 wrap={false}
                 align="middle"
                 className="sortable-item-row"
-                onClick={() => toggleExpandItem && toggleExpandItem(panelId, item.id)}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setMouseDownPos(null)}
             >
                 <Col flex="auto">
                     {renderItemMeta ? renderItemMeta(item) : defaultRenderItemMeta(item)}
@@ -167,9 +251,14 @@ const SortableItemRenderer = React.memo(({
                         />
                     </Space>
                 </Col>
-
             </Row>
-            <div>ddd</div>
+            <div className='form-container' style={{ display: isExpanded ? 'block' : 'none' }}>
+                <Form form={itemForm} layout="vertical" onValuesChange={(changedValues, allValues) => {
+                    onItemChange && onItemChange({ ...dataItem, ...allValues });
+                }}>
+                    {structureListFields?.map(field => renderFormField(field))}
+                </Form>
+            </div>
         </div>
     );
 });
@@ -180,20 +269,20 @@ const StructureList = ({
     dataList,
     sensors,
     renderItemMeta,
-    expandedItemId,
-    toggleExpandItem,
     onOpenReplaceModal: externalOpenReplaceModal,
     onCopyItem: externalCopyItem,
     onDeleteItem: externalDeleteItem,
     commonListConfig = {},
     onReplaceItem,
+
     onItemChange,
     onItemAdded,
     name,
     form,
     selectedItemFromList,
     onSelectedItemProcessed,
-    onSortItems
+    onSortItems,
+    structureListFields
 }) => {
     // 替换弹框状态
     const [replaceModalVisible, setReplaceModalVisible] = useState(false);
@@ -205,6 +294,9 @@ const StructureList = ({
     });
     // 在替换弹框中临时选中的项
     const [tempSelectedItem, setTempSelectedItem] = useState(null);
+
+    // 添加展开项的状态管理
+    const [expandedItemId, setExpandedItemId] = useState(null);
 
     // 音频播放相关状态和引用
     const audioRef = useRef(null);
@@ -291,11 +383,10 @@ const StructureList = ({
     }, [handleAudioEnded]);
 
     // 处理展开/折叠项目的函数
-    const handleToggleExpandItem = useCallback((panelId, itemId) => {
-        if (toggleExpandItem) {
-            toggleExpandItem(itemId);
-        }
-    }, [toggleExpandItem]);
+    const handleToggleExpandItem = useCallback((itemId) => {
+        console.log('切换展开状态：', { itemId, currentExpanded: expandedItemId });
+        setExpandedItemId(prevId => prevId === itemId ? null : itemId);
+    }, []);
 
     // 处理删除项目
     const handleDeleteItem = useCallback((panelName, itemIndex) => {
@@ -411,19 +502,38 @@ const StructureList = ({
 
     }, [selectedItemFromList]);
 
+    // 处理单个项目的值变更
+    const handleItemChange = useCallback((updatedItem) => {
+        debugger
+        const updatedDataList = dataList.map(item =>
+            item.id === updatedItem.id ? updatedItem : item
+        );
+        onItemChange && onItemChange(updatedDataList);
+    }, [dataList, onItemChange]);
+
+    console.log('StructureList 渲染：', {
+        expandedItemId,
+        structureListFields,
+        dataList
+    });
+
     if (!Array.isArray(dataList) || dataList.length === 0) return null;
     return (
         <>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event) => handleDragEnd(event, name)}>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={(event) => handleDragEnd(event, panelName)}
+            >
                 <SortableContext
-                    items={dataList.map((_, index) => `${name}-item-${index}`)}
+                    items={dataList.map((item, index) => `${panelName}-item-${index}`)}
                     strategy={verticalListSortingStrategy}
                 >
                     <div className="structure-list" style={{ position: 'relative', padding: '2px 0' }}>
                         {dataList.map((item, index) => (
                             <SortableItemRenderer
-                                key={index}
-                                panelId={name}
+                                key={`${panelName}-item-${index}`}
+                                panelId={panelName}
                                 item={item}
                                 itemIndex={index}
                                 isExpanded={expandedItemId === item.id}
@@ -432,11 +542,13 @@ const StructureList = ({
                                 onCopyItem={handleCopyItem}
                                 onDeleteItem={handleDeleteItem}
                                 renderItemMeta={renderItemMeta}
-                                onItemChange={onItemChange}
+                                onItemChange={handleItemChange}
                                 onSortItems={onSortItems}
                                 currentPlayingItem={currentPlayingItem}
                                 isPlaying={isPlaying}
                                 onAudioClick={handleAudioClick}
+                                structureListFields={structureListFields}
+                                dataItem={item}
                             />
                         ))}
                     </div>

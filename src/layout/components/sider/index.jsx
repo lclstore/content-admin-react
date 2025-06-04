@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react';
 import "./sider.css"
 import request from "@/request";
+import CMS from "@/assets/images/CMS.png"
 
 export default function Sider() {
     const [users, setUser] = useState('');
@@ -32,7 +33,9 @@ export default function Sider() {
     }
     return (
         <div style={{ height: '100vh', overflow: "hidden" }}>
-            <div className="createWorkoutBtn" onClick={handleCreateWorkout}>CREATE WORKOUT</div>
+            {/* <div className="createWorkoutBtn" onClick={handleCreateWorkout}>CREATE WORKOUT</div> */}
+            <img className='createWorkoutBtn1_img' src={CMS} alt="" />
+            <div className='createWorkoutBtn1'>Content System</div>
             <SideMenu />
             <div className='Profile' onClick={goProfile} >
                 <div className='Profile-avatar'></div>

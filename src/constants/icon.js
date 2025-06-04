@@ -11,13 +11,19 @@ import {
     EditFilled,
     ThunderboltOutlined,
     DashboardOutlined,
+    DatabaseOutlined,
+    VideoCameraOutlined,
+    PlayCircleOutlined,
+    CalendarOutlined,
     UserOutlined,
+    SendOutlined,
     SettingOutlined,
     LoginOutlined,
     AudioOutlined,
     FileOutlined,
     SyncOutlined,
-    FormOutlined
+    FormOutlined,
+    HomeOutlined
 } from '@ant-design/icons';
 // 状态图标
 export const statusIconMap = {
@@ -36,20 +42,20 @@ export const statusIconMap = {
 };
 // 左侧菜单图标映射
 export const menuIconMap = {
-    exercises: ThunderboltOutlined,
-    workouts: DashboardOutlined,
+    exercises: DatabaseOutlined,
+    workouts: VideoCameraOutlined,
     users: UserOutlined,
     'profile-settings': SettingOutlined,
     login: LoginOutlined,
-    musics: AudioOutlined,
+    musics: PlayCircleOutlined,
     collections: CopyOutlined,
-    home: EditOutlined,
+    home: HomeOutlined,
     operationRecords: FileOutlined,
-    plans: FileOutlined,
+    plans: CalendarOutlined,
     profile: EditOutlined,
-    publish: SyncOutlined,
+    publish: SendOutlined,
     sounds: AudioOutlined,
-    workoutSettings:FormOutlined
+    workoutSettings:SettingOutlined
 
 };
 

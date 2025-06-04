@@ -10,7 +10,22 @@
     cursor: pointer;
     width: fit-content;
 }
-
+.createWorkoutBtn1 {
+    margin: 20px auto;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    text-align: center;
+    font-size: 22px;
+    font-weight: var(--font-weight-md);
+    color: var(--text-white);
+    /* border: 1px solid var(--active-color); */
+    /* border-radius: var(--border-radius-md); */
+    cursor: pointer;
+    width: fit-content;
+}
+.createWorkoutBtn1_img{
+    width: 100px;
+    /* height: 20px; */
+}
 .Profile {
     width: fit-content;
     /* padding: 16px; */

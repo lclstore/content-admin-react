@@ -245,15 +245,13 @@ export const useHeaderConfig = (params) => {
 
         setLoading(true);
         // 处理数组列表相关数据格式和验证
-        const hasDataListFields = collapseFormConfigRef.current.filter(
-            formField => Array.isArray(formField.dataList)
-        );
+        if (saveBeforeTransform) {
+            dataToSave = saveBeforeTransform({
+                formFields: collapseFormConfigRef.current,
+                formValues: dataToSave
 
-        // 处理数组列表相关数据格式和验证
-        hasDataListFields.map(formField => {
-            dataToSave[formField.name] = saveBeforeTransform ? saveBeforeTransform(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
-        });
-
+            })
+        }
 
         console.log(dataToSave);
 

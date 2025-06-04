@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, {useCallback, useMemo} from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm/index.jsx';
 
 export default function UserEditorWithCommon() {
@@ -34,7 +34,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'select',
             mode: 'single',
-            name: 'duration',
+            name: 'durationCode',
             label: 'Duration (Min)',
             options: "BizTemplateDurationEnums",
             required: true,
@@ -56,7 +56,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'WARM_UP_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -65,7 +65,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'WARM_UP_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -75,7 +75,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'WARM_UP_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
@@ -94,7 +94,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'MAIN_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -103,7 +103,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'MAIN_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -113,7 +113,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'MAIN_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
@@ -132,7 +132,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'COOL_DOWN_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -141,7 +141,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'COOL_DOWN_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -151,13 +151,12 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'COOL_DOWN_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
                     max: 5,
                     step: 1,
-
                     formatter: (value) => `${value}`,
                 },
 
@@ -165,10 +164,34 @@ export default function UserEditorWithCommon() {
         }
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
+    const saveBeforeTransform = useCallback(({formValues:formData}) => {
+        console.log("formDataStart",formData)
+        const unitNameList = ["WARM_UP","MAIN","COOL_DOWN"]
+        formData.unitList = unitNameList.map((unitName) => {
+            return {
+                "structureName": formData[`${unitName}_name`],
+                "structureTypeCode": unitName,
+                "count": formData[`${unitName}_count`],
+                "round": formData[`${unitName}_round`]
+            }
+        })
+        console.log("formData",formData)
+        return formData
+    })
+    const getDataAfter = useCallback((responseData) => {
+        responseData.unitList?.forEach(i => {
+            responseData[`${i.structureTypeCode}_name`] = i.structureName;
+            responseData[`${i.structureTypeCode}_count`] = i.count;
+            responseData[`${i.structureTypeCode}_round`] = i.round;
+        })
+        return responseData
+    })
     return (
         <CommonEditorForm
+            saveBeforeTransform={saveBeforeTransform}
+            getDataAfter={getDataAfter}
             formType="basic"
-            config={{ formName: 'User', hideSaveButton: false, hideBackButton: false }}
+            config={{ formName: 'Template', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}
             moduleKey='template'

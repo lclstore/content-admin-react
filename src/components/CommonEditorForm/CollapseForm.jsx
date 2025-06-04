@@ -467,95 +467,18 @@ const CollapseForm = ({
         }
     }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed, expandedItems]);
 
-    // 渲染单个表单字段
-    const renderField = (field) => {
-        // 针对字段中声明的校验规则进行处理
-        // 处理每个子项的验证规则
-        const itemRules = processValidationRules(field.rules || [], {
-            required: field.required,
-            label: field.label,
-            type: field.type,
-            requiredMessage: field.requiredMessage
-        });
-        const formItemRestProps = {
-            label: field.label,
-            labelCol: field.labelCol,
-            wrapperCol: field.wrapperCol,
-            // 确保 className 的拼接是安全的，并处理 field.type 对 className 的影响
-            className: `${field.className || ''} ${field.type === 'inputGroup' ? '' : 'editorform-item'}`.trim(),
-            hidden: field.hidden,
-            noStyle: field.noStyle,
-        };
-        // 处理表单验证规则 (仅对非展示型字段有意义)
-        const finalRules = processValidationRules(field.rules, {
-            required: field.required,
-            label: field.label,
-            type: field.type,
-            requiredMessage: field.requiredMessage
-        });
-        // 渲染表单项 - key直接作为属性传递
-        return (
-            // <Form.Item
-            //     name={field.name}
-            //     rules={itemRules}
-            //     className={styles.formItem}
-            //     required={field.required}
-            //     key={field.name}
-            //     label={
-            //         field.type === 'upload' || field.type === 'structureList'
-            //             ? null
-            //             : field.label
-            //     }
-
-            // >
-            //     {renderFormControl(field, {
-            //         form,
-            //         formConnected,
-            //         initialValues,
-            //         mounted,
-
-            //     })}
-            // </Form.Item>
-            <Form.Item
-
-                key={field.name} // React key 直接传递
-                {...formItemRestProps} // 其余布局 props 展开
-                //上传控件隐藏label
-                label={
-                    field.type === 'upload' || field.type === 'structureList'
-                        ? null
-                        : field.label
-                }
-                name={field.name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
-                rules={field.type === 'structureList' ? [] : finalRules}
-                valuePropName={field.type === 'structureList' ? 'value' : 'value'}
-            >
-                {renderFormItem(field, {
+    // 渲染表单字段组
+    const renderFieldGroup = (fieldGroup) => {
+        return fieldGroup.map((field) => {
+            {
+                return renderFormItem(field, {
                     form,
                     formConnected,
                     initialValues,
                     mounted,
                     moduleKey
-                })}
-            </Form.Item>
-        );
-    };
-
-    /**
-     * 统一处理表单验证规则
-     * @param {Array} rules 原始规则数组
-     * @param {Boolean} required 是否必填
-     * @param {String} label 字段标签
-     * @param {String} type 字段类型
-     * @param {String} requiredMessage 自定义必填消息
-     * @returns {Array} 处理后的规则数组
-     */
-
-    // 渲染表单字段组
-    const renderFieldGroup = (fieldGroup) => {
-        // 确保每个field都有name作为key，如果没有name则使用索引
-        return fieldGroup.map((field, index) => {
-            return renderField(field)
+                })
+            }
         });
     };
 

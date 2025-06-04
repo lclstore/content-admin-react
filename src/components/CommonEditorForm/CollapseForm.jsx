@@ -469,17 +469,17 @@ const CollapseForm = ({
 
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {
-        return fieldGroup.map((field) => {
-            {
-                return renderFormItem(field, {
+        return fieldGroup.map((field, index) => (
+            <React.Fragment key={field.name || `field-${index}`}>
+                {renderFormItem(field, {
                     form,
                     formConnected,
                     initialValues,
                     mounted,
                     moduleKey
-                })
-            }
-        });
+                })}
+            </React.Fragment>
+        ));
     };
 
     // 如果没有字段配置或为空数组，则不渲染

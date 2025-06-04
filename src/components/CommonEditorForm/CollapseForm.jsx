@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, Fragment, useState, useCallback } from 'reac
 import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, notification, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
-import { renderFormControl, processValidationRules } from './FormFields';
+import { renderFormControl, processValidationRules, renderFormItem } from './FormFields';
 import CommonList from './CommonList';
 import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
@@ -85,7 +85,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
                             style={{ fontSize: '12px' }}
                             ellipsis={{ tooltip: item.status }}
                         >
-                            {optionsConstants.status.find(status => status.value === item.status)?.name || '-'}
+                            {optionsConstants.statusList.find(status => status.value === item.status)?.name || '-'}
                         </Text>
                     </div>
                     <div>
@@ -467,59 +467,19 @@ const CollapseForm = ({
         }
     }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed, expandedItems]);
 
-    // 渲染单个表单字段
-    const renderField = (field) => {
-        // 针对字段中声明的校验规则进行处理
-        // 处理每个子项的验证规则
-        const itemRules = processValidationRules(field.rules || [], {
-            required: field.required,
-            label: field.label,
-            type: field.type,
-            requiredMessage: field.requiredMessage
-        });
-
-        // 渲染表单项 - key直接作为属性传递
-        return (
-            <Form.Item
-                name={field.name}
-                rules={itemRules}
-                className={styles.formItem}
-                required={field.required}
-                key={field.name}
-                label={
-                    field.type === 'upload' || field.type === 'structureList'
-                        ? null
-                        : field.label
-                }
-
-            >
-                {renderFormControl(field, {
+    // 渲染表单字段组
+    const renderFieldGroup = (fieldGroup) => {
+        return fieldGroup.map((field, index) => (
+            <React.Fragment key={field.name || `field-${index}`}>
+                {renderFormItem(field, {
                     form,
                     formConnected,
                     initialValues,
                     mounted,
-
+                    moduleKey
                 })}
-            </Form.Item>
-        );
-    };
-
-    /**
-     * 统一处理表单验证规则
-     * @param {Array} rules 原始规则数组
-     * @param {Boolean} required 是否必填
-     * @param {String} label 字段标签
-     * @param {String} type 字段类型
-     * @param {String} requiredMessage 自定义必填消息
-     * @returns {Array} 处理后的规则数组
-     */
-
-    // 渲染表单字段组
-    const renderFieldGroup = (fieldGroup) => {
-        // 确保每个field都有name作为key，如果没有name则使用索引
-        return fieldGroup.map((field, index) => {
-            return renderField({ ...field });
-        });
+            </React.Fragment>
+        ));
     };
 
     // 如果没有字段配置或为空数组，则不渲染

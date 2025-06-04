@@ -124,7 +124,9 @@ export const useHeaderConfig = (params) => {
         setIsFormDirty,
         fieldsToValidate,
         getLatestValues,
-        initialValues = {} // 确保初始值可用
+        initialValues = {}, // 确保初始值可用
+        getDataAfter,
+        saveBeforeTransform
     } = params;
     const location = useLocation();
 
@@ -243,15 +245,13 @@ export const useHeaderConfig = (params) => {
 
         setLoading(true);
         // 处理数组列表相关数据格式和验证
-        const hasDataListFields = collapseFormConfigRef.current.filter(
-            formField => Array.isArray(formField.dataList)
-        );
+        if (saveBeforeTransform) {
+            dataToSave = saveBeforeTransform({
+                formFields: collapseFormConfigRef.current,
+                formValues: dataToSave
 
-        // 处理数组列表相关数据格式和验证
-        hasDataListFields.map(formField => {
-            dataToSave[formField.name] = formField.formterList ? formField.formterList(formField.dataList, dataToSave) : formField.dataList.map(item => item.id);
-        });
-
+            })
+        }
 
         console.log(dataToSave);
 

@@ -75,7 +75,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
  * @returns {ReactNode} 渲染的表单控件
  */
 export const renderFormControl = (field, options = {}) => {
-    const optionsBase = useStore(i => i.optionsBase)
+    const optionsBase = useStore.getState().optionsBase;
     // 删除不必要的console.log
 
     // 表单字段的标准属性
@@ -131,6 +131,8 @@ export const renderFormControl = (field, options = {}) => {
                 placeholder={placeholder}
                 {...inputRest}
             />;
+        case 'line':
+            return <div style={field.style || {}} className={styles.line}></div>;
         //文本输入框
         case 'textarea':
             const { key: textareaKey, ...textareaRest } = field;
@@ -331,32 +333,33 @@ export const renderFormControl = (field, options = {}) => {
         case 'inputGroup':
             const { inputConfig } = field;
             return (
-                <Form.Item className='inputGroup'>
-                    <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
-                        {inputConfig.map((config, index) => {
-                            const itemRules = processValidationRules(config.rules || [], {
-                                required: config.required,
-                                label: config.label || label,
-                                type: config.type,
-                                requiredMessage: config.requiredMessage
-                            });
+                field.type == 'line' ? <div>{renderFormControl(field, options)}</div> :
+                    <Form.Item className='inputGroup'>
+                        <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
+                            {inputConfig.map((config, index) => {
+                                const itemRules = processValidationRules(config.rules || [], {
+                                    required: config.required,
+                                    label: config.label || label,
+                                    type: config.type,
+                                    requiredMessage: config.requiredMessage
+                                });
 
-                            return (
-                                <div style={{ flex: 1, minWidth: config.width || '' }} key={index}>
-                                    <Form.Item
-                                        className='editorform-item'
-                                        name={config.name}
-                                        label={config.label}
-                                        required={config.required}
-                                        rules={itemRules}
-                                    >
-                                        {renderFormControl(config, options)}
-                                    </Form.Item>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </Form.Item>
+                                return (
+                                    <div style={{ flex: 1, minWidth: config.width || '' }} key={index}>
+                                        <Form.Item
+                                            className='editorform-item'
+                                            name={config.name}
+                                            label={config.label}
+                                            required={config.required}
+                                            rules={itemRules}
+                                        >
+                                            {renderFormControl(config, options)}
+                                        </Form.Item>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Form.Item>
             );
 
 
@@ -510,7 +513,6 @@ export const renderFormItem = (field, options = {}) => {
     if (dependencies) {
         const newField = JSON.parse(JSON.stringify(field));
         delete newField.dependencies;
-
         return (
             <Form.Item
                 noStyle
@@ -523,7 +525,7 @@ export const renderFormItem = (field, options = {}) => {
                         : field.content;
                     // 处理图片展示字段
                     if (field.type === 'displayImage') {
-                        newField.content = content ? fileSettings.baseURL + content : null;
+                        newField.content = content || null;
                     }
 
                     // 渲染组件
@@ -577,22 +579,24 @@ export const renderFormItem = (field, options = {}) => {
         }
 
         return (
-            <Form.Item
+            field.type == 'line' ?
+                <div>{renderFormControl(field, options)}</div> :
+                <Form.Item
 
-                key={name} // React key 直接传递
-                {...formItemRestProps} // 其余布局 props 展开
-                //上传控件隐藏label
-                label={
-                    field.type === 'upload' || field.type === 'structureList'
-                        ? null
-                        : label
-                }
-                name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
-                rules={field.type === 'structureList' ? [] : finalRules}
-                valuePropName={finalValuePropName}
-            >
-                {renderFormControl(field, options)}
-            </Form.Item>
+                    key={name} // React key 直接传递
+                    {...formItemRestProps} // 其余布局 props 展开
+                    //上传控件隐藏label
+                    label={
+                        field.type === 'upload' || field.type === 'structureList'
+                            ? null
+                            : label
+                    }
+                    name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
+                    rules={field.type === 'structureList' ? [] : finalRules}
+                    valuePropName={finalValuePropName}
+                >
+                    {renderFormControl(field, options)}
+                </Form.Item>
         );
     }
 };

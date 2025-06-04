@@ -70,7 +70,7 @@ export default function Playlists() {
             },
             { title: 'Type', dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
 
-            { title: 'Music Num', dataIndex: 'workoNum', key: 'workoutNum', width: 120, visibleColumn: 1 },
+            { title: 'music Count', dataIndex: 'musicCount', key: 'musicCount', width: 120, visibleColumn: 1 },
 
 
             {

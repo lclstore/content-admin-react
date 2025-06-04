@@ -128,7 +128,7 @@ const CommonList = ({
             const params = {
                 ...defaultQueryParams,
                 ...(filters || selectedFilters),
-                keyword: debouncedKeyword,
+                keywords: debouncedKeyword,
                 pageIndex: page,  // 添加页码参数
                 pageSize: defaultQueryParams.pageSize
             };
@@ -339,7 +339,7 @@ const CommonList = ({
                             style={{ fontSize: '12px' }}
                             ellipsis={{ tooltip: item.status }}
                         >
-                            {optionsConstants.statusList.find(status => status.value === item.status).label}
+                            {optionsConstants.statusList.find(status => status.value === item.status)?.label}
                         </Text>
                     </div>
                     <div>
@@ -462,7 +462,7 @@ const CommonList = ({
                         )
                     }
                     endMessage={
-                        !hasMore && (
+                        !hasMore && internalListData.length > 0 && (
                             <div style={{ textAlign: 'center', padding: '10px', color: '#999' }}>
                                 no more data
                             </div>

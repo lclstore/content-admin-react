@@ -1,14 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import React, {useCallback, useMemo} from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm/index.jsx';
-import { mockUsers } from './Data.js';
-import { validateEmail, validatePassword } from '@/utils/index.js';
 
 export default function UserEditorWithCommon() {
-    const navigate = useNavigate();
 
-
-    const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
         layoutType: 1,
@@ -36,15 +30,11 @@ export default function UserEditorWithCommon() {
             name: 'description', // 遵循命名规范，使用驼峰命名
             label: 'Description',
             maxLength: 1000,
-            placeholder: 'Enter user name',
-            rules: [
-                { max: 100, message: 'Name cannot exceed 100 characters' }
-            ]
         },
         {
             type: 'select',
             mode: 'single',
-            name: 'duration',
+            name: 'durationCode',
             label: 'Duration (Min)',
             options: "BizTemplateDurationEnums",
             required: true,
@@ -66,7 +56,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'WARM_UP_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -75,7 +65,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'WARM_UP_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -85,7 +75,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'WARM_UP_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
@@ -104,7 +94,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'MAIN_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -113,7 +103,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'MAIN_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -123,7 +113,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'MAIN_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
@@ -142,7 +132,7 @@ export default function UserEditorWithCommon() {
             inputConfig: [
                 {
                     type: 'input',
-                    name: 'name',
+                    name: 'COOL_DOWN_name',
                     label: 'Name',
                     required: true,
                     maxLength: 100,
@@ -151,7 +141,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'count',
+                    name: 'COOL_DOWN_count',
                     label: 'Count',
                     required: true,
                     min: 2,
@@ -161,98 +151,50 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'numberStepper',
-                    name: 'rounds',
+                    name: 'COOL_DOWN_round',
                     label: 'Rounds',
                     required: true,
                     min: 1,
                     max: 5,
                     step: 1,
-
                     formatter: (value) => `${value}`,
                 },
 
             ]
-        },
-        {
-            type: 'numberStepper',
-            name: 'day',
-            label: 'Day',
-            required: true,
-            min: 1,
-            step: 1,
-            formatter: (value) => `${value}`,
-        },
-
-
-
-
-
+        }
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
-    // 保存用户数据
-    const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
-        console.log('保存用户数据:', values, id);
-
-        // 处理数据格式
-        const dataToSave = {
-            ...(id && { id: parseInt(id, 10) }),
-            name: values.name.trim(),
-            email: values.email ? values.email.trim() : '',
-            avatar: values.avatar,
-            status: values.status,
-            userPassword: values.userPassword,
-            birthday: values.birthday,
-            // 如果有timeRange，从中提取startDate和endDate
-            ...(values.timeRange && values.timeRange.length === 2 ? {
-                startDate: values.timeRange[0],
-                endDate: values.timeRange[1]
-            } : {}),
-            selectedRoles: values.selectedRoles || [],
-            // 保存联动选择器的值
-            layoutType: values.layoutType,
-            contentStyle: values.contentStyle
-        };
-
-        // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
-        // 实际应用中，这里应该是异步请求
-
-        // 成功处理
-        messageApi.success('用户数据保存成功！');
-
-        // 检查 setLoading 是否为函数再调用，防止 CommonEditorForm 未传递该函数导致报错
-        if (typeof setLoading === 'function') {
-            setLoading(false);
-        }
-        setDirty(false);
-
-        // 保存成功后立即跳转回列表页
-        navigate(-1);
-    };
-
-    //请求列数据方法
-    const initFormData = (id) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                if (id) {
-                    // 查找对应用户
-                    const user = mockUsers.find(u => u.id === parseInt(id, 10));
-                    resolve(user || {});  // 找不到也返回空对象，避免 undefined
-                } else {
-                    // 新增场景：直接返回空对象
-                    resolve(initialValues);
-                }
-            }, 1000);
-        });
-    };
+    const saveBeforeTransform = useCallback(({formValues:formData}) => {
+        console.log("formDataStart",formData)
+        const unitNameList = ["WARM_UP","MAIN","COOL_DOWN"]
+        formData.unitList = unitNameList.map((unitName) => {
+            return {
+                "structureName": formData[`${unitName}_name`],
+                "structureTypeCode": unitName,
+                "count": formData[`${unitName}_count`],
+                "round": formData[`${unitName}_round`]
+            }
+        })
+        console.log("formData",formData)
+        return formData
+    })
+    const getDataAfter = useCallback((responseData) => {
+        responseData.unitList?.forEach(i => {
+            responseData[`${i.structureTypeCode}_name`] = i.structureName;
+            responseData[`${i.structureTypeCode}_count`] = i.count;
+            responseData[`${i.structureTypeCode}_round`] = i.round;
+        })
+        return responseData
+    })
     return (
         <CommonEditorForm
-            initFormData={initFormData}
+            saveBeforeTransform={saveBeforeTransform}
+            getDataAfter={getDataAfter}
             formType="basic"
-            config={{ formName: 'User', hideSaveButton: false, hideBackButton: false }}
+            config={{ formName: 'Template', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
             initialValues={initialValues}
-            onSave={handleSaveUser}
+            moduleKey='template'
         />
     );
 } 

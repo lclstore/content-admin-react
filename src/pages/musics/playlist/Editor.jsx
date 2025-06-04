@@ -37,20 +37,9 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'structureList',
-            name: 'musicIdList',
+            name: 'musicList',
             // renderItemMata: renderItemMata,
             label: 'Musics',
-            formterList: (dataList, formValues) => {
-                if (dataList && dataList.length > 0) {
-                    return dataList.map(item => {
-                        return {
-                            bizMusicId: item.id,
-                            displayName: item.name,
-                            premium: formValues.premium,
-                        }
-                    });
-                }
-            },
             dataList: [],
             rules: [
                 { required: true, message: 'Please add at least one music' },
@@ -60,7 +49,7 @@ export default function UserEditorWithCommon() {
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
-    const initCommonListData = (params) => { 
+    const initCommonListData = (params) => {
         return new Promise(resolve => {
             request.get({
                 url: `/music/page`,
@@ -87,6 +76,21 @@ export default function UserEditorWithCommon() {
             options: 'statusList'
         }
     ];
+    const saveBeforeTransform = (info) => {
+        const { formFields, formValues } = info;
+        const musicListField = formFields.find(field => field.type === 'structureList');
+        if (musicListField) {
+            formValues.musicList = musicListField.dataList.map(item => {
+                return {
+                    bizMusicId: item.id,
+                    displayName: item.name,
+                    premium: formValues.premium,
+                }
+            });
+        }
+        return formValues;
+    }
+
     return (
         <CommonEditorForm
             moduleKey='playlist'
@@ -95,6 +99,7 @@ export default function UserEditorWithCommon() {
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
             }}
+            saveBeforeTransform={saveBeforeTransform}
             formType="advanced"
             enableDraft={true}
             onFormFieldsChange={handleFormFieldsChange}

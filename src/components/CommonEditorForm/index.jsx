@@ -45,6 +45,8 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {boolean} props.isBack 是否返回上一级
  * @param {boolean} props.isTabs 是否为标签页
  * @param {string} props.operationName 操作名称
+ * @param {Function} props.getDataAfter 获取数据后回调函数
+ * @param {Function} props.saveBeforeTransform 保存前回调函数
  */
 export default function CommonEditor(props) {
     const {
@@ -72,7 +74,9 @@ export default function CommonEditor(props) {
         onFormFieldsChange = null, // 字段变更回调
         onCollapseChange = null, // 折叠面板变化回调
         setFormRef, // 添加表单引用设置属性
-        id: propId // 从props中获取id，用于覆盖从URL获取的id
+        id: propId, // 从props中获取id，用于覆盖从URL获取的id
+        getDataAfter,
+        saveBeforeTransform
     } = props;
     // 添加选中项状态管理 - 存储从列表中选择的当前项
     const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
@@ -133,7 +137,8 @@ export default function CommonEditor(props) {
         messageApi,
         contextHolder,
         mounted,
-        getLatestValues
+        getLatestValues,
+
     } = useFormState(initialValues);
 
 
@@ -251,7 +256,9 @@ export default function CommonEditor(props) {
         headerContext,
         setIsFormDirty,
         getLatestValues,
-        setLoading
+        setLoading,
+        getDataAfter,
+        saveBeforeTransform
     });
 
     // 左侧列表添加item - 在组件内部处理选中项
@@ -742,7 +749,20 @@ export default function CommonEditor(props) {
                     response.data.id = null;//重制id
                     response.data.status = null;//重制状态
                 }
-                response = response.data;
+                // 如果fields存在，则将数据中的dataList设置为fields中的dataList
+                const allFields = fields || formFields;
+                allFields.map(field => {
+                    if (field.dataList) {
+                        field.dataList = response.data[field.name]
+
+                    }
+                })
+                // 通知父组件
+                if (onFormFieldsChange) {
+                    onFormFieldsChange(allFields);
+                }
+                // 获取数据后回调
+                response = getDataAfter ? getDataAfter(response.data) : response.data;
             }
         }
 
@@ -929,7 +949,7 @@ export default function CommonEditor(props) {
                             formConnected,
                             initialValues,
                             oneColumnKeys: config.oneColumnKeys || [],
-                            mounted
+                            mounted,
                         })}
                     </Form>
                 </Spin>

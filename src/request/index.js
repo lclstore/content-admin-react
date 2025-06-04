@@ -58,10 +58,10 @@ class Request {
             ...config,
             callback: config.callback || (() => {
             }),
-            warningPoint: config.warningPoint ? config.warningPoint : true,
+            warningPoint: config.warningPoint ?? true,
             success: config.success,
             method: config.method || 'post',
-            point: config.point ? config.point : false,
+            point: config.point ?? false,
             url: (config.baseUrl || baseUrl) + config.url,
         }
     }

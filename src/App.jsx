@@ -1,7 +1,8 @@
 import React from "react";
-import { RouterProvider } from 'react-router';
+import {RouterProvider} from 'react-router';
 import {router} from './router/index.jsx';
-import './App.css';
+import {App as AntdApp} from "antd"
+import './App.less';
 
 /**
  * 应用根组件
@@ -10,7 +11,9 @@ import './App.css';
 function App() {
 
     return (
-        <RouterProvider router={router}/>
+        <AntdApp>
+            <RouterProvider router={router}/>
+        </AntdApp>
     );
 }
 

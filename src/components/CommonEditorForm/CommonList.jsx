@@ -415,7 +415,7 @@ const CommonList = ({
         if (!item || !item.id) return null;
 
         let actions = [];
-        const isDisabled = selectionMode === 'replace' && item.status !== defaultQueryParams.status;
+        const isDisabled = selectionMode === 'replace' && item.status !== 'ENABLED';
         if (selectionMode === 'add') {
             if (item.status === 'ENABLED') {
                 actions.push(

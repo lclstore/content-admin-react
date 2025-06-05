@@ -426,7 +426,9 @@ export default function CommonEditor(props) {
         }
 
         try {
-            const updatedFields = internalFormFields.map(field => {
+            // 递归处理字段的辅助函数
+            const findAndSortItems = (field) => {
+                // 如果当前字段有dataList，检查并排序
                 if (field.name === panelName && Array.isArray(field.dataList)) {
                     // 确保数据存在
                     if (oldIndex < 0 || oldIndex >= field.dataList.length ||
@@ -444,11 +446,37 @@ export default function CommonEditor(props) {
                         dataList: newDataList
                     };
                 }
-                return field;
-            });
 
-            // 检查更新是否有效
-            const changedPanel = updatedFields.find(f => f.name === panelName);
+                // 如果当前字段有子字段，递归处理
+                if (field.fields) {
+                    return {
+                        ...field,
+                        fields: field.fields.map(subField => findAndSortItems(subField))
+                    };
+                }
+
+                // 如果既没有匹配的dataList也没有子字段，返回原字段
+                return field;
+            };
+
+            // 使用递归函数处理所有字段
+            const updatedFields = internalFormFields.map(field => findAndSortItems(field));
+
+            // 检查更新是否有效 - 递归查找修改的面板
+            const findChangedPanel = (fields) => {
+                for (const field of fields) {
+                    if (field.name === panelName && field.dataList) {
+                        return field;
+                    }
+                    if (field.fields) {
+                        const found = findChangedPanel(field.fields);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const changedPanel = findChangedPanel(updatedFields);
             if (changedPanel && changedPanel.dataList) {
                 console.log('更新状态');
                 // 更新内部状态
@@ -473,20 +501,32 @@ export default function CommonEditor(props) {
 
     // 处理删除项的回调函数
     const handleDeleteItem = (panelName, itemIndex) => {
-        const updatedFields = internalFormFields.map(field => {
-            if (field.name === panelName && Array.isArray(field.dataList)) {
-                // 使用索引删除数组中的元素，而不是通过ID过滤
-                const newDataList = [...field.dataList];
-                newDataList.splice(itemIndex, 1);
+        // 递归处理字段
+        const processFields = (fields) => {
+            return fields.map(field => {
+                // 如果有子字段，递归处理
+                if (Array.isArray(field.fields)) {
+                    return {
+                        ...field,
+                        fields: processFields(field.fields)
+                    };
+                }
 
-                return {
-                    ...field,
-                    dataList: newDataList
-                };
-            }
-            return field;
-        });
+                // 如果找到匹配的面板名称且有 dataList，执行删除
+                if (field.name === panelName && Array.isArray(field.dataList)) {
+                    const newDataList = [...field.dataList];
+                    newDataList.splice(itemIndex, 1);
+                    return {
+                        ...field,
+                        dataList: newDataList
+                    };
+                }
 
+                return field;
+            });
+        };
+
+        const updatedFields = processFields(internalFormFields);
         // 更新内部状态
         setInternalFormFields(updatedFields);
 
@@ -500,31 +540,45 @@ export default function CommonEditor(props) {
             collapseFormConfig.onDeleteItem(panelName, itemIndex);
         }
     };
+    // 递归处理字段的辅助函数
+    const findAndCopyItem = (field, itemId) => {
+        // 如果当前字段有dataList，检查并复制项
+        if (field.dataList !== undefined && Array.isArray(field.dataList)) {
+            const itemToCopy = field.dataList.find(item => item.id === itemId);
+            if (itemToCopy) {
+                // 创建一个新的项，包含与原项相同的属性但具有新的ID
+                const newItem = {
+                    ...itemToCopy,
+                    id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                };
+                return {
+                    ...field,
+                    dataList: [...field.dataList, newItem]
+                };
+            }
+        }
 
+        // 如果当前字段有子字段，递归处理
+        if (field.fields) {
+            const updatedFields = field.fields.map(subField =>
+                findAndCopyItem(subField, itemId)
+            );
+            return {
+                ...field,
+                fields: updatedFields
+            };
+        }
+
+        // 如果既没有dataList也没有子字段，返回原字段
+        return field;
+    };
     // 处理复制项的回调函数
     const handleCopyItem = (panelName, itemId) => {
-        debugger
+        // 使用递归函数处理所有字段
         const updatedFields = internalFormFields.map(field => {
-            if (field.name === panelName && Array.isArray(field.dataList)) {
-                // 找到要复制的项
-                const itemToCopy = field.dataList.find(item => item.id === itemId);
-                if (itemToCopy) {
-                    // 创建一个新的项，包含与原项相同的属性但具有新的ID
-                    const newItem = {
-                        ...itemToCopy,
-                        id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
-                    };
-
-                    // 返回更新后的字段，包括新项
-                    return {
-                        ...field,
-                        dataList: [...field.dataList, newItem]
-                    };
-                }
-            }
-            return field;
+            return findAndCopyItem(field, itemId);
         });
-
+        console.log('updatedFields', updatedFields);
         // 更新内部状态
         setInternalFormFields(updatedFields);
 

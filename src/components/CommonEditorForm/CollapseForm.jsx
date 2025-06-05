@@ -269,12 +269,65 @@ const CollapseForm = ({
         }
     }, [onDeleteItem]);
 
+    // 递归查找目标项并复制
+    const findAndCopyItemInFields = (field, itemId) => {
+        let found = false;
+        let result = field;
+
+        // 如果当前字段有 dataList，查找目标项
+        if (field.dataList !== undefined && Array.isArray(field.dataList)) {
+            const targetItem = field.dataList.find(item => item.id === itemId);
+            if (targetItem) {
+                // 找到目标项，创建副本
+                const newItem = {
+                    ...targetItem,
+                    id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                };
+                result = {
+                    ...field,
+                    dataList: [...field.dataList, newItem]
+                };
+                found = true;
+            }
+        }
+
+        // 如果在当前层级没找到，且有子字段，继续递归查找
+        if (!found && field.fields) {
+            const updatedFields = field.fields.map(subField => {
+                const { found: subFound, result: subResult } = findAndCopyItemInFields(subField, itemId);
+                if (subFound) {
+                    found = true;
+                }
+                return subResult;
+            });
+            result = {
+                ...field,
+                fields: updatedFields
+            };
+        }
+
+        return { found, result };
+    };
+
     // 处理复制项目
     const handleCopyItem = useCallback((panelId, itemId) => {
+        // 更新所有字段
+        const updatedFields = fields.map(field => {
+            const { result } = findAndCopyItemInFields(field, itemId);
+            return result;
+        });
+
+        // 更新表单数据
+        if (form) {
+            const formValues = form.getFieldsValue();
+            form.setFieldsValue(formValues);
+        }
+
+        // 如果提供了 onCopyItem 回调，调用它
         if (onCopyItem) {
             onCopyItem(panelId, itemId);
         }
-    }, [onCopyItem]);
+    }, [fields, form, onCopyItem]);
 
     // 处理替换项目
     const handleOpenReplaceModal = useCallback((panelId, itemId, itemIndex) => {
@@ -489,7 +542,14 @@ const CollapseForm = ({
                     formConnected,
                     initialValues,
                     mounted,
-                    moduleKey
+                    moduleKey,
+                    onAddItem: onItemAdded,
+                    onDeleteItem,
+                    onCopyItem: handleCopyItem,
+                    onReplaceItem,
+                    onUpdateItem,
+                    onSortItems,
+                    onSelectedItemProcessed,
                 })}
             </React.Fragment>
         ));

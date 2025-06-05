@@ -10,7 +10,29 @@
     cursor: pointer;
     width: fit-content;
 }
-
+.createWorkoutBtn1_box{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 64px;
+   
+}
+.createWorkoutBtn1 {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    text-align: center;
+    font-size: 22px;
+    font-weight: var(--font-weight-md);
+    color: var(--text-white);
+    /* border: 1px solid var(--active-color); */
+    /* border-radius: var(--border-radius-md); */
+    cursor: pointer;
+    width: fit-content;
+}
+.createWorkoutBtn1_img{
+    /* width: 10px; */
+    height: 30px;
+}
 .Profile {
     width: fit-content;
     /* padding: 16px; */

@@ -1,5 +1,11 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import {
+    CloudUploadOutlined,
+    CloudOutlined
+
+
+} from '@ant-design/icons';
+import {
     PlusOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
@@ -69,12 +75,30 @@ export default function WorkoutsList() {
             { title: 'Version', dataIndex: 'version', key: 'version', width: 80, visibleColumn: 0 },
             { title: 'Comment', dataIndex: 'remark', key: 'remark', visibleColumn: 1 },
             {
+                title: 'Publish Type',
+                dataIndex: 'env',
+                key: 'env',
+                width: 150,
+                options: [
+                    {
+                        label: <div><CloudUploadOutlined style={{ marginRight: '5px', color: "#11cc88" }} />Publish</div>,
+                        value: 'PRODUCTION'
+                    },
+                    {
+                        label: <div><CloudUploadOutlined style={{ marginRight: '5px', color: "#889e9e" }} />Pre-Publish</div>,
+                        value: 'PRE_PRODUCTION'
+                    }
+                ],
+                visibleColumn: 1
+            },
+            {
                 title: 'User',
                 dataIndex: 'createUser',
                 key: 'createUser',
                 width: 150,
                 visibleColumn: 1
             },
+            
             {
                 title: 'Time',
                 dataIndex: 'createTime',
@@ -86,7 +110,6 @@ export default function WorkoutsList() {
             {
                 title: 'Result',
                 showSorterTooltip: false,
-                align: 'center',
                 dataIndex: 'status',
                 width: 220,
                 key: 'status',

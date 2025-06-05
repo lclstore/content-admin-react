@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef,useImperativeHandle,forwardRef } from 'react';
 import { useLocation, useNavigate } from "react-router"
 import { useImmer } from "use-immer"
 import { Table, Input, Button, Spin, Space, Dropdown, message, Modal } from 'antd';
@@ -73,7 +73,7 @@ import { CSS } from '@dnd-kit/utilities';
  * @param {function} [props.onDragEnd] - 添加拖拽结束的回调函数
  * @param {function} [props.expandedRowRender] - 展开行的渲染函数
  */
-function ConfigurableTable({
+const ConfigurableTable = forwardRef(({
     columns, // 所有列的定义
     dataSource = [],
     paddingTop = 20,
@@ -101,7 +101,7 @@ function ConfigurableTable({
     draggable = false, // 添加拖拽功能的开关
     onDragEnd, // 添加拖拽结束的回调函数
     expandedRowRender, // 修改为直接接收展开行渲染函数
-}) {
+},ref) => {
     const optionsBase = useStore(i => i.optionsBase)
     const pathSegments = useLocation().pathname.split('/').filter(Boolean);
     const routeLevel = pathSegments.length;
@@ -113,7 +113,7 @@ function ConfigurableTable({
     const pathname = useLocation().pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${moduleKey}`;
-    const paginationParams = useRef({
+    let paginationParams = useRef({
         ...paginationConfig,
     })
     const [messageApi, contextHolder] = message.useMessage();
@@ -134,7 +134,7 @@ function ConfigurableTable({
 
     //   ref
     const tableRef = useRef(null) // 表格组件的ref
-    const activeFilters = useRef(filterConfig?.activeFilters || {}) //当前选中的筛选器
+    let activeFilters = useRef(filterConfig?.activeFilters || {}) //当前选中的筛选器
     // filter data
     const filterDataHook = useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
@@ -234,10 +234,10 @@ function ConfigurableTable({
             type: 'multiple',
             title: 'Visible Columns',
             key: 'visibleColumns',
-            options: options // 使用过滤后的选项数组
+            options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
-    console.log(columnSettingsSection);
+    console.log('columnSettingsSection',columnSettingsSection);
 
     // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {
@@ -346,6 +346,12 @@ function ConfigurableTable({
             return !!value; // 非数组时判断值是否存在
         });
     }, [activeFilters.current]);
+
+    // if out search data hook is exist，use out search data replace inside
+    useImperativeHandle(ref,() => ({
+        getSearchData: () => ({...paginationParams.current, ...activeFilters.current,}),
+    }))
+
 
     // --- 渲染逻辑 ---
     // 根据外部传入的完整 visibleColumnKeys 过滤列进行渲染
@@ -573,6 +579,7 @@ function ConfigurableTable({
 
     // 筛选器 更新
     const filterUpdate = useCallback((newFilters) => {
+        paginationParams.current.pageIndex = 1;
         activeFilters.current = newFilters;
         searchTableData()// 查询 表格数据
     }, [paginationParams])
@@ -628,15 +635,16 @@ function ConfigurableTable({
 
                     processedCol.render = (text, record, index) => {
                         if (!record) return null; // 如果record不存在，返回null
-                        const key = text;
-                        const optionConfig = options ? options.find(option => option.value === key) : null; // 获取文本选项配置
-                        // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
-                        const DisplayText = optionConfig ? (optionConfig.name || optionConfig.label || text) : text;
-                        // 如果 iconOptions 和 options 都没有为当前 key 提供配置，则返回原始文本
-                        if (!optionConfig) {
-                            return text;
+                        if(!options) return text
+                        if(Array.isArray(text)){
+                            text = text.map(enumVal => options.find(option => option.value === enumVal).label || enumVal ).toString()
                         }
-                        return DisplayText;
+                        else {
+                            const optionConfig = options.find(option => option.value === text); // 获取文本选项配置
+                            // 决定显示的文本: 优先使用 options 的文本，如果不存在则使用原始 text
+                            optionConfig && (text = (optionConfig.name || optionConfig.label || text)) ;
+                        }
+                        return text;
                     };
                 }
 
@@ -952,13 +960,13 @@ function ConfigurableTable({
                     prevSorterRef.current?.field !== sorter.field ||
                     prevSorterRef.current?.order !== sorter.order;
 
-                // 更新分页参数 
+                // 更新分页参数
                 if (showPagination) {
                     paginationParams.current.pageIndex = isSorterChanged ? 1 : pagination.current;
                     paginationParams.current.pageSize = pagination.pageSize;
                 }
 
-                // 更新排序参数 
+                // 更新排序参数
                 const isAscending = sorter.order === 'ascend';
                 const orderBy = sorter.field;
                 const orderDirection = isAscending ? 'ASC' : 'DESC';
@@ -1139,7 +1147,7 @@ function ConfigurableTable({
                 </Modal>
             </div>
     );
-}
+})
 
 // 创建可排序的行组件
 const SortableRow = ({ children, ...props }) => {

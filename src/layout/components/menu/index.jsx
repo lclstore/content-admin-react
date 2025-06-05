@@ -69,7 +69,7 @@ export default function SideMenu() {
                 mode="inline"
                 selectedKeys={selectedKeys}
                 onClick={handleMenuClick}
-                style={{ width: '100%' }}
+                style={{ width: '100%',fontWeight:600 }}
                 items={filteredMenuItems.map(item => ({
                     key: item.key,
                     icon: item.icon,

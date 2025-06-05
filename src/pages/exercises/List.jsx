@@ -1,16 +1,17 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message } from 'antd';
-import { PlusOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import { statusIconMap, optionsConstants } from '@/constants';
-import { statusOrder, listData } from './Data';
+import React, {useContext, useEffect, useState, useMemo, useCallback, useRef} from 'react';
+import {Modal, Button, Checkbox, Input, Typography, Radio, App} from 'antd';
+import {PlusOutlined, ArrowDownOutlined, ArrowUpOutlined} from '@ant-design/icons';
+import {useNavigate} from 'react-router';
+import {HeaderContext} from '@/contexts/HeaderContext';
+
 
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
+import {useImmer} from "use-immer";
+import request from "@/request/index.js";
 
 export default () => {
     // 定义筛选器配置
-    var filterSections = [
+    let filterSections = [
         {
             title: 'Status',
             key: 'statusList',
@@ -131,17 +132,53 @@ export default () => {
         }
     ];
     // 1. 状态定义 - 组件内部状态管理
-    const { setButtons, setCustomPageTitle } = useContext(HeaderContext);
+    const {setButtons, setCustomPageTitle} = useContext(HeaderContext);
+    const {message, modal} = App.useApp()
+    // 用于接受table 的 search 数据
+    const tableRef = useRef(null);
+    const fieldOptions = useMemo(() => [
+        ["ID", "id"], ["Name", "name"], ["Image URL", "coverImgUrl"], ["MET", "met"], ["Structure Type", "structureTypeCode"], ["Gender", "genderCode"],
+        ["Difficulty", "difficultyCode"], ["Equipment", "equipmentCode"], ["Position", "positionCode"], ["Injured", "injuredCodes"],
+        ["Guidance Script", "guidanceScript"], ["Howtodo Script", "howtodoScript"], ["Name Audio URL", "nameAudioUrl"], ["Guidance Audio URL", "guidanceAudioUrl"],
+        ["Howtodo Audio URL", "howtodoAudioUrl"], ["Front Video URL", "frontVideoUrl"], ["Side Video URL", "sideVideoUrl"]
+    ].map(i => ({label: i[0], value: i[1]})), [])
+
+    const [feishuImportModal, updateFeishuImportModal] = useImmer({
+        loading: false,
+        modalShow: false,
+        bitableUrl: "",
+        propertyList: fieldOptions.map(i => i.value),
+    })
+    const [feishuExportModal, updateFeishuExportModal] = useImmer({
+        loading: false,
+        modalShow: false,
+        bitableUrl: "",
+        propertyList: fieldOptions.map(i => i.value),
+        exportBy: 1
+    })
     const navigate = useNavigate();
 
-
+       // 定义按钮显示规则
+        const isButtonVisible = useCallback((record, btnName) => {
+    
+            const status = record.status;
+            //  console.log(status)
+            // 简单的状态-按钮映射关系
+            if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+            if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+            if (status === 'ENABLED' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+            if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+            if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
+    
+            return false;
+        }, []);
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
             {
                 title: 'ID',
                 dataIndex: 'id',
-                visibleColumn: 2,
+                visibleColumn: 0,
                 width: 50,
                 key: 'id'
             },
@@ -199,6 +236,26 @@ export default () => {
                 key: 'structureTypeCode'
             },
             {
+                title: 'Difficulty',
+                dataIndex: 'difficultyCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 2,
+                options: [
+                    {
+                        label: 'Beginner',
+                        value: 'BEGINNER'
+                    }, {
+                        label: 'Intermediate',
+                        value: 'INTERMEDIATE'
+                    }, {
+                        label: 'Advanced',
+                        value: 'ADVANCED'
+                    }
+                ],
+                key: 'difficultyCode'
+            },
+            {
                 title: 'Gender',
                 dataIndex: 'genderCode',
                 sorter: true,
@@ -215,26 +272,7 @@ export default () => {
                 ],
                 key: 'genderCode'
             },
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficultyCode',
-                sorter: true,
-                width: 120,
-                visibleColumn: 1,
-                options: [
-                    {
-                        label: 'Beginner',
-                        value: 'BEGINNER'
-                    }, {
-                        label: 'Intermediate',
-                        value: 'INTERMEDIATE'
-                    }, {
-                        label: 'Advanced',
-                        value: 'ADVANCED'
-                    }
-                ],
-                key: 'difficultyCode'
-            },
+            
             {
                 title: 'Equipment',
                 dataIndex: 'equipmentCode',
@@ -319,13 +357,14 @@ export default () => {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
-
-            },
+                // 定义所有可能的按钮
+               actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
+                // 控制按钮显示规则
+                isShow: isButtonVisible,
+                // 按钮点击处理函数
+            }
         ];
     }, []);
-
-
 
 
     /**
@@ -339,23 +378,23 @@ export default () => {
             {
                 key: 'create',
                 text: 'Add Exercise',
-                icon: <PlusOutlined />,
+                icon: <PlusOutlined/>,
                 type: 'primary',
                 onClick: () => navigate(`/exercises/editor`),
             },
             {
                 key: 'Import',
                 text: 'Feishu Import',
-                icon: <ArrowDownOutlined />,
+                icon: <ArrowDownOutlined/>,
                 type: 'primary',
-                // onClick: () => navigate(`/exercises/editor`),
+                onClick: () => updateFeishuImportModal(draft => void (draft.modalShow = true)),
             },
             {
                 key: 'Export',
                 text: 'Export Feishu',
-                icon: <ArrowUpOutlined />,
+                icon: <ArrowUpOutlined/>,
                 type: 'primary',
-                // onClick: () => navigate(`/exercises/editor`),
+                onClick: () => updateFeishuExportModal(draft => void (draft.modalShow = true)),
             }
         ]);
 
@@ -365,23 +404,131 @@ export default () => {
             setCustomPageTitle && setCustomPageTitle(null);
         };
     }, [setButtons, setCustomPageTitle, navigate]);
-
-
+    const feishuImport = useCallback(async () => {
+        return new Promise(resolve => {
+            request.post({
+                url: `/exercise/import`,
+                data: feishuImportModal,
+                point: true,
+                callback() {
+                    resolve()
+                }
+            })
+        })
+    })
+    const feishuExport = useCallback(async () => {
+        const data = {...feishuExportModal}
+        data.exportBy === 2 && (data.pageReq = tableRef.current.getSearchData())
+        return new Promise(resolve => {
+            request.post({
+                url: `/exercise/export`,
+                data,
+                warningPoint: false,
+                callback(res) {
+                    resolve(res)
+                }
+            })
+        })
+    })
 
     // 渲染 - 组件UI呈现
     return (
-        <div className="workoutsContainer page-list">
+        <div className="list-page">
             <ConfigurableTable
+                ref={tableRef}
                 columns={allColumnDefinitions}
                 moduleKey="exercise"
                 searchConfig={{
-                    placeholder: "Search name or id...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={true}
                 filterConfig={{
                     filterSections: filterSections,
                 }}
             />
+            <Modal
+                title="FeiShu Import"
+                style={{top: 20}}
+                styles={{content: {width: '500px'}}}
+                open={feishuImportModal.modalShow}
+                footer={[
+                    <Button key="submit" type="primary" loading={feishuImportModal.loading} onClick={
+                        () => {
+                            updateFeishuImportModal(draft => {
+                                draft.loading = true
+                            })
+                            feishuImport().then(() => {
+                                updateFeishuImportModal(draft => {
+                                    draft.modalShow = false
+                                    draft.loading = false
+                                })
+                            })
+                        }
+                    }>
+                        Import
+                    </Button>
+                ]}
+                onCancel={() => updateFeishuImportModal(draft => void (draft.modalShow = false))}
+            >
+                <Typography.Title level={5} style={{color: 'black'}}>Import Link:</Typography.Title>
+                <Input.TextArea value={feishuImportModal.bitableUrl}
+                                onChange={e => updateFeishuImportModal(draft => void (draft.bitableUrl = e.target.value))}/>
+                <Typography.Title level={5} style={{color: 'black'}}>Import Fields:</Typography.Title>
+                <Checkbox.Group style={{display: "grid"}} options={fieldOptions} disabled={true}
+                                value={feishuImportModal.propertyList}
+                                onChange={(list) => updateFeishuImportModal(draft => void (draft.propertyList = list))}/>
+            </Modal>
+            {/* Export */}
+            <Modal
+                title="FeiShu Export"
+                style={{top: 20}}
+                styles={{content: {width: '500px'}}}
+                open={feishuExportModal.modalShow}
+                footer={[
+                    <Button key="submit" type="primary" loading={feishuExportModal.loading} onClick={
+                        () => {
+                            updateFeishuExportModal(draft => void (draft.loading = true))
+                            feishuExport().then((res) => {
+                                updateFeishuExportModal(draft => {
+                                    draft.modalShow = false
+                                    draft.loading = false
+                                })
+                                if(res.error){
+                                    message.open({
+                                        type: 'error',
+                                        content: res.data.errMessage,
+                                    });
+                                }else {
+                                    modal.success({
+                                        content: (<>
+                                            <div>Export Success</div>
+                                            <Button style={{ margin:'5px 0' }} onClick={() => window.open("https://google.com")}>View</Button>
+                                        </>),
+                                        className: "modal-default"
+                                    })
+                                }
+                            })
+                        }
+                    }>
+                        Export
+                    </Button>
+                ]}
+                onCancel={() => updateFeishuExportModal(draft => void (draft.modalShow = false))}
+            >
+                <Typography.Title level={5} style={{color: 'black'}}>Export Link:</Typography.Title>
+                <Input.TextArea value={feishuExportModal.bitableUrl}
+                                onChange={e => updateFeishuExportModal(draft => void (draft.bitableUrl = e.target.value))}/>
+                <Typography.Title level={5} style={{color: 'black'}}>Export Type:</Typography.Title>
+                <Radio.Group value={feishuExportModal.exportBy}
+                             onChange={(e) => updateFeishuExportModal(draft => void (draft.exportBy = e.target.value))}>
+                    <Radio value={1}>All</Radio>
+                    <Radio value={2}>filter Data</Radio>
+                </Radio.Group>
+                <Typography.Title level={5} style={{color: 'black'}}>Export Fields:</Typography.Title>
+                <Checkbox.Group style={{display: "grid"}} options={fieldOptions} disabled={true}
+                                value={feishuExportModal.propertyList}
+                                onChange={(list) => updateFeishuExportModal(draft => void (draft.propertyList = list))}/>
+            </Modal>
         </div>
     );
 }

@@ -21,7 +21,7 @@ export default function WorkoutsList() {
                 value: 'DRAFT'
             }, {
                 label: 'Enabled',
-                value: 'ENABLED' 
+                value: 'ENABLED'
             }, {
                 label: 'Disabled',
                 value: 'DISABLED'
@@ -41,8 +41,12 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
+                
                 key: 'name',
                 width: 350,
+                stye: {
+                    fontWeight: 'bold'
+                },
                 visibleColumn: 1
             },
             {
@@ -59,7 +63,7 @@ export default function WorkoutsList() {
                 title: 'Has a Script',
                 sorter: true,
                 showSorterTooltip: false,
-                align: 'center',
+                // align: 'center',
                 dataIndex: 'translation',
                 key: 'translation',
                 width: 120,
@@ -71,23 +75,22 @@ export default function WorkoutsList() {
                         </Space>
                     );
                 }
-            },  
+            },
             {
                 title: 'Actions',
                 key: 'actions',
                 fixed: 'right',
                 width: 70,
-                align: 'center',
+                // align: 'center',
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
 
             },
         ];
     }, []);
-
     /**
      * 设置导航栏按钮
      */
-    useEffect(() => { 
+    useEffect(() => {
         // 设置自定义页面标题
         setCustomPageTitle('Sounds');
 
@@ -111,16 +114,16 @@ export default function WorkoutsList() {
 
     //渲染表格组件
     return (
-            <ConfigurableTable
-                columns={allColumnDefinitions}
-                moduleKey="sound"
-                searchConfig={{
-                    placeholder: "Search name or ID...",
-                }}
-                showColumnSettings={false}
-                filterConfig={{
-                    filterSections: filterSections,
-                }}
-            />
+        <ConfigurableTable
+            columns={allColumnDefinitions}
+            moduleKey="sound"
+            searchConfig={{
+                placeholder: "Search name or ID...",
+            }}
+            showColumnSettings={false}
+            filterConfig={{
+                filterSections: filterSections,
+            }}
+        />
     );
 }   

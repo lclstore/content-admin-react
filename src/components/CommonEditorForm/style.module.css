@@ -27,7 +27,7 @@
 .basicEditorForm {
     margin: 0 auto;
     width: 100%;
-    max-width: 765px;
+    max-width: 1000px;
     /* padding: 24px; */
     flex-grow: 1;
 }
@@ -665,7 +665,8 @@
 .collapseFormContent {
     display: block;
     margin: 0 auto;
-    max-width: 768px;
+    /* max-width: 768px; */
+    width: 80%;
 
 }
 

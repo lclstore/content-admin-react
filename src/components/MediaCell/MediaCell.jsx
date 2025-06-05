@@ -185,6 +185,7 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
                         <audio
                             src={fullUrl}
                             controls
+                            autoPlay={'play'}
                             className={styles.audio}
                         >
                         </audio>
@@ -345,6 +346,7 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                         <AudioMedia
                             src={mediaSrc}
                             mediaType={mediaType}
+                            
                             onPreview={handleAudioPreview}
                         />
                         {tags}

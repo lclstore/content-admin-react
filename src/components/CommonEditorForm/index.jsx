@@ -873,17 +873,30 @@ export default function CommonEditor(props) {
                     response.data.id = null;//重制id
                     response.data.status = null;//重制状态
                 }
-                // 如果fields存在，则将数据中的dataList设置为fields中的dataList
-                const allFields = fields || formFields;
-                allFields.map(field => {
-                    if (field.dataList) {
-                        field.dataList = response.data[field.name]
+                // 递归处理字段映射的辅助函数
+                const recursiveMapFields = (fields, responseData) => {
+                    return fields.map(field => {
+                        // 处理当前字段的 dataList
+                        if (field.dataList) {
+                            field.dataList = responseData[field.name];
+                        }
 
-                    }
-                })
+                        // 如果字段有子字段，递归处理
+                        if (field.fields && Array.isArray(field.fields)) {
+                            field.fields = recursiveMapFields(field.fields, responseData);
+                        }
+
+                        return field;
+                    });
+                };
+
+                // 使用递归函数处理所有字段
+                const allFields = fields || formFields;
+                const updatedFields = recursiveMapFields(allFields, response.data);
+
                 // 通知父组件
                 if (onFormFieldsChange) {
-                    onFormFieldsChange(allFields);
+                    onFormFieldsChange(updatedFields);
                 }
                 // 获取数据后回调
                 response = getDataAfter ? getDataAfter(response.data) : response.data;

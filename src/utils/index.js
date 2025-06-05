@@ -67,7 +67,7 @@ export function validateEmail(email) {
  * @param {string} format 格式化模板，如：'YYYY-MM-DD HH:mm:ss'
  * @returns {string} 格式化后的日期字符串
  */
-export function formatDate(date, format = 'YYYY-MM-DD') {
+export function formatDate(date, format = 'YYYY-MM-DDTHH:mm:ss') {
   if (!date) return '';
 
   date = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;

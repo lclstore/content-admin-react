@@ -34,12 +34,10 @@ export default function UserEditorWithCommon() {
 
 
     const imageUpload = (value, file, form) => {
-        const formValues = form.getFieldsValue();
+        const formValues = form.getFieldsValue(true);
         form.setFieldsValue({
-            coverImage: formValues.coverImage || value,
-            detailImage: formValues.detailImage || value,
-            thumbnailImage: formValues.thumbnailImage || value,
-            completeImage: formValues.completeImage || value,
+            coverImgUrl: formValues.coverImgUrl || value,
+            detailImgUrl: formValues.detailImgUrl || value,
         });
     }
 
@@ -99,7 +97,7 @@ export default function UserEditorWithCommon() {
             fields: [
                 {
                     type: 'upload',
-                    name: 'coverImage',
+                    name: 'coverImgUrl',
                     label: 'Cover Image',
                     required: true,
                     acceptedFileTypes: 'png,webp',
@@ -107,7 +105,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'upload',
-                    name: 'detailImage',
+                    name: 'detailImgUrl',
                     label: 'Detail Image',
                     required: true,
                     acceptedFileTypes: 'png,webp',
@@ -208,7 +206,7 @@ export default function UserEditorWithCommon() {
             formType="advanced"
             saveBeforeTransform={saveBeforeTransform}
             enableDraft={true}
-            config={{ formName: 'Workouts', title: 'Collections' }}
+            config={{ formName: 'Collections', title: 'Collections details' }}
             initialValues={initialValues}
         />
     );

@@ -241,7 +241,7 @@ export default function UserEditorWithCommon() {
                 filterSections: filterSections,
                 title: 'Workouts',
             }}
-            moduleKey='category'
+            moduleKey='program'
             isCollapse={true}
             formType="advanced"
             saveBeforeTransform={saveBeforeTransform}

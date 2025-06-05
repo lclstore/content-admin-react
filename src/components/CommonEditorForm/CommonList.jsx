@@ -348,7 +348,7 @@ const CommonList = ({
     const defaultRenderItemMeta = useCallback((item) => {
         return <List.Item.Meta style={{ alignItems: 'center' }}
             avatar={
-                getFileCategoryFromUrl(item.audioUrl || item.animationPhoneUrl) === 'audio' ?
+                getFileCategoryFromUrl(item.coverImage || item.audioUrl || item.animationPhoneUrl) === 'audio' ?
                     <div className={styles.audioPreview}>
                         <div
                             className={styles.audioPreview_box}
@@ -363,7 +363,7 @@ const CommonList = ({
                     </div>
                     :
                     <div className={styles.itemAvatar}>
-                        <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
+                        <Avatar shape="square" size={64} src={item.coverImage || item.imageUrl || item.animationPhoneUrl} />
                         <CaretRightOutlined
                             className={styles.playIcon}
                         />

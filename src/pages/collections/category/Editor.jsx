@@ -206,7 +206,7 @@ export default function UserEditorWithCommon() {
             formType="advanced"
             saveBeforeTransform={saveBeforeTransform}
             enableDraft={true}
-            config={{ formName: 'Collections', title: 'Collections details' }}
+            config={{ formName: 'Collections', title: 'Category details' }}
             initialValues={initialValues}
         />
     );

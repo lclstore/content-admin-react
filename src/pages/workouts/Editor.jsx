@@ -15,51 +15,54 @@ import {
 
 export default function UserEditorWithCommon() {
 
-     const filterSections = [
+    var filterSections = [
         {
             title: 'Status',
             key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
-            options: 'statusList'
+            options: 'statusList',
         },
-        
+        {
+            title: 'Structure Type',
+            key: 'structureTypeCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseStructureTypeEnums'
+        },
+        {
+            title: 'Gender',
+            key: 'genderCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseGenderEnums'
+        },
+        {
+            title: 'Difficulty',
+            key: 'difficultyCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseDifficultyEnums'
+        },
+        {
+            title: 'Equipment',
+            key: 'equipmentCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseEquipmentEnums'
+        },
+        {
+            title: 'Position',
+            key: 'positionCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExercisePositionEnums',
+        },
+        {
+            title: 'Injured',
+            key: 'injuredCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseInjuredEnums'
+        },
+
     ];
     // 初始用户数据状态--可设默认值
     const initialValues = {}
-    const mockUsers = [{
-        id: 1,
-        name: 'John Doe',
-        description: 'asasdasa',
-        startTime: '2025-01-26',
-        endTime: '2025-07-26',
-        premium: 1,
-        coverImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        detailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        thumbnailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        completeImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        difficulty: 1,
-        equipment: 3,
-        position: 2,
-        target: [1, 5],
-        introDuration: 10,
-        exercisePreviewDuration: 20,
-        exerciseExecutionDuration: 30,
-        list: [{
-            reps: 1,
-            structureName: 'asd1',
-            list: [commonListData[0], commonListData[1]]
-        }, {
-            reps: 2,
-            structureName: 'asd2',
-            list: [commonListData[1]]
-        },
-        {
-            reps: 3,
-            structureName: 'asd3',
-            list: [commonListData[4]]
-        }
-        ]
-    }];
+
 
     // 保存用户数据
     const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
@@ -117,9 +120,7 @@ export default function UserEditorWithCommon() {
             // 模拟延迟 1 秒
             setTimeout(() => {
                 if (id) {
-                    // 查找对应用户
-                    // const user = mockUsers.find(u => u.id === parseInt(id, 10));
-                    const user = mockUsers[0]
+
                     resolve(user || {});  // 找不到也返回空对象，避免 undefined
                 } else {
                     // 新增场景：直接返回空对象
@@ -378,15 +379,17 @@ export default function UserEditorWithCommon() {
 
     };
     const initCommonListData = (params) => {
-            return new Promise(resolve => {
-                request.get({
-                    url: `/exercise/page`,
-                    load: false,
-                    data: params,
-                    callback: res => resolve(res?.data)
-                });
-            })
-        }
+        console.log('initCommonListData', params);
+
+        return new Promise(resolve => {
+            request.get({
+                url: `/exercise/page`,
+                load: false,
+                data: params,
+                callback: res => resolve(res?.data)
+            });
+        })
+    }
 
     return (
         <CommonEditorForm
@@ -402,12 +405,13 @@ export default function UserEditorWithCommon() {
                 initCommonListData: initCommonListData,
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
+                title: 'Exercises',
             }}
             isCollapse={true}
             initFormData={initFormData}
             formType="advanced"
             fieldsToValidate={['name', 'birthday']}
-            config={{ formName: 'Workouts' }}
+            config={{ formName: 'Workouts', title: 'Workout details' }}
             initialValues={initialValues}
             onSave={handleSaveUser}
         />

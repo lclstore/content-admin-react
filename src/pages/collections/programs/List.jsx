@@ -63,15 +63,7 @@ export default () => {
                 title: 'Show Type',
                 dataIndex: 'showTypeCode',
                 sorter: true,
-                options: [
-                    {
-                        label: 'Horizontal',
-                        value: 'HORIZONTAL'
-                    }, {
-                        label: 'Card',
-                        value: 'CARD'
-                    }
-                ],
+                options: 'BizCategoryShowTypeEnums',
                 visibleColumn: 0
             },
             {

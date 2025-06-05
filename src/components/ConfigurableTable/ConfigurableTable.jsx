@@ -233,10 +233,10 @@ const ConfigurableTable = forwardRef(({
             type: 'multiple',
             title: 'Visible Columns',
             key: 'visibleColumns',
-            options: options // 使用过滤后的选项数组
+            options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
-    console.log(columnSettingsSection);
+    console.log('columnSettingsSection',columnSettingsSection);
 
     // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {
@@ -566,6 +566,7 @@ const ConfigurableTable = forwardRef(({
 
     // 筛选器 更新
     const filterUpdate = useCallback((newFilters) => {
+        paginationParams.current.pageIndex = 1;
         activeFilters.current = newFilters;
         searchTableData()// 查询 表格数据
     }, [paginationParams])
@@ -593,7 +594,7 @@ const ConfigurableTable = forwardRef(({
                 if (mediaTypes.includes(processedCol.mediaType)) {
                     // 为包含媒体类型的列添加特殊的className
                     processedCol.className = styles.mediaCell;
-                    processedCol.width = 95
+                    processedCol.width = processedCol.width || 95
                     // 添加 onCell 方法给单元格添加类名
                     processedCol.onCell = () => ({
                         className: 'media-cell', // 为单元格添加 media-cell 类名

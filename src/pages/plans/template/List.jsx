@@ -52,7 +52,7 @@ export default function WorkoutsList() {
                 width: 350,
                 visibleColumn: 1
             },
-            {title: "Duration (Min)", dataIndex: "durationCode", options: 'BizTemplateDurationEnums', sorter: true,},
+            {title: "Duration (Min)", dataIndex: "durationCode", options: 'BizTemplateDurationEnums', sorter: true},
             {
                 title: 'Status',
                 dataIndex: 'status',

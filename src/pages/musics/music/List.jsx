@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Form, } from 'antd';
+import { Form, Modal, Button } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
+import UserEditorWithCommon from './Editor';
 
 //查询条件数组
 const filterSections = [
@@ -20,6 +21,17 @@ export default function Musics() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
+    const [editingMusicId, setEditingMusicId] = useState(null);
+    const [editorActionsRef, setEditorActionsRef] = useState(null);
+    const [isEditorModalVisible, setIsEditorModalVisible] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0); // 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
+
+    // 编辑处理
+    const handleEdit = useCallback((record) => {
+        setEditingMusicId(record?.id || null);
+        setIsEditorModalVisible(true);
+        setRefreshKey(null);// 清空刷新
+    }, []);
 
     // 批量创建文件 Modal 状态
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
@@ -33,7 +45,22 @@ export default function Musics() {
         }
     }, [isBatchCreateModalVisible, batchCreateForm]);
 
-
+    // 提交form
+    const handleModalSubmit = async () => {
+        console.log(editorActionsRef)
+        if (editorActionsRef && editorActionsRef.triggerSave) {
+            console.log('1111111')
+            const currentRecord = dataSource.find(user => user.id === editingMusicId);
+            const statusToSave = currentRecord?.status || 'ENABLED'; // 默认为 ENABLED
+            let ret = await editorActionsRef.triggerSave(statusToSave, false);// 返回保存结果
+            if (ret.success) {
+                messageApi.success(ret.message || 'Save successful!');
+                setIsEditorModalVisible(false);
+                setEditingMusicId(null);
+                setRefreshKey(editingMusicId ? 1 : 2); // 1. 表示当前页面刷新 2. 表示全局刷新
+            }
+        }
+    };
 
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
@@ -63,8 +90,11 @@ export default function Musics() {
             {
                 title: 'Name',
                 sorter: true,
+                width: 350,
                 showSorterTooltip: false,
-                dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1
+                dataIndex: 'name',
+                key: 'name',
+                visibleColumn: 1
             },
             {
                 title: 'Status',
@@ -73,7 +103,6 @@ export default function Musics() {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'displayStatus',
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -82,13 +111,23 @@ export default function Musics() {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
             },
         ];
     }, [isButtonVisible]);
+
+    useEffect(() => {
+        console.log('1111111')
+        if (setEditorActionsRef && editorActionsRef) {
+            const formActions = {
+                form,
+                triggerSave: handleStatusModalConfirmFromHook
+            };
+            setEditorActionsRef(formActions);
+        }
+    }, [setEditorActionsRef]);
 
     //设置导航栏按钮
     useEffect(() => {
@@ -102,7 +141,7 @@ export default function Musics() {
                 text: 'Add Music',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/musics/music/editor'),
+                onClick: () => handleEdit(),
             }
         ]);
 
@@ -118,6 +157,7 @@ export default function Musics() {
     return (
         <div className="workoutsContainer "   >
             <ConfigurableTable
+                refreshKey={refreshKey}
                 moduleKey={'music'}
                 paddingTop={50}
                 columns={allColumnDefinitions}
@@ -129,6 +169,27 @@ export default function Musics() {
                     filterSections: filterSections,
                 }}
             />
+            {/* 编辑弹窗 */}
+            <Modal
+                title={editingMusicId ? "Edit User" : "Add User"}
+                open={isEditorModalVisible}
+                onCancel={() => setIsEditorModalVisible(false)}
+                footer={[
+                    <Button key="cancel" onClick={() => setIsEditorModalVisible(false)}>
+                        Cancel
+                    </Button>,
+                    <Button key="submit" type="primary" onClick={handleModalSubmit}>
+                        Confirm
+                    </Button>
+                ]}
+                width={850}
+                destroyOnClose
+            >
+                <UserEditorWithCommon
+                    id={editingMusicId}
+                    setFormRef={setEditorActionsRef}
+                />
+            </Modal>
         </div>
     );
 }   

@@ -158,14 +158,27 @@ export default () => {
     })
     const navigate = useNavigate();
 
-
+       // 定义按钮显示规则
+        const isButtonVisible = useCallback((record, btnName) => {
+    
+            const status = record.status;
+            //  console.log(status)
+            // 简单的状态-按钮映射关系
+            if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+            if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+            if (status === 'ENABLED' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+            if (status === 'Premium' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
+            if (status === 'Deprecated' && ['duplicate'].includes(btnName)) return true;
+    
+            return false;
+        }, []);
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
             {
                 title: 'ID',
                 dataIndex: 'id',
-                visibleColumn: 2,
+                visibleColumn: 0,
                 width: 50,
                 key: 'id'
             },
@@ -223,6 +236,26 @@ export default () => {
                 key: 'structureTypeCode'
             },
             {
+                title: 'Difficulty',
+                dataIndex: 'difficultyCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 2,
+                options: [
+                    {
+                        label: 'Beginner',
+                        value: 'BEGINNER'
+                    }, {
+                        label: 'Intermediate',
+                        value: 'INTERMEDIATE'
+                    }, {
+                        label: 'Advanced',
+                        value: 'ADVANCED'
+                    }
+                ],
+                key: 'difficultyCode'
+            },
+            {
                 title: 'Gender',
                 dataIndex: 'genderCode',
                 sorter: true,
@@ -239,26 +272,7 @@ export default () => {
                 ],
                 key: 'genderCode'
             },
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficultyCode',
-                sorter: true,
-                width: 120,
-                visibleColumn: 1,
-                options: [
-                    {
-                        label: 'Beginner',
-                        value: 'BEGINNER'
-                    }, {
-                        label: 'Intermediate',
-                        value: 'INTERMEDIATE'
-                    }, {
-                        label: 'Advanced',
-                        value: 'ADVANCED'
-                    }
-                ],
-                key: 'difficultyCode'
-            },
+            
             {
                 title: 'Equipment',
                 dataIndex: 'equipmentCode',
@@ -343,9 +357,12 @@ export default () => {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
-
-            },
+                // 定义所有可能的按钮
+               actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
+                // 控制按钮显示规则
+                isShow: isButtonVisible,
+                // 按钮点击处理函数
+            }
         ];
     }, []);
 
@@ -422,7 +439,7 @@ export default () => {
                 columns={allColumnDefinitions}
                 moduleKey="exercise"
                 searchConfig={{
-                    placeholder: "Search name or id...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={true}
                 filterConfig={{

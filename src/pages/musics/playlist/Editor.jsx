@@ -41,6 +41,24 @@ export default function UserEditorWithCommon() {
             // renderItemMata: renderItemMata,
             label: 'Musics',
             dataList: [],
+            structureListFields: [
+                {
+                    type: 'input',
+                    name: 'displayName',
+                    label: 'Display Name',
+                },
+                {
+                    type: 'select',
+                    name: 'premium',
+                    label: 'Premium',
+                    options: [
+                        { label: 'Yes', value: 'YES' },
+                        { label: 'No', value: 'NO' },
+                    ],
+                },
+
+            ],
+
             rules: [
                 { required: true, message: 'Please add at least one music' },
             ]
@@ -98,12 +116,16 @@ export default function UserEditorWithCommon() {
                 initCommonListData: initCommonListData,
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
+                title: 'Musics',
+            }}
+            initialValues={{
+                type: 'REGULAR',
             }}
             saveBeforeTransform={saveBeforeTransform}
             formType="advanced"
             enableDraft={true}
             onFormFieldsChange={handleFormFieldsChange}
-            config={{ formName: 'Playlist', hideSaveButton: false, hideBackButton: false }}
+            config={{ formName: 'Playlist', hideSaveButton: false, hideBackButton: false, title: 'Playlist details' }}
             fields={formFields}
         />
     );

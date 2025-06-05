@@ -103,21 +103,24 @@ const ConfigurableTable = forwardRef(({
     expandedRowRender, // 修改为直接接收展开行渲染函数
 },ref) => {
     const optionsBase = useStore(i => i.optionsBase)
-    const pathSegments = useLocation().pathname.split('/').filter(Boolean);
+    const navigate = useNavigate(); // 路由导航
+    const location = useLocation();
+    const pathSegments = location.pathname.split('/').filter(Boolean);
     const routeLevel = pathSegments.length;
-    let pathUrl = useLocation().pathname.split('/')[1];
+    let pathUrl = location.pathname.split('/')[1];
     moduleKey = moduleKey || pathSegments[1];
     if (routeLevel == 3) {
         pathUrl = `${pathSegments[0]}/${pathSegments[1]}`;
     }
-    const pathname = useLocation().pathname.split('/')[1];
+    const pathname = location.pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${moduleKey}`;
-    let paginationParams = useRef({
+    const [messageApi, contextHolder] = message.useMessage();
+    // paginationConfig load case
+    paginationConfig = localStorage.getItem(location.pathname) || paginationConfig
+    const paginationParams = useRef({
         ...paginationConfig,
     })
-    const [messageApi, contextHolder] = message.useMessage();
-    const navigate = useNavigate(); // 路由导航
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
@@ -237,7 +240,6 @@ const ConfigurableTable = forwardRef(({
             options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
-    console.log('columnSettingsSection',columnSettingsSection);
 
     // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {
@@ -283,7 +285,6 @@ const ConfigurableTable = forwardRef(({
 
     // 处理列可见性 Popover 的重置
     const handleColumnVisibilityReset = useCallback(() => {
-        debugger
         // 获取所有强制显示的列和默认可见的列
         const resetKeys = columns
             .filter(col => col.visibleColumn === 0 || col.visibleColumn === 2)

@@ -3,7 +3,6 @@ import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, noti
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules, renderFormItem } from './FormFields';
-import StructureList from '@/components/StructureList/StructureList';
 import CommonList from './CommonList';
 import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
@@ -548,6 +547,7 @@ const CollapseForm = ({
                     onCopyItem: handleCopyItem,
                     onReplaceItem,
                     onUpdateItem,
+                    commonListConfig,
                     onSortItems,
                     onSelectedItemProcessed,
                 })}

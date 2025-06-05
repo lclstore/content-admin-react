@@ -548,8 +548,7 @@ export default function CommonEditor(props) {
             if (itemToCopy) {
                 // 创建一个新的项，包含与原项相同的属性但具有新的ID
                 const newItem = {
-                    ...itemToCopy,
-                    id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                    ...itemToCopy
                 };
                 return {
                     ...field,
@@ -629,31 +628,51 @@ export default function CommonEditor(props) {
     };
     // 处理替换项的回调函数
     const handleReplaceItem = (panelName, itemId, newItemId, newItem, itemIndex) => {
-        //折叠面板
-        const updatedFields = internalFormFields.map(panel => {
-            if (panel.name !== panelName) return panel;
-            // 如果提供了索引参数，则使用索引定位具体项目
-            if (itemIndex !== undefined) {
-                const updatedItems = [...panel.dataList];
-                // 确保索引有效
-                if (itemIndex >= 0 && itemIndex < updatedItems.length) {
-                    updatedItems[itemIndex] = { ...newItem, id: newItemId };
+        // 递归处理字段的辅助函数
+        const findAndReplaceItem = (field) => {
+            // 如果当前字段有dataList,检查并替换项
+            if (field.dataList !== undefined && Array.isArray(field.dataList)) {
+                // 如果提供了索引参数,则使用索引定位具体项目
+                if (itemIndex !== undefined) {
+                    const updatedItems = [...field.dataList];
+                    // 确保索引有效
+                    if (itemIndex >= 0 && itemIndex < updatedItems.length) {
+                        updatedItems[itemIndex] = { ...newItem, id: newItemId };
+                    }
+                    return {
+                        ...field,
+                        dataList: updatedItems,
+                    };
+                } else {
+                    // 如果没有提供索引,则使用ID匹配进行替换
+                    const updatedItems = field.dataList.map(item =>
+                        item.id === itemId ? { ...newItem, id: newItemId } : item
+                    );
+                    return {
+                        ...field,
+                        dataList: updatedItems,
+                    };
                 }
+            }
+
+            // 如果当前字段有子字段,递归处理
+            if (field.fields) {
                 return {
-                    ...panel,
-                    dataList: updatedItems,
-                };
-            } else {
-                // 向后兼容：如果没有提供索引，则使用ID匹配（可能替换多个）
-                const updatedItems = panel.dataList.map(item =>
-                    item.id === itemId ? { ...newItem, id: newItemId } : item
-                );
-                return {
-                    ...panel,
-                    dataList: updatedItems,
+                    ...field,
+                    fields: field.fields.map(subField => findAndReplaceItem(subField))
                 };
             }
+
+            // 如果既没有dataList也没有子字段,返回原字段
+            return field;
+        };
+
+        // 使用递归函数处理所有字段
+        const updatedFields = internalFormFields.map(field => {
+            return findAndReplaceItem(field);
+            return field;
         });
+
         console.log('updatedFields', updatedFields);
 
         // 更新内部状态
@@ -664,7 +683,7 @@ export default function CommonEditor(props) {
             onFormFieldsChange(updatedFields);
         }
 
-        // 如果父组件提供了onReplaceItem，也调用它（向后兼容）
+        // 如果父组件提供了onReplaceItem,也调用它（向后兼容）
         if (collapseFormConfig.onReplaceItem) {
             collapseFormConfig.onReplaceItem(panelName, itemId, newItemId, newItem, itemIndex);
         }

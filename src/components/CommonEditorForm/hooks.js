@@ -254,7 +254,6 @@ export const useHeaderConfig = (params) => {
     const executeSave = async (dataToSave, status = null) => {
 
         setLoading(true);
-        debugger
         // 处理数组列表相关数据格式和验证
         if (saveBeforeTransform) {
             dataToSave = saveBeforeTransform({

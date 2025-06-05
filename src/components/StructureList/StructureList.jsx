@@ -613,7 +613,7 @@ const StructureList = ({
             )}
             {/* 替换弹框 */}
             <Modal
-                title={commonListConfig?.title || 'Replace Item'}
+                title={'Replace Item'}
                 open={replaceModalVisible}
                 onCancel={() => setReplaceModalVisible(false)}
                 okText="Confirm Replace"

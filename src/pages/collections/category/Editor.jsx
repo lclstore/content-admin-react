@@ -122,7 +122,7 @@ export default function UserEditorWithCommon() {
             fields: [
                 {
                     type: 'structureList',
-                    name: 'musicIdList',
+                    name: 'workoutList',
                     // renderItemMata: renderItemMata,
                     label: 'Musics',
                     isCollapse: true,
@@ -152,7 +152,27 @@ export default function UserEditorWithCommon() {
         setFormFields(updatedFields);
     };
 
+    const saveBeforeTransform = (info) => {
+        const { formFields, formValues } = info;
 
+        // 递归处理表单字段的函数
+        const processFields = (fields) => {
+            fields.forEach(field => {
+                // 处理结构化列表类型
+                if (field.type === 'structureList') {
+                    formValues[field.name] = field.dataList.map(item => item.id);
+                }
+                // 如果字段包含子字段，递归处理
+                if (field.fields && Array.isArray(field.fields)) {
+                    processFields(field.fields);
+                }
+            });
+        };
+
+        // 开始递归处理所有字段
+        processFields(formFields);
+        return formValues;
+    }
 
     // 自定义渲染列表项展示
     const renderItemMata = (item) => {
@@ -186,6 +206,7 @@ export default function UserEditorWithCommon() {
             moduleKey='category'
             isCollapse={true}
             formType="advanced"
+            saveBeforeTransform={saveBeforeTransform}
             enableDraft={true}
             config={{ formName: 'Workouts', title: 'Collections' }}
             initialValues={initialValues}

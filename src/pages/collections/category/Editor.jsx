@@ -73,15 +73,7 @@ export default function UserEditorWithCommon() {
                     name: 'showTypeCode',
                     label: 'Show Type',
                     required: true,
-                    options: [
-                        {
-                            label: 'Horizontal',
-                            value: 'HORIZONTAL'
-                        }, {
-                            label: 'Card',
-                            value: 'CARD'
-                        }
-                    ],
+                    options: 'BizCategoryShowTypeEnums',
                 },
                 {
                     type: 'displayImage',
@@ -194,7 +186,6 @@ export default function UserEditorWithCommon() {
             isCollapse={true}
             formType="advanced"
             enableDraft={true}
-            fieldsToValidate={['name', 'birthday']}
             config={{ formName: 'Workouts', title: 'Collections' }}
             initialValues={initialValues}
         />

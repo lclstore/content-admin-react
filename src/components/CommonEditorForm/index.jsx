@@ -1025,10 +1025,10 @@ export default function CommonEditor(props) {
 
         // 使用内部状态的选中项，优先于从配置传入的选中项
         // 这允许组件独立管理选中项状态
-        const effectiveSelectedItem = selectedItemFromList !== null
+        const effectiveSelectedItem = selectedItemFromList !== undefined
             ? selectedItemFromList
             : (externalSelectedItem !== undefined ? externalSelectedItem : null);
-
+        console.log('-----');
         return (
             <div className={`${styles.advancedFormContent} ${commonListConfig ? '' : styles.collapseFormContent}`}>
                 {/* 渲染左侧列表 */}

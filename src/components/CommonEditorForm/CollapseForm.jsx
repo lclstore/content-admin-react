@@ -376,20 +376,34 @@ const CollapseForm = ({
             console.log('拖拽没有改变位置或不满足条件', { active, over });
         }
     }
+    // 收集具有 dataList 属性的面板
+    const findFirstDataListItemAndParent = (fields, parent = null) => {
+        for (const item of fields) {
+            if (item.dataList) {
+                return {
+                    dataListItem: item,
+                    parentItem: parent,
+                };
+            }
+
+            if (Array.isArray(item.fields)) {
+                const result = findFirstDataListItemAndParent(item.fields, item);
+                if (result) return result;
+            }
+        }
+
+        return null;
+    };
+
 
     // 接收左侧列表添加item数据
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
             // 查找所有具有 isListData 属性的面板
-            const listDataPanels = fields.filter(item => item.dataList);
-
-            if (listDataPanels.length > 0) {
-                // 查找当前展开的、带有 isListData 属性的面板
-                const currentOpenListDataPanel = listDataPanels.find(item => item.name == activeKeys[0]);
-                // 如果有展开的 isListData 面板，使用它；否则使用第一个 isListData 面板
-                const targetPanel = currentOpenListDataPanel || listDataPanels[0];
-
+            const { dataListItem, parentItem } = findFirstDataListItemAndParent(fields);
+            if (dataListItem) {
+                const targetPanel = parentItem || dataListItem || activeKeys[0];
                 // 如果目标面板未展开，则展开它
                 if (!activeKeys.includes(targetPanel.name)) {
                     // 展开目标面板

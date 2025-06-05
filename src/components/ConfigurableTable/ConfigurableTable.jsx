@@ -123,6 +123,7 @@ function ConfigurableTable({
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
     const [tableData, setTableData] = useState(dataSource);
     const [items, setItems] = useState(dataSource);
+    const [totalCount, setTotalCount] = useState(dataSource?.length || 0); // 使用dataSource的长度初始化
     const dataRef = useRef({ tableData, items });
     // 声明内部 loading，也可以接受外部传入
     const [loadingLocal, setLoadingLocal] = useState(loading)
@@ -479,6 +480,14 @@ function ConfigurableTable({
         }
     }, [dataSource]);
 
+    // 监听数据源变化，更新totalCount
+    useEffect(() => {
+        if (dataSource?.length > 0) {
+            setTotalCount(dataSource.length);
+            paginationParams.current.totalCount = dataSource.length;
+        }
+    }, [dataSource]);
+
     // 查询表格数据
     const searchTableData = useCallback(async (isFirstSearch) => {
         const fetchTableData = getTableList || getPublicTableList;
@@ -519,12 +528,14 @@ function ConfigurableTable({
                 setTableData(newData);
                 setItems(newData);
                 paginationParams.current.totalCount = res.totalCount;
+                setTotalCount(res.data.length);
 
                 if (isFirstSearch) {
                     setIsEmptyTableData(newData.length === 0);
                 }
             } else {
                 paginationParams.current.totalCount = 0;
+                setTotalCount(0);
                 setIsEmptyTableData(true);
                 setTableData([]);
                 setItems([]);
@@ -1084,6 +1095,14 @@ function ConfigurableTable({
                     </DndContext>
                 ) : (
                     tableContent
+                )}
+
+                {/* 当不显示分页时显示总条数 */}
+                {console.log('totalCount:', totalCount, 'showPagination:', showPagination)}
+                {!showPagination && (
+                    <div className={styles.totalCountDisplay} style={{ padding: '16px 0', textAlign: 'right' }}>
+                        {totalCount || 0} items
+                    </div>
                 )}
 
                 {/* 删除确认对话框 */}

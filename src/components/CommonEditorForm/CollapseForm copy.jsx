@@ -3,7 +3,7 @@ import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, noti
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules, renderFormItem } from './FormFields';
-import StructureList from '@/components/StructureList/StructureList';
+import StructureList from '/StructureList/StructureList';
 import CommonList from './CommonList';
 import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
@@ -640,19 +640,42 @@ const CollapseForm = ({
                                     {renderFieldGroup(item.fields || [])}
 
                                     {/* 如果有数据列表，则渲染可排序项目 */}
-                                    <StructureList
-                                        form={form}
-                                        onItemAdded={onItemAdded}
-                                        onReplaceItem={onReplaceItem}
-                                        onDeleteItem={onDeleteItem}
-                                        onCopyItem={onCopyItem}
-                                        onUpdateItem={onUpdateItem}
-                                        onSortItems={onSortItems}
-                                        onSelectedItemProcessed={onSelectedItemProcessed}
-                                        commonListConfig={commonListConfig}
-                                        selectedItemFromList={selectedItemFromList}
-                                        {...item}
-                                    />
+                                    {Array.isArray(item.dataList) && item.dataList.length > 0 && (
+                                        <DndContext
+                                            sensors={sensors}
+                                            collisionDetection={closestCenter}
+                                            onDragEnd={(event) => handleDragEnd(event, item.name)}
+                                        >
+                                            {/* 拖拽排序上下文 */}
+                                            <SortableContext
+                                                items={item.dataList.map((_, index) => `${item.name}-item-${index}`)} // 使用索引作为ID
+                                                strategy={verticalListSortingStrategy}
+                                            >
+                                                <div className='structure-list' style={{
+                                                    position: 'relative',
+                                                    padding: '2px 0'
+                                                }}>
+                                                    {item.dataList.map((listItem, index) => (
+                                                        <SortableItemRenderer
+                                                            key={index}
+                                                            renderItemMata={renderItemMata}
+                                                            panelId={item.name}
+                                                            item={listItem}
+                                                            itemIndex={index}
+                                                            isExpanded={expandedItems[item.name] === listItem.id}
+                                                            toggleExpandItem={toggleExpandItem}
+                                                            onOpenReplaceModal={handleOpenReplaceModal}
+                                                            onCopyItem={handleCopyItem}
+                                                            onDeleteItem={handleDeleteItem}
+                                                            onItemChange={(panelId, itemId, key, value) => {
+                                                                // 处理项目属性变更的逻辑
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </SortableContext>
+                                        </DndContext>
+                                    )}
                                 </div>
                             )
                         }]}

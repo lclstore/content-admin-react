@@ -542,7 +542,6 @@ const StructureList = ({
     useEffect(() => {
 
         if (selectedItemFromList && typeof onItemAdded === 'function') {
-            debugger
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态
             if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {

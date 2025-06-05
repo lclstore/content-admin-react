@@ -237,7 +237,6 @@ const CollapseForm = ({
     onCopyItem,
     onReplaceItem,
 }) => {
-    // debugger
     const newField = fields.find(item => item.isShowAdd);
     // 表单连接状态
     const formConnected = !!form;
@@ -640,19 +639,26 @@ const CollapseForm = ({
                                     {renderFieldGroup(item.fields || [])}
 
                                     {/* 如果有数据列表，则渲染可排序项目 */}
-                                    <StructureList
-                                        form={form}
-                                        onItemAdded={onItemAdded}
-                                        onReplaceItem={onReplaceItem}
-                                        onDeleteItem={onDeleteItem}
-                                        onCopyItem={onCopyItem}
-                                        onUpdateItem={onUpdateItem}
-                                        onSortItems={onSortItems}
-                                        onSelectedItemProcessed={onSelectedItemProcessed}
-                                        commonListConfig={commonListConfig}
-                                        selectedItemFromList={selectedItemFromList}
-                                        {...item}
-                                    />
+                                    {
+                                        item.dataList && <div className='structureList-title'>{`${item.dataList?.length || 0} ${item.label}`}</div>
+                                    }
+                                    {
+
+                                        item.dataList &&
+                                        <StructureList
+                                            form={form}
+                                            onItemAdded={onItemAdded}
+                                            onReplaceItem={onReplaceItem}
+                                            onDeleteItem={onDeleteItem}
+                                            onCopyItem={onCopyItem}
+                                            onUpdateItem={onUpdateItem}
+                                            onSortItems={onSortItems}
+                                            onSelectedItemProcessed={onSelectedItemProcessed}
+                                            commonListConfig={commonListConfig}
+                                            selectedItemFromList={selectedItemFromList}
+                                            {...item}
+                                        />
+                                    }
                                 </div>
                             )
                         }]}

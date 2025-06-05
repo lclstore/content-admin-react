@@ -400,10 +400,11 @@ export const renderFormControl = (field, options = {}) => {
 
                 return () => clearInterval(timer);
             }, []);
-            console.log('field', field);
             return (
                 <div>
-                    <div className='structureList-title'>{`${field.dataList.length} ${field?.label}`}</div>
+                    {
+                        field.type === 'structureList' && field.dataList && <div className='structureList-title'>{`${field.dataList?.length || 0} ${field.label}`}</div>
+                    }
                     <StructureList
                         form={form}
                         onItemAdded={options.onItemAdded}

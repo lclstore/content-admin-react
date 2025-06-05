@@ -117,8 +117,8 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            label: 'Workout',
-            name: 'workoutData',
+            label: 'Workouts',
+            name: 'Workout',
             fields: [
                 {
                     type: 'structureList',

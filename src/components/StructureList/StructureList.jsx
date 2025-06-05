@@ -254,11 +254,12 @@ const SortableItemRenderer = React.memo(({
                         )}
                         <Button
                             type="text"
-                            style={{ fontSize: '15px', color: '#1c8' }}
+                            style={{ fontSize: '15px', color: '#1c8', cursor: 'grab' }}
                             icon={<MenuOutlined />}
                             className="sort-handle"
-                            onClick={e => e.stopPropagation()}
-                            title="Sort"
+                            {...listeners}
+                            {...attributes}
+                            title="拖拽排序"
                         />
                     </Space>
                 </Col>
@@ -323,6 +324,8 @@ const StructureList = ({
     onItemAdded,
     name,
     form,
+    label,
+    type,
     selectedItemFromList,
     onSelectedItemProcessed,
     onSortItems,
@@ -330,7 +333,6 @@ const StructureList = ({
     onUpdateItem
 }) => {
     console.log('parentForm:', form.getFieldsValue());
-
     // 替换弹框状态
     const [replaceModalVisible, setReplaceModalVisible] = useState(false);
     // 当前选中的panel和item id
@@ -540,7 +542,6 @@ const StructureList = ({
     }, [tempSelectedItem, currentReplaceItem.itemId]);
 
     useEffect(() => {
-
         if (selectedItemFromList && typeof onItemAdded === 'function') {
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态
@@ -561,54 +562,54 @@ const StructureList = ({
         onItemChange && onItemChange(updatedDataList);
     }, [dataList, onItemChange]);
 
-    console.log('StructureList 渲染：', {
-        expandedItemId,
-        structureListFields,
-        dataList
-    });
 
-    if (!Array.isArray(dataList) || dataList.length === 0) return null;
     return (
         <>
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={(event) => handleDragEnd(event, panelName)}
-            >
-                <SortableContext
-                    items={dataList.map((item, index) => `${panelName}-item-${index}`)}
-                    strategy={verticalListSortingStrategy}
-                >
-                    <div className="structure-list" style={{ position: 'relative', padding: '2px 0' }}>
-                        {dataList.map((item, index) => (
-                            <SortableItemRenderer
-                                key={`${panelName}-item-${index}`}
-                                panelId={name}
-                                item={item}
-                                itemIndex={index}
-                                isExpanded={expandedItemId === item.id}
-                                toggleExpandItem={handleToggleExpandItem}
-                                onOpenReplaceModal={handleOpenReplaceModal}
-                                onCopyItem={handleCopyItem}
-                                onDeleteItem={handleDeleteItem}
-                                renderItemMeta={renderItemMeta}
-                                onItemChange={handleItemChange}
-                                onSortItems={onSortItems}
-                                currentPlayingItem={currentPlayingItem}
-                                isPlaying={isPlaying}
-                                onAudioClick={handleAudioClick}
-                                structureListFields={structureListFields}
-                                dataItem={item}
-                                onUpdateItem={onUpdateItem}
-                                name={name}
-                                parentForm={form}
-                                dataList={dataList}
-                            />
-                        ))}
-                    </div>
-                </SortableContext>
-            </DndContext>
+            {Array.isArray(dataList) && (
+                <>
 
+                    {dataList.length > 0 && (
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={(event) => handleDragEnd(event, name)}
+                        >
+                            <SortableContext
+                                items={dataList.map((item, index) => `${name}-item-${index}`)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="structure-list" style={{ position: 'relative', padding: '2px 0' }}>
+                                    {dataList.map((item, index) => (
+                                        <SortableItemRenderer
+                                            key={`${name}-item-${index}`}
+                                            panelId={name}
+                                            item={item}
+                                            itemIndex={index}
+                                            isExpanded={expandedItemId === item.id}
+                                            toggleExpandItem={handleToggleExpandItem}
+                                            onOpenReplaceModal={handleOpenReplaceModal}
+                                            onCopyItem={handleCopyItem}
+                                            onDeleteItem={handleDeleteItem}
+                                            renderItemMeta={renderItemMeta}
+                                            onItemChange={handleItemChange}
+                                            onSortItems={onSortItems}
+                                            currentPlayingItem={currentPlayingItem}
+                                            isPlaying={isPlaying}
+                                            onAudioClick={handleAudioClick}
+                                            structureListFields={structureListFields}
+                                            dataItem={item}
+                                            onUpdateItem={onUpdateItem}
+                                            name={name}
+                                            parentForm={form}
+                                            dataList={dataList}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
+                    )}
+                </>
+            )}
             {/* 替换弹框 */}
             <Modal
                 title={commonListConfig?.title || 'Replace Item'}

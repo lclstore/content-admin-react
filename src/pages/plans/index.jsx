@@ -8,7 +8,7 @@ import {Outlet, useNavigate,useLocation} from "react-router";
 const tabItems = [
     {
         key: 'template/list',
-        label: 'Template',
+        label: 'Templates',
     },
     {
         key: 'resources/list',

@@ -434,7 +434,7 @@ const CollapseForm = ({
             if (item.dataList) {
                 return {
                     dataListItem: item,
-                    parentItem: parent,
+                    parentItem: parent || item,
                 };
             }
 
@@ -456,6 +456,7 @@ const CollapseForm = ({
             const { dataListItem, parentItem } = findFirstDataListItemAndParent(fields);
             if (dataListItem) {
                 const targetPanel = dataListItem || dataListItem || activeKeys[0];
+                debugger
                 // 如果目标面板未展开，则展开它
                 if (!activeKeys.includes(parentItem.name)) {
                     // 展开目标面板

@@ -29,12 +29,11 @@ export default function UserEditorWithCommon() {
         },
 
     ];
-    // 初始用户数据状态--可设默认值
-    const initialValues = {
+    const defaultInitialValues = {
         newStartTime: formatDate(new Date(), 'YYYY-MM-DDTHH:mm:ss'),
         newEndTime: formatDate(new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), 'YYYY-MM-DDTHH:mm:ss'),//往后14天
     }
-
+    const [initialValues, setInitialValues] = useState(defaultInitialValues)
 
     const imageUpload = (value, file, form) => {
         const formValues = form.getFieldsValue(true);
@@ -150,7 +149,7 @@ export default function UserEditorWithCommon() {
                     name: 'equipmentCode',
                     label: 'Equipment',
                     required: true,
-                    options: 'BizExerciseEquipmentEnums',
+                    options: 'BizProgramEquipmentEnums',
                 }
             ]
         },
@@ -165,7 +164,7 @@ export default function UserEditorWithCommon() {
                     label: 'Musics',
                     isCollapse: true,
                     formterList: (dataList, formValues) => {
-                        return dataList.map(item => {
+                        return dataList?.map(item => {
                             return {
                                 bizMusicId: item.id,
                                 displayName: item.name,
@@ -174,9 +173,6 @@ export default function UserEditorWithCommon() {
                         });
                     },
                     dataList: [],
-                    rules: [
-                        { required: true, message: 'Please add at least one music' },
-                    ]
                 },
             ]
         }
@@ -186,8 +182,11 @@ export default function UserEditorWithCommon() {
     const [formFields, setFormFields] = useState(initialFormFields);
 
     // 处理formFields变更的回调
-    const handleFormFieldsChange = (updatedFields) => {
+    const handleFormFieldsChange = (updatedFields, formValues) => {
         setFormFields(updatedFields);
+        if (defaultInitialValues !== initialValues) {
+            setInitialValues(formValues);
+        }
     };
 
     const saveBeforeTransform = (info) => {

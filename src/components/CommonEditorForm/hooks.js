@@ -186,7 +186,7 @@ export const useHeaderConfig = (params) => {
             // 处理日期范围字段（有 keys 时分拆，无 keys 时格式化原字段）
             if (field.type === 'dateRange') {
                 const date = form.getFieldValue(field.name);
-                const format = field.props?.format || 'YYYY-MM-DD';
+                const format = field.props?.format || 'YYYY-MM-DDTHH:mm:ss';
 
                 if (date && date.length === 2 && typeof date[0]?.format === 'function') {
                     if (field.keys && Array.isArray(field.keys)) {

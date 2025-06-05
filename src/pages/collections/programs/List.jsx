@@ -37,12 +37,13 @@ export default () => {
             },
             {
                 title: 'Cover Image',
-                dataIndex: 'imageCoverUrl',
+                dataIndex: 'coverImgUrl',
                 mediaType: 'image',
+                showNewBadge: true,
             },
             {
                 title: 'Detail Image',
-                dataIndex: 'imageCoverUrl',
+                dataIndex: 'detailImgUrl',
                 mediaType: 'image',
             },
             {
@@ -56,7 +57,6 @@ export default () => {
                 key: 'status',
                 iconOptions: statusIconMap,
                 options: 'displayStatus',
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -64,20 +64,6 @@ export default () => {
                 dataIndex: 'showTypeCode',
                 sorter: true,
                 options: 'BizCategoryShowTypeEnums',
-                visibleColumn: 0
-            },
-            {
-                title: 'New Start Time',
-                dataIndex: 'newStartTime',
-                sorter: true,
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'New End Time',
-                dataIndex: 'newEndTime',
-                sorter: true,
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -120,101 +106,7 @@ export default () => {
 
 
 
-    // 定义展开行渲染函数
-    const expandedRowRender = (record) => {
-        const data = [{
-            "coverImgUrl": "",
-            "detailImgUrl": "",
-            "id": 2,
-            "name": "ccc3",
-            "newEndTime": null,
-            "newStartTime": null,
-            "showTypeCode": "HORIZONTAL",
-            "status": "DRAFT"
-        },
-        {
-            "coverImgUrl": "",
-            "detailImgUrl": "",
-            "id": 2,
-            "name": "ccc3",
-            "newEndTime": null,
-            "newStartTime": null,
-            "showTypeCode": "HORIZONTAL",
-            "status": "DRAFT"
-        },
-        {
-            "coverImgUrl": "",
-            "detailImgUrl": "",
-            "id": 2,
-            "name": "ccc3",
-            "newEndTime": null,
-            "newStartTime": null,
-            "showTypeCode": "HORIZONTAL",
-            "status": "DRAFT"
-        }, {
-            "coverImgUrl": "",
-            "detailImgUrl": "",
-            "id": 2,
-            "name": "ccc3",
-            "newEndTime": null,
-            "newStartTime": null,
-            "showTypeCode": "HORIZONTAL",
-            "status": "DRAFT"
-        }
-        ];
 
-        // 定义展开行表格的列配置
-        const columns = [
-            {
-                title: 'ID',
-                dataIndex: 'id',
-                key: 'id',
-                width: 80
-            },
-            {
-                title: 'Name',
-                dataIndex: 'name',
-                key: 'name',
-                width: 200
-            },
-            {
-                title: 'Show Type',
-                dataIndex: 'showTypeCode',
-                key: 'showTypeCode',
-                width: 120
-            },
-            {
-                title: 'Status',
-                dataIndex: 'status',
-                key: 'status',
-                width: 100
-            },
-            {
-                title: 'New Start Time',
-                dataIndex: 'newStartTime',
-                key: 'newStartTime',
-                width: 160
-            },
-            {
-                title: 'New End Time',
-                dataIndex: 'newEndTime',
-                key: 'newEndTime',
-                width: 160,
-            }
-        ];
-
-        return (
-            <Table
-
-                columns={columns}
-                dataSource={data}
-                pagination={false}
-                rowKey="id"
-                size="small"
-                bordered={false}
-            />
-        );
-    };
     // 渲染 - 组件UI呈现
     return (
         <div className="usersContainer">
@@ -227,8 +119,6 @@ export default () => {
                 operationName={'list'}
                 showPagination={false}
                 draggable={true}
-                // expandable={true}
-                // expandedRowRender={expandedRowRender}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}
             />

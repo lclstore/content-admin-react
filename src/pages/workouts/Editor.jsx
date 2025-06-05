@@ -61,6 +61,9 @@ export default function UserEditorWithCommon() {
     // 初始用户数据状态--可设默认值
     const defaultInitialValues = {
         premium: 0,
+        genderCode: 'MALE',
+        difficultyCode: 'BEGINNER',
+        positionCode: 'SEATED',
         newStartTime: formatDate(new Date(), 'YYYY-MM-DDTHH:mm:ss'),
         newEndTime: formatDate(new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), 'YYYY-MM-DDTHH:mm:ss'),//往后14天
     }
@@ -71,10 +74,10 @@ export default function UserEditorWithCommon() {
     const imageUpload = (value, file, form) => {
         const formValues = form.getFieldsValue();
         form.setFieldsValue({
-            coverImage: formValues.coverImage || value,
-            detailImage: formValues.detailImage || value,
-            thumbnailImage: formValues.thumbnailImage || value,
-            completeImage: formValues.completeImage || value,
+            coverImgUrl: formValues.coverImgUrl || value,
+            detailImgUrl: formValues.detailImgUrl || value,
+            thumbnailImgUrl: formValues.thumbnailImgUrl || value,
+            completeImgUrl: formValues.completeImgUrl || value,
         });
     }
 
@@ -153,28 +156,28 @@ export default function UserEditorWithCommon() {
             fields: [
                 {
                     type: 'upload',
-                    name: 'coverImage',
+                    name: 'coverImgUrl',
                     label: 'Cover Image',
                     required: true,
                     onChange: imageUpload
                 },
                 {
                     type: 'upload',
-                    name: 'detailImage',
+                    name: 'detailImgUrl',
                     label: 'Detail Image',
                     required: true,
                     onChange: imageUpload
                 },
                 {
                     type: 'upload',
-                    name: 'thumbnailImage',
+                    name: 'thumbnailImgUrl',
                     label: 'Thumbnail Image',
                     required: true,
                     onChange: imageUpload
                 },
                 {
                     type: 'upload',
-                    name: 'completeImage',
+                    name: 'completeImgUrl',
                     label: 'Complete Image',
                     required: true,
                     onChange: imageUpload
@@ -189,52 +192,32 @@ export default function UserEditorWithCommon() {
             fields: [
                 {
                     type: 'select',
-                    name: 'gender',
+                    name: 'genderCode',
                     label: 'Gender',
                     required: true,
-                    options: [
-                        { label: 'Female', value: 1 },
-                        { label: 'Male', value: 2 },
-                    ],
+                    options: 'BizExerciseGenderEnums'
                 },
                 {
                     type: 'select',
-                    name: 'difficulty',
+                    name: 'difficultyCode',
                     label: 'Difficulty',
                     required: true,
-                    options: [
-                        { label: 'Beginner', value: 1 },
-                        { label: 'Intermediate', value: 2 },
-                        { label: 'Advanced', value: 3 }
-                    ],
+                    options: 'BizExerciseDifficultyEnums'
                 },
                 {
                     type: 'select',
-                    name: 'position',
+                    name: 'positionCode',
                     label: 'Position',
                     required: true,
-                    options: [
-                        { label: 'Standing', value: 1 },
-                        { label: 'Lying', value: 2 },
-                        { label: 'Seated', value: 3 },
-                        { label: 'Prone', value: 4 },
-                        { label: 'Kneeling', value: 5 }
-                    ]
+                    options: 'BizExercisePositionEnums'
                 },
                 {
                     type: 'select',
-                    name: 'injured',
+                    name: 'injuredCode',
                     label: 'Injured',
                     mode: 'multiple',
                     required: true,
-                    options: [
-                        { label: 'Shoulder', value: 1 },
-                        { label: 'Back', value: 2 },
-                        { label: 'Wrist', value: 3 },
-                        { label: 'Knee', value: 4 },
-                        { label: 'Ankle', value: 5 },
-                        { label: 'Hip', value: 6 }
-                    ],
+                    options: 'BizExerciseInjuredEnums'
                 },
             ]
         },
@@ -371,11 +354,13 @@ export default function UserEditorWithCommon() {
                 filterSections: filterSections,
                 title: 'Exercises',
             }}
+            moduleKey='workout'
             isCollapse={true}
             initFormData={initFormData}
             formType="advanced"
+            enableDraft={true}
             fieldsToValidate={['name', 'birthday']}
-            config={{ formName: 'Workouts', title: 'Workout details' }}
+            config={{ formName: 'Workout', title: 'Workout details' }}
             initialValues={initialValues}
 
         />

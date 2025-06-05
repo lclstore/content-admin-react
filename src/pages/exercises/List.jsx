@@ -435,7 +435,7 @@ export default () => {
                                     modal.success({
                                         content: (<>
                                             <div>Export Success</div>
-                                            <Button style={{ margin: '5px 0' }} onClick={() => window.open("https://google.com")}>View</Button>
+                                            <Button style={{ margin: '5px 0' }} onClick={() => window.open(res.data.data)}>View</Button>
                                         </>),
                                         className: "modal-default"
                                     })

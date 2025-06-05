@@ -41,6 +41,7 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {deepClone} from "@/utils/index.js";
 
 /**
  * 可配置表格组件
@@ -103,21 +104,21 @@ const ConfigurableTable = forwardRef(({
     expandedRowRender, // 修改为直接接收展开行渲染函数
 },ref) => {
     const optionsBase = useStore(i => i.optionsBase)
-    const pathSegments = useLocation().pathname.split('/').filter(Boolean);
+    const navigate = useNavigate(); // 路由导航
+    const location = useLocation();
+    const pathSegments = location.pathname.split('/').filter(Boolean);
     const routeLevel = pathSegments.length;
-    let pathUrl = useLocation().pathname.split('/')[1];
+    let pathUrl = location.pathname.split('/')[1];
     moduleKey = moduleKey || pathSegments[1];
     if (routeLevel == 3) {
         pathUrl = `${pathSegments[0]}/${pathSegments[1]}`;
     }
-    const pathname = useLocation().pathname.split('/')[1];
+    const pathname = location.pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${moduleKey}`;
-    let paginationParams = useRef({
-        ...paginationConfig,
-    })
     const [messageApi, contextHolder] = message.useMessage();
-    const navigate = useNavigate(); // 路由导航
+    // paginationConfig load cache
+    paginationConfig = localStorage.getItem(location.pathname) || paginationConfig
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
@@ -132,9 +133,15 @@ const ConfigurableTable = forwardRef(({
     // 用于取消请求的控制器
     const abortControllerRef = useRef(null);
 
+    // load cache
+    const searchData = localStorage.getItem(location.pathname)
+    let loadCache = searchData?JSON.parse(searchData):null
     //   ref
     const tableRef = useRef(null) // 表格组件的ref
-    let activeFilters = useRef(filterConfig?.activeFilters || {}) //当前选中的筛选器
+    const activeFilters = useRef(loadCache?loadCache.activeFilters:(filterConfig?.activeFilters || {})) //当前选中的筛选器
+    const paginationParams = useRef(loadCache?loadCache.paginationParams:{
+        ...paginationConfig,
+    })
     // filter data
     const filterDataHook = useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
@@ -237,7 +244,6 @@ const ConfigurableTable = forwardRef(({
             options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
-    console.log('columnSettingsSection',columnSettingsSection);
 
     // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {
@@ -283,7 +289,6 @@ const ConfigurableTable = forwardRef(({
 
     // 处理列可见性 Popover 的重置
     const handleColumnVisibilityReset = useCallback(() => {
-        debugger
         // 获取所有强制显示的列和默认可见的列
         const resetKeys = columns
             .filter(col => col.visibleColumn === 0 || col.visibleColumn === 2)
@@ -507,11 +512,17 @@ const ConfigurableTable = forwardRef(({
 
         // 创建新的 AbortController
         abortControllerRef.current = new AbortController();
-
+        const searchData = deepClone({
+            ...paginationParams.current,
+            ...activeFilters.current,
+            orderBy: paginationParams.current.orderBy || 'id',
+            orderDirection: paginationParams.current.orderDirection || 'DESC',
+        })
+        // 对searchData进行缓存
+        localStorage.setItem(location.pathname,  JSON.stringify({paginationParams:paginationParams.current,activeFilters:activeFilters.current}))
         try {
             setLoadingLocal(true);
             let res;
-
             // 修改数据获取逻辑
             if (dataSource && dataSource.length > 0) {
                 res = {
@@ -520,12 +531,7 @@ const ConfigurableTable = forwardRef(({
                     totalCount: dataSource.length
                 };
             } else {
-                res = await fetchTableData(moduleKey, operationName, {
-                    ...paginationParams.current,
-                    ...activeFilters.current,
-                    orderBy: paginationParams.current.orderBy || 'id',
-                    orderDirection: paginationParams.current.orderDirection || 'DESC',
-                }, { signal: abortControllerRef.current.signal });
+                res = await fetchTableData(moduleKey, operationName, searchData, { signal: abortControllerRef.current.signal });
             }
 
             // 请求完成后清除当前的 AbortController
@@ -1038,7 +1044,7 @@ const ConfigurableTable = forwardRef(({
                                 maxLength={100}
                                 showCount
                                 placeholder={searchConfig.placeholder || 'Search...'}
-                                value={paginationParams.keywords}
+                                value={paginationParams.current.keywords}
                                 prefix={<SearchOutlined />}
                                 onChange={onSearchChange}
                                 className="configurable-table-search-input"

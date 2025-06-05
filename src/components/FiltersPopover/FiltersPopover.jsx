@@ -174,7 +174,7 @@ const FiltersPopover = ({
                 <div className={styles.filterFooter}>
                     <Space>
                         {onReset && (
-                            <Button onClick={() => setTempSelectedValues({})} className={styles.footerButton}>
+                            <Button onClick={() => handleReset()} className={styles.footerButton}>
                                 {clearButtonText}
                             </Button>
                         )}

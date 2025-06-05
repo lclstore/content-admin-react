@@ -145,7 +145,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 1 },
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
             {
                 title: 'Cover ImgUrl',
                 width: 120,
@@ -256,18 +256,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
-                options: [
-                    {
-                        label: 'Beginner',
-                        value: 'BEGINNER'
-                    }, {
-                        label: 'Intermediate',
-                        value: 'INTERMEDIATE'
-                    }, {
-                        label: 'Advanced',
-                        value: 'ADVANCED'
-                    }
-                ],
+                options: 'BizExerciseDifficultyEnums',
                 key: 'difficultyCode'
             },
 

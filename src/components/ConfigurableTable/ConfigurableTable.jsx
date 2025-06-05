@@ -283,10 +283,11 @@ function ConfigurableTable({
 
     // 处理列可见性 Popover 的重置
     const handleColumnVisibilityReset = useCallback(() => {
+        debugger
         // 获取所有强制显示的列和默认可见的列
         const resetKeys = columns
             .filter(col => col.visibleColumn === 0 || col.visibleColumn === 2)
-            .map(col => col.key || col.dataIndex);
+        // .map(col => col.key || col.dataIndex);
 
         if (onVisibilityChange) {
             onVisibilityChange(resetKeys);
@@ -299,6 +300,7 @@ function ConfigurableTable({
                 console.error("重置列配置到localStorage失败:", error);
             }
         }
+        return resetKeys
     }, [columns, onVisibilityChange, storageKey]);
 
     // 检查列设置是否有非默认值
@@ -576,7 +578,7 @@ function ConfigurableTable({
     }, [paginationParams])
     const filterReset = useCallback(() => {
         activeFilters.current = {};
-        searchTableData()// 查询 表格数据
+        // searchTableData()// 查询 表格数据
     }, [paginationParams])
 
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker

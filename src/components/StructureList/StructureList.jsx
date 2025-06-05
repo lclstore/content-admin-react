@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { List, Avatar, Space, Row, Col, Typography, Button, Modal, notification } from 'antd';
+import { List, Avatar, Space, Row, Col, Typography, Button, Modal, notification, Form, Input, Select } from 'antd';
 import { MenuOutlined, RetweetOutlined, CopyOutlined, DeleteOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
+import { renderFormControl } from '@/components/CommonEditorForm/FormFields';
 import {
     DndContext,
     closestCenter,
@@ -29,10 +30,17 @@ const SortableItemRenderer = React.memo(({
     renderItemMeta,
     onCopyItem,
     onDeleteItem,
+    onUpdateItem,
     onSortItems,
     currentPlayingItem,
     isPlaying,
-    onAudioClick
+    onAudioClick,
+    structureListFields,
+    dataItem,
+    onItemChange,
+    name,
+    parentForm,
+    dataList,
 }) => {
     const {
         attributes,
@@ -45,10 +53,66 @@ const SortableItemRenderer = React.memo(({
         data: { type: 'item', item, panelId, itemIndex },
     });
 
-    const rowStyle = { transform: CSS.Transform.toString(transform) };
+    // 添加鼠标事件相关状态
+    const [mouseDownPos, setMouseDownPos] = useState(null);
+    const moveThreshold = 5; // 移动阈值，超过这个距离就认为是拖拽
+
+    const handleMouseDown = useCallback((e) => {
+        // 如果点击来自操作按钮，不设置mouseDownPos
+        if (e.target.closest('.structure-item-actions')) {
+            return;
+        }
+        setMouseDownPos({ x: e.clientX, y: e.clientY });
+    }, []);
+
+    const handleMouseUp = useCallback((e) => {
+        // 如果点击来自操作按钮，不处理展开/折叠
+        if (e.target.closest('.structure-item-actions')) {
+            return;
+        }
+        if (mouseDownPos) {
+            const dx = Math.abs(e.clientX - mouseDownPos.x);
+            const dy = Math.abs(e.clientY - mouseDownPos.y);
+
+            // 如果移动距离小于阈值，认为是点击
+            if (dx < moveThreshold && dy < moveThreshold && !isDragging) {
+                toggleExpandItem && toggleExpandItem(item.id);
+            }
+            setMouseDownPos(null);
+        }
+    }, [mouseDownPos, isDragging, toggleExpandItem, item.id]);
+
+    const handleMouseMove = useCallback((e) => {
+        if (mouseDownPos) {
+            const dx = Math.abs(e.clientX - mouseDownPos.x);
+            const dy = Math.abs(e.clientY - mouseDownPos.y);
+
+            // 如果移动距离超过阈值，清除mouseDownPos，避免触发点击
+            if (dx >= moveThreshold || dy >= moveThreshold) {
+                setMouseDownPos(null);
+            }
+        }
+    }, [mouseDownPos]);
+
+    const rowStyle = {
+        transform: CSS.Transform.toString(transform),
+        cursor: 'pointer'
+    };
     const wrapperStyle = { opacity: isDragging ? 0.5 : 1 };
     const wrapperClassName = `structure-list-item item-wrapper${isExpanded ? ' expanded' : ''}`;
-
+    // 获取状态对应的颜色
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'DRAFT':
+                return '#889e9e';
+            case 'ENABLED':
+                return '#52c41a';
+            case 'DISABLED':
+                return '#ff4d4f';
+            default:
+                return '#889e9e';
+        }
+    };
     const defaultRenderItemMeta = useCallback((currentItem) => {
         const statusObj = optionsConstants.statusList.find(status => status.value === currentItem.status);
         const statusName = statusObj ? statusObj.name : '-';
@@ -92,22 +156,50 @@ const SortableItemRenderer = React.memo(({
                         <div>
                             <Text
                                 type="secondary"
-                                style={{ fontSize: '12px' }}
+                                style={{ fontSize: '12px', color: getStatusColor(item.status) }}
                                 ellipsis={{ tooltip: item.status }}
                             >
                                 {optionsConstants.statusList.find(status => status.value === item.status)?.label}
                             </Text>
                         </div>
-                        <div>
-                            <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                                {item.functionType || item.type}
-                            </Text>
-                        </div>
+                        {
+                            (item.functionType || item.type) && <div>
+                                <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
+                                    {item.functionType || item.type}
+                                </Text>
+                            </div>
+                        }
                     </div>
                 }
             />
         );
     }, [currentPlayingItem, isPlaying, onAudioClick]);
+
+    // 创建表单实例
+    const [itemForm] = Form.useForm();
+
+    // 当item变化时，更新表单的值
+    useEffect(() => {
+        if (item && structureListFields) {
+            // 从item中提取structureListFields中定义的字段值
+            const initialValues = {};
+            structureListFields.forEach(field => {
+                initialValues[field.name] = item[field.name];
+            });
+            itemForm.setFieldsValue(initialValues);
+        }
+    }, [item, structureListFields, itemForm]);
+
+    // 修改handleFieldChange函数
+    const handleFieldChange = useCallback((name, value, item) => {
+        const newItem = {
+            ...item,
+            [name]: value
+        }
+
+        onUpdateItem && onUpdateItem("structureList", newItem, value);
+
+    }, [onUpdateItem]);
 
     return (
         <div style={wrapperStyle} className={wrapperClassName}>
@@ -119,7 +211,10 @@ const SortableItemRenderer = React.memo(({
                 wrap={false}
                 align="middle"
                 className="sortable-item-row"
-                onClick={() => toggleExpandItem && toggleExpandItem(panelId, item.id)}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setMouseDownPos(null)}
             >
                 <Col flex="auto">
                     {renderItemMeta ? renderItemMeta(item) : defaultRenderItemMeta(item)}
@@ -159,17 +254,56 @@ const SortableItemRenderer = React.memo(({
                         )}
                         <Button
                             type="text"
-                            style={{ fontSize: '15px', color: '#1c8' }}
+                            style={{ fontSize: '15px', color: '#1c8', cursor: 'grab' }}
                             icon={<MenuOutlined />}
                             className="sort-handle"
-                            onClick={e => e.stopPropagation()}
-                            title="Sort"
+                            {...listeners}
+                            {...attributes}
+                            title="拖拽排序"
                         />
                     </Space>
                 </Col>
-
             </Row>
-            <div>ddd</div>
+            <div className='form-container' style={{ display: isExpanded ? 'block' : 'none' }}>
+                <Form
+                    form={itemForm}
+                    layout="vertical"
+                    onValuesChange={(changedValues, allValues) => {
+                        // 获取改变的字段名
+                        const changedField = Object.keys(changedValues)[0];
+                        // 调用handleFieldChange更新值
+                        handleFieldChange(changedField, changedValues[changedField], item);
+                    }}
+                >
+                    {structureListFields?.map(field => {
+                        // 获取字段的默认值
+                        let fieldDefaultValue = null;
+
+                        fieldDefaultValue = typeof field.setDefaultValue === 'function'
+                            ? field.setDefaultValue(item)
+                            : field.setDefaultValue;
+                        if (item[field.name] === undefined) {
+                            handleFieldChange(field.name, fieldDefaultValue, item);
+                        }
+                        // 渲染表单项
+                        return (
+                            <Form.Item
+                                key={`${item.id}-${field.name}`}
+                                className='editorform-item'
+                                required={field.required}
+                                rules={field.rules}
+                                name={field.name}
+                                label={field.label}
+                            >
+                                {renderFormControl(field, {
+                                    form: parentForm,
+                                    formConnected: true,
+                                })}
+                            </Form.Item>
+                        );
+                    })}
+                </Form>
+            </div>
         </div>
     );
 });
@@ -180,21 +314,26 @@ const StructureList = ({
     dataList,
     sensors,
     renderItemMeta,
-    expandedItemId,
-    toggleExpandItem,
     onOpenReplaceModal: externalOpenReplaceModal,
     onCopyItem: externalCopyItem,
     onDeleteItem: externalDeleteItem,
     commonListConfig = {},
     onReplaceItem,
+
     onItemChange,
     onItemAdded,
     name,
     form,
+    label,
+    type,
+    isCollapse,
     selectedItemFromList,
     onSelectedItemProcessed,
-    onSortItems
+    onSortItems,
+    structureListFields,
+    onUpdateItem
 }) => {
+    console.log('parentForm:', form.getFieldsValue());
     // 替换弹框状态
     const [replaceModalVisible, setReplaceModalVisible] = useState(false);
     // 当前选中的panel和item id
@@ -205,6 +344,9 @@ const StructureList = ({
     });
     // 在替换弹框中临时选中的项
     const [tempSelectedItem, setTempSelectedItem] = useState(null);
+
+    // 添加展开项的状态管理
+    const [expandedItemId, setExpandedItemId] = useState(null);
 
     // 音频播放相关状态和引用
     const audioRef = useRef(null);
@@ -290,19 +432,19 @@ const StructureList = ({
         };
     }, [handleAudioEnded]);
 
-    // 处理展开/折叠项目的函数
-    const handleToggleExpandItem = useCallback((panelId, itemId) => {
-        if (toggleExpandItem) {
-            toggleExpandItem(itemId);
-        }
-    }, [toggleExpandItem]);
+    // 简化展开/折叠处理函数
+    const handleToggleExpandItem = useCallback((itemId) => {
+        console.log('切换展开状态：', { itemId, currentExpanded: expandedItemId });
+        setExpandedItemId(prevId => prevId === itemId ? null : itemId);
+    }, []);
 
     // 处理删除项目
     const handleDeleteItem = useCallback((panelName, itemIndex) => {
         if (externalDeleteItem) {
-            externalDeleteItem(panelName, itemIndex);
+            // 使用传入的 name 作为 panelName
+            externalDeleteItem(name, itemIndex);
         }
-    }, [externalDeleteItem]);
+    }, [externalDeleteItem, name]);
 
     // 处理复制项目
     const handleCopyItem = useCallback((panelName, itemId) => {
@@ -401,7 +543,7 @@ const StructureList = ({
     }, [tempSelectedItem, currentReplaceItem.itemId]);
 
     useEffect(() => {
-        if (selectedItemFromList && typeof onItemAdded === 'function') {
+        if (selectedItemFromList && typeof onItemAdded === 'function' && !isCollapse) {
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态
             if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
@@ -411,41 +553,67 @@ const StructureList = ({
 
     }, [selectedItemFromList]);
 
-    if (!Array.isArray(dataList) || dataList.length === 0) return null;
+    // 处理单个项目的值变更
+    const handleItemChange = useCallback((updatedItem) => {
+        // 更新整个数据列表
+        const updatedDataList = dataList.map(item =>
+            item.id === updatedItem.id ? updatedItem : item
+        );
+        // 通知父组件数据列表已更新
+        onItemChange && onItemChange(updatedDataList);
+    }, [dataList, onItemChange]);
+
+
     return (
         <>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event) => handleDragEnd(event, name)}>
-                <SortableContext
-                    items={dataList.map((_, index) => `${name}-item-${index}`)}
-                    strategy={verticalListSortingStrategy}
-                >
-                    <div className="structure-list" style={{ position: 'relative', padding: '2px 0' }}>
-                        {dataList.map((item, index) => (
-                            <SortableItemRenderer
-                                key={index}
-                                panelId={name}
-                                item={item}
-                                itemIndex={index}
-                                isExpanded={expandedItemId === item.id}
-                                toggleExpandItem={handleToggleExpandItem}
-                                onOpenReplaceModal={handleOpenReplaceModal}
-                                onCopyItem={handleCopyItem}
-                                onDeleteItem={handleDeleteItem}
-                                renderItemMeta={renderItemMeta}
-                                onItemChange={onItemChange}
-                                onSortItems={onSortItems}
-                                currentPlayingItem={currentPlayingItem}
-                                isPlaying={isPlaying}
-                                onAudioClick={handleAudioClick}
-                            />
-                        ))}
-                    </div>
-                </SortableContext>
-            </DndContext>
+            {Array.isArray(dataList) && (
+                <>
 
+                    {dataList.length > 0 && (
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={(event) => handleDragEnd(event, name)}
+                        >
+                            <SortableContext
+                                items={dataList.map((item, index) => `${name}-item-${index}`)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="structure-list" style={{ position: 'relative', padding: '2px 0' }}>
+                                    {dataList.map((item, index) => (
+                                        <SortableItemRenderer
+                                            key={`${name}-item-${index}`}
+                                            panelId={name}
+                                            item={item}
+                                            itemIndex={index}
+                                            isExpanded={expandedItemId === item.id}
+                                            toggleExpandItem={handleToggleExpandItem}
+                                            onOpenReplaceModal={handleOpenReplaceModal}
+                                            onCopyItem={handleCopyItem}
+                                            onDeleteItem={handleDeleteItem}
+                                            renderItemMeta={renderItemMeta}
+                                            onItemChange={handleItemChange}
+                                            onSortItems={onSortItems}
+                                            currentPlayingItem={currentPlayingItem}
+                                            isPlaying={isPlaying}
+                                            onAudioClick={handleAudioClick}
+                                            structureListFields={structureListFields}
+                                            dataItem={item}
+                                            onUpdateItem={onUpdateItem}
+                                            name={name}
+                                            parentForm={form}
+                                            dataList={dataList}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
+                    )}
+                </>
+            )}
             {/* 替换弹框 */}
             <Modal
-                title={commonListConfig?.title || 'Replace Item'}
+                title={'Replace Item'}
                 open={replaceModalVisible}
                 onCancel={() => setReplaceModalVisible(false)}
                 okText="Confirm Replace"

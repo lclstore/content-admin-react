@@ -116,3 +116,15 @@
     border-color: #0faa77;
     color: #0faa77;
 }
+
+.structure-list-item.item-wrapper {
+    padding: 0 10px;
+    border: 1px solid #fff;
+    border-radius: 10px;
+}
+
+.structure-list-item.item-wrapper.expanded {
+    border: 1px solid #1c8;
+    margin-bottom: 10px;
+
+}

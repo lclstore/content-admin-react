@@ -171,6 +171,17 @@ export const useHeaderConfig = (params) => {
                 );
             }
 
+            // 处理 structureList 类型字段
+            if (field.type === 'structureList') {
+                // 如果有 formterList 函数，使用它来转换数据
+                if (field.formterList && typeof field.formterList === 'function') {
+                    const formValues = form.getFieldsValue();
+                    dataToSave[field.name] = field.formterList(field.dataList, formValues);
+                } else {
+                    // 否则直接使用 dataList
+                    dataToSave[field.name] = field.dataList;
+                }
+            }
 
             // 处理日期范围字段（有 keys 时分拆，无 keys 时格式化原字段）
             if (field.type === 'dateRange') {
@@ -201,7 +212,6 @@ export const useHeaderConfig = (params) => {
             if ((field.type === 'date' || field.type === 'datepicker') && value?.format) {
                 dataToSave[field.name] = value.format('YYYY-MM-DD');
             }
-
 
             // 递归处理嵌套字段
             if (Array.isArray(field.fields)) {
@@ -348,7 +358,6 @@ export const useHeaderConfig = (params) => {
                 if (isCollapse) {
                     processFields(currentFormFields, dataToSave);
                 }
-
 
                 const hasStructureListFields = currentFormFields.filter(
                     formField => formField.type === 'structureList'

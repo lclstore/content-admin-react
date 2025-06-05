@@ -268,6 +268,7 @@ export const renderFormControl = (field, options = {}) => {
             return <TagSelector
                 key={selectKey}
                 {...selectRest}
+                defaultValue={field.defaultValue}
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
@@ -399,16 +400,18 @@ export const renderFormControl = (field, options = {}) => {
 
                 return () => clearInterval(timer);
             }, []);
-            console.log('field', field);
             return (
                 <div>
-                    <div className='structureList-title'>{`${field.dataList.length} ${field?.label}`}</div>
+                    {
+                        field.type === 'structureList' && field.dataList && <div className='structureList-title'>{`${field.dataList?.length || 0} ${field.label}`}</div>
+                    }
                     <StructureList
                         form={form}
                         onItemAdded={options.onItemAdded}
                         onReplaceItem={options.onReplaceItem}
                         onDeleteItem={options.onDeleteItem}
                         onCopyItem={options.onCopyItem}
+                        onUpdateItem={options.onUpdateItem}
                         onSortItems={options.onSortItems}
                         onSelectedItemProcessed={options.onSelectedItemProcessed}
                         commonListConfig={options.commonListConfig}
@@ -579,7 +582,7 @@ export const renderFormItem = (field, options = {}) => {
         }
 
         return (
-            field.type == 'line' ?
+            field.type == 'line' || field.type == 'structureList' ?
                 <div>{renderFormControl(field, options)}</div> :
                 <Form.Item
 
@@ -592,7 +595,7 @@ export const renderFormItem = (field, options = {}) => {
                             : label
                     }
                     name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
-                    rules={field.type === 'structureList' ? [] : finalRules}
+                    rules={finalRules}
                     valuePropName={finalValuePropName}
                 >
                     {renderFormControl(field, options)}

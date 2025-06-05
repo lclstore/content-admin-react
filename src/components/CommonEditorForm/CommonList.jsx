@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useStore } from "@/store/index.js";
 import {
     Input,
     Button,
@@ -20,8 +21,8 @@ import {
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import { optionsConstants } from '@/constants/options';
 import { getFileCategoryFromUrl } from '@/utils';
+import noDataImg from '@/assets/images/no-data.png';
 import styles from './CommonList.module.css';
-
 // 创建防抖hook
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -56,6 +57,29 @@ const getStatusColor = (status) => {
             return '#889e9e';
     }
 };
+
+/**
+ * 处理可能为数组的字段展示
+ * @param {string|array} value - 需要处理的值
+ * @param {string} type - 字段类型
+ * @returns {array} - 返回处理后的数组
+ */
+const handleArrayDisplay = (value, type) => {
+    if (!value) return [];
+    const optionsBase = useStore.getState().optionsBase;
+    const valueArray = Array.isArray(value) ? value : [value];
+
+    // 如果是injuredCodes，需要从optionsConstants.BizExerciseInjuredEnums中匹配displayName
+    if (type === 'injuredCodes') {
+        return valueArray.map(code => {
+            const matchedItem = optionsBase["BizExerciseInjuredEnums"].find(item => item.value === code);
+            return matchedItem ? matchedItem.displayName : code;
+        });
+    }
+
+    return valueArray;
+};
+
 
 // 添加全局音频管理
 const audioManager = {
@@ -106,7 +130,6 @@ const CommonList = ({
     defaultQueryParams = {
         pageIndex: 1,
         pageSize: 10,
-        status: 'ENABLED'
     },
     title
 }) => {
@@ -362,10 +385,24 @@ const CommonList = ({
                         </Text>
                     </div>
                     {
-                        (item.functionType || item.type) && <div>
-                            <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                                {item.functionType || item.type}
-                            </Text>
+                        (item.functionType || item.type || item.injuredCodes) && <div>
+                            {handleArrayDisplay(
+                                item.injuredCodes || item.functionType || item.type,
+                                item.injuredCodes ? 'injuredCodes' : 'other'
+                            ).map((value, index, array) => (
+                                <Text
+                                    key={index}
+                                    type="secondary"
+                                    style={{
+                                        fontSize: '12px',
+                                        marginRight: index !== array.length - 1 ? '8px' : '0',
+                                        display: 'inline-block'
+                                    }}
+                                    ellipsis={{ tooltip: value }}
+                                >
+                                    {value}
+                                </Text>
+                            ))}
                         </div>
                     }
                 </div>
@@ -378,9 +415,9 @@ const CommonList = ({
         if (!item || !item.id) return null;
 
         let actions = [];
-        const isDisabled = selectionMode === 'replace' && item.status !== defaultQueryParams.status;
+        const isDisabled = selectionMode === 'replace' && item.status !== 'ENABLED';
         if (selectionMode === 'add') {
-            if (item.status === defaultQueryParams.status) {
+            if (item.status === 'ENABLED') {
                 actions.push(
                     <Button
                         key={`add-${item.id}`}
@@ -500,6 +537,18 @@ const CommonList = ({
                             dataSource={internalListData}
                             className="common-list"
                             renderItem={renderListItem}
+                            locale={{
+                                emptyText: (
+                                    <div className={styles.customEmptyWrapper}>
+                                        <div className={styles.customEmptyImageWrapper}>
+                                            <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
+                                        </div>
+                                        <div className={styles.customEmptyTitle}>{
+                                            `You don't have any ${title} yet`
+                                        } </div>
+                                    </div>
+                                )
+                            }}
                         />
                     </Spin>
 

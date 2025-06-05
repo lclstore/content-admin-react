@@ -7,16 +7,6 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import TagSelector from '@/components/TagSelector/TagSelector';
-// import { statusIconMap, resultIconMap, fileStatusIconMap } from '@/constants';
-import {
-    statusOrder,
-    difficultyOrder,
-    mockWorkoutsForList,
-    filterSections,
-    BATCH_FILE_OPTIONS,
-    MOCK_LANG_OPTIONS
-} from './Data';
 
 export default function WorkoutsList() {
 
@@ -26,105 +16,37 @@ export default function WorkoutsList() {
             title: 'Status',
             key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [{
-                label: 'Draft',
-                value: 'DRAFT'
-            }, {
-                label: 'Enabled',
-                value: 'ENABLED'
-            }, {
-                label: 'Disabled',
-                value: 'DISABLED'
-            }],
+            options: 'statusList',
         },
         {
             title: 'Structure Type',
             key: 'structureTypeCodeList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [{
-                label: 'Warm Up',
-                value: 'WARM_UP'
-            }, {
-                label: 'Main',
-                value: 'MAIN'
-            }, {
-                label: 'Cool Down',
-                value: 'COOL_DOWN'
-            }]
+            options: 'BizExerciseStructureTypeEnums'
         },
         {
             title: 'Gender',
             key: 'genderCodeList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [
-                {
-                    label: 'Male',
-                    value: 'MALE'
-                }, {
-                    label: 'Female',
-                    value: 'FEMALE'
-                }
-            ]
+            options: 'BizExerciseGenderEnums'
         },
         {
             title: 'Difficulty',
             key: 'difficultyCodeList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [
-                {
-                    label: 'Beginner',
-                    value: 'BEGINNER'
-                }, {
-                    label: 'Intermediate',
-                    value: 'INTERMEDIATE'
-                }, {
-                    label: 'Advanced',
-                    value: 'ADVANCED'
-                }
-            ]
+            options: 'BizExerciseDifficultyEnums'
         },
         {
             title: 'Position',
             key: 'positionCodeList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [
-                {
-                    label: 'Seated',
-                    value: 'SEATED'
-                }, {
-                    label: 'Standing',
-                    value: 'STANDING'
-                },
-            ],
+            options: 'BizExercisePositionEnums',
         },
         {
             title: 'Injured',
             key: 'injuredCodeList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [
-                {
-                    label: 'Shoulder',
-                    value: 'SHOULDER'
-                }, {
-                    label: 'Back',
-                    value: 'BACK'
-                }, {
-                    label: 'Wrist',
-                    value: 'WRIST'
-                }, {
-                    label: 'Knee',
-                    value: 'KNEE'
-                }, {
-                    label: 'Ankle',
-                    value: 'ANKLE'
-                }, {
-                    label: 'Hip',
-                    value: 'HIP'
-                }, {
-                    label: 'None',
-                    value: 'NONE'
-                }
-            ],
+            options: 'BizExerciseInjuredEnums'
         },
         {
             title: 'File Status',
@@ -150,7 +72,6 @@ export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
-    const [dataSource, setDataSource] = useState(mockWorkoutsForList); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
     const [searchValue, setSearchValue] = useState(''); // 搜索关键词
     const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] }); // 筛选条件
@@ -183,30 +104,7 @@ export default function WorkoutsList() {
         setIsBatchCreateModalVisible(true);
     }, []);
 
-    /**
-     * 操作区域点击处理
-     * 设置操作点击标志，阻止事件冒泡以防止触发行点击事件
-     */
-    const handleActionAreaClick = useCallback((e) => {
-        setActionClicked(true);
-        e.stopPropagation();
-    }, []);
 
-    /**
-     * 编辑按钮处理
-     * 导航到训练计划编辑页面
-     */
-    const handleEdit = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
-    }, [navigate]);
-
-    /**
-     * 复制workout处理
-     * 创建一个新的训练计划记录，继承大部分属性但重置状态为草稿
-     */
-    const handleDuplicate = useCallback((record) => {
-        navigate(`/workouts/editor?id=${record.id}`);
-    }, [navigate]);
 
     /**
      * 状态变更处理
@@ -230,36 +128,6 @@ export default function WorkoutsList() {
         messageApi.success(`Successfully ${actionMap[newStatus]} "${record.name}"`);
     }, [messageApi]);
 
-    /**
-     * 处理按钮点击事件
-     */
-    const handleActionClick = useCallback((actionName, record, event) => {
-        if (event) event.stopPropagation();
-        setCurrentRecord(record);
-
-        switch (actionName) {
-            case 'edit':
-                handleEdit(record);
-                break;
-            case 'duplicate':
-                handleDuplicate(record);
-                break;
-            case 'delete':
-                setIsDeleteModalVisible(true);
-                break;
-            case 'enable':
-                handleStatusChange(record, 'Enabled');
-                break;
-            case 'disable':
-                handleStatusChange(record, 'Disabled');
-                break;
-            case 'deprecate':
-                handleStatusChange(record, 'Deprecated');
-                break;
-            default:
-                break;
-        }
-    }, [handleEdit, handleDuplicate, handleStatusChange]);
 
     // 定义按钮显示规则
     const isButtonVisible = useCallback((record, btnName) => {
@@ -277,7 +145,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 1 },
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
             {
                 title: 'Cover ImgUrl',
                 width: 120,
@@ -388,18 +256,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
-                options: [
-                    {
-                        label: 'Beginner',
-                        value: 'BEGINNER'
-                    }, {
-                        label: 'Intermediate',
-                        value: 'INTERMEDIATE'
-                    }, {
-                        label: 'Advanced',
-                        value: 'ADVANCED'
-                    }
-                ],
+                options: 'BizExerciseDifficultyEnums',
                 key: 'difficultyCode'
             },
 
@@ -478,11 +335,9 @@ export default function WorkoutsList() {
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
-                // 按钮点击处理函数
-                onActionClick: handleActionClick
             },
         ];
-    }, [isButtonVisible, handleActionClick]);
+    }, [isButtonVisible]);
 
     /**
      * 处理行选择变化
@@ -492,130 +347,7 @@ export default function WorkoutsList() {
         setSelectedRowKeys(newSelectedRowKeys);
     }, []);
 
-    /**
-     * 搜索处理函数
-     * 直接执行搜索，根据条件过滤数据
-     */
-    const performSearch = useCallback((searchText, filters, pagination) => {
-        setLoading(true);
-        setTimeout(() => {
-            let filteredData = mockWorkoutsForList;
-            // 按状态过滤
-            const statuses = filters?.status || [];
-            if (statuses.length > 0) filteredData = filteredData.filter(w => statuses.includes(w.status));
 
-            // 按难度过滤
-            const difficulties = filters?.difficulty || [];
-            if (difficulties.length > 0) filteredData = filteredData.filter(w => difficulties.includes(w.difficulty));
-
-            // 按姿势过滤
-            const positions = filters?.position || [];
-            if (positions.length > 0) filteredData = filteredData.filter(w => positions.includes(w.position));
-
-            // 按目标部位过滤
-            const targets = filters?.target || [];
-            if (targets.length > 0) {
-                filteredData = filteredData.filter(w => {
-                    if (!w.target) return false;
-                    const workoutTargets = w.target.split(', ').map(t => t.trim().toLowerCase());
-                    return targets.some(ft => workoutTargets.includes(ft.toLowerCase()));
-                });
-            }
-
-            // 关键词搜索
-            if (searchText) {
-                const lowerCaseSearch = searchText.toLowerCase();
-                filteredData = filteredData.filter(w =>
-                    (w.name && w.name.toLowerCase().includes(lowerCaseSearch)) ||
-                    (w.equipment && w.equipment.toLowerCase().includes(lowerCaseSearch)) ||
-                    (w.target && w.target.toLowerCase().includes(lowerCaseSearch))
-                );
-            }
-
-            // 这里可以添加分页处理逻辑
-            // 如果有分页信息，可以在这里进行处理
-            if (pagination) {
-                console.log('【performSearch】处理分页:', pagination);
-                // 真实环境中这里应该是向后端请求分页数据
-                // 当前是前端模拟，不需要额外处理
-            }
-
-            setDataSource(filteredData);
-            setLoading(false);
-        }, 0); // 立即执行
-    }, [setDataSource, setLoading]);
-
-    /**
-     * 搜索输入变化处理
-     */
-    const handleSearchInputChange = useCallback((e) => {
-        const { value } = e.target;
-        setSearchValue(value);
-        performSearch(value, selectedFilters);
-    }, [performSearch, selectedFilters]);
-
-    /**
-     * 筛选更新处理
-     */
-    const handleFilterUpdate = useCallback((newFilters) => {
-        setSelectedFilters(newFilters);
-        performSearch(searchValue, newFilters);
-    }, [performSearch, searchValue]);
-
-    /**
-     * 重置筛选器处理
-     */
-    const handleFilterReset = useCallback(() => {
-        setSelectedFilters({});
-        setSearchValue('');
-        performSearch('', {});
-    }, [performSearch]);
-
-    /**
-     * 处理行点击
-     */
-    const handleRowClick = useCallback((record, event) => {
-        // 如果全局媒体预览处于激活状态，不处理行点击
-        if (window.MEDIA_PREVIEW && window.MEDIA_PREVIEW.isAnyPreviewActive()) {
-            return;
-        }
-
-        // 如果操作按钮被点击，不处理行点击
-        if (actionClicked) {
-            return;
-        }
-
-        // 检查是否点击了操作区域
-        const isActionClick = event.target.closest('.actions-container');
-        if (isActionClick) {
-            return;
-        }
-
-        // 检查是否点击了媒体单元格
-        const isMediaClick = event.target.closest('td.media-cell') ||
-            (event.target.classList &&
-                (event.target.classList.contains('media-cell') ||
-                    event.target.classList.contains('mediaCell')));
-        if (isMediaClick) {
-            console.log('行点击被阻止：点击了媒体单元格');
-            return;
-        }
-
-        // 检查是否点击了复选框单元格
-        const isCheckboxClick = event.target.closest('td.ant-table-cell.ant-table-selection-column') ||
-            (event.target.classList &&
-                (event.target.classList.contains('ant-table-selection-column') ||
-                    event.target.classList.contains('ant-checkbox-wrapper') ||
-                    event.target.classList.contains('ant-checkbox') ||
-                    event.target.classList.contains('ant-checkbox-input')));
-        if (isCheckboxClick) {
-            console.log('行点击被阻止：点击了复选框');
-            return;
-        }
-
-        // 正常导航到编辑页面
-        navigate(`/workouts/editor?id=${record.id}`);
-    }, [navigate, actionClicked]);
 
     /**
      * 批量创建 Modal 取消处理
@@ -633,20 +365,7 @@ export default function WorkoutsList() {
             const values = await batchCreateForm.validateFields();
             const { files, lang } = values;
 
-            // 更新数据源
-            const updatedDataSource = dataSource.map(item => {
-                if (selectedRowKeys.includes(item.id)) {
-                    let updatedItem = { ...item };
-                    if (files.includes('Audio-JSON')) {
-                        // 更新 Audio Language 字段
-                        const existingLangs = new Set((updatedItem.audioLang || '').split(',').map(l => l.trim()).filter(Boolean));
-                        lang.forEach(l => existingLangs.add(l));
-                        updatedItem.audioLang = Array.from(existingLangs).sort().join(', ');
-                    }
-                    return updatedItem;
-                }
-                return item;
-            });
+
             setDataSource(updatedDataSource);
 
             messageApi.success(`Task submitted, files will be generated for ${selectedRowKeys.length} workouts.`);
@@ -657,7 +376,7 @@ export default function WorkoutsList() {
         } finally {
             setBatchCreateLoading(false);
         }
-    }, [batchCreateForm, selectedRowKeys, dataSource, messageApi]);
+    }, [batchCreateForm, selectedRowKeys, messageApi]);
 
     // 7. 副作用 - 组件生命周期相关处理
     /**
@@ -694,16 +413,6 @@ export default function WorkoutsList() {
         return () => document.removeEventListener('click', handleGlobalClick);
     }, []);
 
-    // 8. 表格数据和配置
-    /**
-     * 筛选后的表格数据
-     */
-    const filteredDataForTable = useMemo(() =>  {
-        setLoading(true);
-        let tempData = [...dataSource];
-        setLoading(false);
-        return tempData;
-    }, [dataSource]);
 
     /**
      * 左侧工具栏按钮定义
@@ -717,7 +426,7 @@ export default function WorkoutsList() {
             disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
- 
+
     /**
      * 行选择配置
      */
@@ -727,14 +436,6 @@ export default function WorkoutsList() {
         columnWidth: 60,
     };
 
-    // 处理表格变更（排序、筛选、分页）
-    const handleTableChange = useCallback((pagination, filters, sorter) => {
-        console.log('【List组件】分页已变化:', pagination);
-        console.log('【List组件】当前页:', pagination.current);
-        console.log('【List组件】每页记录数:', pagination.pageSize);
-        // 将分页信息传递给 performSearch 函数
-        performSearch(searchValue, filters, pagination);
-    }, [performSearch, searchValue]);
 
     // 9. 渲染 - 组件UI呈现
     // 渲染 - 组件UI呈现
@@ -745,13 +446,13 @@ export default function WorkoutsList() {
                 open={isBatchCreateModalVisible}
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}
-                confirmLoading={batchCreateLoading}
-                 rowSelection={rowSelection}
+
+                rowSelection={rowSelection}
                 columns={allColumnDefinitions}
                 leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"
                 searchConfig={{
-                    placeholder: "Search name or ID...",
+                    placeholder: "Search content name or ID...",
                 }}
                 showColumnSettings={true}
                 filterConfig={{

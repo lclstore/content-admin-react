@@ -7,6 +7,7 @@ import {HeaderContext} from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import {router} from "@/utils/index.js";
 import request from "@/request/index.js";
+import {Table} from "antd";
 
 export default function WorkoutsList() {
     const {setButtons, setCustomPageTitle} = useContext(HeaderContext); // 更新为新的API
@@ -109,12 +110,70 @@ export default function WorkoutsList() {
             setCustomPageTitle(null);
         };
     }, [setButtons, setCustomPageTitle, navigate]);
+    const getTableList = useCallback(async (params) => {
+        const {data} = await request.get('/api/v1/exercises', {params});
+        return data;
+    }, []);
+    const expandedRowRender =useCallback( (record) => {
 
+        // 定义展开行表格的列配置
+        const columns = [
+            {
+                title: 'ID',
+                dataIndex: 'id',
+                key: 'id',
+                width: 80
+            },
+            {
+                title: 'Name',
+                dataIndex: 'name',
+                key: 'name',
+                width: 200
+            },
+            {
+                title: 'Show Type',
+                dataIndex: 'showTypeCode',
+                key: 'showTypeCode',
+                width: 120
+            },
+            {
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
+                width: 100
+            },
+            {
+                title: 'New Start Time',
+                dataIndex: 'newStartTime',
+                key: 'newStartTime',
+                width: 160
+            },
+            {
+                title: 'New End Time',
+                dataIndex: 'newEndTime',
+                key: 'newEndTime',
+                width: 160,
+            }
+        ];
+
+        return (
+            <Table
+                columns={columns}
+                dataSource={record}
+                pagination={false}
+                rowKey="id"
+                size="small"
+                bordered={false}
+            />
+        );
+    })
     //渲染表格组件
     return (
         <>
             <ConfigurableTable
                 columns={allColumnDefinitions}
+                expandedRowRender={expandedRowRender}
+                getTableList={getTableList}
                 moduleKey="workout"
                 searchConfig={{
                     placeholder: "Search name or ID...",

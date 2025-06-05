@@ -15,14 +15,7 @@ export default function UserEditorWithCommon() {
             required: true,
             placeholder: 'Music name',
         },
-        {
-            type: 'switch',
-            name: 'premium',
-            label: 'Premium',
-            checkedChildren: "Yes",
-            unCheckedChildren: 'No'
 
-        },
         {
             type: 'select',
             mode: 'single',
@@ -36,6 +29,17 @@ export default function UserEditorWithCommon() {
             required: true,
         },
         {
+            type: 'select',
+            name: 'premium',
+            label: 'Premium',
+            required: true,
+            setDefaultValue: 0,
+            options: [
+                { label: 'Yes', value: 1 },
+                { label: 'No', value: 0 },
+            ],
+        },
+        {
             type: 'structureList',
             name: 'musicList',
             // renderItemMata: renderItemMata,
@@ -44,6 +48,10 @@ export default function UserEditorWithCommon() {
             structureListFields: [
                 {
                     type: 'input',
+                    required: true,
+                    setDefaultValue: (data) => {
+                        return data.name
+                    },
                     name: 'displayName',
                     label: 'Display Name',
                 },
@@ -51,9 +59,11 @@ export default function UserEditorWithCommon() {
                     type: 'select',
                     name: 'premium',
                     label: 'Premium',
+                    required: true,
+                    setDefaultValue: 0,
                     options: [
-                        { label: 'Yes', value: 'YES' },
-                        { label: 'No', value: 'NO' },
+                        { label: 'Yes', value: 1 },
+                        { label: 'No', value: 0 },
                     ],
                 },
 
@@ -102,7 +112,8 @@ export default function UserEditorWithCommon() {
                 return {
                     bizMusicId: item.id,
                     displayName: item.name,
-                    premium: formValues.premium,
+                    displayName: item.displayName,
+                    premium: item.premium,
                 }
             });
         }
@@ -120,6 +131,7 @@ export default function UserEditorWithCommon() {
             }}
             initialValues={{
                 type: 'REGULAR',
+                premium: 0,
             }}
             saveBeforeTransform={saveBeforeTransform}
             formType="advanced"

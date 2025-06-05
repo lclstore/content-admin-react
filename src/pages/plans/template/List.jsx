@@ -61,7 +61,10 @@ export default function WorkoutsList() {
                 width: 120,
             },
             {title: "Generate Status", dataIndex: "generateStatus", options: 'BizGenerateTaskStatusEnums'},
-            {title: "Workout Num", dataIndex: "workoutCount",render: (text) => <div onClick={() => router().push("workout")}>{text}</div>},
+            {title: "Workout Num", dataIndex: "workoutCount",render: (text) => <div onClick={(e) => {
+                    e.stopPropagation();
+                    router().push("workout")
+                }}>{text}</div>},
             {
                 title: 'Actions',
                 key: 'actions',

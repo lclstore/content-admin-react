@@ -22,8 +22,8 @@ export default () => {
         const status = record.status;
         // 状态-按钮映射关系
         if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 'ENABLE' && ['edit', 'duplicate', 'disable', 'delete'].includes(btnName)) return true;
-        if (status === 'DISABLE' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLED' && ['edit', 'duplicate', 'disable', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
         return false;
     }, []);
 
@@ -48,7 +48,6 @@ export default () => {
             {
                 title: 'Name',
                 dataIndex: 'name',
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -73,21 +72,6 @@ export default () => {
                         value: 'CARD'
                     }
                 ],
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'New Start Time',
-                dataIndex: 'newStartTime',
-                sorter: true,
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'New End Time',
-                dataIndex: 'newEndTime',
-                sorter: true,
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -215,7 +199,6 @@ export default () => {
 
         return (
             <Table
-
                 columns={columns}
                 dataSource={data}
                 pagination={false}

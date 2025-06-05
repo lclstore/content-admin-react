@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message } from 'antd';
+import { Modal, message, Table } from 'antd';
 import { useNavigate } from 'react-router';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { HeaderContext } from '@/contexts/HeaderContext';
@@ -21,10 +21,9 @@ export default () => {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 状态-按钮映射关系
-        if (status === 'enable' && ['disable'].includes(btnName)) return true;
-        if (status === 'disable' && ['enable'].includes(btnName)) return true;
-        if (btnName === 'edit' || btnName === 'duplicate') return true;  // 编辑按钮始终显示
-
+        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLED' && ['edit', 'duplicate', 'disable', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
         return false;
     }, []);
 
@@ -49,7 +48,6 @@ export default () => {
             {
                 title: 'Name',
                 dataIndex: 'name',
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -62,29 +60,18 @@ export default () => {
                 visibleColumn: 0
             },
             {
-                title: 'Duration(Week)',
+                title: 'Show Type',
                 dataIndex: 'showTypeCode',
-                sorter: true,
-                width: 120,
-                visibleColumn: 0
-            },
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficultyCode',
                 sorter: true,
                 options: [
                     {
-                        label: 'Beginner',
-                        value: 'BEGINNER'
+                        label: 'Horizontal',
+                        value: 'HORIZONTAL'
                     }, {
-                        label: 'Intermediate',
-                        value: 'INTERMEDIATE'
-                    }, {
-                        label: 'Advanced',
-                        value: 'ADVANCED'
+                        label: 'Card',
+                        value: 'CARD'
                     }
                 ],
-                width: 120,
                 visibleColumn: 0
             },
             {
@@ -108,7 +95,7 @@ export default () => {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['enable', 'disable', 'edit', 'duplicate'],
+                actionButtons: ['enable', 'disable', 'edit', 'duplicate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
                 // 按钮点击处理函数
@@ -119,17 +106,17 @@ export default () => {
 
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Category');
+        setCustomPageTitle('Programs');
 
         // 设置头部按钮
         setButtons([
             {
                 key: 'create',
-                text: 'Create Category',
+                text: 'Create Programs',
                 icon: <PlusOutlined />,
                 type: 'primary',
-                onClick: () => navigate('/collections/programs/Editor'),
-            }
+                onClick: () => navigate('/collections/programs/editor'),
+            },
         ]);
 
         return () => {
@@ -141,12 +128,101 @@ export default () => {
 
 
 
+    // 定义展开行渲染函数
+    const expandedRowRender = (record) => {
+        const data = [{
+            "coverImgUrl": "",
+            "detailImgUrl": "",
+            "id": 2,
+            "name": "ccc3",
+            "newEndTime": null,
+            "newStartTime": null,
+            "showTypeCode": "HORIZONTAL",
+            "status": "DRAFT"
+        },
+        {
+            "coverImgUrl": "",
+            "detailImgUrl": "",
+            "id": 2,
+            "name": "ccc3",
+            "newEndTime": null,
+            "newStartTime": null,
+            "showTypeCode": "HORIZONTAL",
+            "status": "DRAFT"
+        },
+        {
+            "coverImgUrl": "",
+            "detailImgUrl": "",
+            "id": 2,
+            "name": "ccc3",
+            "newEndTime": null,
+            "newStartTime": null,
+            "showTypeCode": "HORIZONTAL",
+            "status": "DRAFT"
+        }, {
+            "coverImgUrl": "",
+            "detailImgUrl": "",
+            "id": 2,
+            "name": "ccc3",
+            "newEndTime": null,
+            "newStartTime": null,
+            "showTypeCode": "HORIZONTAL",
+            "status": "DRAFT"
+        }
+        ];
 
-    // 表格数据和配置
-    /**
-     * 筛选后的表格数据
-     */
+        // 定义展开行表格的列配置
+        const columns = [
+            {
+                title: 'ID',
+                dataIndex: 'id',
+                key: 'id',
+                width: 80
+            },
+            {
+                title: 'Name',
+                dataIndex: 'name',
+                key: 'name',
+                width: 200
+            },
+            {
+                title: 'Show Type',
+                dataIndex: 'showTypeCode',
+                key: 'showTypeCode',
+                width: 120
+            },
+            {
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
+                width: 100
+            },
+            {
+                title: 'New Start Time',
+                dataIndex: 'newStartTime',
+                key: 'newStartTime',
+                width: 160
+            },
+            {
+                title: 'New End Time',
+                dataIndex: 'newEndTime',
+                key: 'newEndTime',
+                width: 160,
+            }
+        ];
 
+        return (
+            <Table
+
+                columns={columns}
+                dataSource={data}
+                pagination={false}
+                rowKey="id"
+                size="small"
+                bordered={false}
+            />
+        );
+    };
     // 渲染 - 组件UI呈现
     return (
         <div className="usersContainer">
@@ -157,6 +233,10 @@ export default () => {
             <ConfigurableTable
                 moduleKey={'program'}
                 operationName={'list'}
+                showPagination={false}
+                draggable={true}
+                // expandable={true}
+                // expandedRowRender={expandedRowRender}
                 columns={allColumnDefinitions}
                 showColumnSettings={false}
             />

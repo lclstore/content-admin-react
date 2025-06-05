@@ -103,26 +103,30 @@ const ConfigurableTable = forwardRef(({
     expandedRowRender, // 修改为直接接收展开行渲染函数
 },ref) => {
     const optionsBase = useStore(i => i.optionsBase)
-    const pathSegments = useLocation().pathname.split('/').filter(Boolean);
+    const navigate = useNavigate(); // 路由导航
+    const location = useLocation();
+    const pathSegments = location.pathname.split('/').filter(Boolean);
     const routeLevel = pathSegments.length;
-    let pathUrl = useLocation().pathname.split('/')[1];
+    let pathUrl = location.pathname.split('/')[1];
     moduleKey = moduleKey || pathSegments[1];
     if (routeLevel == 3) {
         pathUrl = `${pathSegments[0]}/${pathSegments[1]}`;
     }
-    const pathname = useLocation().pathname.split('/')[1];
+    const pathname = location.pathname.split('/')[1];
     const listConfig = settings.listConfig;
     const storageKey = `table_visible_columns_${moduleKey}`;
-    let paginationParams = useRef({
+    const [messageApi, contextHolder] = message.useMessage();
+    // paginationConfig load case
+    paginationConfig = localStorage.getItem(location.pathname) || paginationConfig
+    const paginationParams = useRef({
         ...paginationConfig,
     })
-    const [messageApi, contextHolder] = message.useMessage();
-    const navigate = useNavigate(); // 路由导航
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
     const [tableData, setTableData] = useState(dataSource);
     const [items, setItems] = useState(dataSource);
+    const [totalCount, setTotalCount] = useState(dataSource?.length || 0); // 使用dataSource的长度初始化
     const dataRef = useRef({ tableData, items });
     // 声明内部 loading，也可以接受外部传入
     const [loadingLocal, setLoadingLocal] = useState(loading)
@@ -236,7 +240,6 @@ const ConfigurableTable = forwardRef(({
             options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
-    console.log('columnSettingsSection',columnSettingsSection);
 
     // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {
@@ -285,7 +288,7 @@ const ConfigurableTable = forwardRef(({
         // 获取所有强制显示的列和默认可见的列
         const resetKeys = columns
             .filter(col => col.visibleColumn === 0 || col.visibleColumn === 2)
-            .map(col => col.key || col.dataIndex);
+        // .map(col => col.key || col.dataIndex);
 
         if (onVisibilityChange) {
             onVisibilityChange(resetKeys);
@@ -298,6 +301,7 @@ const ConfigurableTable = forwardRef(({
                 console.error("重置列配置到localStorage失败:", error);
             }
         }
+        return resetKeys
     }, [columns, onVisibilityChange, storageKey]);
 
     // 检查列设置是否有非默认值
@@ -485,6 +489,14 @@ const ConfigurableTable = forwardRef(({
         }
     }, [dataSource]);
 
+    // 监听数据源变化，更新totalCount
+    useEffect(() => {
+        if (dataSource?.length > 0) {
+            setTotalCount(dataSource.length);
+            paginationParams.current.totalCount = dataSource.length;
+        }
+    }, [dataSource]);
+
     // 查询表格数据
     const searchTableData = useCallback(async (isFirstSearch) => {
         const fetchTableData = getTableList || getPublicTableList;
@@ -525,12 +537,14 @@ const ConfigurableTable = forwardRef(({
                 setTableData(newData);
                 setItems(newData);
                 paginationParams.current.totalCount = res.totalCount;
+                setTotalCount(res.data.length);
 
                 if (isFirstSearch) {
                     setIsEmptyTableData(newData.length === 0);
                 }
             } else {
                 paginationParams.current.totalCount = 0;
+                setTotalCount(0);
                 setIsEmptyTableData(true);
                 setTableData([]);
                 setItems([]);
@@ -572,7 +586,7 @@ const ConfigurableTable = forwardRef(({
     }, [paginationParams])
     const filterReset = useCallback(() => {
         activeFilters.current = {};
-        searchTableData()// 查询 表格数据
+        // searchTableData()// 查询 表格数据
     }, [paginationParams])
 
     // 处理列渲染: 根据 mediaType 渲染 MediaCell 并添加 Action Marker
@@ -1092,6 +1106,14 @@ const ConfigurableTable = forwardRef(({
                     </DndContext>
                 ) : (
                     tableContent
+                )}
+
+                {/* 当不显示分页时显示总条数 */}
+                {console.log('totalCount:', totalCount, 'showPagination:', showPagination)}
+                {!showPagination && (
+                    <div className={styles.totalCountDisplay} style={{ padding: '16px 0', textAlign: 'right' }}>
+                        {totalCount || 0} items
+                    </div>
                 )}
 
                 {/* 删除确认对话框 */}

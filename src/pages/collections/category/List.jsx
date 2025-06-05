@@ -199,7 +199,6 @@ export default () => {
 
         return (
             <Table
-
                 columns={columns}
                 dataSource={data}
                 pagination={false}

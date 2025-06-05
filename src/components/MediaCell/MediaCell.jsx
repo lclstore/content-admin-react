@@ -22,13 +22,15 @@ window.MEDIA_PREVIEW = {
 
 // 新标签和锁图标组件
 const MediaTags = memo(({ showNewTag, showLockIcon }) => {
-    const newTagElement = showNewTag ? <div className={styles['new-tag']}>New</div> : null;
-    const lockElement = showLockIcon ? <div className={styles['lock-icon']}><LockFilled /></div> : null;
-
     return (
         <>
-            {newTagElement}
-            {lockElement}
+            {
+                showNewTag && <div className={styles['new-tag']}>New</div>
+            }
+            {
+                showLockIcon && <div className={styles['lock-icon']}><LockFilled /></div>
+            }
+
         </>
     );
 });
@@ -218,7 +220,9 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
         const start = newStartTime ? new Date(newStartTime).getTime() : null;
         const end = newEndTime ? new Date(newEndTime).getTime() : null;
 
-        if (start && end) {
+        if (start && end && showNewBadge) {
+            console.log(now >= start && now <= end && showNewBadge);
+
             return now >= start && now <= end && showNewBadge;
         }
         return false;
@@ -337,6 +341,7 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                             duration={duration}
                             onPreview={handleVideoPreview}
                         />
+                        {tags}
                     </>
                 );
 
@@ -346,7 +351,7 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                         <AudioMedia
                             src={mediaSrc}
                             mediaType={mediaType}
-                            
+
                             onPreview={handleAudioPreview}
                         />
                         {tags}
@@ -363,7 +368,9 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
                             onImageError={handleImageError}
                             onPreviewVisibleChange={handleImagePreviewChange}
                         />
-                        {tags}
+                        <div>
+                            {tags}
+                        </div>
                     </div>
                 );
         }

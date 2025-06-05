@@ -29,8 +29,7 @@ export default function UserEditorWithCommon() {
         },
 
     ];
-    // 初始用户数据状态--可设默认值
-    const initialValues = {}
+    const [initialValues, setInitialValues] = useState({})
 
 
     const imageUpload = (value, file, form) => {
@@ -125,7 +124,7 @@ export default function UserEditorWithCommon() {
                     label: 'Musics',
                     isCollapse: true,
                     formterList: (dataList, formValues) => {
-                        return dataList.map(item => {
+                        return dataList?.map(item => {
                             return {
                                 bizMusicId: item.id,
                                 displayName: item.name,
@@ -146,8 +145,10 @@ export default function UserEditorWithCommon() {
     const [formFields, setFormFields] = useState(initialFormFields);
 
     // 处理formFields变更的回调
-    const handleFormFieldsChange = (updatedFields) => {
+    const handleFormFieldsChange = (updatedFields, formValues) => {
+        debugger
         setFormFields(updatedFields);
+        setInitialValues(formValues);
     };
 
     const saveBeforeTransform = (info) => {
@@ -206,7 +207,7 @@ export default function UserEditorWithCommon() {
             formType="advanced"
             saveBeforeTransform={saveBeforeTransform}
             enableDraft={true}
-            config={{ formName: 'Collections', title: 'Collections details' }}
+            config={{ formName: 'Collections', title: 'Category details' }}
             initialValues={initialValues}
         />
     );

@@ -292,7 +292,7 @@ export default function UserEditorWithCommon() {
             name: 'structure',
             isShowAdd: true,
             formterList: (dataList) => {
-                return dataList.map(item => {
+                return dataList?.map(item => {
                     return {
                         name: item.name,
                         id: item.id

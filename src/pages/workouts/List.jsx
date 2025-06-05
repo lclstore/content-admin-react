@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message, Form, Table } from 'antd';
+import { Modal, message, Form, Table, Switch } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -49,22 +49,33 @@ export default function WorkoutsList() {
             options: 'BizExerciseInjuredEnums'
         },
         {
+            title: 'Equipment',
+            key: 'equipmentCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseEquipmentEnums'
+        },
+        {
             title: 'File Status',
-            key: 'fileStatus',
+            key: 'fileStatusList',
             type: 'multiple', // 单选 //multiple 多选
             options: [
                 {
                     label: 'Succeeded',
-                    value: 'Succeeded'
-                }, {
-                    label: 'Running',
-                    value: 'Running'
-                }, {
-                    label: 'Failed',
-                    value: 'Failed'
+                    value: 'SUCCEEDED'
                 },
-            ],
-        },
+                {
+                    label: 'Failed',
+                    value: 'FAILED'
+                },
+                {
+                    label: 'Processing',
+                    value: 'PROCESSING'
+                }
+            ]
+        }
+
+
+
     ];
 
 
@@ -179,14 +190,15 @@ export default function WorkoutsList() {
             //     visibleColumn: 0
             // },
 
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0 },
+            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true },
             {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
                 sorter: true,
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 0,
+                options: 'displayStatus',
             },
 
             {
@@ -196,14 +208,20 @@ export default function WorkoutsList() {
                 key: 'Premium',
                 width: 120,
                 options: 'defaultStatus',
-                visibleColumn: 2
+                sorter: true,
+                visibleColumn: 2,
+                render: (text, record) => {
+                    const defaultChecked = record.premium ? true : false;
+                    return (
+                        <Switch disabled={true} defaultChecked={defaultChecked} checked={text} />
+                    );
+                }
             },
             {
                 title: 'Duration (Min)',
                 align: 'center',
                 dataIndex: 'duration',
                 key: 'duration',
-                sorter: (a, b) => (a.duration || 0) - (b.duration || 0),
                 width: 150,
                 visibleColumn: 2,
                 // render: (duration) => {
@@ -218,7 +236,6 @@ export default function WorkoutsList() {
                 align: 'center',
                 dataIndex: 'calorie',
                 key: 'calorie',
-                sorter: (a, b) => (a.calorie || 0) - (b.calorie || 0),
                 width: 150,
                 visibleColumn: 2
             },
@@ -256,6 +273,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
+                sorter: true,
                 options: 'BizExerciseDifficultyEnums',
                 key: 'difficultyCode'
             },
@@ -313,7 +331,12 @@ export default function WorkoutsList() {
                 dataIndex: 'audioLang',
                 key: 'audioLang',
                 width: 120,
-                visibleColumn: 1
+                visibleColumn: 1,
+                // 渲染音频语言
+                // render: (_, record) => {
+                //     const langs = Array.isArray(record.audioLang) ? record.audioLang : [];
+                //     return langs.join(',');
+                // }
             },
             {
                 title: 'File Status', dataIndex: 'fileStatus', key: 'fileStatus',

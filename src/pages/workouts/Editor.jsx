@@ -1,8 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { data, useNavigate } from 'react-router';
-
+import { formatDate } from '@/utils/index';
 import CommonEditorForm from '@/components/CommonEditorForm';
-import { commonListData } from '@/pages/Data';
 import request from "@/request";
 
 import {
@@ -15,91 +13,60 @@ import {
 
 export default function UserEditorWithCommon() {
 
-     const filterSections = [
+    var filterSections = [
         {
             title: 'Status',
             key: 'statusList',
             type: 'multiple', // 单选 //multiple 多选
-            options: 'statusList'
-        },
-        
-    ];
-    // 初始用户数据状态--可设默认值
-    const initialValues = {}
-    const mockUsers = [{
-        id: 1,
-        name: 'John Doe',
-        description: 'asasdasa',
-        startTime: '2025-01-26',
-        endTime: '2025-07-26',
-        premium: 1,
-        coverImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        detailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        thumbnailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        completeImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        difficulty: 1,
-        equipment: 3,
-        position: 2,
-        target: [1, 5],
-        introDuration: 10,
-        exercisePreviewDuration: 20,
-        exerciseExecutionDuration: 30,
-        list: [{
-            reps: 1,
-            structureName: 'asd1',
-            list: [commonListData[0], commonListData[1]]
-        }, {
-            reps: 2,
-            structureName: 'asd2',
-            list: [commonListData[1]]
+            options: 'statusList',
         },
         {
-            reps: 3,
-            structureName: 'asd3',
-            list: [commonListData[4]]
-        }
-        ]
-    }];
+            title: 'Structure Type',
+            key: 'structureTypeCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseStructureTypeEnums'
+        },
+        {
+            title: 'Gender',
+            key: 'genderCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseGenderEnums'
+        },
+        {
+            title: 'Difficulty',
+            key: 'difficultyCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseDifficultyEnums'
+        },
+        {
+            title: 'Equipment',
+            key: 'equipmentCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseEquipmentEnums'
+        },
+        {
+            title: 'Position',
+            key: 'positionCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExercisePositionEnums',
+        },
+        {
+            title: 'Injured',
+            key: 'injuredCodeList',
+            type: 'multiple', // 单选 //multiple 多选
+            options: 'BizExerciseInjuredEnums'
+        },
 
-    // 保存用户数据
-    const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
-        console.log('保存用户数据:', values, id);
+    ];
+    // 初始用户数据状态--可设默认值
+    const defaultInitialValues = {
+        premium: 0,
+        newStartTime: formatDate(new Date(), 'YYYY-MM-DDTHH:mm:ss'),
+        newEndTime: formatDate(new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), 'YYYY-MM-DDTHH:mm:ss'),//往后14天
+    }
+    const [initialValues, setInitialValues] = useState(defaultInitialValues);
 
-        // 处理数据格式
-        // const dataToSave = {
-        //     ...(id && { id: parseInt(id, 10) }),
-        //     name: values.name.trim(),
-        //     email: values.email ? values.email.trim() : '',
-        //     avatar: values.avatar,
-        //     status: values.status,
-        //     userPassword: values.userPassword,
-        //     birthday: values.birthday,
-        //     // 如果有timeRange，从中提取startDate和endDate
-        //     ...(values.timeRange && values.timeRange.length === 2 ? {
-        //         startDate: values.timeRange[0],
-        //         endDate: values.timeRange[1]
-        //     } : {}),
-        //     selectedRoles: values.selectedRoles || [],
-        //     // 保存联动选择器的值
-        //     layoutType: values.layoutType,
-        //     contentStyle: values.contentStyle
-        // };
 
-        // 模拟API请求（注意：这里为了演示，移除了 setTimeout 模拟延迟）
-        // 实际应用中，这里应该是异步请求
-
-        // 成功处理
-        messageApi.success('用户数据保存成功！');
-
-        // 检查 setLoading 是否为函数再调用，防止 CommonEditorForm 未传递该函数导致报错
-        if (typeof setLoading === 'function') {
-            setLoading(false);
-        }
-        setDirty(false);
-
-        // 保存成功后立即跳转回列表页
-        navigate(-1);
-    };
 
     const imageUpload = (value, file, form) => {
         const formValues = form.getFieldsValue();
@@ -117,9 +84,7 @@ export default function UserEditorWithCommon() {
             // 模拟延迟 1 秒
             setTimeout(() => {
                 if (id) {
-                    // 查找对应用户
-                    // const user = mockUsers.find(u => u.id === parseInt(id, 10));
-                    const user = mockUsers[0]
+
                     resolve(user || {});  // 找不到也返回空对象，避免 undefined
                 } else {
                     // 新增场景：直接返回空对象
@@ -152,19 +117,33 @@ export default function UserEditorWithCommon() {
                     showCount: true,
                 },
                 {
-                    type: 'switch',
+                    type: 'select',
                     name: 'premium',
                     label: 'Premium',
-                    defaultChecked: 0,
+                    options: [
+                        { label: 'Yes', value: 1 },
+                        { label: 'No', value: 0 },
+                    ],
 
                 },
                 {
                     type: 'dateRange',
                     name: 'timeRange',
                     label: 'New Date',
-                    keys: ['startTime', 'endTime'],
+                    keys: ['newStartTime', 'newEndTime'],
                     required: false,
-                }
+                },
+                {
+                    type: 'displayText',
+                    name: 'duration',
+                    label: 'Duration (Min):',
+                },
+                {
+                    type: 'displayText',
+                    name: 'calorie',
+                    label: 'Calorie:',
+
+                },
             ]
         },
         {
@@ -266,7 +245,7 @@ export default function UserEditorWithCommon() {
             name: 'structure',
             isShowAdd: true,
             formterList: (dataList) => {
-                return dataList.map(item => {
+                return dataList?.map(item => {
                     return {
                         name: item.name,
                         id: item.id
@@ -296,23 +275,6 @@ export default function UserEditorWithCommon() {
                 }
             ]
 
-        },
-        {
-            label: 'Workout Data',
-            name: 'workoutData',
-            fields: [
-                {
-                    type: 'displayText',
-                    name: 'duration',
-                    label: 'Duration (Min):',
-                },
-                {
-                    type: 'displayText',
-                    name: 'calorie',
-                    label: 'Calorie:',
-
-                },
-            ]
         }
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
@@ -320,8 +282,11 @@ export default function UserEditorWithCommon() {
     const [formFields, setFormFields] = useState(initialFormFields);
 
     // 处理formFields变更的回调
-    const handleFormFieldsChange = (updatedFields) => {
+    const handleFormFieldsChange = (updatedFields, formValues) => {
         setFormFields(updatedFields);
+        if (defaultInitialValues !== initialValues) {
+            setInitialValues(formValues);
+        }
     };
 
 
@@ -378,15 +343,17 @@ export default function UserEditorWithCommon() {
 
     };
     const initCommonListData = (params) => {
-            return new Promise(resolve => {
-                request.get({
-                    url: `/exercise/page`,
-                    load: false,
-                    data: params,
-                    callback: res => resolve(res?.data)
-                });
-            })
-        }
+        console.log('initCommonListData', params);
+
+        return new Promise(resolve => {
+            request.get({
+                url: `/exercise/page`,
+                load: false,
+                data: params,
+                callback: res => resolve(res?.data)
+            });
+        })
+    }
 
     return (
         <CommonEditorForm
@@ -402,14 +369,15 @@ export default function UserEditorWithCommon() {
                 initCommonListData: initCommonListData,
                 placeholder: 'Search your content name...',
                 filterSections: filterSections,
+                title: 'Exercises',
             }}
             isCollapse={true}
             initFormData={initFormData}
             formType="advanced"
             fieldsToValidate={['name', 'birthday']}
-            config={{ formName: 'Workouts' }}
+            config={{ formName: 'Workouts', title: 'Workout details' }}
             initialValues={initialValues}
-            onSave={handleSaveUser}
+
         />
     );
 } 

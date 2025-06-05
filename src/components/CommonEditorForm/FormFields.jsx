@@ -203,6 +203,7 @@ export const renderFormControl = (field, options = {}) => {
                     placeholder={placeholder}
                     disabled={disabled}
                     onChange={handleChange}
+                    format={field.format || 'YYYY-MM-DD'}
                     style={{ width: field.width || '100%' }}
                 />
             );

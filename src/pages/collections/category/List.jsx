@@ -37,12 +37,12 @@ export default () => {
             },
             {
                 title: 'Cover Image',
-                dataIndex: 'imageCoverUrl',
+                dataIndex: 'coverImgUrl',
                 mediaType: 'image',
             },
             {
                 title: 'Detail Image',
-                dataIndex: 'imageCoverUrl',
+                dataIndex: 'detailImgUrl',
                 mediaType: 'image',
             },
             {

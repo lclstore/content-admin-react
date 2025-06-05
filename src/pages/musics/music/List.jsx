@@ -78,7 +78,7 @@ export default function Musics() {
                 setRefreshKey(editingMusicId ? 1 : 2); // 1. 表示当前页面刷新 2. 表示全局刷新
             }
         }
-    };
+    }
     useEffect(() => {
         const handleGlobalClick = () => setActionClicked(false);
         document.addEventListener('click', handleGlobalClick);
@@ -199,7 +199,7 @@ export default function Musics() {
             />
             {/* 编辑弹窗 */}
             <Modal
-                title={editingMusicId ? "Edit User" : "Add Music"}
+                title={editingMusicId ? "Edit Music" : "Add Music"}
                 open={isEditorModalVisible}
                 onCancel={() => setIsEditorModalVisible(false)}
                 footer={[

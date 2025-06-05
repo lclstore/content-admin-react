@@ -362,7 +362,7 @@ const FileUpload = ({
 
                 // 显示成功消息 - 在这里处理一次即可
                 const successMsg = uploadSuccessMessage || 'Upload successfully!';
-                messageApi.success(successMsg);
+                // messageApi.success(successMsg);
             } else {
                 console.error('Upload did not return valid URL:', result);
                 const failMsg = uploadFailMessage || 'Failed to get file upload URL';

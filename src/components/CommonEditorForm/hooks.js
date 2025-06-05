@@ -243,7 +243,7 @@ export const useHeaderConfig = (params) => {
     // 执行保存操作
     const executeSave = async (dataToSave, status = null) => {
 
-        setLoading(true);
+        setLoading(true); 
         // 处理数组列表相关数据格式和验证
         if (saveBeforeTransform) {
             dataToSave = saveBeforeTransform({
@@ -460,7 +460,7 @@ export const useHeaderConfig = (params) => {
             }
 
             // 显示错误信息
-            messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
+            // messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
             throw error; // 确保错误也被正确传递
         }
     }, [

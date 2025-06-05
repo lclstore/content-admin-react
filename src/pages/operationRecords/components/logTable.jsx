@@ -5,8 +5,40 @@ import { statusOrder, filterSections, listData } from './Data';
 import request from "@/request";
 // import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 
-export default ({bizType}) => {
-    
+export default ({ bizType }) => {
+    let num = [
+        {
+            label: "Musics",
+            value: "biz-music"
+        },
+        {
+            label: "Playlists",
+            value: "biz-playlist"
+        },
+        {
+            label: "Sounds",
+            value: "biz-sound"
+        }, {
+            label: "Images",
+            value: "biz-music"
+        }, {
+            label: "Exercises",
+            value: "biz-exercise"
+        }, {
+            label: "Workouts",
+            value: "biz-workout"
+        }, {
+            label: "Categories",
+            value: "biz-category"
+        }, {
+            label: "Programs",
+            value: "biz-program"
+        }, {
+            label: "Templates",
+            value: "biz-template"
+        }
+    ]
+
     // 1. 状态定义 - 组件内部状态管理
     const [dataSource, setDataSource] = useState(listData); // 表格数据源
     const [loading, setLoading] = useState(false); // 加载状态
@@ -22,12 +54,12 @@ export default ({bizType}) => {
         return [
             {
                 title: 'ID',
-                dataIndex: 'id',
+                dataIndex: 'dataId',
                 width: 50,
             },
             {
                 title: 'Name',
-                dataIndex: 'name',
+                dataIndex: 'dataInfo',
                 width: 120,
                 visibleColumn: 0
             },
@@ -148,18 +180,19 @@ export default ({bizType}) => {
 
 
     // 获取数据
-    const getData = useCallback(() => {
+    const getData = useCallback((value) => {
         return new Promise(resolve => {
             request.get({
                 url: "/opLogs/page",
                 load: true,
                 data: {
-                    bizType:"biz-music",
+                    bizType: value,
                     pageSize: 20
                 },
                 callback(res) {
                     // setDataSource(res.data.data)
                     console.log('res', res.data.data)
+                     setDataSource(res.data.data)
                     resolve()
                 }
             })
@@ -171,8 +204,10 @@ export default ({bizType}) => {
     useEffect(() => {
         console.log('1111')
         console.log(bizType)
-        // getData().then()
-    },[bizType]);
+        let value = num.filter(item => item.label == bizType)[0].value
+        getData(value).then()
+       
+    }, [bizType]);
 
     // 表格数据和配置
     // 渲染 - 组件UI呈现
@@ -191,12 +226,12 @@ export default ({bizType}) => {
                 onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
-                    placeholder: "Search name or email...",
+                    placeholder: "Search content name or ID...",
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}
                 filterConfig={{
-                    filterSections: filterSections,
+                    filterSections: bizType=='Templates'|| bizType=='Workouts' ? filterSections :null,
                     activeFilters: selectedFilters,
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,

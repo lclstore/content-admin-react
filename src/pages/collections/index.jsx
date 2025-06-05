@@ -9,7 +9,7 @@ export default function CollectionsList() {
     const tabItems = [
         {
             key: 'category/list',
-            label: 'Category',
+            label: 'Categories',
         },
         {
             key: 'programs/list',

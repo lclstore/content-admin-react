@@ -21,11 +21,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'type',
             label: 'Type',
-            options: [
-                { label: 'Regular', value: 'REGULAR' },
-                { label: 'Yoga', value: 'YOGA' },
-                { label: 'Dance', value: 'DANCE' },
-            ],
+            options: "BizPlaylistTypeEnums",
             required: true,
         },
         {

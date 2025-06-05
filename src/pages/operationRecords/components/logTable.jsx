@@ -226,7 +226,7 @@ export default ({ bizType }) => {
                 onRowClick={handleRowClick}
                 actionColumnKey="actions"
                 searchConfig={{
-                    placeholder: "Search content name or ID...",
+                    placeholder: "Search name or ID...",
                     searchValue: searchValue,
                     onSearchChange: handleSearchInputChange,
                 }}

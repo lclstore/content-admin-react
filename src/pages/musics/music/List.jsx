@@ -190,7 +190,7 @@ export default function Musics() {
                 columns={allColumnDefinitions}
                 onRowClick={handleRowClick}
                 searchConfig={{
-                    placeholder: "Search content name or ID...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={false}
                 filterConfig={{

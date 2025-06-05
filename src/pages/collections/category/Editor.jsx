@@ -29,7 +29,9 @@ export default function UserEditorWithCommon() {
         },
 
     ];
-    const [initialValues, setInitialValues] = useState({})
+    const [initialValues, setInitialValues] = useState({
+        showTypeCode:"CARD"
+    })
 
 
     const imageUpload = (value, file, form) => {
@@ -61,7 +63,6 @@ export default function UserEditorWithCommon() {
                     type: 'textarea',
                     name: 'description',
                     label: 'Description',
-                    required: true,
                     maxLength: 1000,
                     showCount: true,
                 },

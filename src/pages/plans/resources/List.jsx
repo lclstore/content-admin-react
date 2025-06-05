@@ -36,13 +36,17 @@ export default function WorkoutsList() {
     const allColumnDefinitions = useMemo(() => {
         return [
             {title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1},
+            {title: "Cover Image", width: 100,dataIndex: "coverImgUrl",mediaType: 'image',},
+            {title: "Detail Image",width: 100, dataIndex: "detailImgUrl",mediaType: 'image',},
+            {title: "Thumbnail Image",width: 100, dataIndex: "thumbnailImgUrl",mediaType: 'image',},
+            {title: "Complete Image", width: 100,dataIndex: "completeImgUrl",mediaType: 'image',},
             {
                 title: 'Name',
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
                 key: 'name',
-                width: 350,
+                // width: 350,
                 visibleColumn: 1
             },
             {
@@ -50,25 +54,23 @@ export default function WorkoutsList() {
                 dataIndex: 'status',
                 sorter: true,
                 options: 'displayStatus',
-                width: 120,
+                // width: 120,
             },
             {
                 title: 'Application',
                 dataIndex: 'applicationCode',
+                sorter: true,
                 options: 'BizResourceApplicationEnums',
-                width: 120,
+                // width: 120,
             },
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
                 sorter: true,
                 options: 'BizExerciseGenderEnums',
-                width: 120,
+                // width: 120,
             },
-            {title: "Cover Image", dataIndex: "coverImgUrl",mediaType: 'image',},
-            {title: "Detail Image", dataIndex: "detailImgUrl",mediaType: 'image',},
-            {title: "Thumbnail Image", dataIndex: "thumbnailImgUrl",mediaType: 'image',},
-            {title: "Complete Image", dataIndex: "completeImgUrl",mediaType: 'image',},
+            
             {
                 title: 'Actions',
                 key: 'actions',

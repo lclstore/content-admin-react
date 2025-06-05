@@ -30,26 +30,30 @@ export default () => {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            {
-                title: 'ID',
-                dataIndex: 'id',
-                width: 60,
-            },
+            
             {
                 title: 'Cover Image',
                 dataIndex: 'coverImgUrl',
                 mediaType: 'image',
                 showNewBadge: true,
+                width:200,
             },
             {
                 title: 'Detail Image',
                 dataIndex: 'detailImgUrl',
                 mediaType: 'image',
+                width:200,
+            },
+            {
+                title: 'ID',
+                dataIndex: 'id',
+                // width: 60,
             },
             {
                 title: 'Name',
                 dataIndex: 'name',
-                visibleColumn: 0
+                visibleColumn: 0,
+                // width:200,
             },
             {
                 title: 'Status',
@@ -57,14 +61,16 @@ export default () => {
                 key: 'status',
                 iconOptions: statusIconMap,
                 options: 'displayStatus',
-                visibleColumn: 0
+                visibleColumn: 0,
+                // width:200
             },
             {
                 title: 'Show Type',
                 dataIndex: 'showTypeCode',
                 sorter: true,
                 options: 'BizCategoryShowTypeEnums',
-                visibleColumn: 0
+                visibleColumn: 0,
+                // width:200,
             },
             {
                 title: 'Actions',

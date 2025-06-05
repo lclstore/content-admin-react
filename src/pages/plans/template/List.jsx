@@ -141,7 +141,7 @@ export default function WorkoutsList() {
                 columns={allColumnDefinitions}
                 moduleKey="template"
                 searchConfig={{
-                    placeholder: "Search content name or ID...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={false}
                 filterConfig={{

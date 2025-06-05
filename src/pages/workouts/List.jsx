@@ -156,7 +156,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
+            
             {
                 title: 'Cover ImgUrl',
                 width: 120,
@@ -165,6 +165,7 @@ export default function WorkoutsList() {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
             // {
             //     title: 'Detail ImgUrl',
             //     width: 120,
@@ -475,7 +476,7 @@ export default function WorkoutsList() {
                 leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"
                 searchConfig={{
-                    placeholder: "Search content name or ID...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={true}
                 filterConfig={{

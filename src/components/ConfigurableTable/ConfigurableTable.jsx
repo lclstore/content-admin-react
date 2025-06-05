@@ -236,7 +236,7 @@ function ConfigurableTable({
             options: options.filter(i => i.key != 'actions'), // 使用包含key和label的对象数组
         };
     }, [columns]);
-    console.log(columnSettingsSection);
+    console.log('columnSettingsSection',columnSettingsSection);
 
     // 准备传递给列设置 Popover 的初始选中值
     const initialVisibleColumnTitles = useMemo(() => {

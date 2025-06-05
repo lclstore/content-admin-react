@@ -28,11 +28,15 @@ export default function UserEditorWithCommon() {
         previewNextAudioStartTime: 3,
         previewLastAudioStartTime: 3,
         previewNameAudioStartTime: 6,
-        previewThree21AudioEndTime: 3,
+        previewThreeAudioEndTime: 3,
+        previewTwoAudioEndTime: 2,
+        previewOneAudioEndTime: 1,
         previewGoAudioStartTime: 0,
         executionGuidanceAudioStartTime: 2,
         executionHalfwayAudioStartTime: 30,
-        executionThree21AudioEndTime: 4,
+        executionThreeAudioEndTime: 4,
+        executionTwoAudioEndTime: 3,
+        executionOneAudioEndTime: 2,
         executionRestAudioEndTime: 1,
         executionBeepAudioEndTime: 5,
         introAudioClosed: 0,
@@ -41,11 +45,15 @@ export default function UserEditorWithCommon() {
         previewNextAudioClosed: 0,
         previewLastAudioClosed: 0,
         previewNameAudioClosed: 0,
-        previewThree21AudioClosed: 0,
+        previewThreeAudioClosed: 0,
+        previewTwoAudioClosed: 0,
+        previewOneAudioClosed: 0,
         previewGoAudioClosed: 0,
         executionGuidanceAudioClosed: 0,
         executionHalfwayAudioClosed: 0,
-        executionThree21AudioClosed: 0,
+        executionThreeAudioClosed: 0,
+        executionTwoAudioClosed: 0,
+        executionOneAudioClosed: 0,
         executionBeepAudioClosed: 0,
         executionRestAudioClosed: 0,
 
@@ -345,7 +353,7 @@ export default function UserEditorWithCommon() {
 
                     type: 'inputGroup',
                     name: 'warmUp',
-                    label: 'Preview Audio ( First | Next | Last | Name | 321 )',
+                    label: 'Preview Audio ( First | Next | Last | Name | 3 | 2 | 1 )',
                     // required: true,
                     inputConfig: [
                         {
@@ -697,15 +705,15 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'previewThree21AudioBizSoundId',
+                            name: 'previewThreeAudioBizSoundId',
                             label: '',
                             style: {
                                 width: '300px',
                             },
-                            placeholder: 'Preview 321 Audio',
+                            placeholder: 'Preview 3 Audio',
                             rules: [{
                                 required: true,
-                                message: 'Preview 321 Audio'
+                                message: 'Preview 3 Audio'
                             }],
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
@@ -742,7 +750,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'previewThree21AudioEndTime',
+                            name: 'previewThreeAudioEndTime',
                             label: '',
                             required: true,
                             maxLength: 100,
@@ -753,14 +761,192 @@ export default function UserEditorWithCommon() {
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Countdown Seconds'
                             }],
-                            style:{
-                                 border: '1px solid #d5c031'
+                            style: {
+                                border: '1px solid #d5c031'
                             },
                             showCount: true,
                         },
                         {
                             type: 'select',
-                            name: 'previewThree21AudioClosed',
+                            name: 'previewThreeAudioClosed',
+                            label: '',
+                            options: [
+                                {
+                                    label: 'Can Close',
+                                    value: 1
+                                }, {
+                                    label: "Can't Close",
+                                    value: 0
+                                },
+                            ],
+                            required: true,
+                        }
+
+
+
+                    ]
+                }, {
+
+                    type: 'inputGroup',
+                    name: 'warmUp',
+                    label: '',
+                    // required: true,
+                    inputConfig: [
+                        {
+                            type: 'antdSelect',
+                            name: 'previewTwoAudioBizSoundId',
+                            label: '',
+                            style: {
+                                width: '300px',
+                            },
+                            placeholder: 'Preview 2 Audio',
+                            rules: [{
+                                required: true,
+                                message: 'Preview 2 Audio'
+                            }],
+                            options: [
+                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
+                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
+                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
+                            ],
+                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
+                                return (
+                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
+                                        {option.label}
+                                        <span
+                                            onClick={(e) => {
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+                                            }}
+                                            onMouseDown={(e) => {
+                                                e.stopPropagation();
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+
+                                            }}>
+                                            {isPlaying && isPlaying === option.value ? (
+                                                <PauseCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            ) : (
+                                                <PlayCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            )}
+                                        </span>
+                                    </span >
+                                );
+                            },
+                            required: true,
+                        },
+                        {
+                            type: 'input',
+                            name: 'previewTwoAudioEndTime',
+                            label: '',
+                            required: true,
+                            maxLength: 100,
+                            placeholder: 'Countdown Seconds',
+                            defaultValue: 3,
+                            rules: [{
+                                required: true,
+                                pattern: /^\d+(\.\d+)?$/,
+                                message: 'Countdown Seconds'
+                            }],
+                            style: {
+                                border: '1px solid #d5c031'
+                            },
+                            showCount: true,
+                        },
+                        {
+                            type: 'select',
+                            name: 'previewTwoAudioClosed',
+                            label: '',
+                            options: [
+                                {
+                                    label: 'Can Close',
+                                    value: 1
+                                }, {
+                                    label: "Can't Close",
+                                    value: 0
+                                },
+                            ],
+                            required: true,
+                        }
+
+
+
+                    ]
+                }, {
+
+                    type: 'inputGroup',
+                    name: 'warmUp',
+                    label: '',
+                    // required: true,
+                    inputConfig: [
+                        {
+                            type: 'antdSelect',
+                            name: 'previewOneAudioBizSoundId',
+                            label: '',
+                            style: {
+                                width: '300px',
+                            },
+                            placeholder: 'Preview 1 Audio',
+                            rules: [{
+                                required: true,
+                                message: 'Preview 1 Audio'
+                            }],
+                            options: [
+                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
+                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
+                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
+                            ],
+                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
+                                return (
+                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
+                                        {option.label}
+                                        <span
+                                            onClick={(e) => {
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+                                            }}
+                                            onMouseDown={(e) => {
+                                                e.stopPropagation();
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+
+                                            }}>
+                                            {isPlaying && isPlaying === option.value ? (
+                                                <PauseCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            ) : (
+                                                <PlayCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            )}
+                                        </span>
+                                    </span >
+                                );
+                            },
+                            required: true,
+                        },
+                        {
+                            type: 'input',
+                            name: 'previewOneAudioEndTime',
+                            label: '',
+                            required: true,
+                            maxLength: 100,
+                            placeholder: 'Countdown Seconds',
+                            defaultValue: 3,
+                            rules: [{
+                                required: true,
+                                pattern: /^\d+(\.\d+)?$/,
+                                message: 'Countdown Seconds'
+                            }],
+                            style: {
+                                border: '1px solid #d5c031'
+                            },
+                            showCount: true,
+                        },
+                        {
+                            type: 'select',
+                            name: 'previewOneAudioClosed',
                             label: '',
                             options: [
                                 {
@@ -802,7 +988,7 @@ export default function UserEditorWithCommon() {
 
                     type: 'inputGroup',
                     name: 'executionVideoReps',
-                    label: 'Execution Audio ( Go | Guidance | Halfway | 321 | Rest | Beep )',
+                    label: 'Execution Audio ( Go | Guidance | Halfway | 3 | 2 | 1 | Rest | Beep )',
                     // required: true,
                     inputConfig: [
                         {
@@ -1069,15 +1255,15 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'executionThree21AudioBizSoundId',
+                            name: 'executionThreeAudioBizSoundId',
                             label: '',
                             style: {
                                 width: '300px'
                             },
-                            placeholder: 'Execution 321 Audio',
+                            placeholder: 'Execution 3 Audio',
                             rules: [{
                                 required: true,
-                                message: 'Execution 321 Audio'
+                                message: 'Execution 3 Audio'
                             }],
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
@@ -1114,7 +1300,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'executionThree21AudioEndTime',
+                            name: 'executionThreeAudioEndTime',
                             label: '',
                             required: true,
                             defaultValue: 30.1,
@@ -1125,14 +1311,194 @@ export default function UserEditorWithCommon() {
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Countdown Seconds'
                             }],
-                            style:{
-                                 border: '1px solid #d5c031'
+                            style: {
+                                border: '1px solid #d5c031'
                             },
                             showCount: true,
                         },
                         {
                             type: 'select',
-                            name: 'executionThree21AudioClosed',
+                            name: 'executionThreeAudioClosed',
+                            label: '',
+                            options: [
+                                {
+                                    label: 'Can Close',
+                                    value: 1
+                                }, {
+                                    label: "Can't Close",
+                                    value: 0
+                                },
+                            ],
+                            required: true,
+                        }
+
+
+
+                    ]
+                },
+                {
+
+                    type: 'inputGroup',
+                    name: 'warmUp',
+                    label: '',
+                    // required: true,
+                    inputConfig: [
+                        {
+                            type: 'antdSelect',
+                            name: 'executionTwoAudioBizSoundId',
+                            label: '',
+                            style: {
+                                width: '300px'
+                            },
+                            placeholder: 'Execution 2 Audio',
+                            rules: [{
+                                required: true,
+                                message: 'Execution 2 Audio'
+                            }],
+                            options: [
+                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
+                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
+                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
+                            ],
+                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
+                                return (
+                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
+                                        {option.label}
+                                        <span
+                                            onClick={(e) => {
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+                                            }}
+                                            onMouseDown={(e) => {
+                                                e.stopPropagation();
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+
+                                            }}>
+                                            {isPlaying && isPlaying === option.value ? (
+                                                <PauseCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            ) : (
+                                                <PlayCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            )}
+                                        </span>
+                                    </span >
+                                );
+                            },
+                            required: true,
+                        },
+                        {
+                            type: 'input',
+                            name: 'executionTwoAudioEndTime',
+                            label: '',
+                            required: true,
+                            defaultValue: 30.1,
+                            maxLength: 100,
+                            placeholder: 'Countdown Seconds',
+                            rules: [{
+                                required: true,
+                                pattern: /^\d+(\.\d+)?$/,
+                                message: 'Countdown Seconds'
+                            }],
+                            style: {
+                                border: '1px solid #d5c031'
+                            },
+                            showCount: true,
+                        },
+                        {
+                            type: 'select',
+                            name: 'executionTwoAudioClosed',
+                            label: '',
+                            options: [
+                                {
+                                    label: 'Can Close',
+                                    value: 1
+                                }, {
+                                    label: "Can't Close",
+                                    value: 0
+                                },
+                            ],
+                            required: true,
+                        }
+
+
+
+                    ]
+                },
+                {
+
+                    type: 'inputGroup',
+                    name: 'warmUp',
+                    label: '',
+                    // required: true,
+                    inputConfig: [
+                        {
+                            type: 'antdSelect',
+                            name: 'executionOneAudioBizSoundId',
+                            label: '',
+                            style: {
+                                width: '300px'
+                            },
+                            placeholder: 'Execution 1 Audio',
+                            rules: [{
+                                required: true,
+                                message: 'Execution 1 Audio'
+                            }],
+                            options: [
+                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
+                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
+                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
+                            ],
+                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
+                                return (
+                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
+                                        {option.label}
+                                        <span
+                                            onClick={(e) => {
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+                                            }}
+                                            onMouseDown={(e) => {
+                                                e.stopPropagation();
+                                                playAudio(option, e, isPlaying, setIsPlaying);
+
+                                            }}>
+                                            {isPlaying && isPlaying === option.value ? (
+                                                <PauseCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            ) : (
+                                                <PlayCircleOutlined
+                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
+                                                />
+                                            )}
+                                        </span>
+                                    </span >
+                                );
+                            },
+                            required: true,
+                        },
+                        {
+                            type: 'input',
+                            name: 'executionOneAudioEndTime',
+                            label: '',
+                            required: true,
+                            defaultValue: 30.1,
+                            maxLength: 100,
+                            placeholder: 'Countdown Seconds',
+                            rules: [{
+                                required: true,
+                                pattern: /^\d+(\.\d+)?$/,
+                                message: 'Countdown Seconds'
+                            }],
+                            style: {
+                                border: '1px solid #d5c031'
+                            },
+                            showCount: true,
+                        },
+                        {
+                            type: 'select',
+                            name: 'executionOneAudioClosed',
                             label: '',
                             options: [
                                 {
@@ -1215,8 +1581,8 @@ export default function UserEditorWithCommon() {
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Countdown Seconds'
                             }],
-                            style:{
-                                 border: '1px solid #d5c031'
+                            style: {
+                                border: '1px solid #d5c031'
                             },
                             showCount: true,
                         },
@@ -1300,8 +1666,8 @@ export default function UserEditorWithCommon() {
                             maxLength: 100,
                             placeholder: 'Countdown Seconds',
                             defaultValue: 1,
-                            style:{
-                                 border: '1px solid #d5c031'
+                            style: {
+                                border: '1px solid #d5c031'
                             },
                             rules: [{
                                 required: true,
@@ -1430,12 +1796,12 @@ export default function UserEditorWithCommon() {
                 onCollapseChange={handleCollapseChange}
                 // 其他基本配置
                 // renderItemMata={renderItemMata}
-                config={{ formName: 'workoutSettings', title: 'Workout Settings', headerButtons}}
+                config={{ formName: 'workoutSettings', title: 'Workout Settings', headerButtons }}
                 isBack={false}
-                isCollapse={true} 
+                isCollapse={true}
                 formType="advanced"
-                
-                collapseFormConfig={{defaultActiveKeys:'all'}}
+
+                collapseFormConfig={{ defaultActiveKeys: 'all' }}
                 initialValues={initialValues}
             />
         </div>

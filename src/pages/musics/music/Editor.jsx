@@ -1,7 +1,6 @@
 import React, { useMemo, } from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm';
-export default function UserEditorWithCommon() {
-
+export default function UserEditorWithCommon({id, setFormRef}) {
 
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -10,6 +9,7 @@ export default function UserEditorWithCommon() {
             // required: true,
             name: 'audioUrl', // 视频文件
             label: 'Audio',
+            required: true,
             durationName: 'audioDuration',
             acceptedFileTypes: 'mp3',
         },
@@ -31,12 +31,18 @@ export default function UserEditorWithCommon() {
 
     return (
         <CommonEditorForm
+            
+            changeHeader={false}
             formType="basic"
             moduleKey="music"
+            isBack={false}
             enableDraft={true}
-            config={{ formName: 'Music', title: 'Music', hideSaveButton: false, hideBackButton: false }}
+            config={{ formName: 'Music', hideSaveButton
+                : false, hideBackButton: true }}
             fields={formFields}
+            id={id}
             initialValues={{}}
+            setFormRef={setFormRef}
         />
     );
 } 

@@ -336,7 +336,35 @@ export default function CommonEditor(props) {
     };
 
     // 处理选中项被添加到表单后的回调
-    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance) => {
+    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance, isCollapse) => {
+        // 递归查找并更新dataList的辅助函数
+        const findAndUpdateDataList = (field, itemsToAdd) => {
+            // 如果当前字段有dataList，直接返回更新后的字段
+            if (field.dataList !== undefined) {
+                const newDataList = Array.isArray(field.dataList)
+                    ? [...field.dataList, ...itemsToAdd]
+                    : itemsToAdd;
+                return {
+                    ...field,
+                    dataList: newDataList
+                };
+            }
+
+            // 如果当前字段有子字段，递归查找
+            if (field.fields) {
+                const updatedFields = field.fields.map(subField =>
+                    findAndUpdateDataList(subField, itemsToAdd)
+                );
+                return {
+                    ...field,
+                    fields: updatedFields
+                };
+            }
+
+            // 如果既没有dataList也没有子字段，返回原字段
+            return field;
+        };
+
         // 创建 formFields 的深拷贝
         const updatedFields = internalFormFields.map(field => {
             // 找到匹配的面板
@@ -350,41 +378,29 @@ export default function CommonEditor(props) {
                     const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
 
                     if (expandedItemIndex !== -1) {
-                        // 如果找到展开的项，在其后插入新项（可能是多个）
+                        // 如果找到展开的项，在其后插入新项
                         const newDataList = [...field.dataList];
                         newDataList.splice(expandedItemIndex + 1, 0, ...itemsToAdd);
-
                         return {
                             ...field,
                             dataList: newDataList
                         };
                     }
                 }
-                const newDataList = Array.isArray(field.dataList)
-                    ? [...field.dataList, ...itemsToAdd] // 如果是数组，创建新数组并添加新项（可能是多个）
-                    : itemsToAdd;
 
-
-                // 默认行为：如果没有展开的项或找不到展开的项，添加到末尾
-                return {
-                    ...field,
-                    dataList: newDataList // 如果不是数组，创建新数组
-                };
+                // 使用递归函数查找并更新dataList
+                return findAndUpdateDataList(field, itemsToAdd);
             }
 
             if (panelName === 'basic' && field.type === 'structureList') {
                 const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
-                return {
-                    ...field,
-                    dataList: [...(field.dataList || []), ...itemsToAdd]
-
-                };
+                return findAndUpdateDataList(field, itemsToAdd);
             }
 
             return field; // 返回未修改的其他面板
         });
-        console.log('updatedFields', updatedFields);
 
+        console.log('updatedFields', updatedFields);
 
         // 更新内部状态
         setInternalFormFields(updatedFields);

@@ -125,6 +125,7 @@ export default function UserEditorWithCommon() {
                     name: 'musicIdList',
                     // renderItemMata: renderItemMata,
                     label: 'Musics',
+                    isCollapse: true,
                     formterList: (dataList, formValues) => {
                         return dataList.map(item => {
                             return {

@@ -403,13 +403,12 @@ const CollapseForm = ({
             // 查找所有具有 isListData 属性的面板
             const { dataListItem, parentItem } = findFirstDataListItemAndParent(fields);
             if (dataListItem) {
-                const targetPanel = parentItem || dataListItem || activeKeys[0];
+                const targetPanel = dataListItem || dataListItem || activeKeys[0];
                 // 如果目标面板未展开，则展开它
-                if (!activeKeys.includes(targetPanel.name)) {
+                if (!activeKeys.includes(parentItem.name)) {
                     // 展开目标面板
-                    onCollapseChange(targetPanel.name);
+                    onCollapseChange(parentItem.name);
                 }
-
                 // 将选中的数据添加到表单中
                 try {
                     // 获取当前表单数据
@@ -445,7 +444,7 @@ const CollapseForm = ({
                     currentFormValues[fieldName].push(itemToAdd);
 
                     // 更新表单值
-                    // form.setFieldsValue(currentFormValues);
+                    form.setFieldsValue(currentFormValues);
 
                     // 触发表单的 onValuesChange 回调（如果直接设置值可能不会触发）
                     const changeEvent = {};
@@ -458,9 +457,7 @@ const CollapseForm = ({
 
                     // 如果提供了回调函数，则调用它
                     if (onItemAdded && typeof onItemAdded === 'function') {
-                        // 获取当前面板中展开的项的ID
-                        const expandedItemId = expandedItems[targetPanel.name] || null;
-                        onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId, form);
+                        onItemAdded(parentItem?.name || targetPanel.name, fieldName, itemToAdd, null, form);
                     }
 
                     // 通知父组件已处理完选中项，可以清空选中状态
@@ -481,7 +478,7 @@ const CollapseForm = ({
                 }
             }
         }
-    }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed, expandedItems]);
+    }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed]);
 
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {
@@ -637,28 +634,6 @@ const CollapseForm = ({
                             children: (
                                 <div className={styles.collapsePanelContent}>
                                     {renderFieldGroup(item.fields || [])}
-
-                                    {/* 如果有数据列表，则渲染可排序项目 */}
-                                    {
-                                        item.dataList && <div className='structureList-title'>{`${item.dataList?.length || 0} ${item.label}`}</div>
-                                    }
-                                    {
-
-                                        item.dataList &&
-                                        <StructureList
-                                            form={form}
-                                            onItemAdded={onItemAdded}
-                                            onReplaceItem={onReplaceItem}
-                                            onDeleteItem={onDeleteItem}
-                                            onCopyItem={onCopyItem}
-                                            onUpdateItem={onUpdateItem}
-                                            onSortItems={onSortItems}
-                                            onSelectedItemProcessed={onSelectedItemProcessed}
-                                            commonListConfig={commonListConfig}
-                                            selectedItemFromList={selectedItemFromList}
-                                            {...item}
-                                        />
-                                    }
                                 </div>
                             )
                         }]}

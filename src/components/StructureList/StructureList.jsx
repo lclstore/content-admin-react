@@ -326,6 +326,7 @@ const StructureList = ({
     form,
     label,
     type,
+    isCollapse,
     selectedItemFromList,
     onSelectedItemProcessed,
     onSortItems,
@@ -542,7 +543,8 @@ const StructureList = ({
     }, [tempSelectedItem, currentReplaceItem.itemId]);
 
     useEffect(() => {
-        if (selectedItemFromList && typeof onItemAdded === 'function') {
+        if (selectedItemFromList && typeof onItemAdded === 'function' && !isCollapse) {
+            debugger
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态
             if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {

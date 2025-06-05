@@ -87,7 +87,6 @@ export default () => {
                 title: 'New End Time',
                 dataIndex: 'newEndTime',
                 sorter: true,
-                width: 120,
                 visibleColumn: 0
             },
             {

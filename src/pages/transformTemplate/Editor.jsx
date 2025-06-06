@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-
+import request from "@/request";
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { commonListData, filterSections } from '@/pages/Data';
 import {
@@ -350,14 +350,17 @@ export default function UserEditorWithCommon() {
         setFormFields(updatedFields);
     };
 
-    //请求列表数据方法
     const initCommonListData = (params) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                resolve(commonListData.filter(item => item.status === 1));
-            }, 1000);
-        });
+        console.log('initCommonListData', params);
+
+        return new Promise(resolve => {
+            request.get({
+                url: `/exercise/page`,
+                load: false,
+                data: params,
+                callback: res => resolve(res?.data)
+            });
+        })
     }
 
     // 自定义渲染列表项展示

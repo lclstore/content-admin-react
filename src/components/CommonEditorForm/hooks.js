@@ -149,10 +149,9 @@ export const useHeaderConfig = (params) => {
         for (const field of fields) {
             const value = dataToSave[field.name];
             const isRequired = formType === 'advanced' && isCollapse && field.required;
-
+            const isStructureList = field.type === 'structureList';
             // 校验必填项
-            if (isRequired && (value === undefined || value === null || value === '')) {
-                debugger
+            if (isRequired && ((value === undefined || value === null || value === '') || (isStructureList && field.dataList.length === 0))) {
                 if (setActiveCollapseKeys && parent.name) {
                     setActiveCollapseKeys(parent.name);
 
@@ -252,6 +251,7 @@ export const useHeaderConfig = (params) => {
 
     // 执行保存操作
     const executeSave = async (dataToSave, status = null) => {
+
 
         setLoading(true);
         // 处理数组列表相关数据格式和验证

@@ -214,50 +214,95 @@ export default function UserEditorWithCommon() {
 
             title: 'Structure',
             label: 'Structure Settings',
-            name: 'structure',
+            name: 'exerciseGroupList',
+            isGroup: true,
             isShowAdd: true,
+            formterList: (dataList) => {
+                return dataList?.map(item => {
+                    return {
+                        name: item.name,
+                        id: item.id
+                    }
+                })
+            },
+
             icon: <VideoCameraOutlined />,
             fields: [
+
+                {
+                    type: 'input',
+                    name: 'structureName',
+                    label: 'Structure Name',
+                    required: true,
+                },
+                {
+                    type: 'numberStepper',
+                    min: 1,
+                    max: 5,
+                    step: 1,
+                    formatter: (value) => value, // 格式化显示为 0:XX
+                    name: 'reps', // 修改字段名避免重复
+                    label: 'Reps',
+                    required: true,
+                },
                 {
                     type: 'structureList',
-                    name: 'exerciseList',
-                    // renderItemMata: renderItemMata,
-                    label: 'Exercises',
+                    name: 'exerciseIdList',
                     dataList: [],
-                    structureListFields: [
-                        //    {
-                        //         type: 'input',
-                        //         required: true,
-                        //         setDefaultValue: (data) => {
-                        //             return data.name
-                        //         },
-                        //         name: 'displayName',
-                        //         label: 'Display Name',
-                        //     },
-                        //     {
-                        //         type: 'select',
-                        //         name: 'premium',
-                        //         label: 'Premium',
-                        //         required: true,
-                        //         setDefaultValue: 0,
-                        //         options: [
-                        //             { label: 'Yes', value: 1 },
-                        //             { label: 'No', value: 0 },
-                        //         ],
-                        //     },
-
-                    ],
-
-                    rules: [
-                        { required: true, message: 'Please add at least one music' },
-                    ]
+                    label: 'Exercises',
+                    required: true,
                 },
-
-
             ]
 
+        },
+        // {
 
-        }
+        //     title: 'Structure',
+        //     label: 'Structure Settings',
+        //     name: 'structure',
+        //     isShowAdd: true,
+        //     icon: <VideoCameraOutlined />,
+        //     fields: [
+        //         {
+        //             type: 'structureList',
+        //             name: 'exerciseList',
+        //             // renderItemMata: renderItemMata,
+        //             label: 'Exercises',
+        //             dataList: [],
+        //             structureListFields: [
+        //                 {
+        //                     type: 'input',
+        //                     required: true,
+        //                     setDefaultValue: (data) => {
+        //                         return data.name
+        //                     },
+        //                     name: 'displayName',
+        //                     label: 'Display Name',
+        //                 },
+        //                 {
+        //                     type: 'select',
+        //                     name: 'premium',
+        //                     label: 'Premium',
+        //                     required: true,
+        //                     setDefaultValue: 0,
+        //                     options: [
+        //                         { label: 'Yes', value: 1 },
+        //                         { label: 'No', value: 0 },
+        //                     ],
+        //                 },
+
+        //             ],
+
+        //             rules: [
+        //                 { required: true, message: 'Please add at least one music' },
+        //             ]
+        //         },
+
+
+        //     ]
+
+
+        // }
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
     // 使用新设计：只维护一个formFields状态，并提供更新回调
@@ -265,7 +310,7 @@ export default function UserEditorWithCommon() {
 
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields, formValues) => {
-        debugger
+        // debugger
         setFormFields(updatedFields);
         if (defaultInitialValues !== initialValues) {
             // setInitialValues(formValues);
@@ -337,6 +382,25 @@ export default function UserEditorWithCommon() {
             });
         })
     }
+    const saveBeforeTransform = (info) => {
+        const { formFields, formValues } = info;
+        console.log(info);
+
+        const exerciseGroupList = [];
+        const groupList = formFields.filter(item => item.isGroup) || [];
+        groupList.forEach((item, index) => {
+            exerciseGroupList.push({
+                structureName: formValues[`structureName${index ? index : ''}`],
+                reps: formValues[`reps${index ? index : ''}`],
+                exerciseList: formValues[`exerciseIdList${index ? index : ''}`]?.map(item => item.id)
+            })
+            delete formValues[`exerciseIdList${index ? index : ''}`];
+        })
+        formValues['exerciseGroupList'] = exerciseGroupList;
+
+        debugger
+        return formValues;
+    }
 
     return (
         <CommonEditorForm
@@ -344,6 +408,7 @@ export default function UserEditorWithCommon() {
             fields={formFields}
             // 提供更新配置项回调
             onFormFieldsChange={handleFormFieldsChange}
+            saveBeforeTransform={saveBeforeTransform}
             // 提供折叠面板展开回调
             // onCollapseChange={handleCollapseChange}
             // 其他基本配置

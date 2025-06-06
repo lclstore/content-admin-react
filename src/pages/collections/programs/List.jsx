@@ -30,7 +30,7 @@ export default () => {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            
+
             {
                 title: 'Cover Image',
                 dataIndex: 'coverImgUrl',
@@ -53,7 +53,7 @@ export default () => {
                 title: 'Name',
                 dataIndex: 'name',
                 visibleColumn: 0,
-                // width:200,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
                 title: 'Status',
@@ -69,8 +69,7 @@ export default () => {
                 dataIndex: 'showTypeCode',
                 sorter: true,
                 options: 'BizCategoryShowTypeEnums',
-                visibleColumn: 0,
-                // width:200,
+                visibleColumn: 0
             },
             {
                 title: 'Actions',

@@ -191,7 +191,8 @@ export default function WorkoutsList() {
             //     visibleColumn: 0
             // },
 
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true },
+            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,},
             {
                 title: 'Status',
                 dataIndex: 'status',

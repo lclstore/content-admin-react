@@ -92,7 +92,7 @@ export default function UsersList() {
                 width: 350,
                 visibleColumn: 0,
                 render: (record) => (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center',fontWeight:700 }}>
                         {record.avatar ? (
                             <img
                                 src={`${fileSettings.baseURL}${record.avatar}`}

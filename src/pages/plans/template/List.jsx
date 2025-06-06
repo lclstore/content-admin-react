@@ -50,7 +50,8 @@ export default function WorkoutsList() {
                 dataIndex: 'name',
                 key: 'name',
                 width: 350,
-                visibleColumn: 1
+                visibleColumn: 1,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {title: "Duration (Min)", dataIndex: "durationCode", options: 'BizTemplateDurationEnums', sorter: true},
             {

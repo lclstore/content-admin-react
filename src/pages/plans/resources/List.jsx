@@ -47,7 +47,8 @@ export default function WorkoutsList() {
                 dataIndex: 'name',
                 key: 'name',
                 // width: 350,
-                visibleColumn: 1
+                visibleColumn: 1,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
                 title: 'Status',
@@ -70,7 +71,7 @@ export default function WorkoutsList() {
                 options: 'BizExerciseGenderEnums',
                 // width: 120,
             },
-            
+
             {
                 title: 'Actions',
                 key: 'actions',

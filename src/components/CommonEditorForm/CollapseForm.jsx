@@ -644,7 +644,7 @@ const CollapseForm = ({
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
             handleAddCustomPanel(newCustomPanel);
-            onCollapseChange(newPanelName); // 自动展开新添加的面板
+            // onCollapseChange(newPanelName); // 自动展开新添加的面板
         }
     };
 

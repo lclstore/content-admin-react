@@ -286,23 +286,24 @@ export default function CommonEditor(props) {
 
     // 添加自定义面板的回调函数
     const handleAddCustomPanel = (newPanel) => {
+
         // 内部面板有isShowAdd的数量
         if (!newField) return;
 
-        const lastIndexWithDatalist = [...internalFormFields]
-            .map((item, index) => item.dataList ? index : -1)
-            .filter(index => index !== -1)
-            .pop();
+        // const lastIndexWithDatalist = [...internalFormFields]
+        //     .map((item, index) => item.dataList ? index : -1)
+        //     .filter(index => index !== -1)
+        //     .pop();
 
-        let updatedFields;
-        if (lastIndexWithDatalist !== undefined && lastIndexWithDatalist !== -1) {
-            updatedFields = [...internalFormFields];
-            updatedFields.splice(lastIndexWithDatalist + 1, 0, newPanel);
-        } else {
-            // 如果没有任何项包含 datalist，则默认追加到末尾
-            updatedFields = [...internalFormFields, newPanel];
-        }
-
+        // let updatedFields;
+        // if (lastIndexWithDatalist !== undefined && lastIndexWithDatalist !== -1) {
+        //     updatedFields = [...internalFormFields];
+        //     updatedFields.splice(lastIndexWithDatalist + 1, 0, newPanel);
+        // } else {
+        //     // 如果没有任何项包含 datalist，则默认追加到末尾
+        //     updatedFields = [...internalFormFields, newPanel];
+        // }
+        const updatedFields = [...internalFormFields, newPanel];
         // 更新内部状态
         setInternalFormFields(updatedFields);
 

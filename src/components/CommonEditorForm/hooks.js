@@ -152,6 +152,7 @@ export const useHeaderConfig = (params) => {
 
             // 校验必填项
             if (isRequired && (value === undefined || value === null || value === '')) {
+                debugger
                 if (setActiveCollapseKeys && parent.name) {
                     setActiveCollapseKeys(parent.name);
 
@@ -227,7 +228,6 @@ export const useHeaderConfig = (params) => {
         const isArray = Array.isArray(field.dataList);
         const isRequired = field.required || field.rules?.some(rule => rule?.required);
         const isEmptyList = isArray && field.dataList.length === 0;
-
         // 只对需要校验的结构化列表或数组字段生效
         if ((isStructureList || isArray) && isRequired && isEmptyList) {
             // 如果配置了折叠面板开关，尝试展开当前折叠项

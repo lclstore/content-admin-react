@@ -3,7 +3,6 @@ import { Collapse, Form, Button, Typography, List, Avatar, Space, Row, Col, noti
 import { PlusOutlined, DeleteOutlined, MenuOutlined, RetweetOutlined, CopyOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { ShrinkOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { renderFormControl, processValidationRules, renderFormItem } from './FormFields';
-import StructureList from '/StructureList/StructureList';
 import CommonList from './CommonList';
 import { optionsConstants } from '@/constants';
 import styles from './CollapseForm.module.css';
@@ -237,7 +236,6 @@ const CollapseForm = ({
     onCopyItem,
     onReplaceItem,
 }) => {
-    // debugger
     const newField = fields.find(item => item.isShowAdd);
     // 表单连接状态
     const formConnected = !!form;
@@ -270,12 +268,65 @@ const CollapseForm = ({
         }
     }, [onDeleteItem]);
 
+    // 递归查找目标项并复制
+    const findAndCopyItemInFields = (field, itemId) => {
+        let found = false;
+        let result = field;
+
+        // 如果当前字段有 dataList，查找目标项
+        if (field.dataList !== undefined && Array.isArray(field.dataList)) {
+            const targetItem = field.dataList.find(item => item.id === itemId);
+            if (targetItem) {
+                // 找到目标项，创建副本
+                const newItem = {
+                    ...targetItem,
+                    id: `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                };
+                result = {
+                    ...field,
+                    dataList: [...field.dataList, newItem]
+                };
+                found = true;
+            }
+        }
+
+        // 如果在当前层级没找到，且有子字段，继续递归查找
+        if (!found && field.fields) {
+            const updatedFields = field.fields.map(subField => {
+                const { found: subFound, result: subResult } = findAndCopyItemInFields(subField, itemId);
+                if (subFound) {
+                    found = true;
+                }
+                return subResult;
+            });
+            result = {
+                ...field,
+                fields: updatedFields
+            };
+        }
+
+        return { found, result };
+    };
+
     // 处理复制项目
     const handleCopyItem = useCallback((panelId, itemId) => {
+        // 更新所有字段
+        const updatedFields = fields.map(field => {
+            const { result } = findAndCopyItemInFields(field, itemId);
+            return result;
+        });
+
+        // 更新表单数据
+        if (form) {
+            const formValues = form.getFieldsValue();
+            form.setFieldsValue(formValues);
+        }
+
+        // 如果提供了 onCopyItem 回调，调用它
         if (onCopyItem) {
             onCopyItem(panelId, itemId);
         }
-    }, [onCopyItem]);
+    }, [fields, form, onCopyItem]);
 
     // 处理替换项目
     const handleOpenReplaceModal = useCallback((panelId, itemId, itemIndex) => {
@@ -378,22 +429,25 @@ const CollapseForm = ({
         }
     }
     // 收集具有 dataList 属性的面板
-    const findFirstDataListItemAndParent = (fields, parent = null) => {
+    const findFirstDataListItemAndParent = (fields, parent = {}) => {
         for (const item of fields) {
+            console.log(item);
+
             if (item.dataList) {
+                debugger
                 return {
-                    dataListItem: item,
-                    parentItem: parent,
+                    dataListItem: item || {},
+                    parentItem: parent || item || {},
                 };
             }
 
-            if (Array.isArray(item.fields)) {
+            if (Array.isArray(item.fields || item.structureListFields)) {
                 const result = findFirstDataListItemAndParent(item.fields, item);
                 if (result) return result;
             }
         }
 
-        return null;
+        return {};
     };
 
 
@@ -401,14 +455,16 @@ const CollapseForm = ({
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
-            // 查找所有具有 isListData 属性的面板
+            // 查找所有具有 dataList 属性的面板
             const { dataListItem, parentItem } = findFirstDataListItemAndParent(fields);
+            debugger
             if (dataListItem) {
-                const targetPanel = parentItem || dataListItem || activeKeys[0];
+                const targetPanel = dataListItem || dataListItem || activeKeys[0];
+
                 // 如果目标面板未展开，则展开它
-                if (!activeKeys.includes(targetPanel.name)) {
+                if (!activeKeys.includes(parentItem.name)) {
                     // 展开目标面板
-                    onCollapseChange(targetPanel.name);
+                    onCollapseChange(parentItem.name);
                 }
 
                 // 将选中的数据添加到表单中
@@ -420,7 +476,6 @@ const CollapseForm = ({
                     // 1. 如果面板有指定的 listFieldName，使用该字段名
                     // 2. 否则使用面板的 name 作为字段名
                     const fieldName = targetPanel.listFieldName || targetPanel.name;
-
                     // 初始化字段值为数组（如果尚未初始化）
                     if (!currentFormValues[fieldName]) {
                         currentFormValues[fieldName] = [];
@@ -446,7 +501,7 @@ const CollapseForm = ({
                     currentFormValues[fieldName].push(itemToAdd);
 
                     // 更新表单值
-                    // form.setFieldsValue(currentFormValues);
+                    form.setFieldsValue(currentFormValues);
 
                     // 触发表单的 onValuesChange 回调（如果直接设置值可能不会触发）
                     const changeEvent = {};
@@ -459,9 +514,8 @@ const CollapseForm = ({
 
                     // 如果提供了回调函数，则调用它
                     if (onItemAdded && typeof onItemAdded === 'function') {
-                        // 获取当前面板中展开的项的ID
-                        const expandedItemId = expandedItems[targetPanel.name] || null;
-                        onItemAdded(targetPanel.name, fieldName, itemToAdd, expandedItemId, form);
+                        debugger
+                        onItemAdded(parentItem?.name || targetPanel.name, fieldName, itemToAdd, null, form);
                     }
 
                     // 通知父组件已处理完选中项，可以清空选中状态
@@ -482,10 +536,12 @@ const CollapseForm = ({
                 }
             }
         }
-    }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed, expandedItems]);
+    }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed]);
 
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {
+        console.log(fieldGroup);
+
         return fieldGroup.map((field, index) => (
             <React.Fragment key={field.name || `field-${index}`}>
                 {renderFormItem(field, {
@@ -493,7 +549,15 @@ const CollapseForm = ({
                     formConnected,
                     initialValues,
                     mounted,
-                    moduleKey
+                    moduleKey,
+                    onAddItem: onItemAdded,
+                    onDeleteItem,
+                    onCopyItem: handleCopyItem,
+                    onReplaceItem,
+                    onUpdateItem,
+                    commonListConfig,
+                    onSortItems,
+                    onSelectedItemProcessed,
                 })}
             </React.Fragment>
         ));
@@ -638,44 +702,6 @@ const CollapseForm = ({
                             children: (
                                 <div className={styles.collapsePanelContent}>
                                     {renderFieldGroup(item.fields || [])}
-
-                                    {/* 如果有数据列表，则渲染可排序项目 */}
-                                    {Array.isArray(item.dataList) && item.dataList.length > 0 && (
-                                        <DndContext
-                                            sensors={sensors}
-                                            collisionDetection={closestCenter}
-                                            onDragEnd={(event) => handleDragEnd(event, item.name)}
-                                        >
-                                            {/* 拖拽排序上下文 */}
-                                            <SortableContext
-                                                items={item.dataList.map((_, index) => `${item.name}-item-${index}`)} // 使用索引作为ID
-                                                strategy={verticalListSortingStrategy}
-                                            >
-                                                <div className='structure-list' style={{
-                                                    position: 'relative',
-                                                    padding: '2px 0'
-                                                }}>
-                                                    {item.dataList.map((listItem, index) => (
-                                                        <SortableItemRenderer
-                                                            key={index}
-                                                            renderItemMata={renderItemMata}
-                                                            panelId={item.name}
-                                                            item={listItem}
-                                                            itemIndex={index}
-                                                            isExpanded={expandedItems[item.name] === listItem.id}
-                                                            toggleExpandItem={toggleExpandItem}
-                                                            onOpenReplaceModal={handleOpenReplaceModal}
-                                                            onCopyItem={handleCopyItem}
-                                                            onDeleteItem={handleDeleteItem}
-                                                            onItemChange={(panelId, itemId, key, value) => {
-                                                                // 处理项目属性变更的逻辑
-                                                            }}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </SortableContext>
-                                        </DndContext>
-                                    )}
                                 </div>
                             )
                         }]}

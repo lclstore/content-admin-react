@@ -85,21 +85,6 @@ export default function UserEditorWithCommon() {
         });
     }
 
-    //请求列数据方法
-    const initFormData = (id) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                if (id) {
-
-                    resolve(user || {});  // 找不到也返回空对象，避免 undefined
-                } else {
-                    // 新增场景：直接返回空对象
-                    resolve(initialValues);
-                }
-            }, 1000);
-        });
-    };
 
     const initialFormFields = useMemo(() => [
         {
@@ -231,37 +216,35 @@ export default function UserEditorWithCommon() {
             label: 'Structure Settings',
             name: 'structure',
             isShowAdd: true,
-            required: true,
             icon: <VideoCameraOutlined />,
-            dataList: [],
             fields: [
                 {
                     type: 'structureList',
-                    name: 'musicList',
+                    name: 'exerciseList',
                     // renderItemMata: renderItemMata,
-                    label: 'Musics',
+                    label: 'Exercises',
                     dataList: [],
                     structureListFields: [
-                        {
-                            type: 'input',
-                            required: true,
-                            setDefaultValue: (data) => {
-                                return data.name
-                            },
-                            name: 'displayName',
-                            label: 'Display Name',
-                        },
-                        {
-                            type: 'select',
-                            name: 'premium',
-                            label: 'Premium',
-                            required: true,
-                            setDefaultValue: 0,
-                            options: [
-                                { label: 'Yes', value: 1 },
-                                { label: 'No', value: 0 },
-                            ],
-                        },
+                        //    {
+                        //         type: 'input',
+                        //         required: true,
+                        //         setDefaultValue: (data) => {
+                        //             return data.name
+                        //         },
+                        //         name: 'displayName',
+                        //         label: 'Display Name',
+                        //     },
+                        //     {
+                        //         type: 'select',
+                        //         name: 'premium',
+                        //         label: 'Premium',
+                        //         required: true,
+                        //         setDefaultValue: 0,
+                        //         options: [
+                        //             { label: 'Yes', value: 1 },
+                        //             { label: 'No', value: 0 },
+                        //         ],
+                        //     },
 
                     ],
 
@@ -269,6 +252,8 @@ export default function UserEditorWithCommon() {
                         { required: true, message: 'Please add at least one music' },
                     ]
                 },
+
+
             ]
 
 
@@ -280,9 +265,10 @@ export default function UserEditorWithCommon() {
 
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields, formValues) => {
+        debugger
         setFormFields(updatedFields);
         if (defaultInitialValues !== initialValues) {
-            setInitialValues(formValues);
+            // setInitialValues(formValues);
         }
     };
 
@@ -359,7 +345,7 @@ export default function UserEditorWithCommon() {
             // 提供更新配置项回调
             onFormFieldsChange={handleFormFieldsChange}
             // 提供折叠面板展开回调
-            onCollapseChange={handleCollapseChange}
+            // onCollapseChange={handleCollapseChange}
             // 其他基本配置
             // renderItemMata={renderItemMata}
             commonListConfig={{
@@ -370,7 +356,6 @@ export default function UserEditorWithCommon() {
             }}
             moduleKey='workout'
             isCollapse={true}
-            initFormData={initFormData}
             formType="advanced"
             enableDraft={true}
             fieldsToValidate={['name', 'birthday']}

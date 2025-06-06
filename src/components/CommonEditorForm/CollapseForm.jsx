@@ -429,25 +429,30 @@ const CollapseForm = ({
         }
     }
     // 收集具有 dataList 属性的面板
-    const findFirstDataListItemAndParent = (fields, parent = {}) => {
-        for (const item of fields) {
-            console.log(item);
+    const findFirstDataListItemAndParent = (fields, parent = null) => {
+        if (!Array.isArray(fields)) {
+            return null;
+        }
 
-            if (item.dataList) {
-                debugger
+        for (const item of fields) {
+            // 如果当前项有 dataList 属性，直接返回结果
+            if (item && item.dataList) {
                 return {
-                    dataListItem: item || {},
-                    parentItem: parent || item || {},
+                    dataListItem: item,
+                    parentItem: parent || item,
                 };
             }
 
-            if (Array.isArray(item.fields || item.structureListFields)) {
+            // 如果当前项有子字段，递归查找
+            if (item && Array.isArray(item.fields)) {
                 const result = findFirstDataListItemAndParent(item.fields, item);
-                if (result) return result;
+                if (result) {
+                    return result;
+                }
             }
         }
 
-        return {};
+        return null;
     };
 
 
@@ -455,11 +460,12 @@ const CollapseForm = ({
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
-            // 查找所有具有 dataList 属性的面板
-            const { dataListItem, parentItem } = findFirstDataListItemAndParent(fields);
 
-            if (dataListItem) {
-                const targetPanel = dataListItem || dataListItem || activeKeys[0];
+            // 查找所有具有 dataList 属性的面板
+            const result = findFirstDataListItemAndParent(fields);
+            if (result) {
+                const { dataListItem, parentItem } = result;
+                const targetPanel = dataListItem;
 
                 // 如果目标面板未展开，则展开它
                 if (!activeKeys.includes(parentItem.name)) {
@@ -523,10 +529,7 @@ const CollapseForm = ({
                     }
                 } catch (error) {
                     console.error('添加数据到面板时出错:', error);
-                    // 即使出错也清空选中状态，避免无限循环
-                    if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
-                        onSelectedItemProcessed();
-                    }
+
                 }
             } else {
                 // 如果没有适合的面板，也需要清空选中状态
@@ -535,7 +538,7 @@ const CollapseForm = ({
                 }
             }
         }
-    }, [selectedItemFromList, fields, activeKeys, onCollapseChange, form, onItemAdded, onSelectedItemProcessed]);
+    }, [selectedItemFromList]);
 
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {

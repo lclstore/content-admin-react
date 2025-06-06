@@ -49,7 +49,8 @@ export default () => {
             {
                 title: 'Name',
                 dataIndex: 'name',
-                visibleColumn: 0
+                visibleColumn: 0,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
                 title: 'Status',

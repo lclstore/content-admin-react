@@ -29,7 +29,8 @@ export default ({bizType}) => {
                 title: 'Name',
                 dataIndex: 'name',
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 0,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
                 title: 'Operation Type',

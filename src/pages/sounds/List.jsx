@@ -41,7 +41,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
-                
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
                 key: 'name',
                 width: 350,
                 stye: {

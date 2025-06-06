@@ -94,7 +94,8 @@ export default function Musics() {
                 showSorterTooltip: false,
                 dataIndex: 'name',
                 key: 'name',
-                visibleColumn: 1
+                visibleColumn: 1,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
                 title: 'Status',

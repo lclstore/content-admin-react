@@ -151,8 +151,12 @@ export const useHeaderConfig = (params) => {
             const value = dataToSave[field.name];
             const isRequired = formType === 'advanced' && isCollapse && field.required;
             const isStructureList = field.type === 'structureList';
+            const isInvalid = isRequired && (
+                (isStructureList && field.dataList.length === 0) ||
+                (!isStructureList && (value === undefined || value === null || value === ''))
+            );
             // 校验必填项
-            if (isRequired && ((value === undefined || value === null || value === '') || (isStructureList && field.dataList.length === 0))) {
+            if (isInvalid) {
                 if (setActiveCollapseKeys && parent.name) {
                     setActiveCollapseKeys(parent.name);
 

@@ -529,6 +529,7 @@ const CollapseForm = ({
                     // 如果提供了回调函数，则调用它
                     // 如果提供了回调函数，则调用它
                     if (onItemAdded && typeof onItemAdded === 'function') {
+                        console.log(parentName, fieldName, itemToAdd, null, form);
                         onItemAdded(parentName, fieldName, itemToAdd, null, form);
                     }
 
@@ -604,7 +605,7 @@ const CollapseForm = ({
 
         if (hasInvalidField) {
             // 展开字段所在的面板
-            // onCollapseChange(fieldGroup.name);
+            onCollapseChange(fieldGroup.name);
 
             // 等待面板展开再校验
             requestAnimationFrame(() => {
@@ -621,14 +622,15 @@ const CollapseForm = ({
     // 添加新的collapse面板的回调函数
     const onAddCollapsePanel = () => {
         // 找到具有isShowAdd属性的面板
-        const currentFields = fields.find(item => item.isShowAdd);
-        if (!currentFields) return;
-
-        // 验证当前表单数据是否填写
-        let valid = validateFields(currentFields);
-        if (!valid) return;
-
-
+        const currentFieldsList = fields.filter(item => item.isGroup);
+        const currentFields = currentFieldsList[0];
+        // // 验证当前表单数据是否填写
+        let valid = false;
+        //循环验证
+        currentFieldsList.forEach(field => {
+            valid = validateFields(field);
+        })
+        if (!valid || !currentFields) return;
         // 检查当前面板是否有数据
 
         // 计算需要添加的新面板索引

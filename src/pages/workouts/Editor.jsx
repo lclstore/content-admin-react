@@ -62,7 +62,7 @@ export default function UserEditorWithCommon() {
     const defaultInitialValues = {
         name: 'Weight Lifting',
         description: 'Weight Lifting',
-        injuredCode: ['NONE'],
+        injuredCodes: ['NONE'],
         premium: 0,
         genderCode: 'MALE',
 
@@ -202,7 +202,7 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'select',
-                    name: 'injuredCode',
+                    name: 'injuredCodes',
                     label: 'Injured',
                     mode: 'multiple',
                     required: true,
@@ -241,7 +241,7 @@ export default function UserEditorWithCommon() {
                     max: 5,
                     step: 1,
                     formatter: (value) => value, // 格式化显示为 0:XX
-                    name: 'reps', // 修改字段名避免重复
+                    name: 'structureRound', // 修改字段名避免重复
                     label: 'Reps',
                     required: true,
                 },
@@ -311,7 +311,7 @@ export default function UserEditorWithCommon() {
 
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields, formValues, activeCollapseKeys) => {
-
+        setFormFields(updatedFields);
     };
 
 
@@ -338,9 +338,9 @@ export default function UserEditorWithCommon() {
                 const structureList = newFields.filter(item => Array.isArray(item.dataList) && item.dataList.length > 0);
                 if (structureList.length > 0) {
                     structureList.forEach((item, index) => {
-                        const reps = formValues[`reps${index == 0 ? '' : index}`] | 0;
-                        loopCount = reps * item.dataList.length;
-                        const calories = MET * 75 / 3600 * execution * reps * item.dataList.length;
+                        const structureRound = formValues[`structureRound${index == 0 ? '' : index}`] | 0;
+                        loopCount = structureRound * item.dataList.length;
+                        const calories = MET * 75 / 3600 * execution * structureRound * item.dataList.length;
                         workoutCalorie += calories
                     })
                     const workOutTime = (preview + execution) * loopCount;
@@ -385,10 +385,13 @@ export default function UserEditorWithCommon() {
 
         const exerciseGroupList = [];
         const groupList = formFields.filter(item => item.isGroup) || [];
+        console.log(formValues);
+
+        debugger
         groupList.forEach((item, index) => {
             exerciseGroupList.push({
                 structureName: formValues[`structureName${index ? index : ''}`],
-                reps: formValues[`reps${index ? index : ''}`],
+                structureRound: formValues[`structureRound${index ? index : ''}`],
                 exerciseList: formValues[`exerciseIdList${index ? index : ''}`]?.map(item => item.id)
             })
             delete formValues[`exerciseIdList${index ? index : ''}`];

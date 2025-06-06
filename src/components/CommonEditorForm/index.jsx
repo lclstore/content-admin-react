@@ -348,7 +348,6 @@ export default function CommonEditor(props) {
     // 处理选中项被添加到表单后的回调
     const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance, isCollapse) => {
         // console.log(activeCollapseKeys[0], panelName);
-        debugger
         setActiveCollapseKeys(panelName);
         // debugger
         // const findAndUpdateDataList = (field, itemsToAdd) => {
@@ -428,7 +427,15 @@ export default function CommonEditor(props) {
             }
             return field;
         });
-        console.log(internalFormFields);
+        //基础表单逻辑
+        if (panelName === 'basic') {
+            internalFormFields.map(field => {
+                if (field.type === 'structureList') {
+                    field.dataList = [...field.dataList, itemData];
+                }
+                return field;
+            })
+        }
 
         // 更新内部状态
         setInternalFormFields(internalFormFields);

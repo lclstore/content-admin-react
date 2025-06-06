@@ -275,9 +275,11 @@
 }
 
 :global(.structureList-title) {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 16px 0;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    text-align: right;
 }
 
 .avatarUploader :global(.ant-upload-drag-hover) {

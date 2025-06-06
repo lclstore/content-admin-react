@@ -163,9 +163,9 @@ const SortableItemRenderer = React.memo(({
                             </Text>
                         </div>
                         {
-                            (item.functionType || item.type) && <div>
-                                <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.functionType || item.type }}>
-                                    {item.functionType || item.type}
+                            (item.difficultyCode || item.type) && <div>
+                                <Text type="secondary" style={{ fontSize: '12px' }} ellipsis={{ tooltip: item.difficultyCode || item.type }}>
+                                    {item.difficultyCode || item.type}
                                 </Text>
                             </div>
                         }

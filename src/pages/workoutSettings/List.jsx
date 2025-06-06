@@ -20,7 +20,9 @@ export default function UserEditorWithCommon() {
     const initialValues = {
         introVideoReps: 0,
         previewVideoReps: 1,
-
+        introVideoCycleCode:"FRONT_TO_SIDE",
+        previewVideoCycleCode:"FRONT_TO_SIDE",
+        executionVideoCycleCode:"FRONT_TO_SIDE",
         executionVideoReps: 3,
         introAudioStartTime: 0,
         previewRestAudioStartTime: 0,
@@ -31,7 +33,7 @@ export default function UserEditorWithCommon() {
         previewThreeAudioEndTime: 3,
         previewTwoAudioEndTime: 2,
         previewOneAudioEndTime: 1,
-        previewGoAudioStartTime: 0,
+        executionGoAudioStartTime: 0,
         executionGuidanceAudioStartTime: 2,
         executionHalfwayAudioStartTime: 30,
         executionThreeAudioEndTime: 4,
@@ -48,7 +50,7 @@ export default function UserEditorWithCommon() {
         previewThreeAudioClosed: 0,
         previewTwoAudioClosed: 0,
         previewOneAudioClosed: 0,
-        previewGoAudioClosed: 0,
+        executionGoAudioClosed: 0,
         executionGuidanceAudioClosed: 0,
         executionHalfwayAudioClosed: 0,
         executionThreeAudioClosed: 0,
@@ -152,6 +154,13 @@ export default function UserEditorWithCommon() {
                     formatter: (value) => value, // 格式化显示为 0:XX
                     name: 'introVideoReps', // 修改字段名避免重复
                     label: 'Intro Video Reps',
+                },
+                {
+                    type: 'select',
+                    name: 'introVideoCycleCode',
+                    label: 'Intro Video Cycle',
+                    options: "BizWorkoutSettingsVideoCycleEnums",
+                    // required: true,
                 },
                 {
 
@@ -258,6 +267,13 @@ export default function UserEditorWithCommon() {
                     formatter: (value) => value, // 格式化显示为 0:XX
                     name: 'previewVideoReps', // 修改字段名避免重复
                     label: 'Preview Video Reps',
+                    required: true,
+                },
+                 {
+                    type: 'select',
+                    name: 'previewVideoCycleCode',
+                    label: 'Preview Video Cycle',
+                    options: "BizWorkoutSettingsVideoCycleEnums",
                     required: true,
                 },
                 // {
@@ -985,6 +1001,13 @@ export default function UserEditorWithCommon() {
                     required: true,
                 },
                 {
+                    type: 'select',
+                    name: 'executionVideoCycleCode',
+                    label: 'Execution Video Cycle',
+                    options: "BizWorkoutSettingsVideoCycleEnums",
+                    required: true,
+                },
+                {
 
                     type: 'inputGroup',
                     name: 'executionVideoReps',
@@ -993,7 +1016,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'previewGoAudioBizSoundId',
+                            name: 'executionGoAudioBizSoundId',
                             label: '',
                             placeholder: 'Execution Go Audio',
                             rules: [{
@@ -1038,7 +1061,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'previewGoAudioStartTime',
+                            name: 'executionGoAudioStartTime',
                             label: '',
                             defaultValue: 3,
                             required: true,
@@ -1054,7 +1077,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
-                            name: 'previewGoAudioClosed',
+                            name: 'executionGoAudioClosed',
                             label: '',
                             options: [
                                 {

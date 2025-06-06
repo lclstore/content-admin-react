@@ -13,6 +13,10 @@ const tabItems = [
     {
         key: 'resources/list',
         label: 'Resources',
+    },
+    {
+        key: 'workout/list',
+        label: 'Workout',
     }
 ];
 export default () => {
@@ -30,6 +34,7 @@ export default () => {
         setShowTab(!location.pathname.includes("editor"))
     }, [location.pathname]);
     const onChange = (key) => {
+        console.log(key,path)
         setDefaultTabItem(tabItems.find(item => item.key === key))
         navigate(path + '/' + key,{ replace: true })
     };
@@ -41,7 +46,7 @@ export default () => {
     );
 
     return (<>
-        <Tabs style={{ backgroundColor: 'white',display:`${showTab?"block":"none"}`}} activeKey={defaultTabItem.key} onChange={onChange} renderTabBar={renderTabBar} items={tabItems}/>
+        <Tabs  style={{ backgroundColor: 'white',display:`${showTab?"block":"none"}`}} activeKey={defaultTabItem.key} onChange={onChange} renderTabBar={renderTabBar} items={tabItems}/>
         <div style={{padding: '20px', position: 'relative', flex: 1}}><Outlet/></div>
     </>);
 }

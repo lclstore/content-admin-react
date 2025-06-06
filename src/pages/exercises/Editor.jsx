@@ -67,7 +67,7 @@ export default function UserEditorWithCommon() {
             name: 'equipmentCode',
             label: 'Equipment',
             width: "50%",
-            options: "BizProgramEquipmentEnums",
+            options: "BizExerciseEquipmentEnums",
             required: true,
         },
         {

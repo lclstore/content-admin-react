@@ -257,17 +257,19 @@ export function getFileCategoryFromUrl(url = '') {
   const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
 
   // 无效 URL 直接返回 audio
-  if (!url || !/^https?:\/\//.test(url)) return 'audio'
+  if (!url || !/^https?:\/\//.test(url)) return 'image'
 
   const urlObj = new URL(url)
   const nameMatch = urlObj.search.match(/name=([^&]+)/)
   let filename = nameMatch ? nameMatch[1] : urlObj.pathname.split("/").pop()
 
   const ext = filename.split('.').pop().toLowerCase()
-
+  console.log(audioTypes.includes(ext));
+  console.log(videoTypes.includes(ext));
+  console.log(imageTypes.includes(ext));
   if (audioTypes.includes(ext)) return 'audio'
   if (videoTypes.includes(ext)) return 'video'
   if (imageTypes.includes(ext)) return 'image'
 
-  return 'audio' // 默认归类为 audio
+  return 'image' // 默认归类为 audio
 }

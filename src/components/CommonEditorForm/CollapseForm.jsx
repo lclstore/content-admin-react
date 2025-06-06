@@ -429,22 +429,25 @@ const CollapseForm = ({
         }
     }
     // 收集具有 dataList 属性的面板
-    const findFirstDataListItemAndParent = (fields, parent = null) => {
+    const findFirstDataListItemAndParent = (fields, parent = {}) => {
         for (const item of fields) {
+            console.log(item);
+
             if (item.dataList) {
+                debugger
                 return {
-                    dataListItem: item,
-                    parentItem: parent || item,
+                    dataListItem: item || {},
+                    parentItem: parent || item || {},
                 };
             }
 
-            if (Array.isArray(item.fields)) {
+            if (Array.isArray(item.fields || item.structureListFields)) {
                 const result = findFirstDataListItemAndParent(item.fields, item);
                 if (result) return result;
             }
         }
 
-        return null;
+        return {};
     };
 
 
@@ -452,16 +455,18 @@ const CollapseForm = ({
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
-            // 查找所有具有 isListData 属性的面板
+            // 查找所有具有 dataList 属性的面板
             const { dataListItem, parentItem } = findFirstDataListItemAndParent(fields);
+
             if (dataListItem) {
                 const targetPanel = dataListItem || dataListItem || activeKeys[0];
-                debugger
+
                 // 如果目标面板未展开，则展开它
                 if (!activeKeys.includes(parentItem.name)) {
                     // 展开目标面板
                     onCollapseChange(parentItem.name);
                 }
+
                 // 将选中的数据添加到表单中
                 try {
                     // 获取当前表单数据
@@ -471,7 +476,6 @@ const CollapseForm = ({
                     // 1. 如果面板有指定的 listFieldName，使用该字段名
                     // 2. 否则使用面板的 name 作为字段名
                     const fieldName = targetPanel.listFieldName || targetPanel.name;
-
                     // 初始化字段值为数组（如果尚未初始化）
                     if (!currentFormValues[fieldName]) {
                         currentFormValues[fieldName] = [];
@@ -535,6 +539,8 @@ const CollapseForm = ({
 
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {
+        console.log(fieldGroup);
+
         return fieldGroup.map((field, index) => (
             <React.Fragment key={field.name || `field-${index}`}>
                 {renderFormItem(field, {

@@ -69,8 +69,8 @@ const handleArrayDisplay = (value, type) => {
     const optionsBase = useStore.getState().optionsBase;
     const valueArray = Array.isArray(value) ? value : [value];
 
-    // 如果是injuredCodes，需要从optionsConstants.BizExerciseInjuredEnums中匹配displayName
-    if (type === 'injuredCodes') {
+    // 如果是difficultyCode，需要从optionsConstants.BizExerciseInjuredEnums中匹配displayName
+    if (type === 'difficultyCode') {
         return valueArray.map(code => {
             const matchedItem = optionsBase["BizExerciseInjuredEnums"].find(item => item.value === code);
             return matchedItem ? matchedItem.displayName : code;
@@ -385,10 +385,10 @@ const CommonList = ({
                         </Text>
                     </div>
                     {
-                        (item.functionType || item.type || item.injuredCodes) && <div>
+                        (item.functionType || item.type || item.difficultyCode) && <div>
                             {handleArrayDisplay(
-                                item.injuredCodes || item.functionType || item.type,
-                                item.injuredCodes ? 'injuredCodes' : 'other'
+                                item.difficultyCode || item.functionType || item.type,
+                                item.difficultyCode ? 'difficultyCode' : 'other'
                             ).map((value, index, array) => (
                                 <Text
                                     key={index}

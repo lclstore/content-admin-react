@@ -60,8 +60,12 @@ export default function UserEditorWithCommon() {
     ];
     // 初始用户数据状态--可设默认值
     const defaultInitialValues = {
+        name: 'Weight Lifting',
+        description: 'Weight Lifting',
+        injuredCode: ['NONE'],
         premium: 0,
         genderCode: 'MALE',
+
         difficultyCode: 'BEGINNER',
         positionCode: 'SEATED',
         newStartTime: formatDate(new Date(), 'YYYY-MM-DDTHH:mm:ss'),
@@ -227,36 +231,46 @@ export default function UserEditorWithCommon() {
             label: 'Structure Settings',
             name: 'structure',
             isShowAdd: true,
-            formterList: (dataList) => {
-                return dataList?.map(item => {
-                    return {
-                        name: item.name,
-                        id: item.id
-                    }
-                })
-            },
-            dataList: [],
-            dataKey: 'list',
             required: true,
             icon: <VideoCameraOutlined />,
+            dataList: [],
             fields: [
                 {
-                    type: 'input',
-                    name: 'structureName',
-                    label: 'Structure Name',
-                    required: true,
+                    type: 'structureList',
+                    name: 'musicList',
+                    // renderItemMata: renderItemMata,
+                    label: 'Musics',
+                    dataList: [],
+                    structureListFields: [
+                        {
+                            type: 'input',
+                            required: true,
+                            setDefaultValue: (data) => {
+                                return data.name
+                            },
+                            name: 'displayName',
+                            label: 'Display Name',
+                        },
+                        {
+                            type: 'select',
+                            name: 'premium',
+                            label: 'Premium',
+                            required: true,
+                            setDefaultValue: 0,
+                            options: [
+                                { label: 'Yes', value: 1 },
+                                { label: 'No', value: 0 },
+                            ],
+                        },
+
+                    ],
+
+                    rules: [
+                        { required: true, message: 'Please add at least one music' },
+                    ]
                 },
-                {
-                    type: 'numberStepper',
-                    min: 1,
-                    max: 5,
-                    step: 1,
-                    formatter: (value) => value, // 格式化显示为 0:XX
-                    name: 'reps', // 修改字段名避免重复
-                    label: 'Reps',
-                    required: true,
-                }
             ]
+
 
         }
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建

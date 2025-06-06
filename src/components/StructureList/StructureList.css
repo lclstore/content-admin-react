@@ -69,6 +69,7 @@
 
 /* 音频播放器和头像样式 */
 .item-avatar {
+    margin-right: 16px;
     position: relative;
     width: 64px;
     height: 64px;

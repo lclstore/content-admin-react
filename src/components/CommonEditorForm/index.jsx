@@ -149,6 +149,7 @@ export default function CommonEditor(props) {
         complexConfig.structurePanels || []
     );
     const [activeCollapseKeys, setActiveCollapseKeys] = useState(() => {
+
         if (!collapseFormConfig || !internalFormFields || internalFormFields.length === 0) {
             return [];
         }
@@ -341,6 +342,9 @@ export default function CommonEditor(props) {
 
     // 处理选中项被添加到表单后的回调
     const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance, isCollapse) => {
+        console.log(activeCollapseKeys);
+
+        debugger
         // 递归查找并更新dataList的辅助函数
         const findAndUpdateDataList = (field, itemsToAdd) => {
             // 如果当前字段有dataList，直接返回更新后的字段
@@ -408,7 +412,7 @@ export default function CommonEditor(props) {
 
         // 更新内部状态
         setInternalFormFields(updatedFields);
-
+        setActiveCollapseKeys(panelName);
         // 通知父组件
         if (onFormFieldsChange) {
             onFormFieldsChange(updatedFields);
@@ -697,7 +701,7 @@ export default function CommonEditor(props) {
     const handleCollapseChange = useCallback((key) => {
         // 手风琴模式下，key是单个字符串而不是数组
         const keysArray = key ? [key] : [];
-
+        console.log(activeCollapseKeys);
         setActiveCollapseKeys(keysArray);
 
         // 如果父组件提供了onCollapseChange，优先调用它

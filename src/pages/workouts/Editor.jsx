@@ -310,11 +310,8 @@ export default function UserEditorWithCommon() {
     const [formFields, setFormFields] = useState(initialFormFields);
 
     // 处理formFields变更的回调
-    const handleFormFieldsChange = (updatedFields, formValues) => {
-        // setFormFields(updatedFields);
-        if (defaultInitialValues !== initialValues) {
-            // setInitialValues(formValues);
-        }
+    const handleFormFieldsChange = (updatedFields, formValues, activeCollapseKeys) => {
+
     };
 
 

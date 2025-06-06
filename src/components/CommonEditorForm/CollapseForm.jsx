@@ -461,7 +461,6 @@ const CollapseForm = ({
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
-
             // 查找所有具有 dataList 属性的面板
             const result = findFirstDataListItemAndParent(fields);
             if (result) {
@@ -471,7 +470,7 @@ const CollapseForm = ({
                 // 如果目标面板未展开，则展开它
                 if (!activeKeys.includes(parentItem.name)) {
                     // 展开目标面板
-                    onCollapseChange(parentItem.name);
+                    // onCollapseChange(parentItem.name);
                 }
 
                 // 将选中的数据添加到表单中
@@ -519,10 +518,12 @@ const CollapseForm = ({
 
                     console.log('数据已添加到面板:', targetPanel.name, '字段:', fieldName);
                     console.log(activeKeys);
+                    const currentActiveKeys = typeof activeKeys === 'string' ? activeKeys : activeKeys[0];
                     let parentName = parentItem?.name || targetPanel.name
-                    const currentFieldsName = fields.find(item => item.isShowAdd)
-                    if (activeKeys[0].includes(currentFieldsName.name)) {
-                        parentName = activeKeys[0]
+                    const currentFieldsName = fields.find(item => item.isShowAdd);
+                    // 如果当前面板是添加数据的面板，则使用当前面板的name
+                    if (currentActiveKeys.includes(currentFieldsName.name)) {
+                        parentName = currentActiveKeys;
                     }
 
                     // 如果提供了回调函数，则调用它
@@ -603,7 +604,7 @@ const CollapseForm = ({
 
         if (hasInvalidField) {
             // 展开字段所在的面板
-            onCollapseChange(fieldGroup.name);
+            // onCollapseChange(fieldGroup.name);
 
             // 等待面板展开再校验
             requestAnimationFrame(() => {
@@ -651,7 +652,7 @@ const CollapseForm = ({
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
             handleAddCustomPanel(newCustomPanel);
-            onCollapseChange(newPanelName); // 自动展开新添加的面板
+            // onCollapseChange(ne wPanelName); // 自动展开新添加的面板
         }
     };
 
@@ -694,7 +695,9 @@ const CollapseForm = ({
                     <Collapse
                         expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
                         destroyInactivePanel={false}
-                        accordion={activeKeys.length > 1 ? false : true}
+                        accordion={true}
+                        // accordion={false}
+                        // defaultActiveKey={activeKeys}
                         activeKey={activeKeys}
                         onChange={onCollapseChange}
                         ghost

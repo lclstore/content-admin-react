@@ -293,7 +293,7 @@ export default function CommonEditor(props) {
 
         // 内部面板有isShowAdd的数量
         if (!newField) return;
-
+        //  切换到添加数据当前的panel
         // const lastIndexWithDatalist = [...internalFormFields]
         //     .map((item, index) => item.dataList ? index : -1)
         //     .filter(index => index !== -1)
@@ -310,16 +310,21 @@ export default function CommonEditor(props) {
         const updatedFields = [...internalFormFields, newPanel];
         // 更新内部状态
         setInternalFormFields(updatedFields);
-
+        setActiveCollapseKeys(newPanel.name);
+        //通知父组件面板状态变化
+        if (onCollapseChange) {
+            onCollapseChange(newActiveKeys);
+        }
         // 通知父组件
         if (onFormFieldsChange) {
             onFormFieldsChange(updatedFields);
         }
 
+
         // 如果父组件提供了handleAddCustomPanel，也调用它（向后兼容）
-        if (collapseFormConfig.handleAddCustomPanel) {
-            collapseFormConfig.handleAddCustomPanel(newPanel);
-        }
+        // if (collapseFormConfig.handleAddCustomPanel) {
+        //     collapseFormConfig.handleAddCustomPanel(newPanel);
+        // }
     };
 
     // 删除面板的回调函数
@@ -342,81 +347,97 @@ export default function CommonEditor(props) {
 
     // 处理选中项被添加到表单后的回调
     const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance, isCollapse) => {
-        console.log(activeCollapseKeys);
-
+        // console.log(activeCollapseKeys[0], panelName);
         debugger
-        // 递归查找并更新dataList的辅助函数
-        const findAndUpdateDataList = (field, itemsToAdd) => {
-            // 如果当前字段有dataList，直接返回更新后的字段
-            if (field.dataList !== undefined) {
-                const newDataList = Array.isArray(field.dataList)
-                    ? [...field.dataList, ...itemsToAdd]
-                    : itemsToAdd;
-                return {
-                    ...field,
-                    dataList: newDataList
-                };
-            }
+        setActiveCollapseKeys(panelName);
+        // debugger
+        // const findAndUpdateDataList = (field, itemsToAdd) => {
+        //     // 如果当前字段有dataList，直接返回更新后的字段
+        //     if (field.dataList !== undefined) {
+        //         const newDataList = Array.isArray(field.dataList)
+        //             ? [...field.dataList, ...itemsToAdd]
+        //             : itemsToAdd;
+        //         return {
+        //             ...field,
+        //             dataList: newDataList
+        //         };
+        //     }
 
-            // 如果当前字段有子字段，递归查找
-            if (field.fields) {
-                const updatedFields = field.fields.map(subField =>
-                    findAndUpdateDataList(subField, itemsToAdd)
-                );
-                return {
-                    ...field,
-                    fields: updatedFields
-                };
-            }
+        //     // 如果当前字段有子字段，递归查找
+        //     if (field.fields) {
+        //         const updatedFields = field.fields.map(subField =>
+        //             findAndUpdateDataList(subField, itemsToAdd)
+        //         );
+        //         return {
+        //             ...field,
+        //             fields: updatedFields
+        //         };
+        //     }
 
-            // 如果既没有dataList也没有子字段，返回原字段
-            return field;
-        };
+        //     // 如果既没有dataList也没有子字段，返回原字段
+        //     return field;
+        // };
 
-        // 创建 formFields 的深拷贝
-        const updatedFields = internalFormFields.map(field => {
-            // 找到匹配的面板
+        // // 创建 formFields 的深拷贝
+        // const updatedFields = internalFormFields.map(field => {
+        //     // 找到匹配的面板
+        //     if (field.name === panelName) {
+        //         // 判断itemData是否为数组
+        //         const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
+
+        //         // 检查是否有展开的项
+        //         if (expandedItemId && Array.isArray(field.dataList)) {
+        //             // 查找展开项的索引
+        //             const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
+
+        //             if (expandedItemIndex !== -1) {
+        //                 // 如果找到展开的项，在其后插入新项
+        //                 const newDataList = [...field.dataList];
+        //                 newDataList.splice(expandedItemIndex + 1, 0, ...itemsToAdd);
+        //                 return {
+        //                     ...field,
+        //                     dataList: newDataList
+        //                 };
+        //             }
+        //         }
+
+        //         // 使用递归函数查找并更新dataList
+        //         return findAndUpdateDataList(field, itemsToAdd);
+        //     }
+
+        //     if (panelName === 'basic' && field.type === 'structureList') {
+        //         const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
+        //         return findAndUpdateDataList(field, itemsToAdd);
+        //     }
+
+        //     return field; // 返回未修改的其他面板
+        // });
+        // console.log('updatedFields', updatedFields);
+        internalFormFields.map(field => {
             if (field.name === panelName) {
-                // 判断itemData是否为数组
-                const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
-
-                // 检查是否有展开的项
-                if (expandedItemId && Array.isArray(field.dataList)) {
-                    // 查找展开项的索引
-                    const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
-
-                    if (expandedItemIndex !== -1) {
-                        // 如果找到展开的项，在其后插入新项
-                        const newDataList = [...field.dataList];
-                        newDataList.splice(expandedItemIndex + 1, 0, ...itemsToAdd);
-                        return {
-                            ...field,
-                            dataList: newDataList
-                        };
-                    }
+                if (field.dataList) {
+                    field.dataList = [...field.dataList, itemData];
+                } else {
+                    field.fields.map(subField => {
+                        if (subField.dataList) {
+                            subField.dataList = [...subField.dataList, itemData];
+                        }
+                        return subField;
+                    })
                 }
-
-                // 使用递归函数查找并更新dataList
-                return findAndUpdateDataList(field, itemsToAdd);
             }
-
-            if (panelName === 'basic' && field.type === 'structureList') {
-                const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
-                return findAndUpdateDataList(field, itemsToAdd);
-            }
-
-            return field; // 返回未修改的其他面板
+            return field;
         });
-
-        console.log('updatedFields', updatedFields);
+        console.log(internalFormFields);
 
         // 更新内部状态
-        setInternalFormFields(updatedFields);
-        setActiveCollapseKeys(panelName);
+        setInternalFormFields(internalFormFields);
+        // setActiveCollapseKeys(activeCollapseKeys);
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(internalFormFields);
         }
+
 
         // 如果父组件提供了onItemAdded，也调用它（向后兼容）
         // if (collapseFormConfig.onItemAdded) {
@@ -698,21 +719,29 @@ export default function CommonEditor(props) {
     };
 
     // 处理折叠面板展开的回调函数
-    const handleCollapseChange = useCallback((key) => {
-        // 手风琴模式下，key是单个字符串而不是数组
-        const keysArray = key ? [key] : [];
-        console.log(activeCollapseKeys);
-        setActiveCollapseKeys(keysArray);
+    // const handleCollapseChange = useCallback((key) => {
+    //     // 手风琴模式下，key是单个字符串而不是数组
+    //     const keysArray = key ? [key] : [];
+    //     console.log(activeCollapseKeys);
+    //     debugger
+    //     setActiveCollapseKeys(keysArray);
 
-        // 如果父组件提供了onCollapseChange，优先调用它
+    //     // // 如果父组件提供了onCollapseChange，优先调用它
+    //     // if (onCollapseChange) {
+    //     //     onCollapseChange(keysArray, form);
+    //     // }
+    //     // // 如果collapseFormConfig中也提供了collapseChange回调，也调用它（向后兼容）
+    //     // else if (collapseFormConfig.collapseChange) {
+    //     //     collapseFormConfig.collapseChange(key, form);
+    //     // }
+    // }, []);
+    const handleCollapseChange = (key) => {
+        console.log(key);
+        setActiveCollapseKeys(key);
         if (onCollapseChange) {
-            onCollapseChange(keysArray, form);
+            onCollapseChange(key, form);
         }
-        // 如果collapseFormConfig中也提供了collapseChange回调，也调用它（向后兼容）
-        else if (collapseFormConfig.collapseChange) {
-            collapseFormConfig.collapseChange(key, form);
-        }
-    }, [collapseFormConfig, form, onCollapseChange]);
+    }
 
     // 转换日期
     const transformDatesInObject = (obj = {}, fields = []) => {

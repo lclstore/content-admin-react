@@ -100,6 +100,7 @@ export default function WorkoutsList() {
 
     // 在Modal打开时重置表单
     useEffect(() => {
+        console.log('isBatchCreateModalVisible',isBatchCreateModalVisible,batchCreateForm.resetFields())
         if (isBatchCreateModalVisible) {
             batchCreateForm.resetFields();
             batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
@@ -367,6 +368,7 @@ export default function WorkoutsList() {
      * 用于批量操作功能
      */
     const onSelectChange = useCallback((newSelectedRowKeys) => {
+        console.log('11111111')
         setSelectedRowKeys(newSelectedRowKeys);
     }, []);
 
@@ -446,7 +448,7 @@ export default function WorkoutsList() {
             label: 'Batch Create File',
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
-            disabled: selectedRowKeys.length === 0
+            // disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
 

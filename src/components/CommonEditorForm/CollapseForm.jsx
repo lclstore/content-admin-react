@@ -578,6 +578,18 @@ const CollapseForm = ({
         const formValues = form.getFieldsValue();
 
         const hasInvalidField = fieldGroup.fields.some(field => {
+            // 如果字段类型是structureList，检查dataList是否为空
+            if (field.type === 'structureList') {
+                if (field.required && (!field.dataList || field.dataList.length === 0)) {
+                    notification.warning({
+                        message: `Cannot Add New ${field.label}`,
+                        description: field.placeholder || `Please add exercises to the current last ${field.label} before adding a new one.`,
+                        placement: 'topRight',
+                    });
+                }
+                return field.required && (!field.dataList || field.dataList.length === 0);
+            }
+            // 其他类型字段检查表单值是否为空
             return field.required && !formValues[field.name];
         });
 
@@ -596,6 +608,7 @@ const CollapseForm = ({
         return true;
     };
 
+
     // 添加新的collapse面板的回调函数
     const onAddCollapsePanel = () => {
         // 找到具有isShowAdd属性的面板
@@ -606,15 +619,8 @@ const CollapseForm = ({
         let valid = validateFields(currentFields);
         if (!valid) return;
 
+
         // 检查当前面板是否有数据
-        if (!currentFields.dataList || currentFields.dataList.length === 0) {
-            notification.warning({
-                message: `Cannot Add New ${currentFields.label}`,
-                description: `Please add exercises to the current last ${currentFields.label} before adding a new one.`,
-                placement: 'topRight',
-            });
-            return;
-        }
 
         // 计算需要添加的新面板索引
         // 查找所有带有isShowAdd属性的面板
@@ -624,17 +630,17 @@ const CollapseForm = ({
         // 创建新面板的数据结构
         const newPanelName = `${currentFields.name}${newPanelIndex}`; // 生成唯一名称
         const newCustomPanel = {
-            ...currentFields,
-            dataList: [],  // 新面板初始无数据
+            ...showAddPanels[0],
             name: newPanelName,
             isShowAdd: true,
             // 确保fields中的每个字段name也是唯一的
-            fields: currentFields.fields?.map(field => ({
+            fields: showAddPanels[0].fields?.map(field => ({
                 ...field,
+                dataList: field.dataList ? [] : null,
                 name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
             })) || []
         };
-
+        debugger
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
             handleAddCustomPanel(newCustomPanel);

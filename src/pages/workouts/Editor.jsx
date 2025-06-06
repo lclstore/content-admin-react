@@ -250,6 +250,7 @@ export default function UserEditorWithCommon() {
                     name: 'exerciseIdList',
                     dataList: [],
                     label: 'Exercises',
+                    // placeholder: 'Please add exercises...',
                     required: true,
                 },
             ]

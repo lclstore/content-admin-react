@@ -517,10 +517,18 @@ const CollapseForm = ({
                     }
 
                     console.log('数据已添加到面板:', targetPanel.name, '字段:', fieldName);
+                    console.log(activeKeys);
+                    let parentName = parentItem?.name || targetPanel.name
+                    const currentFieldsName = fields.find(item => item.isShowAdd)
+                    if (activeKeys[0].includes(currentFieldsName.name)) {
+                        parentName = activeKeys[0]
+                        debugger
+                    }
 
                     // 如果提供了回调函数，则调用它
+                    // 如果提供了回调函数，则调用它
                     if (onItemAdded && typeof onItemAdded === 'function') {
-                        onItemAdded(parentItem?.name || targetPanel.name, fieldName, itemToAdd, null, form);
+                        onItemAdded(parentName, fieldName, itemToAdd, null, form);
                     }
 
                     // 通知父组件已处理完选中项，可以清空选中状态
@@ -640,11 +648,10 @@ const CollapseForm = ({
                 name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
             })) || []
         };
-        debugger
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {
             handleAddCustomPanel(newCustomPanel);
-            // onCollapseChange(newPanelName); // 自动展开新添加的面板
+            onCollapseChange(newPanelName); // 自动展开新添加的面板
         }
     };
 

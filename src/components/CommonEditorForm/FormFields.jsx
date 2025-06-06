@@ -378,29 +378,29 @@ export const renderFormControl = (field, options = {}) => {
             );
         //结构化排序列表
         case 'structureList':
-            // 使用ref保存dataList的引用，避免直接依赖field对象
-            const dataListRef = React.useRef(field.dataList);
+            // // 使用ref保存dataList的引用，避免直接依赖field对象
+            // const dataListRef = React.useRef(field.dataList);
 
-            // 当field.dataList改变时更新ref
-            if (field.dataList !== dataListRef.current) {
-                dataListRef.current = field.dataList;
-            }
+            // // 当field.dataList改变时更新ref
+            // if (field.dataList !== dataListRef.current) {
+            //     dataListRef.current = field.dataList;
+            // }
 
             // 使用空依赖数组执行一次，通过ref访问最新值
-            useEffect(() => {
-                // 使用函数来确保每次都能获取最新的值
-                const updateFormValue = () => {
-                    const currentDataList = field.formterList ? field.formterList(field.dataList) : field.dataList.map(item => item.id)// 提取 ID 列表
-                };
+            // useEffect(() => {
+            //     // 使用函数来确保每次都能获取最新的值
+            //     const updateFormValue = () => {
+            //         const currentDataList = field.formterList ? field.formterList(field.dataList) : field.dataList.map(item => item.id)// 提取 ID 列表
+            //     };
 
-                // 立即执行一次
-                updateFormValue();
+            //     // 立即执行一次
+            //     updateFormValue();
 
-                // 设置定时器检查变化
-                const timer = setInterval(updateFormValue, 300);
+            //     // 设置定时器检查变化
+            //     const timer = setInterval(updateFormValue, 300);
 
-                return () => clearInterval(timer);
-            }, []);
+            //     return () => clearInterval(timer);
+            // }, []);
             return (
                 <div>
                     {

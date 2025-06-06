@@ -463,7 +463,7 @@ const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeh
                             setInputDisabled(!inputDisabled);
                             //按钮点击事件
                             if (field.buttonClick) {
-                                field.buttonClick(form, inputDisabled ? field.buttons[0] : field.buttons[1]);
+                                field.buttonClick(form, inputDisabled);
                             }
                         }}
                     >

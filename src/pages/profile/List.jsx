@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
-import { SaveOutlined, LogoutOutlined } from '@ant-design/icons';
+import { SaveOutlined, LogoutOutlined, LockOutlined, EyeOutlined, UnlockOutlined } from '@ant-design/icons';
 import request from "@/request";
 import Password from 'antd/es/input/Password';
 
@@ -87,10 +87,13 @@ export default function UserEditorWithCommon() {
             name: 'password',
             label: 'Password',
             required: true,
-            buttons: ['Edit', 'Save'],
+            buttons: [
+                <LockOutlined />,
+                <UnlockOutlined />
+            ],
             buttonClick: (form, buttonText) => {
                 //如果密码输入框为禁用状态，则清空密码
-                if (buttonText === 'Edit' && form.getFieldValue('password').includes('******')) {
+                if (buttonText && form.getFieldValue('password').includes('******')) {
                     form.setFieldValue('password', null);
                 }
             },

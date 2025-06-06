@@ -415,9 +415,9 @@ export default function CommonEditor(props) {
         }
 
         // 如果父组件提供了onItemAdded，也调用它（向后兼容）
-        // if (collapseFormConfig.onItemAdded) {
-        //     collapseFormConfig.onItemAdded(panelName, fieldName, itemData, expandedItemId, formInstance);
-        // }
+        if (collapseFormConfig.onItemAdded) {
+            collapseFormConfig.onItemAdded(panelName, fieldName, itemData, expandedItemId, formInstance);
+        }
     };
 
     // 处理排序的回调函数
@@ -697,7 +697,6 @@ export default function CommonEditor(props) {
     const handleCollapseChange = useCallback((key) => {
         // 手风琴模式下，key是单个字符串而不是数组
         const keysArray = key ? [key] : [];
-
         setActiveCollapseKeys(keysArray);
 
         // 如果父组件提供了onCollapseChange，优先调用它

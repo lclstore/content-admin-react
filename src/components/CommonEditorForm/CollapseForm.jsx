@@ -236,6 +236,7 @@ const CollapseForm = ({
     onCopyItem,
     onReplaceItem,
 }) => {
+    // debugger
     const newField = fields.find(item => item.isShowAdd);
     // 表单连接状态
     const formConnected = !!form;
@@ -522,7 +523,6 @@ const CollapseForm = ({
                     const currentFieldsName = fields.find(item => item.isShowAdd)
                     if (activeKeys[0].includes(currentFieldsName.name)) {
                         parentName = activeKeys[0]
-                        debugger
                     }
 
                     // 如果提供了回调函数，则调用它

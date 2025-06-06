@@ -123,14 +123,17 @@ export const renderFormControl = (field, options = {}) => {
             return field.content ? <Image className={styles.displayImg} src={field.content} style={{ ...field.style }} /> : '';
         case 'input':
             const { key: inputKey, style: inputStyle, ...inputRest } = field;
+
             return <ControlledInput
                 field={field}
                 name={name}
+                form={options.form}
                 label={label}
                 disabled={disabled}
                 placeholder={placeholder}
                 {...inputRest}
             />;
+
         case 'line':
             return <div style={field.style || {}} className={styles.line}></div>;
         //文本输入框
@@ -153,6 +156,7 @@ export const renderFormControl = (field, options = {}) => {
             return <ControlledInput
                 field={field}
                 name={name}
+                form={options.form}
                 label={label}
                 disabled={disabled}
                 placeholder={placeholder}
@@ -426,10 +430,9 @@ export const renderFormControl = (field, options = {}) => {
 };
 
 // 创建一个独立的输入框组件
-const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', ...rest }) => {
+const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', form, ...rest }) => {
     const [inputDisabled, setInputDisabled] = useState(initialDisabled);
     const InputComponent = type === 'password' ? Input.Password : Input;
-
     // 根据类型准备不同的属性
     const inputProps = {
         style: field.style,
@@ -447,16 +450,22 @@ const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeh
     if (type === 'password') {
         inputProps.iconRender = (visible) => visible ? <EyeOutlined /> : <EyeInvisibleOutlined />;
     }
-
+    const { buttonClick, ...newInputProps } = inputProps;
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <InputComponent {...inputProps} />
+            <InputComponent {...newInputProps} />
             {
                 field.buttons && field.buttons.length > 1 && (
                     <Button
                         className='btn'
                         type={inputDisabled ? "primary" : "default"}
-                        onClick={() => setInputDisabled(!inputDisabled)}
+                        onClick={() => {
+                            setInputDisabled(!inputDisabled);
+                            //按钮点击事件
+                            if (field.buttonClick) {
+                                field.buttonClick(form, inputDisabled ? field.buttons[0] : field.buttons[1]);
+                            }
+                        }}
                     >
                         {inputDisabled ? field.buttons[0] : field.buttons[1]}
                     </Button>

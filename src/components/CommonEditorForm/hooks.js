@@ -113,6 +113,7 @@ export const useHeaderConfig = (params) => {
         formConnected,
         validate,
         onSave,
+        confirmSucess,
         navigate,
         messageApi,
         fields,
@@ -263,28 +264,30 @@ export const useHeaderConfig = (params) => {
             })
         }
 
-        console.log(dataToSave);
-
+        const submitData = JSON.parse(JSON.stringify(dataToSave));//深拷贝
 
         //统一处理密码字段--加密
         const passwordField = collapseFormConfigRef.current.find(field => field.type === 'password');
         if (passwordField) {
-            dataToSave[passwordField.name] = md5Encrypt(dataToSave[passwordField.name]);
+            if (submitData[passwordField.name].includes('****')) {
+                submitData[passwordField.name] = null;
+            } else {
+                submitData[passwordField.name] = md5Encrypt(submitData[passwordField.name]);
+            }
         }
         //统一处理switch值
         const switchFields = collapseFormConfigRef.current.filter(field => field.type === 'switch');
         switchFields.forEach(field => {
-            dataToSave[field.name] = dataToSave[field.name] ? 1 : 0;
+            submitData[field.name] = submitData[field.name] ? 1 : 0;
         });
 
         try {
-            if (!dataToSave.status) {
-                dataToSave.status = 'ENABLED';
+            if (!submitData.status) {
+                submitData.status = 'ENABLED';
             }
-
+            let ret = null;
             if (onSave) {
-                const result = await onSave(dataToSave);
-                return result;
+                ret = await onSave(submitData);
             } else {
                 // 从 location 获取基础路径
                 const module = moduleKey || location.pathname.split('/')[1]; // 获取模块名称
@@ -293,12 +296,18 @@ export const useHeaderConfig = (params) => {
                 const operation = operationName || (isSystem ? id ? 'update' : 'add' : 'save');
                 const apiUrl = `/${module}/${operation}`; // 完整的API路径
                 // 使用新的命名调用
-                const ret = await savePublicFormData(dataToSave, apiUrl, 'post');
-                return ret;
+                ret = await savePublicFormData(submitData, apiUrl, 'post');
+
             }
+            // 如果 confirmSucess 存在，则调用它
+            if (confirmSucess) {
+                confirmSucess(ret);
+            }
+            return ret;
         } finally {
             setLoading(false);
         }
+
     };
 
     // 保存按钮处理函数

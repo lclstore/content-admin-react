@@ -173,6 +173,10 @@ export const getFullUrl = (url) => {
 export const validatePassword = (password) => {
   // 密码必须包含字母（大写或小写）和数字，且长度为8到12位
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/;
+  // 扩展：如果包含 *****，也视为合法
+  if (String(password).includes('*****')) {
+    return true;
+  }
   return passwordRegex.test(password);
 };
 

@@ -47,6 +47,7 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {string} props.operationName 操作名称
  * @param {Function} props.getDataAfter 获取数据后回调函数
  * @param {Function} props.saveBeforeTransform 保存前回调函数
+ * @param {boolean} props.confirmSucess 是否确认保存成功
  */
 export default function CommonEditor(props) {
     const {
@@ -55,6 +56,7 @@ export default function CommonEditor(props) {
         operationName,
         isTabs = false,
         isBack = true,
+        confirmSucess,
         moduleKey,
         onSubmit,
         fields = [],
@@ -242,6 +244,7 @@ export default function CommonEditor(props) {
         formConnected,
         validate,
         onSave,
+        confirmSucess,
         navigate,
         setActiveCollapseKeys,
         isCollapse,

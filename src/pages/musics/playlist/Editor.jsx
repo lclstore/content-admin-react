@@ -107,7 +107,7 @@ export default function UserEditorWithCommon() {
             formValues.musicList = musicListField.dataList.map(item => {
                 return {
                     bizMusicId: item.id,
-                    displayName: item.name,
+                    // displayName: item.name,
                     displayName: item.displayName,
                     premium: item.premium,
                 }

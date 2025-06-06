@@ -274,7 +274,6 @@ export default function WorkoutsList() {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
-                sorter: true,
                 options: 'BizExerciseDifficultyEnums',
                 key: 'difficultyCode'
             },

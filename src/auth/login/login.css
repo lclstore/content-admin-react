@@ -25,11 +25,11 @@
 }
 
 .login-left-panel {
-    border-radius: 20px 0 0 20px;
+    /* border-radius: 20px 0 0 20px; */
     position: relative;
     color: #fff;
     text-align: left;
-    /* background: linear-gradient(135deg, #4158d0, #2b8aff); */
+    background: #243636;
     overflow: hidden;
 }
 
@@ -378,7 +378,7 @@
     font-weight: 700;
     border-radius: 8px;
     margin-top: 19px;
-    background: linear-gradient(135deg, #427cea, #409eff);
+    /* background: linear-gradient(135deg, #427cea, #409eff); */
     border: none;
     transition: all 0.3s;
     letter-spacing: 1px;
@@ -387,14 +387,15 @@
 }
 
 .login-submit-button:hover {
-    background: linear-gradient(135deg, #3671d6, #3794eb) !important;
+    /* background: linear-gradient(135deg, #3671d6, #3794eb) !important; */
+    opacity: 0.8;
     color: white;
     box-shadow: 0 6px 15px rgba(65, 88, 208, 0.25);
 }
 
 .login-submit-button:active,
 .login-submit-button:focus {
-    background: linear-gradient(135deg, #3169c8, #3189db);
+    /* background: linear-gradient(135deg, #3169c8, #3189db); */
     color: white;
     box-shadow: 0 4px 10px rgba(65, 88, 208, 0.2);
 }

@@ -5,16 +5,44 @@ import CommonEditorForm from '@/components/CommonEditorForm';
 import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
 import { SaveOutlined, LogoutOutlined } from '@ant-design/icons';
+import request from "@/request";
+import Password from 'antd/es/input/Password';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
-
-
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [editorRef, setEditorRef] = useState(null);
     const [loading, setLoading] = useState(true);
     // 初始用户数据状态--可设默认值
     const initialValues = {
 
     }
+    const [users, setUser] = useState(initialValues);
+    const getUser = async () => {
+        console.log('2222222')
+        return new Promise(resolve => {
+            request.get({
+                url: `/user/getMyInfo`,
+                load: true,
+                callback: res => {
+                    console.log('res11111', res)
+                    // initialValues = res.data.data
+                    resolve(res.data.data)
+                }
+            });
+        })
+    }
+    // useEffect(() => {
+    //     console.log('1111111111111')
+    // }, [users]);
+    useEffect(() => {
+        console.log('1111111111111')
+        getUser().then(res => {
+            console.log(res)
+            res = { ...res, password: '******' }
+            setUser(res)
+        })
+    }, []);
     // 表单字段配置
     const formFields = useMemo(() => [
 
@@ -39,13 +67,13 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'input',
-            name: 'emailAddress',
+            name: 'email',
             maxLength: 100,
             label: 'Email',
             required: true,
             disabled: true,
             placeholder: 'Enter email...',
-            buttons: ['Edit', 'Save'],
+            // buttons: ['Edit', 'Save'],
             rules: [
                 { required: true, message: 'Please input Email.' },
                 { max: 100, message: 'Email cannot exceed 100 characters' },
@@ -62,7 +90,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'password',
-            name: 'userPassword',
+            name: 'password',
             label: 'Password',
             required: true,
             buttons: ['Edit', 'Save'],
@@ -74,7 +102,7 @@ export default function UserEditorWithCommon() {
                     validator: async (_, value) => {
                         if (value && !validatePassword(value)) {
                             return Promise.reject(
-                                'The password must contain letters (uppercase or lowercase) and numbers (0-9) and be 8-12 characters long.'
+                                'The password must contain both letters and numbers and be 8 to 12 characters long.'
                             );
                         }
                         return Promise.resolve();
@@ -123,44 +151,36 @@ export default function UserEditorWithCommon() {
         // 保存成功后立即跳转回列表页
         navigate('/profile/list');
     };
+    const saveBeforeTransform = (info) => {
+        console.log(info.formValues)
+    }
     const headerButtons = [
         {
             key: 'save',
             text: 'Save',
             icon: <SaveOutlined />,
             type: 'primary',
-            onClick: () => {
 
+            onClick: (e) => {
+                debugger
+                triggerSave
             },
         }
     ]
-    //请求列数据方法
-    const initFormData = (id) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                if (id) {
-                    // 查找对应用户
-                    const user = mockUsers.find(u => u.id === parseInt(id, 10));
-                    resolve(user || {});  // 找不到也返回空对象，避免 undefined
-                } else {
-                    // 新增场景：直接返回空对象
-                    resolve(initialValues);
-                }
-            }, 1000);
-        });
-    };
     return (
         <div >
             <CommonEditorForm
-                initFormData={initFormData}
+                refreshKey={refreshKey}
                 formType="basic"
-                config={{ formName: 'Profile', title: 'Profile', headerButtons }}
+                moduleKey='user'
+                operationName="profileSave"
+                isBack={false}
+                config={{ formName: 'Profile', headerButtons }}
                 fields={formFields}
-                initialValues={initialValues}
-                onSave={handleSaveUser}
+                initialValues={users}
+                setFormRef={setEditorRef}
             />
-            <div style={{ maxWidth: '765px', margin: '-20px auto', paddingLeft: '20px' }}>
+            <div style={{ maxWidth: '1000px', margin: '-5px auto', paddingLeft: '20px' }}>
                 <Button
                     block
                     onClick={() => navigate('/login')}

@@ -60,20 +60,22 @@ export default function UserEditorWithCommon() {
     ];
     // 初始用户数据状态--可设默认值
     const defaultInitialValues = {
-        name: 'Weight Lifting',
-        description: 'Weight Lifting',
-        injuredCodes: ['NONE'],
         premium: 0,
         genderCode: 'MALE',
-
         difficultyCode: 'BEGINNER',
         positionCode: 'SEATED',
         newStartTime: formatDate(new Date(), 'YYYY-MM-DDTHH:mm:ss'),
         newEndTime: formatDate(new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), 'YYYY-MM-DDTHH:mm:ss'),//往后14天
     }
     const [initialValues, setInitialValues] = useState(defaultInitialValues);
+    const [workoutSettingInfo, setWorkoutSettingInfo] = useState({});
 
-
+    useEffect(async () => {
+        const res = await request.get({
+            url: `/workoutSetttings/detail`,
+        });
+        setWorkoutSettingInfo(res?.data);
+    }, []);
 
     const imageUpload = (value, file, form) => {
         const formValues = form.getFieldsValue();
@@ -127,8 +129,24 @@ export default function UserEditorWithCommon() {
                 },
                 {
                     type: 'displayText',
+                    // type: 'displayImage',
                     name: 'duration',
                     label: 'Duration (Min):',
+                    dependencies: ['name', ''],
+                    content: ({ getFieldValue }) => {
+                        console.log(workoutSettingInfo);
+                        console.log(getFieldValue('name'));
+
+                        return getFieldValue('name') + '分钟'
+
+                        // const CARD = 'https://amber.7mfitness.com/category/image/e45cf328-57dc-4c23-a8cf-ad2e4cf14575.png?name=CARD.png'
+                        // const HORIZONTAL = 'https://amber.7mfitness.com/category/image/363ba524-6876-4ff2-b14c-b25f77e529c4.jpeg?name=HORIZONTAL.jpeg'
+                        // const showTypeCode = getFieldValue('showTypeCode');
+                        // return showTypeCode ? showTypeCode == 'CARD' ? CARD : HORIZONTAL : null
+                    },
+                    style: {
+                        height: '100px',
+                    },
                 },
                 {
                     type: 'displayText',
@@ -401,6 +419,75 @@ export default function UserEditorWithCommon() {
         debugger
         return formValues;
     }
+    /**
+     * 处理表单数据后的回调函数
+     * @param {Object} data - 原始数据
+     * @param {Object} params - 回调参数
+     * @param {Function} params.setInternalFormFields - 设置内部表单字段的函数
+     * @param {Array} params.updatedFields - 更新后的字段配置
+     * @returns {Object} 处理后的数据
+     */
+    const getDataAfter = (data, { setInternalFormFields, updatedFields }) => {
+        // 获取基础字段配置（非分组字段）
+        const baseFields = updatedFields.filter(item => !item.isGroup);
+        // 获取分组类型的字段配置模板
+        const structureTemplate = updatedFields.find(item => item.isGroup);
+
+        // 如果没有运动组数据，直接返回原始数据
+        if (!data?.exerciseGroupList?.length || !structureTemplate) {
+            return data;
+        }
+        // 初始化新的分组字段列表
+        const newStructureFields = [];
+
+        // 处理运动组数据
+        data.exerciseGroupList.forEach((exerciseGroup, index) => {
+            // 创建新的分组字段配置
+            const newField = createGroupField(structureTemplate, index, exerciseGroup, data);
+            newStructureFields.push(newField);
+
+            // 在数据对象中设置运动列表
+            const fieldKey = `exerciseIdList${index || ''}`;
+            data[fieldKey] = exerciseGroup.exerciseList;
+        });
+
+        // 合并基础字段和新的分组字段
+        const newFields = [...baseFields, ...newStructureFields];
+        setFormFields(newFields);
+
+        console.log(newFields);
+
+        console.log(data);
+
+        return data;
+    };
+
+    /**
+     * 创建运动组的字段配置
+     * @param {Object} template - 基础字段配置模板
+     * @param {number} index - 运动组索引
+     * @param {Object} exerciseGroup - 运动组数据
+     * @returns {Object} 新的字段配置
+     */
+    const createGroupField = (template, index, exerciseGroup, data) => {
+        const isFirstGroup = index === 0;
+        return {
+            ...template,
+            // 第一个分组保持原名，后续分组添加索引
+            name: isFirstGroup ? template.name : `${template.name}${index}`,
+            fields: template.fields.map(field => {
+                data[`${field.name}${index ? index : ''}`] = exerciseGroup[field.name];
+                return {
+                    ...field,
+                    // 更新exerciseIdList字段的名称和数据
+                    name: `${field.name}${isFirstGroup ? '' : index}`,
+                    dataList: field.name === 'exerciseIdList'
+                        ? exerciseGroup.exerciseList
+                        : field.dataList
+                }
+            })
+        };
+    };
 
     return (
         <CommonEditorForm
@@ -409,6 +496,7 @@ export default function UserEditorWithCommon() {
             // 提供更新配置项回调
             onFormFieldsChange={handleFormFieldsChange}
             saveBeforeTransform={saveBeforeTransform}
+            getDataAfter={getDataAfter}
             // 提供折叠面板展开回调
             // onCollapseChange={handleCollapseChange}
             // 其他基本配置

@@ -244,6 +244,7 @@ export const renderFormControl = (field, options = {}) => {
             const [isPlaying, setIsPlaying] = useState(null);
             return (
                 <Select
+                    maxTagCount={field.maxTagCount || 1}
                     name={field.name}
                     disabled={field.disabled}
                     mode={field.mode}

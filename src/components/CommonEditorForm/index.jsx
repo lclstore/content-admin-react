@@ -414,6 +414,7 @@ export default function CommonEditor(props) {
 
     // 防抖处理的handleItemAdded函数
     const handleItemAdded = (panelName, fieldName, itemData, expandedItemIndex, formInstance, isCollapse) => {
+        debugger
         // 添加新的待处理项
         const newItem = { panelName, fieldName, itemData, expandedItemIndex };
         setPendingItems(prev => [...prev, newItem]);
@@ -426,7 +427,7 @@ export default function CommonEditor(props) {
         // 设置新的定时器
         debounceTimerRef.current = setTimeout(() => {
             debouncedHandleItems([...pendingItems, newItem]);
-        }, 50);
+        }, 10);
     };
 
     // 在组件卸载时清理定时器
@@ -930,7 +931,10 @@ export default function CommonEditor(props) {
                     onFormFieldsChange(updatedFields);
                 }
                 // 获取数据后回调
-                response = getDataAfter ? getDataAfter(response.data) : response.data;
+                response = getDataAfter ? getDataAfter(response.data, {
+                    setInternalFormFields,
+                    updatedFields
+                }) : response.data;
             }
         }
 

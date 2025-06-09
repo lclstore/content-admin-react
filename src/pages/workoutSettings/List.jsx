@@ -1,4 +1,4 @@
-import React, { useState, useMemo ,useEffect} from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 import CommonEditorForm from '@/components/CommonEditorForm';
@@ -390,6 +390,8 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
+                            // mode: 'multiple',
+                            maxTagCount: 1,
                             name: 'previewFirstAudioBizSoundId',
                             label: '',
                             placeholder: 'Preview First Audio',

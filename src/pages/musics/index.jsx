@@ -9,11 +9,11 @@ export default function CollectionsList() {
     const tabItems = [
         {
             key: 'music/list',
-            label: 'Music',
+            label: 'Musics',
         },
         {
             key: 'playlist/list',
-            label: 'Playlist',
+            label: 'Playlists',
         },
     ];
     const [defaultTabItem, setDefaultTabItem] = useState(tabItems[0]);

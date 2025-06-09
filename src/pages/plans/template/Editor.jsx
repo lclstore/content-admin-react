@@ -124,7 +124,7 @@ export default function UserEditorWithCommon() {
                         }, {
                             label: "Main",
                             value: 1
-                        },{
+                        },{ 
                             label: "Cool Down",
                             value: 2
                         },

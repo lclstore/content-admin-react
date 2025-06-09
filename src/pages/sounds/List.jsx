@@ -33,17 +33,17 @@ export default function WorkoutsList() {
     const allColumnDefinitions = useMemo(() => {
         return [
 
-            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', width: 50, visibleColumn: 0 },
-            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', width: 50, visibleColumn: 0 },
+            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl',  visibleColumn: 0 },
+            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl',  visibleColumn: 0 },
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             {
                 title: 'Name',
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
-                
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
                 key: 'name',
-                width: 350,
+                width: 250,
                 stye: {
                     fontWeight: 'bold'
                 },

@@ -50,7 +50,8 @@ export default function WorkoutsList() {
                 dataIndex: 'name',
                 key: 'name',
                 width: 350,
-                visibleColumn: 1
+                visibleColumn: 1,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {title: "Duration (Min)", dataIndex: "durationCode", options: 'BizTemplateDurationEnums', sorter: true},
             {
@@ -60,10 +61,11 @@ export default function WorkoutsList() {
                 options: 'displayStatus',
                 width: 120,
             },
-            {title: "Generate Status", dataIndex: "generateStatus", options: 'BizGenerateTaskStatusEnums'},
-            {title: "Workout Num", dataIndex: "workoutCount",render: (text) => <div onClick={(e) => {
+            {title: "Generate Status", dataIndex: "generateStatus", options: 'publishStatus',},
+            {title: "Workout Num", dataIndex: "workoutCount",render: (text,record) => <div onClick={(e) => {
+                console.log('page',text,record)
                     e.stopPropagation();
-                    router().push("workout")
+                    // router().push(`workout?id=${record.id}`)
                 }}>{text}</div>},
             {
                 title: 'Actions',
@@ -114,7 +116,7 @@ export default function WorkoutsList() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Template');
+        setCustomPageTitle('Templates');
 
         // 设置头部按钮
         setButtons([

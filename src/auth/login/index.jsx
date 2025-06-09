@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Button, Modal } from 'antd';
 import { UserOutlined, LockOutlined, QuestionCircleOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { validateEmail } from '@/utils/index.js';
+import { validateEmail, validatePassword } from '@/utils/index.js';
 import settings from "@/config/settings.js";
 import lionImg from '@/assets/images/lion.png';
 import loginLeftImg from '@/assets/images/login-left.svg';
@@ -36,7 +36,7 @@ const Login = () => {
             console.log(account)
             // 表单验证
             let hasError = false;
-
+            console.log(!account)
             if (!account) {
                 setAccountError("Email cannot be empty.");
                 hasError = true;
@@ -47,6 +47,9 @@ const Login = () => {
 
             if (!password) {
                 setPasswordError("Password cannot be empty.");
+                hasError = true;
+            } else if (!validatePassword(password)) {
+                setPasswordError("The password must contain both letters and numbers and be 8 to 12 characters long.");
                 hasError = true;
             }
 
@@ -60,24 +63,27 @@ const Login = () => {
             setLoading(true);
         }
         // 表单验证
-        // let hasError = false;
+        let hasError = false;
 
-        // if (!account) {
-        //     setAccountError("Email cannot be empty.");
-        //     hasError = true;
-        // } else if (!validateEmail(account)) {
-        //     setAccountError("Email is not valid.");
-        //     hasError = true;
-        // }
+        if (!account) {
+            setAccountError("Email cannot be empty.");
+            hasError = true;
+        } else if (!validateEmail(account)) {
+            setAccountError("Email is not valid.");
+            hasError = true;
+        }
 
-        // if (!password) {
-        //     setPasswordError("Password cannot be empty.");
-        //     hasError = true;
-        // }
+        if (!password) {
+            setPasswordError("Password cannot be empty.");
+            hasError = true;
+        } else if (!validatePassword(password)) {
+            setPasswordError("The password must contain both letters and numbers and be 8 to 12 characters long.");
+            hasError = true;
+        }
 
-        // if (hasError) {
-        //     return false;
-        // }
+        if (hasError) {
+            return false;
+        }
 
         // 清除错误提示
         setAccountError('');
@@ -91,13 +97,13 @@ const Login = () => {
                 password: md5(password)
             },
             callback(res) {
-                console.log('res',res.data)
+                console.log('res', res.data)
                 if (res.data.success) {
                     localDown(res.data.data.token)
-                    localStorage.setItem('users',JSON.stringify(res.data.data));
+                    localStorage.setItem('users', JSON.stringify(res.data.data));
                     setUserInfo(res.data.data)
                     navigate(settings.router.homePath);
-                
+
                 } else {
                     setLoading(false)
                 }
@@ -123,11 +129,12 @@ const Login = () => {
         const value = e.target.value;
         setPassword(value);
         // 实时验证
-        console.log(value)
-        if (value) {
-            setPasswordError('');
+        console.log(value,validatePassword(value))
+        if (value && !validatePassword(value)) {
+            setPasswordError('The password must contain both letters and numbers and be 8 to 12 characters long.');
+            
         } else {
-            setPasswordError('Password cannot be empty.');
+            setPasswordError('');
         }
     };
 
@@ -178,7 +185,7 @@ const Login = () => {
                                         placeholder="Enter email..."
                                         value={account}
                                         onChange={handleAccountChange}
-                                        onFocus={() => setAccountError('')}
+                                        // onFocus={() => setAccountError('')}
                                     />
                                 </div>
                                 <div className="login-form-error">{accountError}</div>
@@ -191,7 +198,7 @@ const Login = () => {
                                         placeholder="Enter password..."
                                         value={password}
                                         onChange={handlePaswordChange}
-                                        onFocus={() => setPasswordError('')}
+                                        // onFocus={() => setPasswordError('')}
                                         visibilityToggle={{ visible: passwordVisible, onVisibleChange: setPasswordVisible }}
                                         iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
                                     />
@@ -203,6 +210,7 @@ const Login = () => {
                                     type="primary"
                                     onClick={login}
                                     loading={loading}
+                                    color="#243636"
                                     block
                                 >
                                     <span className="btn-text">SIGN IN</span>

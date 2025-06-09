@@ -27,6 +27,7 @@ export default function CollectionsList() {
     }, [bizType]);
 
     const onChange = (key) => {
+        console.log(key)
         setBizType(key);
     };
 

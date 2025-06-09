@@ -30,25 +30,29 @@ export default () => {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            {
-                title: 'ID',
-                dataIndex: 'id',
-                width: 60,
-            },
+
             {
                 title: 'Cover Image',
                 dataIndex: 'coverImgUrl',
+                width: 200,
                 mediaType: 'image',
             },
             {
                 title: 'Detail Image',
                 dataIndex: 'detailImgUrl',
+                width: 200,
                 mediaType: 'image',
+            },
+            {
+                title: 'ID',
+                dataIndex: 'id',
+                // width: 60,
             },
             {
                 title: 'Name',
                 dataIndex: 'name',
-                visibleColumn: 0
+                visibleColumn: 0,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
                 title: 'Status',
@@ -56,13 +60,14 @@ export default () => {
                 key: 'status',
                 iconOptions: statusIconMap,
                 options: 'displayStatus',
-                width: 120,
+                // width: 120,
                 visibleColumn: 0
             },
             {
                 title: 'Show Type',
                 dataIndex: 'showTypeCode',
                 sorter: true,
+                // width: 200,
                 options: [
                     {
                         label: 'Horizontal',
@@ -92,7 +97,7 @@ export default () => {
 
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Category');
+        setCustomPageTitle('Categories');
 
         // 设置头部按钮
         setButtons([

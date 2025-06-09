@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo ,useEffect} from 'react';
 import { useNavigate } from 'react-router';
 
 import CommonEditorForm from '@/components/CommonEditorForm';
@@ -13,15 +13,17 @@ import {
     PlayCircleOutlined,
     PauseCircleOutlined
 } from '@ant-design/icons';
-
+import request from "@/request";
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
     // 初始用户数据状态--可设默认值
     const initialValues = {
         introVideoReps: 0,
         previewVideoReps: 1,
-
-        executionVideoReps: 3,
+        introVideoCycleCode: "FRONT_TO_SIDE",
+        previewVideoCycleCode: "SIDE_TO_FRONT",
+        executionVideoCycleCode: "SIDE_TO_FRONT",
+        executionVideoReps: 2,
         introAudioStartTime: 0,
         previewRestAudioStartTime: 0,
         previewFirstAudioStartTime: 3,
@@ -31,7 +33,7 @@ export default function UserEditorWithCommon() {
         previewThreeAudioEndTime: 3,
         previewTwoAudioEndTime: 2,
         previewOneAudioEndTime: 1,
-        previewGoAudioStartTime: 0,
+        executionGoAudioStartTime: 0,
         executionGuidanceAudioStartTime: 2,
         executionHalfwayAudioStartTime: 30,
         executionThreeAudioEndTime: 4,
@@ -48,7 +50,7 @@ export default function UserEditorWithCommon() {
         previewThreeAudioClosed: 0,
         previewTwoAudioClosed: 0,
         previewOneAudioClosed: 0,
-        previewGoAudioClosed: 0,
+        executionGoAudioClosed: 0,
         executionGuidanceAudioClosed: 0,
         executionHalfwayAudioClosed: 0,
         executionThreeAudioClosed: 0,
@@ -63,6 +65,28 @@ export default function UserEditorWithCommon() {
 
 
     }
+    const [workoutSetting, setworkoutSettingsr] = useState(initialValues);
+    const getData = async () => {
+        console.log('2222222')
+        return new Promise(resolve => {
+            request.get({
+                url: `/workoutSetttings/detail`,
+                load: true,
+                callback: res => {
+                    console.log('res11111', res)
+                    // initialValues = res.data.data
+                    resolve(res.data.data)
+                }
+            });
+        })
+    }
+    useEffect(() => {
+        console.log('1111111111111')
+        getData().then(res => {
+            console.log(res)
+            setworkoutSettingsr(res)
+        })
+    }, []);
     const mockUsers = [{
         id: 1,
         name: 'John Doe',
@@ -154,6 +178,13 @@ export default function UserEditorWithCommon() {
                     label: 'Intro Video Reps',
                 },
                 {
+                    type: 'select',
+                    name: 'introVideoCycleCode',
+                    label: 'Intro Video Cycle',
+                    options: "BizWorkoutSettingsVideoCycleEnums",
+                    // required: true,
+                },
+                {
 
                     type: 'inputGroup',
                     name: 'warmUp',
@@ -165,10 +196,6 @@ export default function UserEditorWithCommon() {
                             name: 'introAudioBizSoundId',
                             label: '',
                             placeholder: 'Intro Audio',
-                            rules: [{
-                                required: true,
-                                message: 'Intro Audio'
-                            }],
                             style: {
                                 width: '300px',
                             },
@@ -203,17 +230,15 @@ export default function UserEditorWithCommon() {
                                     </span >
                                 );
                             },
-                            required: true,
                         },
                         {
                             type: 'input',
                             name: 'introAudioStartTime',
                             label: '',
-                            required: true,
                             maxLength: 100,
                             placeholder: 'Start Seconds',
                             rules: [{
-                                required: true,
+                                // required: true,
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Start Seconds'
                             }],
@@ -234,7 +259,7 @@ export default function UserEditorWithCommon() {
                                 },
                             ],
 
-                            required: true,
+                            // required: true,
                         },
 
 
@@ -258,6 +283,13 @@ export default function UserEditorWithCommon() {
                     formatter: (value) => value, // 格式化显示为 0:XX
                     name: 'previewVideoReps', // 修改字段名避免重复
                     label: 'Preview Video Reps',
+                    required: true,
+                },
+                {
+                    type: 'select',
+                    name: 'previewVideoCycleCode',
+                    label: 'Preview Video Cycle',
+                    options: "BizWorkoutSettingsVideoCycleEnums",
                     required: true,
                 },
                 // {
@@ -985,6 +1017,13 @@ export default function UserEditorWithCommon() {
                     required: true,
                 },
                 {
+                    type: 'select',
+                    name: 'executionVideoCycleCode',
+                    label: 'Execution Video Cycle',
+                    options: "BizWorkoutSettingsVideoCycleEnums",
+                    required: true,
+                },
+                {
 
                     type: 'inputGroup',
                     name: 'executionVideoReps',
@@ -993,7 +1032,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'previewGoAudioBizSoundId',
+                            name: 'executionGoAudioBizSoundId',
                             label: '',
                             placeholder: 'Execution Go Audio',
                             rules: [{
@@ -1038,7 +1077,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
-                            name: 'previewGoAudioStartTime',
+                            name: 'executionGoAudioStartTime',
                             label: '',
                             defaultValue: 3,
                             required: true,
@@ -1054,7 +1093,7 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
-                            name: 'previewGoAudioClosed',
+                            name: 'executionGoAudioClosed',
                             label: '',
                             options: [
                                 {
@@ -1802,7 +1841,7 @@ export default function UserEditorWithCommon() {
                 formType="advanced"
 
                 collapseFormConfig={{ defaultActiveKeys: 'all' }}
-                initialValues={initialValues}
+                initialValues={workoutSetting}
             />
         </div>
     );

@@ -100,6 +100,7 @@ export default function WorkoutsList() {
 
     // 在Modal打开时重置表单
     useEffect(() => {
+        console.log('isBatchCreateModalVisible',isBatchCreateModalVisible,batchCreateForm.resetFields())
         if (isBatchCreateModalVisible) {
             batchCreateForm.resetFields();
             batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
@@ -156,7 +157,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
+            
             {
                 title: 'Cover ImgUrl',
                 width: 120,
@@ -165,6 +166,7 @@ export default function WorkoutsList() {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
             // {
             //     title: 'Detail ImgUrl',
             //     width: 120,
@@ -190,7 +192,8 @@ export default function WorkoutsList() {
             //     visibleColumn: 0
             // },
 
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true },
+            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,},
             {
                 title: 'Status',
                 dataIndex: 'status',
@@ -273,7 +276,6 @@ export default function WorkoutsList() {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
-                sorter: true,
                 options: 'BizExerciseDifficultyEnums',
                 key: 'difficultyCode'
             },
@@ -367,6 +369,7 @@ export default function WorkoutsList() {
      * 用于批量操作功能
      */
     const onSelectChange = useCallback((newSelectedRowKeys) => {
+        console.log('11111111')
         setSelectedRowKeys(newSelectedRowKeys);
     }, []);
 
@@ -446,7 +449,7 @@ export default function WorkoutsList() {
             label: 'Batch Create File',
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
-            disabled: selectedRowKeys.length === 0
+            // disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
 
@@ -475,7 +478,7 @@ export default function WorkoutsList() {
                 leftToolbarItems={leftToolbarItems}
                 moduleKey="workout"
                 searchConfig={{
-                    placeholder: "Search content name or ID...",
+                    placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={true}
                 filterConfig={{

@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useMemo,useRef} from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Button, Card, Space, Spin } from 'antd';
+import { Form, Button, Card, Space, Spin,FloatButton } from 'antd';
 import {
     PlusOutlined,
     DeleteOutlined,
@@ -88,7 +88,8 @@ export default function CommonEditor(props) {
     const [internalFormFields, setInternalFormFields] = useState(
         collapseFormConfig.fields || formFields || fields || []
     );
-
+    // scroll ref
+    const scrollableContainerRef = useRef(null);
     // 每当外部formFields/fields变化时，更新内部状态
     useEffect(() => {
         // 优先使用fields，然后是formFields，最后是collapseFormConfig.fields
@@ -1249,15 +1250,17 @@ export default function CommonEditor(props) {
 
     // 在 useEffect 中设置表单引用
     useEffect(() => {
+        console.log('scrollableContainerRef',scrollableContainerRef)
         if (setFormRef && form && handleStatusModalConfirmFromHook) {
             setFormRef({ form, triggerSave: handleStatusModalConfirmFromHook });
         }
     }, [setFormRef]);
 
     return (
-        <div className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer} ${formType === 'basic' ? "basicEditorContainer" : "advancedEditorContainer"}`}>
+        <div ref={scrollableContainerRef} className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer} ${formType === 'basic' ? "basicEditorContainer" : "advancedEditorContainer"}`}>
             {contextHolder}
             {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
+            <FloatButton.BackTop target={() => scrollableContainerRef.current} visibilityHeight={50}/>
         </div>
     );
 }

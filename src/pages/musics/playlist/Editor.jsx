@@ -21,11 +21,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'type',
             label: 'Type',
-            options: [
-                { label: 'Regular', value: 'REGULAR' },
-                { label: 'Yoga', value: 'YOGA' },
-                { label: 'Dance', value: 'DANCE' },
-            ],
+            options: "BizPlaylistTypeEnums",
             required: true,
         },
         {
@@ -111,7 +107,7 @@ export default function UserEditorWithCommon() {
             formValues.musicList = musicListField.dataList.map(item => {
                 return {
                     bizMusicId: item.id,
-                    displayName: item.name,
+                    // displayName: item.name,
                     displayName: item.displayName,
                     premium: item.premium,
                 }

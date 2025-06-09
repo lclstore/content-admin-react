@@ -482,7 +482,7 @@ export const useHeaderConfig = (params) => {
             }
 
             // 显示错误信息
-            messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
+            // messageApi.error(errorData.errorFields[0].errors?.[0] || 'Form validation error');
             throw error; // 确保错误也被正确传递
         }
     }, [

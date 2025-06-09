@@ -35,8 +35,16 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'applicationCode',
             label: 'Application',
-            options:"BizResourceApplicationEnums",
+            options: "BizResourceApplicationEnums",
             required: true,
+        },
+        {
+           type: 'select',
+            mode: 'single',
+            name: 'genderCode',
+            label: 'Gender',
+            options: 'BizExerciseGenderEnums',
+            required: true
         },
         {
             type: 'upload',
@@ -53,6 +61,7 @@ export default function UserEditorWithCommon() {
                 });
             },
             maxFileSize: 2 * 1024,
+            required: true
         },
         {
             type: 'upload',
@@ -68,6 +77,7 @@ export default function UserEditorWithCommon() {
                 });
             },
             maxFileSize: 2 * 1024,
+            required: true
         },
         {
             type: 'upload',
@@ -83,6 +93,7 @@ export default function UserEditorWithCommon() {
                 });
             },
             maxFileSize: 2 * 1024,
+            required: true
         },
         {
             type: 'upload',
@@ -99,6 +110,7 @@ export default function UserEditorWithCommon() {
             },
             //文件上传后修改name
             maxFileSize: 2 * 1024,
+            required: true
         },
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建

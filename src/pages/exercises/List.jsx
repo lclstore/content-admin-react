@@ -108,13 +108,7 @@ export default () => {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            {
-                title: 'ID',
-                dataIndex: 'id',
-                visibleColumn: 0,
-                width: 50,
-                key: 'id'
-            },
+            
             {
                 title: 'Image',
                 width: 120,
@@ -123,13 +117,20 @@ export default () => {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
-
+            {
+                title: 'ID',
+                dataIndex: 'id',
+                visibleColumn: 0,
+                width: 50,
+                key: 'id'
+            },
             {
                 title: 'Name',
                 dataIndex: 'name',
                 sorter: true,
                 width: 120,
                 visibleColumn: 0,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
                 key: 'name'
             },
             {
@@ -156,16 +157,7 @@ export default () => {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
-                options: [{
-                    label: 'Warm Up',
-                    value: 'WARM_UP'
-                }, {
-                    label: 'Main',
-                    value: 'MAIN'
-                }, {
-                    label: 'Cool Down',
-                    value: 'COOL_DOWN'
-                }],
+                options: "BizExerciseStructureTypeEnums",
                 key: 'structureTypeCode'
             },
             {
@@ -174,18 +166,7 @@ export default () => {
                 sorter: true,
                 width: 120,
                 visibleColumn: 2,
-                options: [
-                    {
-                        label: 'Beginner',
-                        value: 'BEGINNER'
-                    }, {
-                        label: 'Intermediate',
-                        value: 'INTERMEDIATE'
-                    }, {
-                        label: 'Advanced',
-                        value: 'ADVANCED'
-                    }
-                ],
+                options: "BizExerciseDifficultyEnums",
                 key: 'difficultyCode'
             },
             {
@@ -194,15 +175,7 @@ export default () => {
                 sorter: true,
                 width: 120,
                 visibleColumn: 1,
-                options: [
-                    {
-                        label: 'Male',
-                        value: 'MALE'
-                    }, {
-                        label: 'Female',
-                        value: 'FEMALE'
-                    }
-                ],
+                options: "BizExerciseGenderEnums",
                 key: 'genderCode'
             },
 
@@ -211,15 +184,7 @@ export default () => {
                 dataIndex: 'equipmentCode',
                 width: 120,
                 visibleColumn: 1,
-                options: [
-                    {
-                        label: 'No equipment',
-                        value: 'NO_EQUIPMENT'
-                    }, {
-                        label: 'Chair',
-                        value: 'CHAIR'
-                    },
-                ],
+                options: "BizProgramEquipmentEnums",
                 key: 'equipmentCode'
             },
             {
@@ -228,15 +193,7 @@ export default () => {
                 sorter: true,
                 width: 120,
                 visibleColumn: 1,
-                options: [
-                    {
-                        label: 'Seated',
-                        value: 'SEATED'
-                    }, {
-                        label: 'Standing',
-                        value: 'STANDING'
-                    },
-                ],
+                options: "BizExercisePositionEnums",
                 key: 'positionCode'
             },
             {
@@ -244,30 +201,7 @@ export default () => {
                 dataIndex: 'injuredCodes',
                 width: 120,
                 visibleColumn: 1,
-                options: [
-                    {
-                        label: 'Shoulder',
-                        value: 'SHOULDER'
-                    }, {
-                        label: 'Back',
-                        value: 'BACK'
-                    }, {
-                        label: 'Wrist',
-                        value: 'WRIST'
-                    }, {
-                        label: 'Knee',
-                        value: 'KNEE'
-                    }, {
-                        label: 'Ankle',
-                        value: 'ANKLE'
-                    }, {
-                        label: 'Hip',
-                        value: 'HIP'
-                    }, {
-                        label: 'None',
-                        value: 'NONE'
-                    },
-                ],
+                options: "BizExerciseInjuredEnums",
                 key: 'injuredCodes'
             },
             {

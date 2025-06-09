@@ -190,7 +190,7 @@ export default function WorkoutsList() {
                             formName: 'publish',
                             hideSaveButton: true,
                             hideBackButton: true,
-                            layout: 'vertical'
+                            layout: 'vertical' 
                         }}
                         fields={formFields}
                         initialValues={initialValues}

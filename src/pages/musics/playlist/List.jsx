@@ -52,7 +52,7 @@ export default function Playlists() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1 },
+            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1,render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,},
             {
                 title: 'Status',
                 dataIndex: 'status',
@@ -68,7 +68,9 @@ export default function Playlists() {
                     );
                 }
             },
-            { title: 'Type', dataIndex: 'type', key: 'type', width: 120, visibleColumn: 1 },
+            { title: 'Type', dataIndex: 'type',
+                options:"BizPlaylistTypeEnums",
+                key: 'type', width: 120, visibleColumn: 1 },
 
             { title: 'music Count', dataIndex: 'musicCount', key: 'musicCount', width: 120, visibleColumn: 1 },
 

@@ -49,16 +49,7 @@ export default function UserEditorWithCommon() {
             label: 'Structure Type',
             // disabled: true,
             width: "50%",
-            options: [{
-                label: 'Warm Up',
-                value: 'WARM_UP'
-            }, {
-                label: 'Main',
-                value: 'MAIN'
-            }, {
-                label: 'Cool Down',
-                value: 'COOL_DOWN'
-            }],
+            options: "BizExerciseStructureTypeEnums",
             required: true,
         },
         {
@@ -67,15 +58,7 @@ export default function UserEditorWithCommon() {
             name: 'genderCode',
             label: 'Gender',
             width: "50%",
-            options: [
-                {
-                    label: 'Male',
-                    value: 'MALE'
-                }, {
-                    label: 'Female',
-                    value: 'FEMALE'
-                }
-            ],
+            options:"BizExerciseGenderEnums",
             required: true,
         },
         {
@@ -84,15 +67,7 @@ export default function UserEditorWithCommon() {
             name: 'equipmentCode',
             label: 'Equipment',
             width: "50%",
-            options: [
-                {
-                    label: 'No equipment',
-                    value: 'NO_EQUIPMENT'
-                }, {
-                    label: 'Chair',
-                    value: 'CHAIR'
-                },
-            ],
+            options: "BizExerciseEquipmentEnums",
             required: true,
         },
         {
@@ -101,18 +76,7 @@ export default function UserEditorWithCommon() {
             name: 'difficultyCode',
             label: 'Difficulty',
             width: "50%",
-            options: [
-                {
-                    label: 'Beginner',
-                    value: 'BEGINNER'
-                }, {
-                    label: 'Intermediate',
-                    value: 'INTERMEDIATE'
-                }, {
-                    label: 'Advanced',
-                    value: 'ADVANCED'
-                }
-            ],
+            options: "BizExerciseDifficultyEnums",
             required: true,
         },
         {
@@ -120,15 +84,7 @@ export default function UserEditorWithCommon() {
             name: 'positionCode',
             label: 'position',
             width: "50%",
-            options: [
-                {
-                    label: 'Seated',
-                    value: 'SEATED'
-                }, {
-                    label: 'Standing',
-                    value: 'STANDING'
-                },
-            ],
+            options: "BizExercisePositionEnums",
             required: true,
         },
         {
@@ -137,27 +93,7 @@ export default function UserEditorWithCommon() {
             name: 'injuredCodes',
             label: 'Injured',
             width: "50%",
-            options: [
-                {
-                    label: 'Shoulder',
-                    value: 'SHOULDER'
-                }, {
-                    label: 'Back',
-                    value: 'BACK'
-                }, {
-                    label: 'Wrist',
-                    value: 'WRIST'
-                }, {
-                    label: 'Knee',
-                    value: 'KNEE'
-                }, {
-                    label: 'Ankle',
-                    value: 'ANKLE'
-                }, {
-                    label: 'Hip',
-                    value: 'HIP'
-                }
-            ],
+            options: "BizExerciseInjuredEnums",
         },
         {
             type: 'textarea',

@@ -76,11 +76,11 @@ const SortableItemRenderer = React.memo(({
 
             // 如果移动距离小于阈值，认为是点击
             if (dx < moveThreshold && dy < moveThreshold && !isDragging) {
-                toggleExpandItem && toggleExpandItem(item.id);
+                toggleExpandItem && toggleExpandItem(itemIndex);
             }
             setMouseDownPos(null);
         }
-    }, [mouseDownPos, isDragging, toggleExpandItem, item.id]);
+    }, [mouseDownPos, isDragging, toggleExpandItem, itemIndex]);
 
     const handleMouseMove = useCallback((e) => {
         if (mouseDownPos) {
@@ -433,9 +433,9 @@ const StructureList = ({
     }, [handleAudioEnded]);
 
     // 简化展开/折叠处理函数
-    const handleToggleExpandItem = useCallback((itemId) => {
-        console.log('切换展开状态：', { itemId, currentExpanded: expandedItemId });
-        setExpandedItemId(prevId => prevId === itemId ? null : itemId);
+    const handleToggleExpandItem = useCallback((itemIndex) => {
+        console.log('切换展开状态：', { itemIndex, currentExpanded: expandedItemId });
+        setExpandedItemId(prevId => prevId === itemIndex ? null : itemIndex);
     }, []);
 
     // 处理删除项目
@@ -586,7 +586,7 @@ const StructureList = ({
                                             panelId={name}
                                             item={item}
                                             itemIndex={index}
-                                            isExpanded={expandedItemId === item.id}
+                                            isExpanded={expandedItemId === index}
                                             toggleExpandItem={handleToggleExpandItem}
                                             onOpenReplaceModal={handleOpenReplaceModal}
                                             onCopyItem={handleCopyItem}

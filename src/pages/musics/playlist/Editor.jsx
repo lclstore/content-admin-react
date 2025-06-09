@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import request from '@/request';
 import { validateEmail, validatePassword } from '@/utils';
-
+import { LockFilled, UnlockFilled } from '@ant-design/icons';
 export default function UserEditorWithCommon() {
 
     // 表单字段配置
@@ -41,8 +41,17 @@ export default function UserEditorWithCommon() {
             // renderItemMata: renderItemMata,
             label: 'Musics',
             dataList: [],
-            showLock: true,
             structureListFields: [
+                {
+                    type: 'icon',
+                    name: 'lock',
+                    label: 'Lock',
+                    options: [
+                        { value: 1, label: <LockFilled /> },
+                        { value: 0, label: <UnlockFilled /> },
+                    ],
+                    defaultValue: 0,
+                }
                 // {
                 //     type: 'input',
                 //     required: true,

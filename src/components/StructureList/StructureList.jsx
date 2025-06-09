@@ -223,6 +223,16 @@ const SortableItemRenderer = React.memo(({
                 </Col>
                 <Col flex="none">
                     <Space className="structure-item-actions">
+                        {onCopyItem && (
+                            <Button
+                                style={{ fontSize: '15px', color: '#1c8' }}
+                                type="text"
+                                icon={<CopyOutlined />}
+                                onClick={e => { e.stopPropagation(); onCopyItem(panelId, item.id); }}
+                                onPointerDown={e => e.stopPropagation()}
+                                title="Copy"
+                            />
+                        )}
                         {onOpenReplaceModal && (
                             <Button
                                 style={{ fontSize: '15px', color: '#1c8' }}

@@ -347,72 +347,26 @@ export default function CommonEditor(props) {
     };
 
     // 处理选中项被添加到表单后的回调
-    const handleItemAdded = (panelName, fieldName, itemData, expandedItemIndex, formInstance, isCollapse) => {
-        // console.log(activeCollapseKeys[0], panelName);
-        // setActiveCollapseKeys(panelName);
-        // debugger
-        // const findAndUpdateDataList = (field, itemsToAdd) => {
-        //     // 如果当前字段有dataList，直接返回更新后的字段
-        //     if (field.dataList !== undefined) {
-        //         const newDataList = Array.isArray(field.dataList)
-        //             ? [...field.dataList, ...itemsToAdd]
-        //             : itemsToAdd;
-        //         return {
-        //             ...field,
-        //             dataList: newDataList
-        //         };
-        //     }
+    const [pendingItems, setPendingItems] = useState([]); // 用于存储待处理的项
+    const debounceTimerRef = useRef(null); // 用于存储定时器引用
 
-        //     // 如果当前字段有子字段，递归查找
-        //     if (field.fields) {
-        //         const updatedFields = field.fields.map(subField =>
-        //             findAndUpdateDataList(subField, itemsToAdd)
-        //         );
-        //         return {
-        //             ...field,
-        //             fields: updatedFields
-        //         };
-        //     }
+    // 处理项目添加的防抖函数
+    const debouncedHandleItems = (items) => {
+        if (items.length === 1) {
+            // 如果只有一个项目，直接处理
+            const [item] = items;
+            processItemAdd(item.panelName, item.fieldName, item.itemData, item.expandedItemIndex);
+        } else {
+            // 如果有多个项目，只处理最后一个
+            const lastItem = items[items.length - 1];
+            processItemAdd(lastItem.panelName, lastItem.fieldName, lastItem.itemData, lastItem.expandedItemIndex);
+        }
+        // 清空待处理项
+        setPendingItems([]);
+    };
 
-        //     // 如果既没有dataList也没有子字段，返回原字段
-        //     return field;
-        // };
-
-        // // 创建 formFields 的深拷贝
-        // const updatedFields = internalFormFields.map(field => {
-        //     // 找到匹配的面板
-        //     if (field.name === panelName) {
-        //         // 判断itemData是否为数组
-        //         const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
-
-        //         // 检查是否有展开的项
-        //         if (expandedItemId && Array.isArray(field.dataList)) {
-        //             // 查找展开项的索引
-        //             const expandedItemIndex = field.dataList.findIndex(item => item.id === expandedItemId);
-
-        //             if (expandedItemIndex !== -1) {
-        //                 // 如果找到展开的项，在其后插入新项
-        //                 const newDataList = [...field.dataList];
-        //                 newDataList.splice(expandedItemIndex + 1, 0, ...itemsToAdd);
-        //                 return {
-        //                     ...field,
-        //                     dataList: newDataList
-        //                 };
-        //             }
-        //         }
-
-        //         // 使用递归函数查找并更新dataList
-        //         return findAndUpdateDataList(field, itemsToAdd);
-        //     }
-
-        //     if (panelName === 'basic' && field.type === 'structureList') {
-        //         const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
-        //         return findAndUpdateDataList(field, itemsToAdd);
-        //     }
-
-        //     return field; // 返回未修改的其他面板
-        // });
-        // console.log('updatedFields', updatedFields);
+    // 实际处理添加项目的函数
+    const processItemAdd = (panelName, fieldName, itemData, expandedItemIndex) => {
         internalFormFields.map(field => {
             if (field.name === panelName) {
                 if (Array.isArray(field.dataList)) {
@@ -438,6 +392,7 @@ export default function CommonEditor(props) {
             }
             return field;
         });
+
         //基础表单逻辑
         if (panelName === 'basic') {
             internalFormFields.map(field => {
@@ -450,18 +405,38 @@ export default function CommonEditor(props) {
 
         // 更新内部状态
         setInternalFormFields(internalFormFields);
-        // setActiveCollapseKeys(activeCollapseKeys);
+
         // 通知父组件
         if (onFormFieldsChange) {
             onFormFieldsChange(internalFormFields);
         }
-
-
-        // 如果父组件提供了onItemAdded，也调用它（向后兼容）
-        // if (collapseFormConfig.onItemAdded) {
-        //     collapseFormConfig.onItemAdded(panelName, fieldName, itemData, expandedItemId, formInstance);
-        // }
     };
+
+    // 防抖处理的handleItemAdded函数
+    const handleItemAdded = (panelName, fieldName, itemData, expandedItemIndex, formInstance, isCollapse) => {
+        // 添加新的待处理项
+        const newItem = { panelName, fieldName, itemData, expandedItemIndex };
+        setPendingItems(prev => [...prev, newItem]);
+
+        // 清除之前的定时器
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        // 设置新的定时器
+        debounceTimerRef.current = setTimeout(() => {
+            debouncedHandleItems([...pendingItems, newItem]);
+        }, 50);
+    };
+
+    // 在组件卸载时清理定时器
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
 
     // 处理排序的回调函数
     const handleSortItems = (panelName, oldIndex, newIndex) => {

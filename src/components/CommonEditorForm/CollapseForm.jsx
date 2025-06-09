@@ -475,7 +475,8 @@ const CollapseForm = ({
                 if (currentActiveKeys && currentFieldsName && currentActiveKeys.includes(currentFieldsName.name)) {
                     parentName = currentActiveKeys;
                 }
-
+                onCollapseChange(parentName)
+                return
                 // 将选中的数据添加到表单中
                 try {
                     // 获取当前表单数据
@@ -562,7 +563,6 @@ const CollapseForm = ({
                     initialValues,
                     mounted,
                     moduleKey,
-                    onAddItem: onItemAdded,
                     onCollapseChange,
                     isCollapse,
                     onDeleteItem,

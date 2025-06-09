@@ -461,19 +461,20 @@ const CollapseForm = ({
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
-            console.log(expandedItemId);
-
-            debugger
             // 查找所有具有 dataList 属性的面板
             const result = findFirstDataListItemAndParent(fields);
             if (result) {
                 const { dataListItem, parentItem } = result;
                 const targetPanel = dataListItem;
 
-                // 如果目标面板未展开，则展开它
-                if (!activeKeys.includes(parentItem.name)) {
-                    // 展开目标面板
-                    // onCollapseChange(parentItem.name);
+                // 获取当前展开的面板
+                const currentActiveKeys = typeof activeKeys === 'string' ? activeKeys : activeKeys[0];
+                let parentName = parentItem?.name || targetPanel.name;
+                const currentFieldsName = fields.find(item => item.isShowAdd);
+
+                // 如果当前面板是添加数据的面板，则使用当前面板的name
+                if (currentActiveKeys && currentFieldsName && currentActiveKeys.includes(currentFieldsName.name)) {
+                    parentName = currentActiveKeys;
                 }
 
                 // 将选中的数据添加到表单中
@@ -482,68 +483,61 @@ const CollapseForm = ({
                     const currentFormValues = form.getFieldsValue();
 
                     // 检查目标面板的字段结构
-                    // 1. 如果面板有指定的 listFieldName，使用该字段名
-                    // 2. 否则使用面板的 name 作为字段名
                     const fieldName = targetPanel.listFieldName || targetPanel.name;
-                    // 初始化字段值为数组（如果尚未初始化）
+
+                    // 初始化字段值为数组
                     if (!currentFormValues[fieldName]) {
                         currentFormValues[fieldName] = [];
                     } else if (!Array.isArray(currentFormValues[fieldName])) {
-                        // 如果存在但不是数组，转换为包含原值的数组
                         currentFormValues[fieldName] = [currentFormValues[fieldName]];
                     }
 
                     // 准备要添加的数据
-                    // 如果面板定义了 dataMapping 函数，使用它转换数据
                     let itemToAdd;
                     if (typeof targetPanel.dataMapping === 'function') {
-                        // 使用映射函数转换数据
                         itemToAdd = targetPanel.dataMapping(selectedItemFromList);
                     } else {
-                        // 否则使用默认映射 - 添加原始数据并生成ID
                         itemToAdd = {
                             ...selectedItemFromList,
                         };
                     }
 
-                    // 添加新项目到数组中
-                    currentFormValues[fieldName].push(itemToAdd);
+                    // 查找当前展开的项的索引
+                    const expandedItemId = expandedItems[parentName];
+                    let insertIndex = currentFormValues[fieldName].length; // 默认添加到末尾
+
+                    if (expandedItemId) {
+                        // 如果有展开的项，找到其索引并在其后插入
+                        const expandedIndex = currentFormValues[fieldName].findIndex(item => item.id === expandedItemId);
+                        if (expandedIndex !== -1) {
+                            insertIndex = expandedIndex + 1;
+                        }
+                    }
+
+                    // 在指定位置插入新项目
+                    currentFormValues[fieldName].splice(insertIndex, 0, itemToAdd);
 
                     // 更新表单值
                     form.setFieldsValue(currentFormValues);
 
-                    // 触发表单的 onValuesChange 回调（如果直接设置值可能不会触发）
+                    // 触发表单的 onValuesChange 回调
                     const changeEvent = {};
                     changeEvent[fieldName] = currentFormValues[fieldName];
                     if (form.onValuesChange) {
                         form.onValuesChange(changeEvent, currentFormValues);
                     }
 
-                    console.log('数据已添加到面板:', targetPanel.name, '字段:', fieldName);
-                    console.log(activeKeys);
-                    const currentActiveKeys = typeof activeKeys === 'string' ? activeKeys : activeKeys[0];
-                    let parentName = parentItem?.name || targetPanel.name
-                    const currentFieldsName = fields.find(item => item.isShowAdd);
-                    // 如果当前面板是添加数据的面板，则使用当前面板的name
-                    if (currentActiveKeys.includes(currentFieldsName.name)) {
-                        parentName = currentActiveKeys;
-                    }
-
-                    // 如果提供了回调函数，则调用它
                     // 如果提供了回调函数，则调用它
                     if (onItemAdded && typeof onItemAdded === 'function') {
-                        console.log(parentName, fieldName, itemToAdd, expandedIndex, form);
-                        debugger
-                        onItemAdded(parentName, fieldName, itemToAdd, expandedIndex, form);
+                        onItemAdded(parentName, fieldName, itemToAdd, expandedItemId, form);
                     }
 
-                    // 通知父组件已处理完选中项，可以清空选中状态
+                    // 通知父组件已处理完选中项
                     if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
                         onSelectedItemProcessed();
                     }
                 } catch (error) {
                     console.error('添加数据到面板时出错:', error);
-
                 }
             } else {
                 // 如果没有适合的面板，也需要清空选中状态

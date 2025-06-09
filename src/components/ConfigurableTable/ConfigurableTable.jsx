@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef,useImperativeHandle,forwardRef } from 'react';
 import { useLocation, useNavigate } from "react-router"
 import { useImmer } from "use-immer"
-import { Table, Input, Button, Spin, Space, Dropdown, message, Modal } from 'antd';
+import { Table, Input, Button, Spin, Space, Dropdown, message, Modal,FloatButton } from 'antd';
 import {
     SearchOutlined,
     FilterOutlined,
@@ -14,7 +14,8 @@ import {
     EllipsisOutlined,
     MenuOutlined,
     RightOutlined,
-    DownOutlined
+    DownOutlined,
+    VerticalAlignTopOutlined,
 } from '@ant-design/icons';
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import styles from './ConfigurableTable.module.less';
@@ -129,10 +130,10 @@ const ConfigurableTable = forwardRef(({
     // 声明内部 loading，也可以接受外部传入
     const [loadingLocal, setLoadingLocal] = useState(loading)
     useEffect(() => { setLoadingLocal(loading) }, [loading]);
-
     // 用于取消请求的控制器
     const abortControllerRef = useRef(null);
-
+    // 是否展示置顶按钮
+    const [topping, setTopping] = useState(false);
     // load cache
     const searchData = localStorage.getItem(location.pathname)
     let loadCache = searchData?JSON.parse(searchData):null
@@ -789,20 +790,6 @@ const ConfigurableTable = forwardRef(({
         });
     }, [currentlyVisibleColumns]);
 
-    useEffect(() => {
-        searchTableData(true)//初始化数据
-
-        // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
-    }, []);
-
-    // 组件卸载时取消所有未完成的请求
-    useEffect(() => {
-        return () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-        };
-    }, []);
     // 刷新表格数据
     useEffect(() => {
         if (refreshKey === 1) {
@@ -923,6 +910,24 @@ const ConfigurableTable = forwardRef(({
             }
         };
     }, [expandedRowRender]);
+    console.log("toping 加载了")
+    // table sroll 监听事件
+    const tableSroll = useCallback((e) => {
+        setTopping(e.target.scrollTop > 50)
+    },[topping]);
+    useEffect(() => {
+        searchTableData(true)//初始化数据
+        // tableRef.current 获取的dom有问题，只能用原生直接拿了
+        document.querySelector('.ant-table-wrapper').addEventListener('scroll', tableSroll)
+        // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
+        return () => {
+            document.querySelector('.ant-table-wrapper')?.removeEventListener('scroll', tableSroll)
+            // 组件卸载时取消所有未完成的请求
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     // 修改表格组件的渲染内容
     const tableContent = useMemo(() => (
@@ -1112,9 +1117,11 @@ const ConfigurableTable = forwardRef(({
                 ) : (
                     tableContent
                 )}
-
+                {/* 置顶按钮 */}
+                <Button style={{opacity:topping?1:0,transition:"opacity 0.5s", position:"fixed", bottom:"100px", right:"20px", zIndex:2
+                }} icon={<VerticalAlignTopOutlined />} shape="circle" onClick={() => {document.querySelector('.ant-table-wrapper').scrollTo(0,0)}}></Button>
                 {/* 当不显示分页时显示总条数 */}
-                {console.log('totalCount:', totalCount, 'showPagination:', showPagination)}
+                {/*{console.log('totalCount:', totalCount, 'showPagination:', showPagination)}*/}
                 {!showPagination && (
                     <div className={styles.totalCountDisplay} style={{ padding: '16px 0', textAlign: 'right' }}>
                         {totalCount || 0} items

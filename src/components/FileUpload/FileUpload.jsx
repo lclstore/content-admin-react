@@ -1,6 +1,6 @@
-import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import React, {useCallback, useRef, useState, useMemo, useEffect, memo} from 'react';
 import PropTypes from 'prop-types';
-import { Upload, Button, Image, Spin, Typography, message } from 'antd';
+import {Upload, Button, Image, Spin, Typography, message, Modal} from 'antd';
 import {
     PlusOutlined,
     DownloadOutlined,
@@ -37,6 +37,93 @@ const audioManager = {
     }
 };
 
+const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
+    // 使用ref引用modal容器，避免事件冒泡
+    const modalContainerRef = React.useRef(null);
+
+    const isVideo = type === 'video';
+    // 处理关闭按钮点击事件
+    const handleCloseClick = useCallback((e) => {
+        // 阻止事件冒泡但不阻止默认行为
+        if (e) e.stopPropagation();
+        onCancel();
+    }, [onCancel]);
+
+    const fullUrl = getFullUrl(url);
+
+    return (
+        <Modal
+            open={visible}
+            onCancel={handleCloseClick}
+            footer={null}
+            destroyOnClose
+            centered
+            width={800}
+            maskClosable={true}
+            closeIcon={
+                <CloseOutlined style={{ fontSize: '30px', color: '#fff' }} />
+            }
+            wrapClassName="media-preview-modal-wrap prevent-row-click"
+            styles={{
+                mask: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                    pointerEvents: 'auto'
+                },
+                wrapper: { pointerEvents: 'auto' },
+                content: {
+                    background: 'transparent',
+                    boxShadow: 'none',
+                },
+                body: {
+                    padding: '20px',
+                    background: 'transparent'
+                },
+                header: {
+                    borderBottom: 'none',
+                    background: 'transparent',
+                    color: '#fff',
+                    padding: '16px 20px',
+                    height: 'auto',
+                    fontSize: '50px'
+                },
+                closeButton: {
+                    pointerEvents: 'auto',
+                    zIndex: 1001,
+                    color: '#fff',
+                    fontSize: '50px',
+                    top: '50px',
+                    right: '50px',
+                    position: 'fixed'
+                }
+            }}
+        >
+            <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                {isVideo ? (
+                    <div className={styles.videoPlayer}>
+                        <video
+                            src={fullUrl}
+                            controls
+                            style={{ width: '100%', display: 'block', height: '100%', minWidth: '720px' }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                ) : (
+                    <div className={styles.audioPlayer}>
+                        <audio
+                            src={fullUrl}
+                            controls
+                            autoPlay={'play'}
+                            className={styles.audio}
+                        >
+                        </audio>
+                    </div>
+                )}
+            </div>
+        </Modal>
+    );
+});
 /**
  * @description 自定义文件上传控件
  * @param {Object} field - 字段配置，包含上传逻辑、URL、限制等
@@ -95,6 +182,13 @@ const FileUpload = ({
     const [isPlaying, setIsPlaying] = useState(false);
     const [audioDuration, setAudioDuration] = useState('');
     const audioRef = useRef(null);
+
+    // 媒体预览状态
+    const [previewState, setPreviewState] = useState({
+        visible: false,
+        url: '',
+        type: '' // 'video' 或 'audio'
+    });
 
     // 当外部 value 变化时更新内部状态
     useEffect(() => {
@@ -860,7 +954,7 @@ const FileUpload = ({
     }, [displayValue]);
 
     // 渲染文件预览
-    const renderFilePreview = () => {
+    const RenderFilePreview = () => {
         if (!hasFile) return null;
         switch (getFileType) {
             case 'image':
@@ -893,7 +987,6 @@ const FileUpload = ({
                     <div className={styles.videoPreview}>
                         <video
                             src={displayValue}
-                            controls
                             className={styles.videoPlayer}
                             style={mediaElementStyle}
                         >
@@ -1015,6 +1108,29 @@ const FileUpload = ({
         }
     };
 
+    // 媒体预览关闭处理
+    const handleMediaPreviewClose = useCallback(() => {
+        // 重置全局预览状态
+        if (previewState.type === 'video') {
+            window.MEDIA_PREVIEW.VIDEO = false;
+        } else if (previewState.type === 'audio') {
+            window.MEDIA_PREVIEW.AUDIO = false;
+        }
+        setPreviewState(prev => ({ ...prev, visible: false }));
+    }, [previewState.type]);
+
+    // 媒体预览模态框状态控制
+    const handleMediaPreview = useCallback(( url, type) => {
+        // 设置全局预览状态
+        if (type === 'video') {
+            window.MEDIA_PREVIEW.VIDEO = true;
+        } else if (type === 'audio') {
+            window.MEDIA_PREVIEW.AUDIO = true;
+        }
+        setPreviewState({ visible: true, url, type });
+    }, []);
+    // 视频预览处理
+
     return (
         <div className={styles.uploadContainer}>
             {contextHolder}
@@ -1034,8 +1150,14 @@ const FileUpload = ({
                     <div className={styles.uploadLeftSection}>
                         <div className={styles.uploadArea} style={{ ...style }}>
                             {hasFile ? (
-                                <div className={styles.previewContainer}>
-                                    {renderFilePreview()}
+                                <div className={styles.previewContainer}  onClick={() => getFileType === "video" && setPreviewState({ visible: true })}>
+                                    <RenderFilePreview></RenderFilePreview>
+                                    <MediaPreviewModal
+                                        type="video"
+                                        url={displayValue}
+                                        visible={previewState.visible}
+                                        onCancel={handleMediaPreviewClose}
+                                    />
                                 </div>
                             ) : (
                                 <Upload.Dragger

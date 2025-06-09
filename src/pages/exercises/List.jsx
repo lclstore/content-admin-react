@@ -130,6 +130,7 @@ export default () => {
                 sorter: true,
                 width: 120,
                 visibleColumn: 0,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
                 key: 'name'
             },
             {

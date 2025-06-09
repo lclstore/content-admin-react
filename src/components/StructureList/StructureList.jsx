@@ -434,9 +434,6 @@ const StructureList = ({
 
     // 简化展开/折叠处理函数
     const handleToggleExpandItem = useCallback((itemIndex) => {
-        console.log(name);
-
-        debugger
         console.log('切换展开状态：', { itemIndex, currentExpanded: expandedItemId });
         setExpandedItemId(prevId => prevId === itemIndex ? null : itemIndex);
     }, []);
@@ -546,6 +543,7 @@ const StructureList = ({
     }, [tempSelectedItem, currentReplaceItem.itemId]);
 
     useEffect(() => {
+        debugger
         if (selectedItemFromList && typeof onItemAdded === 'function' && !isCollapse) {
             onItemAdded('basic', name, selectedItemFromList, null, form);
             // 通知父组件已处理完选中项，可以清空选中状态

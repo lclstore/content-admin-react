@@ -567,6 +567,7 @@ const CollapseForm = ({
                     onUpdateItem,
                     commonListConfig,
                     onSortItems,
+                    selectedItemFromList,
                     onSelectedItemProcessed,
                 })}
             </React.Fragment>

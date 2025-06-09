@@ -41,27 +41,28 @@ export default function UserEditorWithCommon() {
             // renderItemMata: renderItemMata,
             label: 'Musics',
             dataList: [],
+            showLock: true,
             structureListFields: [
-                {
-                    type: 'input',
-                    required: true,
-                    setDefaultValue: (data) => {
-                        return data.name
-                    },
-                    name: 'displayName',
-                    label: 'Display Name',
-                },
-                {
-                    type: 'select',
-                    name: 'premium',
-                    label: 'Premium',
-                    required: true,
-                    setDefaultValue: 0,
-                    options: [
-                        { label: 'Yes', value: 1 },
-                        { label: 'No', value: 0 },
-                    ],
-                },
+                // {
+                //     type: 'input',
+                //     required: true,
+                //     setDefaultValue: (data) => {
+                //         return data.name
+                //     },
+                //     name: 'displayName',
+                //     label: 'Display Name',
+                // },
+                // {
+                //     type: 'select',
+                //     name: 'premium',
+                //     label: 'Premium',
+                //     required: true,
+                //     setDefaultValue: 0,
+                //     options: [
+                //         { label: 'Yes', value: 1 },
+                //         { label: 'No', value: 0 },
+                //     ],
+                // },
 
             ],
 

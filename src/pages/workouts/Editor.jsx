@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { formatDate } from '@/utils/index';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import request from "@/request";
-
+import { sleep } from '@/utils/index';
 import {
     ThunderboltOutlined,
     TagsOutlined,
@@ -78,13 +78,128 @@ export default function UserEditorWithCommon() {
             callback: res => {
                 // setWorkoutSettingInfo(res?.data?.data || {});
                 workoutSettingInfo.current = res?.data?.data;
-
                 console.log('0000001111');
-
-                // window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data));
+                window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data));
             }
         });
     }, []);
+
+    // 设置运动时长
+    const setWorkoutDuration = (data, exerciseGroup) => {
+        let workoutDuration = 0;
+
+        try {
+            // 确保workoutSettingInfo存在
+            workoutSettingInfo.current = workoutSettingInfo.current || JSON.parse(window.sessionStorage.getItem('workoutSettingInfo') || '{}');
+
+            if (!workoutSettingInfo.current || !data) {
+                console.warn('缺少必要的配置信息或数据');//缺少配置信息警告
+                return workoutDuration;
+            }
+
+            const exerciseGroupList = exerciseGroup || data.exerciseGroupList || [];
+
+            // 检查运动组是否有效
+            if (!Array.isArray(exerciseGroupList) || exerciseGroupList.length === 0) {
+                console.warn('运动组列表为空或无效');//运动组无效警告
+                return workoutDuration;
+            }
+
+            // 获取第一个运动的视频时长
+            const firstExercise = exerciseGroupList[0]?.exerciseList?.[0];
+            if (!firstExercise) {
+                console.warn('未找到有效的运动数据');//运动数据无效警告
+                return workoutDuration;
+            }
+
+            const frontVideoUrlDuration = (firstExercise.frontVideoUrlDuration || 0) / 1000;//正机位时长
+
+            // 确保配置参数有效
+            const previewReps = Number(workoutSettingInfo.current.previewVideoReps) || 0;//预览次数
+            const executionReps = Number(workoutSettingInfo.current.executionVideoReps) || 0;//执行次数
+            const introReps = Number(workoutSettingInfo.current.introVideoReps) || 0;//介绍次数
+
+            const Preview = frontVideoUrlDuration * previewReps;//预览时长
+            const Execution = frontVideoUrlDuration * executionReps;//执行时长
+            const introDuration = frontVideoUrlDuration * introReps;//介绍时长
+
+            let allActionDuration = 0;
+
+            // 计算所有运动组的总时长
+            exerciseGroupList.forEach(item => {
+                if (item && typeof item.structureRound === 'number') {
+                    allActionDuration += item.structureRound * (Preview + Execution);
+                }
+            });
+
+            // 计算总时长（分钟）并向上取整
+            workoutDuration = Math.round((introDuration + allActionDuration) / 60) || 0;//取分
+        } catch (error) {
+            console.error('计算运动时长时发生错误:', error);//计算错误警告
+            workoutDuration = 0;
+        }
+
+        // 确保返回值为非负数
+        data.workoutDuration = Math.max(0, workoutDuration);
+        return Math.max(0, workoutDuration);
+    }
+
+    // 设置运动卡路里
+    const setWorkoutCalorie = (data, exerciseGroup) => {
+        let allCalorie = 0;
+
+        try {
+            // 确保workoutSettingInfo存在
+            workoutSettingInfo.current = workoutSettingInfo.current || JSON.parse(window.sessionStorage.getItem('workoutSettingInfo') || '{}');
+
+            if (!workoutSettingInfo.current || !data) {
+                console.warn('缺少必要的配置信息或数据');//缺少配置信息警告
+                return allCalorie;
+            }
+
+            const exerciseGroupList = exerciseGroup || data.exerciseGroupList || [];
+
+            // 检查运动组是否有效
+            if (!Array.isArray(exerciseGroupList) || exerciseGroupList.length === 0) {
+                console.warn('运动组列表为空或无效');//运动组无效警告
+                return allCalorie;
+            }
+
+            // 获取第一个运动的视频时长
+            const firstExercise = exerciseGroupList[0]?.exerciseList?.[0];
+            if (!firstExercise) {
+                console.warn('未找到有效的运动数据');//运动数据无效警告
+                return allCalorie;
+            }
+
+            const frontVideoUrlDuration = (firstExercise.frontVideoUrlDuration || 0) / 1000;//正机位时长
+            const executionReps = Number(workoutSettingInfo.current.executionVideoReps) || 0;//执行次数
+            const Execution = frontVideoUrlDuration * executionReps;//执行时长
+
+            // 计算所有运动组的总卡路里
+            exerciseGroupList.forEach(item => {
+                if (item && Array.isArray(item.exerciseList) && typeof item.structureRound === 'number') {
+                    item.exerciseList.forEach(exercise => {
+                        if (exercise && typeof exercise.met === 'number') {
+                            // 使用标准体重75kg计算
+                            const caloriePerExercise = item.structureRound * Execution * exercise.met * 75 / 3600;
+                            allCalorie += caloriePerExercise;
+                        }
+                    });
+                }
+            });
+
+            // 向上取整
+            allCalorie = Math.ceil(allCalorie) || 0;//向上取整
+        } catch (error) {
+            console.error('计算卡路里时发生错误:', error);//计算错误警告
+            allCalorie = 0;
+        }
+
+        // 确保返回值为非负数
+        data.calorie = Math.max(0, allCalorie);
+        return Math.max(0, allCalorie);
+    }
 
     const imageUpload = (value, file, form) => {
         const formValues = form.getFieldsValue();
@@ -139,27 +254,10 @@ export default function UserEditorWithCommon() {
                 {
                     type: 'displayText',
                     // type: 'displayImage',
-                    name: 'duration',
+                    name: 'workoutDuration',
                     label: 'Duration (Min):',
                     displayFn: (form) => {
-                        let workoutDuration = 0;
-                        if (workoutSettingInfo.current && form.getFieldValue('exerciseGroupList')) {
-                            const exerciseGroupList = form.getFieldValue('exerciseGroupList') || [];
-                            const frontVideoUrlDuration = exerciseGroupList[0]?.exerciseList[0]?.frontVideoUrlDuration || 0;//正机位时长
-                            const Preview = frontVideoUrlDuration * workoutSettingInfo.current.previewVideoReps || 0;//预览次数
-                            const Execution = frontVideoUrlDuration * workoutSettingInfo.current.executionVideoReps || 0;//执行次数
-                            const introDuration = frontVideoUrlDuration * workoutSettingInfo.current.introVideoReps || 0;//介绍时长
-                            let allActionDuration = 0;
-                            exerciseGroupList?.forEach(item => {
-                                allActionDuration += item.structureRound * (Preview + Execution)
-                            })
-                            workoutDuration = Math.round(introDuration + allActionDuration / 1000 / 60) || 0;//取分
-                        }
-                        return <div>{workoutDuration} ("Auto-updated based on selected exercise.")</div>
-                    },
-
-                    style: {
-
+                        return <div>{form.getFieldValue('workoutDuration') || 0}("Auto-updated based on selected exercise.")</div>
                     },
                 },
                 {
@@ -167,19 +265,7 @@ export default function UserEditorWithCommon() {
                     name: 'calorie',
                     label: 'Calorie:',
                     displayFn: (form) => {
-                        let allCalorie = 0;
-                        if (workoutSettingInfo.current && form.getFieldValue('exerciseGroupList')) {
-                            const exerciseGroupList = form.getFieldValue('exerciseGroupList') || [];
-                            const frontVideoUrlDuration = exerciseGroupList[0]?.exerciseList[0]?.frontVideoUrlDuration || 0;//正机位时长
-                            const Execution = frontVideoUrlDuration * workoutSettingInfo.current.executionVideoReps || 0;//执行次数
-                            exerciseGroupList.forEach(item => {
-                                item.exerciseList.forEach(exercise => {
-                                    allCalorie += item.structureRound * Execution * exercise.met * 75 / 3600
-                                })
-                            })
-                            allCalorie = Math.round(allCalorie) || 0;//取分
-                        }
-                        return <div>{allCalorie} ("Auto-updated based on selected exercise.")</div>
+                        return <div>{form.getFieldValue('calorie') || 0} ("Auto-updated based on selected exercise.")</div>
                     },
 
                 },
@@ -355,10 +441,31 @@ export default function UserEditorWithCommon() {
 
     // 使用新设计：只维护一个formFields状态，并提供更新回调
     const [formFields, setFormFields] = useState(initialFormFields);
+    // 更新运动时长
+    const updateWorkoutDuration = (updatedFields, form) => {
+        const data = form.getFieldsValue(true);
+        const exerciseGroupList = updatedFields.filter(item => item.isGroup) || [];
+        if (exerciseGroupList.length > 0) {
+            const newExerciseGroupList = exerciseGroupList.map((item, index) => {
+                return {
+                    ...item,
+                    exerciseList: item.fields.find(subItem => subItem.dataList)?.dataList,
+                    structureRound: form.getFieldValue(`structureRound${index ? index : ''}`),
+                    structureName: form.getFieldValue(`structureName${index ? index : ''}`)
+                }
+            })
+            let workoutDuration = setWorkoutDuration(data, newExerciseGroupList);
+            let workoutCalorie = setWorkoutCalorie(data, newExerciseGroupList);
+            form.setFieldValue('workoutDuration', workoutDuration)
+            form.setFieldValue('calorie', workoutCalorie)
+        }
+    }
 
     // 处理formFields变更的回调
-    const handleFormFieldsChange = (updatedFields, formValues, activeCollapseKeys) => {
+    const handleFormFieldsChange = (updatedFields, form) => {
         setFormFields(updatedFields);
+        updateWorkoutDuration(updatedFields, form)
+
     };
 
 
@@ -479,6 +586,8 @@ export default function UserEditorWithCommon() {
 
         // 合并基础字段和新的分组字段
         const newFields = [...baseFields, ...newStructureFields];
+        setWorkoutDuration(data)//计算时长
+        setWorkoutCalorie(data)//计算卡路里
         setFormFields(newFields);
 
         console.log(newFields);

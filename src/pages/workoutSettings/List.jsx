@@ -390,8 +390,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            // mode: 'multiple',
-                            maxTagCount: 1,
+
                             name: 'previewFirstAudioBizSoundId',
                             label: '',
                             placeholder: 'Preview First Audio',
@@ -1127,6 +1126,7 @@ export default function UserEditorWithCommon() {
                             style: {
                                 width: '300px',
                             },
+                            disabled: true,
                             placeholder: 'Execution Guidance Audio',
                             rules: [{
                                 required: true,
@@ -1216,6 +1216,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution Halfway Audio'
                             }],
+                            mode: 'multiple',
+                            maxTagCount: 1,
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },

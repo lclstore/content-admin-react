@@ -48,6 +48,7 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {Function} props.getDataAfter 获取数据后回调函数
  * @param {Function} props.saveBeforeTransform 保存前回调函数
  * @param {boolean} props.confirmSucess 是否确认保存成功
+ * @param {Function} props.onFormValuesChange 表单值变化回调函数
  */
 export default function CommonEditor(props) {
     const {
@@ -78,7 +79,8 @@ export default function CommonEditor(props) {
         setFormRef, // 添加表单引用设置属性
         id: propId, // 从props中获取id，用于覆盖从URL获取的id
         getDataAfter,
-        saveBeforeTransform
+        saveBeforeTransform,
+        onFormValuesChange, // 添加新的 prop
     } = props;
     // 添加选中项状态管理 - 存储从列表中选择的当前项
     const [selectedItemFromList, setSelectedItemFromList] = useState(null); // 左侧列表添加item
@@ -318,7 +320,7 @@ export default function CommonEditor(props) {
         }
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(updatedFields, form);
         }
 
 
@@ -337,7 +339,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(updatedFields, form);
         }
 
         // 如果父组件提供了handleDeletePanel，也调用它（向后兼容）
@@ -408,13 +410,12 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(internalFormFields);
+            onFormFieldsChange(internalFormFields, form);
         }
     };
 
     // 防抖处理的handleItemAdded函数
     const handleItemAdded = (panelName, fieldName, itemData, expandedItemIndex, formInstance, isCollapse) => {
-        debugger
         // 添加新的待处理项
         const newItem = { panelName, fieldName, itemData, expandedItemIndex };
         setPendingItems(prev => [...prev, newItem]);
@@ -507,7 +508,7 @@ export default function CommonEditor(props) {
 
                 // 通知父组件
                 if (onFormFieldsChange) {
-                    onFormFieldsChange(updatedFields);
+                    onFormFieldsChange(updatedFields, form);
                 }
 
                 // 如果父组件提供了onSortItems，也调用它（向后兼容）
@@ -555,7 +556,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(updatedFields, form);
         }
 
         // 如果父组件提供了onDeleteItem，也调用它（向后兼容）
@@ -606,7 +607,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(updatedFields, form);
         }
 
         // 如果父组件提供了onCopyItem，也调用它（向后兼容）
@@ -641,7 +642,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(updatedFields, form);
         }
 
         // 如果父组件提供了onUpdateItem，也调用它（向后兼容）
@@ -703,7 +704,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
-            onFormFieldsChange(updatedFields);
+            onFormFieldsChange(updatedFields, form);
         }
 
         // 如果父组件提供了onReplaceItem,也调用它（向后兼容）
@@ -820,7 +821,7 @@ export default function CommonEditor(props) {
                 });
             }
             if (onFormFieldsChange) {
-                onFormFieldsChange(fields);
+                onFormFieldsChange(fields, form);
             }
         }
         return obj;
@@ -834,6 +835,11 @@ export default function CommonEditor(props) {
         // 执行自定义表单变更处理器
         if (config.onFormChange) {
             config.onFormChange(changedValues, allValues, formConnected ? form : null);
+        }
+
+        // 调用父组件传入的回调函数，并传递 form 对象
+        if (onFormValuesChange) {
+            onFormValuesChange(changedValues, allValues, form);
         }
     };
 
@@ -928,7 +934,7 @@ export default function CommonEditor(props) {
 
                 // 通知父组件
                 if (onFormFieldsChange) {
-                    onFormFieldsChange(updatedFields);
+                    onFormFieldsChange(updatedFields, form);
                 }
                 // 获取数据后回调
                 response = getDataAfter ? getDataAfter(response.data, {

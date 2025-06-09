@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { formatDate } from '@/utils/index';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import request from "@/request";
@@ -68,13 +68,22 @@ export default function UserEditorWithCommon() {
         newEndTime: formatDate(new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), 'YYYY-MM-DDTHH:mm:ss'),//往后14天
     }
     const [initialValues, setInitialValues] = useState(defaultInitialValues);
-    const [workoutSettingInfo, setWorkoutSettingInfo] = useState({});
+    // const [workoutSettingInfo, setWorkoutSettingInfo] = useState(null);
+    let workoutSettingInfo = useRef(null);
 
-    useEffect(async () => {
-        const res = await request.get({
+
+    useEffect(() => {
+        request.get({
             url: `/workoutSetttings/detail`,
+            callback: res => {
+                // setWorkoutSettingInfo(res?.data?.data || {});
+                workoutSettingInfo.current = res?.data?.data;
+
+                console.log('0000001111');
+
+                // window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data));
+            }
         });
-        setWorkoutSettingInfo(res?.data);
     }, []);
 
     const imageUpload = (value, file, form) => {
@@ -132,26 +141,46 @@ export default function UserEditorWithCommon() {
                     // type: 'displayImage',
                     name: 'duration',
                     label: 'Duration (Min):',
-                    dependencies: ['name', ''],
-                    content: ({ getFieldValue }) => {
-                        console.log(workoutSettingInfo);
-                        console.log(getFieldValue('name'));
-
-                        return getFieldValue('name') + '分钟'
-
-                        // const CARD = 'https://amber.7mfitness.com/category/image/e45cf328-57dc-4c23-a8cf-ad2e4cf14575.png?name=CARD.png'
-                        // const HORIZONTAL = 'https://amber.7mfitness.com/category/image/363ba524-6876-4ff2-b14c-b25f77e529c4.jpeg?name=HORIZONTAL.jpeg'
-                        // const showTypeCode = getFieldValue('showTypeCode');
-                        // return showTypeCode ? showTypeCode == 'CARD' ? CARD : HORIZONTAL : null
+                    displayFn: (form) => {
+                        let workoutDuration = 0;
+                        if (workoutSettingInfo.current && form.getFieldValue('exerciseGroupList')) {
+                            const exerciseGroupList = form.getFieldValue('exerciseGroupList') || [];
+                            const frontVideoUrlDuration = exerciseGroupList[0]?.exerciseList[0]?.frontVideoUrlDuration || 0;//正机位时长
+                            const Preview = frontVideoUrlDuration * workoutSettingInfo.current.previewVideoReps || 0;//预览次数
+                            const Execution = frontVideoUrlDuration * workoutSettingInfo.current.executionVideoReps || 0;//执行次数
+                            const introDuration = frontVideoUrlDuration * workoutSettingInfo.current.introVideoReps || 0;//介绍时长
+                            let allActionDuration = 0;
+                            exerciseGroupList?.forEach(item => {
+                                allActionDuration += item.structureRound * (Preview + Execution)
+                            })
+                            workoutDuration = Math.round(introDuration + allActionDuration / 1000 / 60) || 0;//取分
+                        }
+                        return <div>{workoutDuration} ("Auto-updated based on selected exercise.")</div>
                     },
+
                     style: {
-                        height: '100px',
+
                     },
                 },
                 {
                     type: 'displayText',
                     name: 'calorie',
                     label: 'Calorie:',
+                    displayFn: (form) => {
+                        let allCalorie = 0;
+                        if (workoutSettingInfo.current && form.getFieldValue('exerciseGroupList')) {
+                            const exerciseGroupList = form.getFieldValue('exerciseGroupList') || [];
+                            const frontVideoUrlDuration = exerciseGroupList[0]?.exerciseList[0]?.frontVideoUrlDuration || 0;//正机位时长
+                            const Execution = frontVideoUrlDuration * workoutSettingInfo.current.executionVideoReps || 0;//执行次数
+                            exerciseGroupList.forEach(item => {
+                                item.exerciseList.forEach(exercise => {
+                                    allCalorie += item.structureRound * Execution * exercise.met * 75 / 3600
+                                })
+                            })
+                            allCalorie = Math.round(allCalorie) || 0;//取分
+                        }
+                        return <div>{allCalorie} ("Auto-updated based on selected exercise.")</div>
+                    },
 
                 },
             ]
@@ -404,8 +433,6 @@ export default function UserEditorWithCommon() {
         const exerciseGroupList = [];
         const groupList = formFields.filter(item => item.isGroup) || [];
         console.log(formValues);
-
-        debugger
         groupList.forEach((item, index) => {
             exerciseGroupList.push({
                 structureName: formValues[`structureName${index ? index : ''}`],
@@ -416,7 +443,6 @@ export default function UserEditorWithCommon() {
         })
         formValues['exerciseGroupList'] = exerciseGroupList;
 
-        debugger
         return formValues;
     }
     /**
@@ -490,31 +516,34 @@ export default function UserEditorWithCommon() {
     };
 
     return (
-        <CommonEditorForm
-            // 传递当前formFields状态
-            fields={formFields}
-            // 提供更新配置项回调
-            onFormFieldsChange={handleFormFieldsChange}
-            saveBeforeTransform={saveBeforeTransform}
-            getDataAfter={getDataAfter}
-            // 提供折叠面板展开回调
-            // onCollapseChange={handleCollapseChange}
-            // 其他基本配置
-            // renderItemMata={renderItemMata}
-            commonListConfig={{
-                initCommonListData: initCommonListData,
-                placeholder: 'Search your content name...',
-                filterSections: filterSections,
-                title: 'Exercises',
-            }}
-            moduleKey='workout'
-            isCollapse={true}
-            formType="advanced"
-            enableDraft={true}
-            fieldsToValidate={['name', 'birthday']}
-            config={{ formName: 'Workout', title: 'Workout details' }}
-            initialValues={initialValues}
+        <>{
+            <CommonEditorForm
+                // 传递当前formFields状态
+                fields={formFields}
+                // 提供更新配置项回调
+                onFormFieldsChange={handleFormFieldsChange}
+                saveBeforeTransform={saveBeforeTransform}
+                getDataAfter={getDataAfter}
+                // 提供折叠面板展开回调
+                // onCollapseChange={handleCollapseChange}
+                // 其他基本配置
+                // renderItemMata={renderItemMata}
+                commonListConfig={{
+                    initCommonListData: initCommonListData,
+                    placeholder: 'Search your content name...',
+                    filterSections: filterSections,
+                    title: 'Exercises',
+                }}
+                moduleKey='workout'
+                isCollapse={true}
+                formType="advanced"
+                enableDraft={true}
+                fieldsToValidate={['name', 'birthday']}
+                config={{ formName: 'Workout', title: 'Workout details' }}
+                initialValues={initialValues}
 
-        />
+            />
+        }
+        </>
     );
 } 

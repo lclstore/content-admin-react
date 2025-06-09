@@ -536,13 +536,16 @@ export const renderFormItem = (field, options = {}) => {
                 noStyle
                 dependencies={dependencies}
             >
-                {({ getFieldValue }) => {
+                {({ getFieldValue, form }) => {
                     // 1) 动态计算 content（可能是函数）
                     const content = typeof field.content === 'function'
-                        ? field.content({ getFieldValue })
+                        ? field.content({ getFieldValue, form })
                         : field.content;
                     // 处理图片展示字段
                     if (field.type === 'displayImage') {
+                        newField.content = content || null;
+                    }
+                    if (field.type === 'displayText') {
                         newField.content = content || null;
                     }
 

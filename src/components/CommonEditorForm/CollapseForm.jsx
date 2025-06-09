@@ -236,7 +236,6 @@ const CollapseForm = ({
     onCopyItem,
     onReplaceItem,
 }) => {
-    // debugger
     const newField = fields.find(item => item.isShowAdd);
     // 表单连接状态
     const formConnected = !!form;
@@ -504,6 +503,7 @@ const CollapseForm = ({
 
                     // 查找当前展开的项的索引
                     const expandedItemId = expandedItems[parentName];
+
                     let insertIndex = currentFormValues[fieldName].length; // 默认添加到末尾
 
                     if (expandedItemId) {
@@ -526,41 +526,48 @@ const CollapseForm = ({
                     if (form.onValuesChange) {
                         form.onValuesChange(changeEvent, currentFormValues);
                     }
-
+                    // 触发折叠面板的展开/收起
+                    onCollapseChange(parentName)
                     // 如果提供了回调函数，则调用它
-                    if (onItemAdded && typeof onItemAdded === 'function') {
-                        onItemAdded(parentName, fieldName, itemToAdd, expandedItemId, form);
-                    }
+                    // if (onItemAdded && typeof onItemAdded === 'function') {
+                    //     onItemAdded(parentName, fieldName, itemToAdd, expandedItemId, form);
+                    // }
 
                     // 通知父组件已处理完选中项
-                    if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
-                        onSelectedItemProcessed();
-                    }
+                    // if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
+                    //     onSelectedItemProcessed();
+                    // }
                 } catch (error) {
                     console.error('添加数据到面板时出错:', error);
                 }
-            } else {
-                // 如果没有适合的面板，也需要清空选中状态
-                if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
-                    onSelectedItemProcessed();
-                }
             }
+            //  else {
+            //     // 如果没有适合的面板，也需要清空选中状态
+            //     if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
+            //         onSelectedItemProcessed();
+            //     }
+            // }
         }
     }, [selectedItemFromList]);
 
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {
-        console.log(fieldGroup);
-
         return fieldGroup.map((field, index) => (
             <React.Fragment key={field.name || `field-${index}`}>
                 {renderFormItem(field, {
                     form,
+                    fields,
+                    activeKeys,
                     formConnected,
                     initialValues,
                     mounted,
                     moduleKey,
                     onAddItem: onItemAdded,
+                    onCollapseChange,
+                    isCollapse,
+                    onDeleteItem,
+                    onItemAdded,
+                    onCollapseChange,
                     onDeleteItem,
                     onCopyItem: handleCopyItem,
                     onReplaceItem,

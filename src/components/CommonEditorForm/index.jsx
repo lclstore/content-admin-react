@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState, useCallback, useMemo,useRef} from 'react';
+import React, { useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Form, Button, Card, Space, Spin,FloatButton } from 'antd';
+import { Form, Button, Card, Space, Spin, FloatButton } from 'antd';
 import {
     PlusOutlined,
     DeleteOutlined,
@@ -347,9 +347,9 @@ export default function CommonEditor(props) {
     };
 
     // 处理选中项被添加到表单后的回调
-    const handleItemAdded = (panelName, fieldName, itemData, expandedItemId, formInstance, isCollapse) => {
+    const handleItemAdded = (panelName, fieldName, itemData, expandedItemIndex, formInstance, isCollapse) => {
         // console.log(activeCollapseKeys[0], panelName);
-        setActiveCollapseKeys(panelName);
+        // setActiveCollapseKeys(panelName);
         // debugger
         // const findAndUpdateDataList = (field, itemsToAdd) => {
         //     // 如果当前字段有dataList，直接返回更新后的字段
@@ -415,15 +415,25 @@ export default function CommonEditor(props) {
         // console.log('updatedFields', updatedFields);
         internalFormFields.map(field => {
             if (field.name === panelName) {
-                if (field.dataList) {
-                    field.dataList = [...field.dataList, itemData];
-                } else {
-                    field.fields.map(subField => {
-                        if (subField.dataList) {
-                            subField.dataList = [...subField.dataList, itemData];
+                if (Array.isArray(field.dataList)) {
+                    // 有 dataList，插入到指定位置
+                    if (typeof expandedItemIndex === 'number' && expandedItemIndex >= 0) {
+                        field.dataList.splice(expandedItemIndex + 1, 0, itemData);
+                    } else {
+                        field.dataList = [...field.dataList, itemData];
+                    }
+                } else if (Array.isArray(field.fields)) {
+                    // 处理嵌套 fields 情况
+                    field.fields = field.fields.map(subField => {
+                        if (Array.isArray(subField.dataList)) {
+                            if (typeof expandedItemIndex === 'number' && expandedItemIndex >= 0) {
+                                subField.dataList.splice(expandedItemIndex + 1, 0, itemData);
+                            } else {
+                                subField.dataList = [...subField.dataList, itemData];
+                            }
                         }
                         return subField;
-                    })
+                    });
                 }
             }
             return field;
@@ -1250,7 +1260,7 @@ export default function CommonEditor(props) {
 
     // 在 useEffect 中设置表单引用
     useEffect(() => {
-        console.log('scrollableContainerRef',scrollableContainerRef)
+        console.log('scrollableContainerRef', scrollableContainerRef)
         if (setFormRef && form && handleStatusModalConfirmFromHook) {
             setFormRef({ form, triggerSave: handleStatusModalConfirmFromHook });
         }
@@ -1260,7 +1270,7 @@ export default function CommonEditor(props) {
         <div ref={scrollableContainerRef} className={`${styles.commonEditorContainer} ${formType === 'basic' ? styles.basicEditorContainer : styles.advancedEditorContainer} ${formType === 'basic' ? "basicEditorContainer" : "advancedEditorContainer"}`}>
             {contextHolder}
             {formType === 'basic' ? renderBasicContent() : renderAdvancedContent()}
-            <FloatButton.BackTop target={() => scrollableContainerRef.current} visibilityHeight={50}/>
+            <FloatButton.BackTop target={() => scrollableContainerRef.current} visibilityHeight={50} />
         </div>
     );
 }

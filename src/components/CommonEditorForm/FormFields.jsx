@@ -412,6 +412,10 @@ export const renderFormControl = (field, options = {}) => {
                     }
                     <StructureList
                         form={form}
+                        onCollapseChange={options.onCollapseChange}
+                        isCollapse={options.isCollapse}
+                        fields={options.fields}
+                        activeKeys={options.activeKeys}
                         onItemAdded={options.onItemAdded}
                         onReplaceItem={options.onReplaceItem}
                         onDeleteItem={options.onDeleteItem}

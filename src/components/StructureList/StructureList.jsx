@@ -17,6 +17,7 @@ import './StructureList.css';
 import CommonList from '../CommonEditorForm/CommonList';
 import { getFileCategoryFromUrl } from '../../utils';
 import audioManager from '../../utils/audioManager';
+import { add } from 'lodash';
 
 const { Text } = Typography;
 
@@ -39,6 +40,7 @@ const SortableItemRenderer = React.memo(({
     dataItem,
     onItemChange,
     name,
+    fields,
     parentForm,
     dataList,
 }) => {
@@ -319,7 +321,7 @@ const StructureList = ({
     onDeleteItem: externalDeleteItem,
     commonListConfig = {},
     onReplaceItem,
-
+    fields,
     onItemChange,
     onItemAdded,
     name,
@@ -327,6 +329,7 @@ const StructureList = ({
     label,
     type,
     isCollapse,
+    activeKeys,
     selectedItemFromList,
     onSelectedItemProcessed,
     onSortItems,
@@ -542,11 +545,119 @@ const StructureList = ({
         return !tempSelectedItem || tempSelectedItem.id === currentReplaceItem.itemId;
     }, [tempSelectedItem, currentReplaceItem.itemId]);
 
+    // 收集具有 dataList 属性的面板
+    const findFirstDataListItemAndParent = (fields, parent = null) => {
+        if (!Array.isArray(fields)) {
+            return null;
+        }
+
+        for (const item of fields) {
+            // 如果当前项有 dataList 属性，直接返回结果
+            if (item && item.dataList) {
+                return {
+                    dataListItem: item,
+                    parentItem: parent || item,
+                };
+            }
+
+            // 如果当前项有子字段，递归查找
+            if (item && Array.isArray(item.fields)) {
+                const result = findFirstDataListItemAndParent(item.fields, item);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
+    };
+    const addCollapseItemData = (selectedItemFromList, name, fields) => {
+        // 查找所有具有 dataList 属性的面板
+        const result = findFirstDataListItemAndParent(fields);
+        if (result) {
+            const { dataListItem, parentItem } = result;
+            const targetPanel = dataListItem;
+
+            // // 获取当前展开的面板
+            // const currentActiveKeys = typeof activeKeys === 'string' ? activeKeys : activeKeys[0];
+            // let parentName = parentItem?.name || targetPanel.name;
+            // const currentFieldsName = fields.find(item => item.isShowAdd);
+
+            // // 如果当前面板是添加数据的面板，则使用当前面板的name
+            // if (currentActiveKeys && currentFieldsName && currentActiveKeys.includes(currentFieldsName.name)) {
+            //     parentName = currentActiveKeys;
+            // }
+
+            // 获取当前表单数据
+            const currentFormValues = form.getFieldsValue();
+
+            // 检查目标面板的字段结构
+            const fieldName = targetPanel.listFieldName || targetPanel.name;
+
+            // 初始化字段值为数组
+            if (!currentFormValues[fieldName]) {
+                currentFormValues[fieldName] = [];
+            } else if (!Array.isArray(currentFormValues[fieldName])) {
+                currentFormValues[fieldName] = [currentFormValues[fieldName]];
+            }
+
+            // 准备要添加的数据
+            let itemToAdd;
+            if (typeof targetPanel.dataMapping === 'function') {
+                itemToAdd = targetPanel.dataMapping(selectedItemFromList);
+            } else {
+                itemToAdd = {
+                    ...selectedItemFromList,
+                };
+            }
+            let insertIndex = expandedItemId || currentFormValues[fieldName].length; // 默认添加到末尾
+            if (expandedItemId) {
+                insertIndex = expandedItemId + 1;
+            }
+
+            // 在指定位置插入新项目
+            currentFormValues[fieldName].splice(insertIndex, 0, itemToAdd);
+
+            // 更新表单值
+            form.setFieldsValue(currentFormValues);
+
+            // 触发表单的 onValuesChange 回调
+            const changeEvent = {};
+            changeEvent[fieldName] = currentFormValues[fieldName];
+            if (form.onValuesChange) {
+                form.onValuesChange(changeEvent, currentFormValues);
+            }
+            // 触发折叠面板的展开/收起
+            // onCollapseChange(parentName)
+            // 如果提供了回调函数，则调用它
+            if (onItemAdded && typeof onItemAdded === 'function') {
+                onItemAdded(activeKeys, fieldName, itemToAdd, expandedItemId, form);
+            }
+
+            // 通知父组件已处理完选中项
+            // if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
+            //     onSelectedItemProcessed();
+            // }
+
+        }
+    }
+    // 处理选中项
     useEffect(() => {
-        debugger
-        if (selectedItemFromList && typeof onItemAdded === 'function' && !isCollapse) {
-            onItemAdded('basic', name, selectedItemFromList, null, form);
+        if (selectedItemFromList && typeof onItemAdded === 'function') {
+            // 如果折叠面板，则调用addCollapseItemData
+            if (isCollapse) {
+                addCollapseItemData(selectedItemFromList, name, fields)
+            }
+            // 否则调用onItemAdded
+            else {
+                onItemAdded('basic', name, selectedItemFromList, null, form);
+            }
             // 通知父组件已处理完选中项，可以清空选中状态
+            if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
+                onSelectedItemProcessed();
+            }
+        } else {
+            // 如果没有适合的面板，也需要清空选中状态
             if (onSelectedItemProcessed && typeof onSelectedItemProcessed === 'function') {
                 onSelectedItemProcessed();
             }

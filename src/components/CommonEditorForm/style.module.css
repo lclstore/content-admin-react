@@ -766,3 +766,30 @@
     border-bottom: 1px solid rgb(226, 235, 235);
     margin-bottom: 10px;
 }
+
+.infoIcon {
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    display: inline-block;
+    color: var(--text-primary);
+    background-color: rgb(226, 235, 235);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+:global(.ant-tooltip) {
+    max-width: 400px;
+    --antd-arrow-background-color: #fff;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+:global(.ant-tooltip .ant-tooltip-inner) {
+    background-color: #fff;
+    color: var(--text-primary);
+    padding: 16px;
+    max-width: 400px;
+    border-radius: 4px;
+    box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.1);
+}

@@ -1,6 +1,7 @@
 .tag-selector-options {
     display: flex;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .tag-selector-container-multiple {
@@ -22,6 +23,8 @@
     background-color: #fff;
     /* transition: all 0.3s; */
     user-select: none;
+    text-align: center;
+    flex: 1;
 }
 
 

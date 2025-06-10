@@ -100,7 +100,7 @@ const FiltersPopover = ({
     // 重置
     const handleReset = (isClear = false) => {
         if (onReset) {
-            onReset();
+            onReset(isClear);
         }
         setTempSelectedValues({});
     };

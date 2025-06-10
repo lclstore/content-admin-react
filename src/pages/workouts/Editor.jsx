@@ -263,6 +263,7 @@ export default function UserEditorWithCommon() {
                     type: 'input',
                     name: 'calorie',
                     tooltip: 'Auto-updated based on selected exercise.',
+                    tooltipPlacement: 'right',
                     label: 'Calorie (Kcal)',
                     disabled: true,
                 },

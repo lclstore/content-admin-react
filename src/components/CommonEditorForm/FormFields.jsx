@@ -280,7 +280,7 @@ export const renderFormControl = (field, options = {}) => {
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
-                        field.onChange(value);
+                        field.onChange(value, form);
                     }
 
                     // 表单的onChange由Form.Item注入（通过options.onChange）

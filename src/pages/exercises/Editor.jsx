@@ -93,7 +93,19 @@ export default function UserEditorWithCommon() {
             name: 'injuredCodes',
             label: 'Injured',
             colSpan: 12,
+            required: true,
             options: "BizExerciseInjuredEnums",
+            onChange: (value, form) => {
+                if (value.length === 2 && value[0] === 'NONE') {
+                    form.setFieldValue('injuredCodes', value.filter(item => item !== 'NONE'));
+                    return;
+                }
+                if (value.includes('NONE') && value.length > 1) {
+                    form.setFieldValue('injuredCodes', ['NONE']);
+                    return;
+                }
+                form.setFieldValue('injuredCodes', value);
+            },
         },
         {
             type: 'textarea',
@@ -252,7 +264,7 @@ export default function UserEditorWithCommon() {
     };
     return (
         <CommonEditorForm
-            gutter={30}
+            gutter={50}
             enableDraft={true}
             formType="basic"
             moduleKey='exercise'

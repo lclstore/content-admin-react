@@ -23,6 +23,17 @@ export default function UserEditorWithCommon({id, setFormRef}) {
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
+        },
+        {
+            type: 'input',
+            name: 'displayName', // 遵循命名规范，使用驼峰命名
+            label: 'Display Name',
+            maxLength: 100,
+            required: true,
+            placeholder: 'Music name',
+            rules: [
+                { max: 100, message: 'Name cannot exceed 100 characters' }
+            ]
         }
 
 

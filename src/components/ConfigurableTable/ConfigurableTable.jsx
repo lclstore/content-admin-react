@@ -137,6 +137,8 @@ const ConfigurableTable = forwardRef(({
     // load cache
     const searchData = localStorage.getItem(location.pathname)
     let loadCache = searchData?JSON.parse(searchData):null
+    // select list
+    const [selectList,  setSelectList] = useState([]);
     //   ref
     const tableRef = useRef(null) // 表格组件的ref
     const activeFilters = useRef(loadCache?loadCache.activeFilters:(filterConfig?.activeFilters || {})) //当前选中的筛选器
@@ -356,6 +358,11 @@ const ConfigurableTable = forwardRef(({
     // if out search data hook is exist，use out search data replace inside
     useImperativeHandle(ref,() => ({
         getSearchData: () => ({...paginationParams.current, ...activeFilters.current,}),
+        // select list
+        selectList:{
+            get:() => selectList,
+            set:setSelectList
+        }
     }))
 
 
@@ -504,8 +511,6 @@ const ConfigurableTable = forwardRef(({
 
     // 查询表格数据
     const searchTableData = useCallback(async (isFirstSearch) => {
-        const fetchTableData = getTableList || getPublicTableList;
-
         // 如果存在正在进行的请求，取消它
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -532,12 +537,11 @@ const ConfigurableTable = forwardRef(({
                     totalCount: dataSource.length
                 };
             } else {
-                res = await fetchTableData(moduleKey, operationName, searchData, { signal: abortControllerRef.current.signal });
+                res = await (getTableList? getTableList(searchData) : getPublicTableList(moduleKey, operationName, searchData, { signal: abortControllerRef.current.signal }))
             }
 
             // 请求完成后清除当前的 AbortController
             abortControllerRef.current = null;
-
             if (res && res.success) {
                 const newData = res.data || [];
                 setTableData(newData);
@@ -574,7 +578,7 @@ const ConfigurableTable = forwardRef(({
     // 搜索框 输入框 变化 (使用防抖)
     const debouncedSearch = useCallback(
         debounce((value) => {
-            paginationParams.current.keywords = value;
+            paginationParams.current[searchConfig.fieldName?searchConfig.fieldName:'keywords'] = value;
             searchTableData(); // 查询表格数据
         }, 300), // 300ms 的防抖延迟
         [paginationParams]
@@ -910,7 +914,6 @@ const ConfigurableTable = forwardRef(({
             }
         };
     }, [expandedRowRender]);
-    console.log("toping 加载了")
     // table sroll 监听事件
     const tableSroll = useCallback((e) => {
         setTopping(e.target.scrollTop > 50)
@@ -962,7 +965,13 @@ const ConfigurableTable = forwardRef(({
                 showTotal: (total, range) => `${total} items`,
             } : false}
             scroll={finalScrollConfig}
-            rowSelection={rowSelection}
+            rowSelection={rowSelection ?{
+                onChange(key,rowData){
+                    setSelectList(rowData)
+                },
+                columnWidth: 60,
+                ...rowSelection
+            }:false}
             virtual={tableVirtualConfig}
             expandable={expandableConfig} // 使用内部定义的expandable配置
             onChange={(pagination, filters, sorter) => {
@@ -1009,17 +1018,17 @@ const ConfigurableTable = forwardRef(({
     ]);
 
     return (
-        isEmptyTableData ?
-            <div className={styles.customEmptyWrapper}>
-                <div className={styles.customEmptyImageWrapper}>
-                    <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
-                </div>
-                <div className={styles.customEmptyTitle}>{
-                    noDataTip || `You don't have any ${pathname} yet`
-                } </div>
-                {/* <div className={styles.customEmptyDescription}>Create your first program.</div> */}
-            </div>
-            :
+        // isEmptyTableData ?
+        //     <div className={styles.customEmptyWrapper}>
+        //         <div className={styles.customEmptyImageWrapper}>
+        //             <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
+        //         </div>
+        //         <div className={styles.customEmptyTitle}>{
+        //             noDataTip || `You don't have any ${pathname} yet`
+        //         } </div>
+        //         {/* <div className={styles.customEmptyDescription}>Create your first program.</div> */}
+        //     </div>
+        //     :
             <div className={styles.configurableTableContainer} style={{ paddingTop: paddingTop }}>
                 {/* 工具栏 */}
                 {contextHolder}
@@ -1049,7 +1058,7 @@ const ConfigurableTable = forwardRef(({
                                 maxLength={100}
                                 showCount
                                 placeholder={searchConfig.placeholder || 'Search...'}
-                                value={paginationParams.current.keywords}
+                                value={paginationParams.current[searchConfig.fieldName?searchConfig.fieldName:'keywords']}
                                 prefix={<SearchOutlined />}
                                 onChange={onSearchChange}
                                 className="configurable-table-search-input"

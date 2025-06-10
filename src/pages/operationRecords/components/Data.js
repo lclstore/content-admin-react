@@ -2,24 +2,7 @@
 export const statusOrder = { 'Enabled': 1, 'Draft': 2, 'Disabled': 3, 'Deprecated': 4 };
 
 export const listData = [
-    {
-        id: 1,
-        type: 'video',
-        imageCoverUrl:"https://2d.zol-img.com.cn/product/270_160x120/525/cejVQOyTTMea2.png",
-        name:"123",
-        updateType:"ADD",
-        updateUser:"ZhangSan",
-        status:"draft",
-        updateTime:"2025-02-12",
-        met:"1",
-        structureType:"asd",
-        difficulty:"asd",
-        equipment:"asd",
-        position:"asd",
-        target:"asd",
-        frontVideoStatus:"Successful",
-        sideVideoStatus:"Processing"
-    },
+    
 ]
 // 定义筛选器配置
 export const filterSections = [

@@ -1267,7 +1267,6 @@ export default function CommonEditor(props) {
     useEffect(() => {
         console.log('scrollableContainerRef', scrollableContainerRef)
         if (setFormRef && form && handleStatusModalConfirmFromHook) {
-            debugger
             setFormRef({ form, triggerSave: handleStatusModalConfirmFromHook });
         }
     }, [setFormRef]);

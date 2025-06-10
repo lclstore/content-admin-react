@@ -5,28 +5,38 @@ import { formFieldsReducer } from "@/reducer/tableReducer.jsx";
 export default function UserEditorWithCommon() {
 
     const [editorRef, setEditorRef] = useState(null);
-    const change = useCallback((val,val2) => {
-        console.log(editorRef,val,val2)
-    },[])
     // 初始用户数据状态--可设默认值
     const initialValues = {
         translation: 1,
         usageCode:"FLOW",
         genderCode:"FEMALE_AND_MALE"
     }
-    function formFieldsManage(){
+    function formFieldsManage(val,{ getFieldsValue }){
+        const formData = getFieldsValue()
+        console.log(formData)
         // 必填 变化
-        {
-            const gender = formFields.find(item => item.name === 'genderCode');
-            const hasAScript = formFields.find(item => item.name === 'translation');
-            const femaleScript = formFields.find(item => item.name === 'femaleScript');
-            const maleScript = formFields.find(item => item.name === 'maleScript');
-            const femaleAudio = formFields.find(item => item.name === 'femaleAudioUrl');
-            const maleAudio = formFields.find(item => item.name === 'maleAudioUrl');
-        }
+        const gender = formFields.find(item => item.name === 'genderCode');
+        const hasAScript = formFields.find(item => item.name === 'translation');
+        const femaleScript = formFields.find(item => item.name === 'femaleScript');
+        const maleScript = formFields.find(item => item.name === 'maleScript');
+        const femaleAudio = formFields.find(item => item.name === 'femaleAudioUrl');
+        const maleAudio = formFields.find(item => item.name === 'maleAudioUrl');
+        console.log(femaleScript.required)
+        setFormFields(formFields.map(i => {
+            // if (i.name === 'femaleScript') {
+            //     femaleScript.required = formData.translation === 1 && formData.genderCode === "FEMALE"
+            //     return {
+            //         ...i,
+            //         required: formData.translation === 1 && formData.genderCode === "FEMALE"
+            //     }
+            // }
+            return i
+        }))
+        // setFormFields({type: 'itemReplace',itemSearch:(i) => i.name === 'femaleScript',
+        //     factory:(item) => ({...item,required: formData.translation === 1 && formData.genderCode === "FEMALE"})})
     }
     // 表单字段配置
-    const [formFields,formFieldsDispatch] = useReducer(formFieldsReducer, [
+    const [formFields,setFormFields] = useState( [
         {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
@@ -66,7 +76,7 @@ export default function UserEditorWithCommon() {
                 },
             ],
             required: true,
-            onChange:change
+            onChange:formFieldsManage
         },
         {
             type: 'textarea',
@@ -113,14 +123,17 @@ export default function UserEditorWithCommon() {
 
 
     return (
-        <CommonEditorForm
-            enableDraft={true}
-            formType="basic"
-            moduleKey="sound"
-            config={{ formName: 'Sound' }}
-            fields={formFields}
-            setFormRef={setEditorRef}
-            initialValues={initialValues}
-        />
+        <>
+            <div>{ formFields.find(i => i.name === 'translation').required.toString() }</div>
+            <CommonEditorForm
+                enableDraft={true}
+                formType="basic"
+                moduleKey="sound"
+                config={{ formName: 'Sound' }}
+                fields={formFields}
+                setFormRef={setEditorRef}
+                initialValues={initialValues}
+            />
+        </>
     );
 } 

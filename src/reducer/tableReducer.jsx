@@ -15,5 +15,6 @@ export const formFieldsReducer = (originData, action) => {
             break;
         }
     }
+    console.log(result.find(i => i.name === 'translation').required.toString())
     return result
 }

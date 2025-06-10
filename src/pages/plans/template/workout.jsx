@@ -111,10 +111,14 @@ export default function WorkoutsList() {
         };
     }, [setButtons, setCustomPageTitle, navigate]);
     const getTableList = useCallback(async (params) => {
-        const {data} = await request.get('/api/v1/exercises', {params});
-        return data;
+        return new Promise(resolve => {
+            request.post({
+                url:'/template/workout/page', data: params,
+                callback:resolve
+            });
+        })
     }, []);
-    const expandedRowRender =useCallback( (record) => {
+    const expandedRowRender = useCallback( (record) => {
 
         // 定义展开行表格的列配置
         const columns = [
@@ -173,7 +177,7 @@ export default function WorkoutsList() {
             <ConfigurableTable
                 columns={allColumnDefinitions}
                 expandedRowRender={expandedRowRender}
-                // getTableList={getTableList}
+                getTableList={getTableList}
                 moduleKey="workout"
                 operationName="page"
                 searchConfig={{

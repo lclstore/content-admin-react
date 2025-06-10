@@ -63,9 +63,8 @@ export default function WorkoutsList() {
             },
             {title: "Generate Status", dataIndex: "generateStatus", options: 'publishStatus',},
             {title: "Workout Num", dataIndex: "workoutCount",render: (text,record) => <div onClick={(e) => {
-                console.log('page',text,record)
                     e.stopPropagation();
-                    // router().push(`workout?id=${record.id}`)
+                    navigate(`/plans/workout/list?id=${record.id}`)
                 }}>{text}</div>},
             {
                 title: 'Actions',

@@ -26,7 +26,17 @@ export default function WorkoutsList() {
                 label: 'Disabled',
                 value: 'DISABLED'
             }],
-        }
+        },
+        {
+            title: 'Usage',
+            key: 'usage',
+            options:[]
+        },
+        {
+            title: 'Gender',
+            key: 'genderCodeList',
+            options: 'BizExerciseGenderEnums'
+        },
     ];
 
     // 表格渲染配置项
@@ -56,6 +66,24 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'displayStatus',
+                width: 120,
+                visibleColumn: 0
+            },
+            {
+                title: 'Usage',
+                dataIndex: 'usageCode',
+                sorter: true,
+                showSorterTooltip: false,
+                options: 'usage',
+                width: 120,
+                visibleColumn: 0
+            },
+            {
+                title: 'Gender',
+                dataIndex: 'genderCode',
+                sorter: true,
+                showSorterTooltip: false,
+                options: 'BizExerciseGenderEnums',
                 width: 120,
                 visibleColumn: 0
             },

@@ -30,7 +30,7 @@ export default function UserEditorWithCommon() {
 
     ];
     const [initialValues, setInitialValues] = useState({
-        showTypeCode:"CARD"
+        showTypeCode: "CARD"
     })
 
 
@@ -148,7 +148,7 @@ export default function UserEditorWithCommon() {
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields, formValues) => {
         setFormFields(updatedFields);
-        setInitialValues(formValues);
+        // setInitialValues(formValues);
     };
 
     const saveBeforeTransform = (info) => {
@@ -205,6 +205,7 @@ export default function UserEditorWithCommon() {
             moduleKey='category'
             isCollapse={true}
             formType="advanced"
+            // getDataAfter={getDataAfter}
             saveBeforeTransform={saveBeforeTransform}
             enableDraft={true}
             config={{ formName: 'Collections', title: 'Category details' }}

@@ -3,7 +3,6 @@ import { Modal, message, Table } from 'antd';
 import { useNavigate } from 'react-router';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { HeaderContext } from '@/contexts/HeaderContext';
-import { statusIconMap } from '@/constants';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -52,13 +51,12 @@ export default () => {
                 title: 'Name',
                 dataIndex: 'name',
                 visibleColumn: 0,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
             },
             {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',
-                iconOptions: statusIconMap,
                 options: 'displayStatus',
                 // width: 120,
                 visibleColumn: 0
@@ -66,7 +64,6 @@ export default () => {
             {
                 title: 'Show Type',
                 dataIndex: 'showTypeCode',
-                sorter: true,
                 // width: 200,
                 options: [
                     {

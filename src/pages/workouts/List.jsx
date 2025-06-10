@@ -100,7 +100,7 @@ export default function WorkoutsList() {
 
     // 在Modal打开时重置表单
     useEffect(() => {
-        console.log('isBatchCreateModalVisible',isBatchCreateModalVisible,batchCreateForm.resetFields())
+        // console.log('isBatchCreateModalVisible',isBatchCreateModalVisible,batchCreateForm.resetFields())
         if (isBatchCreateModalVisible) {
             batchCreateForm.resetFields();
             batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
@@ -157,7 +157,7 @@ export default function WorkoutsList() {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            
+
             {
                 title: 'Cover ImgUrl',
                 width: 120,
@@ -192,8 +192,10 @@ export default function WorkoutsList() {
             //     visibleColumn: 0
             // },
 
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,},
+            {
+                title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
+                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
+            },
             {
                 title: 'Status',
                 dataIndex: 'status',

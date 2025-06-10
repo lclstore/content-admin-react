@@ -244,6 +244,7 @@ export const renderFormControl = (field, options = {}) => {
             const [isPlaying, setIsPlaying] = useState(null);
             return (
                 <Select
+                    maxTagCount={field.maxTagCount || 1}
                     name={field.name}
                     disabled={field.disabled}
                     mode={field.mode}
@@ -412,8 +413,13 @@ export const renderFormControl = (field, options = {}) => {
                     }
                     <StructureList
                         form={form}
+                        onCollapseChange={options.onCollapseChange}
+                        isCollapse={options.isCollapse}
+                        fields={options.fields}
+                        activeKeys={options.activeKeys}
                         onItemAdded={options.onItemAdded}
                         onReplaceItem={options.onReplaceItem}
+                        onIconChange={options.onIconChange}
                         onDeleteItem={options.onDeleteItem}
                         onCopyItem={options.onCopyItem}
                         onUpdateItem={options.onUpdateItem}
@@ -531,13 +537,16 @@ export const renderFormItem = (field, options = {}) => {
                 noStyle
                 dependencies={dependencies}
             >
-                {({ getFieldValue }) => {
+                {({ getFieldValue, form }) => {
                     // 1) 动态计算 content（可能是函数）
                     const content = typeof field.content === 'function'
-                        ? field.content({ getFieldValue })
+                        ? field.content({ getFieldValue, form })
                         : field.content;
                     // 处理图片展示字段
                     if (field.type === 'displayImage') {
+                        newField.content = content || null;
+                    }
+                    if (field.type === 'displayText') {
                         newField.content = content || null;
                     }
 

@@ -439,7 +439,7 @@ export const renderFormControl = (field, options = {}) => {
 };
 
 // 创建一个独立的输入框组件
-const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', form, ...rest }) => {
+const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', form, tooltipPlacement, tooltip, ...rest }) => {
     const [inputDisabled, setInputDisabled] = useState(initialDisabled);
     const InputComponent = type === 'password' ? Input.Password : Input;
     // 根据类型准备不同的属性

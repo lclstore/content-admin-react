@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { List, Avatar, Space, Row, Col, Typography, Button, Modal, notification, Form, Input, Select } from 'antd';
-import { MenuOutlined, RetweetOutlined, CopyOutlined, DeleteOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
+import { MenuOutlined, RetweetOutlined, CopyOutlined, DeleteOutlined, CaretRightOutlined, PauseOutlined, LockFilled, UnlockFilled } from '@ant-design/icons';
 import { renderFormControl } from '@/components/CommonEditorForm/FormFields';
 import {
     DndContext,
@@ -28,6 +28,7 @@ const SortableItemRenderer = React.memo(({
     isExpanded,
     toggleExpandItem,
     onOpenReplaceModal,
+    onIconChange,
     renderItemMeta,
     onCopyItem,
     onDeleteItem,
@@ -43,6 +44,8 @@ const SortableItemRenderer = React.memo(({
     fields,
     parentForm,
     dataList,
+    lockName,
+    defaultLockValue
 }) => {
     const {
         attributes,
@@ -223,12 +226,12 @@ const SortableItemRenderer = React.memo(({
                 </Col>
                 <Col flex="none">
                     <Space className="structure-item-actions">
-                        {onCopyItem && (
+                        {lockName && (
                             <Button
                                 style={{ fontSize: '15px', color: '#1c8' }}
                                 type="text"
-                                icon={<CopyOutlined />}
-                                onClick={e => { e.stopPropagation(); onCopyItem(panelId, item.id); }}
+                                icon={item[lockName] ? <LockFilled /> : <UnlockFilled />}
+                                onClick={e => { e.stopPropagation(); onIconChange(panelId, item.id, itemIndex, lockName, defaultLockValue); }}
                                 onPointerDown={e => e.stopPropagation()}
                                 title="Copy"
                             />
@@ -327,6 +330,8 @@ const StructureList = ({
     sensors,
     renderItemMeta,
     onOpenReplaceModal: externalOpenReplaceModal,
+    onIconChange,
+    onOpenReplaceModal,
     onCopyItem: externalCopyItem,
     onDeleteItem: externalDeleteItem,
     commonListConfig = {},
@@ -344,7 +349,9 @@ const StructureList = ({
     onSelectedItemProcessed,
     onSortItems,
     structureListFields,
-    onUpdateItem
+    onUpdateItem,
+    lockName,
+    defaultLockValue
 }) => {
     console.log('parentForm:', form.getFieldsValue());
     // 替换弹框状态
@@ -465,7 +472,12 @@ const StructureList = ({
             externalCopyItem(panelName, itemId);
         }
     }, [externalCopyItem]);
-
+    // 处理图标变更
+    const handleIconChange = useCallback((panelName, itemId, itemIndex, lockName, from) => {
+        if (onIconChange) {
+            onIconChange(panelName, itemId, itemIndex, lockName, from);
+        }
+    }, [onIconChange]);
     // 处理替换项目
     const handleOpenReplaceModal = useCallback((panelId, itemId, itemIndex) => {
         // 如果有外部替换处理函数，优先使用
@@ -641,6 +653,7 @@ const StructureList = ({
             // onCollapseChange(parentName)
             // 如果提供了回调函数，则调用它
             if (onItemAdded && typeof onItemAdded === 'function') {
+
                 onItemAdded(activeKeys, fieldName, itemToAdd, expandedItemId, form);
             }
 
@@ -660,6 +673,9 @@ const StructureList = ({
             }
             // 否则调用onItemAdded
             else {
+                if (lockName && defaultLockValue !== undefined) {
+                    selectedItemFromList[lockName] = defaultLockValue;
+                }
                 onItemAdded('basic', name, selectedItemFromList, null, form);
             }
             // 通知父组件已处理完选中项，可以清空选中状态
@@ -704,6 +720,8 @@ const StructureList = ({
                                 <div className="structure-list" style={{ position: 'relative', padding: '2px 0' }}>
                                     {dataList.map((item, index) => (
                                         <SortableItemRenderer
+                                            defaultLockValue={defaultLockValue}
+                                            lockName={lockName}
                                             key={`${name}-item-${index}`}
                                             panelId={name}
                                             item={item}
@@ -711,6 +729,7 @@ const StructureList = ({
                                             isExpanded={expandedItemId === index}
                                             toggleExpandItem={handleToggleExpandItem}
                                             onOpenReplaceModal={handleOpenReplaceModal}
+                                            onIconChange={handleIconChange}
                                             onCopyItem={handleCopyItem}
                                             onDeleteItem={handleDeleteItem}
                                             renderItemMeta={renderItemMeta}

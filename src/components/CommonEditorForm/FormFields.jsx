@@ -419,6 +419,7 @@ export const renderFormControl = (field, options = {}) => {
                         activeKeys={options.activeKeys}
                         onItemAdded={options.onItemAdded}
                         onReplaceItem={options.onReplaceItem}
+                        onIconChange={options.onIconChange}
                         onDeleteItem={options.onDeleteItem}
                         onCopyItem={options.onCopyItem}
                         onUpdateItem={options.onUpdateItem}

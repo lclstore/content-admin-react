@@ -712,6 +712,19 @@ export default function CommonEditor(props) {
             collapseFormConfig.onReplaceItem(panelName, itemId, newItemId, newItem, itemIndex);
         }
     };
+    const handleIconChange = (panelName, itemId, itemIndex, lockName, form) => {
+        debugger
+        internalFormFields.map(field => {
+            if (field.name === panelName && Array.isArray(field.dataList)) {
+                field.dataList[itemIndex][lockName] = field.dataList[itemIndex][lockName] ? 0 : 1;
+            }
+        });
+
+        setInternalFormFields([...internalFormFields]);
+        if (onFormFieldsChange) {
+            onFormFieldsChange(internalFormFields, form);
+        }
+    }
 
     // 处理折叠面板展开的回调函数
     // const handleCollapseChange = useCallback((key) => {
@@ -1126,6 +1139,7 @@ export default function CommonEditor(props) {
                             onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
                             onReplaceItem: handleReplaceItem,
+                            onIconChange: handleIconChange,
                             onCopyItem: handleCopyItem,
                             onSortItems: handleSortItems,
                             onUpdateItem: handleUpdateItem,
@@ -1225,6 +1239,7 @@ export default function CommonEditor(props) {
                                         onCopyItem={handleCopyItem}
                                         onUpdateItem={handleUpdateItem}
                                         onReplaceItem={handleReplaceItem}
+                                        onIconChange={handleIconChange}
                                     />
                                 )}
                                 {/* 如果配置了结构面板，则渲染结构面板 */}

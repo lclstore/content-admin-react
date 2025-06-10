@@ -161,7 +161,6 @@
 .formItem :global(.ant-picker) {
     border-radius: 4px;
 }
-
 /* 必填项标记样式 */
 .formItem :global(.ant-form-item-required)::before {
     color: #ff4d4f;

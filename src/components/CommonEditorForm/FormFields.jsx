@@ -13,11 +13,13 @@ import {
     Col,
     Image,
     Select,
-    Button
+    Button,
+    Tooltip
 } from 'antd';
 import {
     EyeOutlined,
-    EyeInvisibleOutlined
+    EyeInvisibleOutlined,
+    InfoOutlined
 } from '@ant-design/icons';
 import FileUpload from '@/components/FileUpload/FileUpload';//文件上传组件
 import NumberStepper from '@/components/NumberStepper/NumberStepper';//数字步进器组件
@@ -278,7 +280,7 @@ export const renderFormControl = (field, options = {}) => {
                 onChange={(value) => {
                     // 调用字段自身的onChange（如果存在）
                     if (field.onChange) {
-                        field.onChange(value);
+                        field.onChange(value, form);
                     }
 
                     // 表单的onChange由Form.Item注入（通过options.onChange）
@@ -300,6 +302,7 @@ export const renderFormControl = (field, options = {}) => {
                 dirKey,
                 uploadFn,
                 style,
+                gutter,
                 key: uploadKey,
                 ...uploadRest
             } = field;
@@ -436,7 +439,7 @@ export const renderFormControl = (field, options = {}) => {
 };
 
 // 创建一个独立的输入框组件
-const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', form, ...rest }) => {
+const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeholder, type = 'input', form, tooltipPlacement, tooltip, ...rest }) => {
     const [inputDisabled, setInputDisabled] = useState(initialDisabled);
     const InputComponent = type === 'password' ? Input.Password : Input;
     // 根据类型准备不同的属性
@@ -478,6 +481,27 @@ const ControlledInput = ({ field, name, label, disabled: initialDisabled, placeh
                 )
             }
         </div>
+    );
+};
+
+// 添加一个新的辅助函数来处理带 tooltip 的 label
+const getLabelWithTooltip = ({ label, tooltip, tooltipPlacement }) => {
+    if (!tooltip) return label;
+
+    return (
+        <span>
+            {label}&nbsp;
+            <Tooltip
+                className={styles.tooltip}
+                trigger={['click']}
+                title={tooltip}
+                placement={tooltipPlacement || 'bottom'}
+            >
+                <span className={styles.infoIcon}>
+                    i
+                </span>
+            </Tooltip>
+        </span>
     );
 };
 
@@ -604,14 +628,13 @@ export const renderFormItem = (field, options = {}) => {
             field.type == 'line' || field.type == 'structureList' ?
                 <div>{renderFormControl(field, options)}</div> :
                 <Form.Item
-
                     key={name} // React key 直接传递
                     {...formItemRestProps} // 其余布局 props 展开
-                    //上传控件隐藏label
+                    //上传控件隐藏label，添加tooltip支持
                     label={
                         field.type === 'upload' || field.type === 'structureList'
                             ? null
-                            : label
+                            : getLabelWithTooltip(field)
                     }
                     name={name} // AntD Form.Item 'name' prop 仍然需要，用于表单控制和校验
                     rules={finalRules}
@@ -697,6 +720,7 @@ export const renderBasicForm = (fields, options) => {
 
         return (
             <Row
+                gutter={options.gutter}
                 key={`group-${groupIndex}`}
             >
                 {group.map((field) => {
@@ -707,6 +731,7 @@ export const renderBasicForm = (fields, options) => {
                         <Col
                             key={field.name || `field-${Math.random()}`}
                             className={styles.formCol}
+                            span={field.colSpan}
                             style={{ width: field.width || '100%' }}
                         >
                             {renderFormItem(field, options)}

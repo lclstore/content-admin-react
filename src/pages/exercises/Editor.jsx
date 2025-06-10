@@ -24,7 +24,7 @@ export default function UserEditorWithCommon() {
             name: 'name', // 遵循命名规范，使用驼峰命名
             label: 'Name',
             maxLength: 100,
-            width: '50%',
+            colSpan: 12,
             required: true,
             placeholder: 'Enter name',
             rules: [
@@ -36,7 +36,7 @@ export default function UserEditorWithCommon() {
             name: 'met',
             label: 'Met',
             required: true,
-            width: "50%",
+            colSpan: 12,
             min: 1,
             max: 12,
             step: 1,
@@ -48,7 +48,7 @@ export default function UserEditorWithCommon() {
             name: 'structureTypeCode',
             label: 'Structure Type',
             // disabled: true,
-            width: "50%",
+            colSpan: 12,
             options: "BizExerciseStructureTypeEnums",
             required: true,
         },
@@ -57,8 +57,8 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'genderCode',
             label: 'Gender',
-            width: "50%",
-            options:"BizExerciseGenderEnums",
+            colSpan: 12,
+            options: "BizExerciseGenderEnums",
             required: true,
         },
         {
@@ -66,7 +66,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'equipmentCode',
             label: 'Equipment',
-            width: "50%",
+            colSpan: 12,
             options: "BizExerciseEquipmentEnums",
             required: true,
         },
@@ -75,7 +75,7 @@ export default function UserEditorWithCommon() {
             mode: 'single',
             name: 'difficultyCode',
             label: 'Difficulty',
-            width: "50%",
+            colSpan: 12,
             options: "BizExerciseDifficultyEnums",
             required: true,
         },
@@ -83,7 +83,7 @@ export default function UserEditorWithCommon() {
             type: 'select',
             name: 'positionCode',
             label: 'position',
-            width: "50%",
+            colSpan: 12,
             options: "BizExercisePositionEnums",
             required: true,
         },
@@ -92,8 +92,20 @@ export default function UserEditorWithCommon() {
             mode: 'multiple',
             name: 'injuredCodes',
             label: 'Injured',
-            width: "50%",
+            colSpan: 12,
+            required: true,
             options: "BizExerciseInjuredEnums",
+            onChange: (value, form) => {
+                if (value.length === 2 && value[0] === 'NONE') {
+                    form.setFieldValue('injuredCodes', value.filter(item => item !== 'NONE'));
+                    return;
+                }
+                if (value.includes('NONE') && value.length > 1) {
+                    form.setFieldValue('injuredCodes', ['NONE']);
+                    return;
+                }
+                form.setFieldValue('injuredCodes', value);
+            },
         },
         {
             type: 'textarea',
@@ -252,6 +264,7 @@ export default function UserEditorWithCommon() {
     };
     return (
         <CommonEditorForm
+            gutter={50}
             enableDraft={true}
             formType="basic"
             moduleKey='exercise'

@@ -87,7 +87,6 @@ export default function UserEditorWithCommon() {
     // 设置运动时长
     const setWorkoutDuration = (data, exerciseGroup) => {
         let workoutDuration = 0;
-
         try {
             // 确保workoutSettingInfo存在
             workoutSettingInfo.current = workoutSettingInfo.current || JSON.parse(window.sessionStorage.getItem('workoutSettingInfo') || '{}');
@@ -124,14 +123,16 @@ export default function UserEditorWithCommon() {
             const introDuration = frontVideoUrlDuration * introReps;//介绍时长
 
             let allActionDuration = 0;
-
             // 计算所有运动组的总时长
             exerciseGroupList.forEach(item => {
-                if (item && typeof item.structureRound === 'number') {
-                    allActionDuration += item.structureRound * (Preview + Execution);
+                if (item && Array.isArray(item.exerciseList) && typeof item.structureRound === 'number') {
+                    item.exerciseList.forEach(exercise => {
+                        if (exercise && typeof item.structureRound === 'number') {
+                            allActionDuration += item.structureRound * (Preview + Execution);
+                        }
+                    });
                 }
             });
-
             // 计算总时长（分钟）并向上取整
             workoutDuration = Math.round((introDuration + allActionDuration) / 60) || 0;//取分
         } catch (error) {
@@ -252,23 +253,39 @@ export default function UserEditorWithCommon() {
                     required: false,
                 },
                 {
-                    type: 'displayText',
-                    // type: 'displayImage',
+                    type: 'input',
                     name: 'workoutDuration',
-                    label: 'Duration (Min):',
-                    displayFn: (form) => {
-                        return <div>{form.getFieldValue('workoutDuration') || 0}("Auto-updated based on selected exercise.")</div>
-                    },
+                    tooltip: 'Auto-updated based on selected exercise.',
+                    tooltipPlacement: 'right',
+                    label: 'Duration (Min)',
+                    disabled: true,
                 },
                 {
-                    type: 'displayText',
+                    type: 'input',
                     name: 'calorie',
-                    label: 'Calorie:',
-                    displayFn: (form) => {
-                        return <div>{form.getFieldValue('calorie') || 0} ("Auto-updated based on selected exercise.")</div>
-                    },
-
+                    tooltip: 'Auto-updated based on selected exercise.',
+                    tooltipPlacement: 'right',
+                    label: 'Calorie (Kcal)',
+                    disabled: true,
                 },
+                // {
+                //     type: 'displayText',
+                //     // type: 'displayImage',
+                //     name: 'workoutDuration',
+                //     label: 'Duration (Min):',
+                //     // displayFn: (form) => {
+                //     //     return <input disabled value={form.getFieldValue('workoutDuration') || 0} />
+                //     // },
+                // },
+                // {
+                //     type: 'displayText',
+                //     name: 'calorie',
+                //     label: 'Calorie:',
+                //     displayFn: (form) => {
+                //         return <div>{form.getFieldValue('calorie') || 0}  </div>
+                //     },
+
+                // },
             ]
         },
         {
@@ -463,6 +480,7 @@ export default function UserEditorWithCommon() {
 
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields, form) => {
+
         setFormFields(updatedFields);
         updateWorkoutDuration(updatedFields, form)
 

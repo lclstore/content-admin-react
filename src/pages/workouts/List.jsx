@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useContext, useEffect, useState, useMemo, useCallback, useForm } from 'react';
 import { Modal, message, Form, Table, Switch } from 'antd';
 import {
     PlusOutlined,
@@ -100,7 +100,7 @@ export default function WorkoutsList() {
 
     // 在Modal打开时重置表单
     useEffect(() => {
-        // console.log('isBatchCreateModalVisible',isBatchCreateModalVisible,batchCreateForm.resetFields())
+        console.log('isBatchCreateModalVisible', isBatchCreateModalVisible, batchCreateForm.resetFields())
         if (isBatchCreateModalVisible) {
             batchCreateForm.resetFields();
             batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
@@ -113,6 +113,7 @@ export default function WorkoutsList() {
      * 显示弹窗
      */
     const handleBatchCreateFile = useCallback(() => {
+        debugger
         setIsBatchCreateModalVisible(true);
     }, []);
 
@@ -451,6 +452,7 @@ export default function WorkoutsList() {
             label: 'Batch Create File',
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
+
             // disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);

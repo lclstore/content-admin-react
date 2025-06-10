@@ -6,7 +6,9 @@ export default function UserEditorWithCommon() {
 
     // 初始用户数据状态--可设默认值
     const initialValues = {
-        translation: true,
+        translation: 1,
+        usageCode:"FLOW",
+        genderCode:"FEMALE_AND_MALE"
     }
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -21,6 +23,20 @@ export default function UserEditorWithCommon() {
             rules: [
                 { max: 100, message: 'Name cannot exceed 100 characters' }
             ]
+        },
+        {
+            label: 'Usage',
+            name: 'usageCode',
+            type: 'select',
+            required: true,
+            options: []
+        },
+        {
+            label: 'Gender',
+            name: 'genderCode',
+            type: 'select',
+            options: 'BizSoundGenderEnums',
+            required: true,
         },
         {
             type: 'select',
@@ -39,19 +55,24 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'textarea',
-            name: 'script',
-            label: 'Script',
-            required: true,
+            name: 'femaleScript',
+            label: 'Female Script',
+            required: false,
             maxLength: 1000,
             showCount: true,
-            dependencies: ['translation'],           // 声明依赖
-            content: ({ getFieldValue }) => {      // content 支持函数
-                const layoutType = getFieldValue('translation');
-                console.log('layoutType', layoutType)
-                return layoutType
-                    ? true
-                    : false;
-            },
+            // dependencies: ['translation'],           // 声明依赖
+            // content: ({ getFieldValue }) => {    // content 支持函数
+            //     const layoutType = getFieldValue('translation');
+            //     return !!layoutType
+            // },
+        },
+        {
+            type: 'textarea',
+            name: 'maleScript',
+            label: 'Male Script',
+            required: false,
+            maxLength: 1000,
+            showCount: true
         },
         {
             type: 'upload',

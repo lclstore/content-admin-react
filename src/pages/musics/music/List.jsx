@@ -124,6 +124,15 @@ export default function Musics() {
                 render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
             },
             {
+                title: 'Display Name',
+                sorter: true,
+                // width: 350,
+                showSorterTooltip: false,
+                dataIndex: 'displayName',
+                visibleColumn: 1,
+                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+            },
+            {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'status',

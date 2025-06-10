@@ -1,18 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, {useState, useMemo, useReducer, useCallback} from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm';
+import { formFieldsReducer } from "@/reducer/tableReducer.jsx";
+
 export default function UserEditorWithCommon() {
 
-
-
+    const [editorRef, setEditorRef] = useState(null);
+    const change = useCallback((val,val2) => {
+        console.log(editorRef,val,val2)
+    },[])
     // 初始用户数据状态--可设默认值
     const initialValues = {
         translation: 1,
         usageCode:"FLOW",
         genderCode:"FEMALE_AND_MALE"
     }
+    function formFieldsManage(){
+        // 必填 变化
+        {
+            const gender = formFields.find(item => item.name === 'genderCode');
+            const hasAScript = formFields.find(item => item.name === 'translation');
+            const femaleScript = formFields.find(item => item.name === 'femaleScript');
+            const maleScript = formFields.find(item => item.name === 'maleScript');
+            const femaleAudio = formFields.find(item => item.name === 'femaleAudioUrl');
+            const maleAudio = formFields.find(item => item.name === 'maleAudioUrl');
+        }
+    }
     // 表单字段配置
-    const formFields = useMemo(() => [
-
+    const [formFields,formFieldsDispatch] = useReducer(formFieldsReducer, [
         {
             type: 'input',
             name: 'name', // 遵循命名规范，使用驼峰命名
@@ -29,7 +43,7 @@ export default function UserEditorWithCommon() {
             name: 'usageCode',
             type: 'select',
             required: true,
-            options: []
+            options: "BizSoundUsageEnums"
         },
         {
             label: 'Gender',
@@ -52,6 +66,7 @@ export default function UserEditorWithCommon() {
                 },
             ],
             required: true,
+            onChange:change
         },
         {
             type: 'textarea',
@@ -93,7 +108,7 @@ export default function UserEditorWithCommon() {
             acceptedFileTypes: 'mp3',
         }
 
-    ], []); // 使用useMemo优化性能，避免每次渲染重新创建
+    ]); // 使用useMemo优化性能，避免每次渲染重新创建
 
 
 
@@ -104,6 +119,7 @@ export default function UserEditorWithCommon() {
             moduleKey="sound"
             config={{ formName: 'Sound' }}
             fields={formFields}
+            setFormRef={setEditorRef}
             initialValues={initialValues}
         />
     );

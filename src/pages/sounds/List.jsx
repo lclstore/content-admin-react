@@ -30,7 +30,7 @@ export default function WorkoutsList() {
         {
             title: 'Usage',
             key: 'usage',
-            options:[]
+            options:"BizSoundUsageEnums"
         },
         {
             title: 'Gender',
@@ -74,7 +74,7 @@ export default function WorkoutsList() {
                 dataIndex: 'usageCode',
                 sorter: true,
                 showSorterTooltip: false,
-                options: 'usage',
+                options: 'BizSoundUsageEnums',
                 width: 120,
                 visibleColumn: 0
             },

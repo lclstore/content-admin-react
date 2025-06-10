@@ -118,43 +118,6 @@ export default function UserEditorWithCommon() {
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
 
 
-    // 保存用户数据
-    const handleSaveUser = (values, id, { setLoading, setDirty, messageApi, navigate }) => {
-        console.log('保存用户数据:', values, id);
-
-        // 处理数据格式
-        const dataToSave = {
-            ...(id && { id: parseInt(id, 10) }),
-            name: values.name.trim(),
-            email: values.email ? values.email.trim() : '',
-            avatar: values.avatar,
-            status: values.status,
-            userPassword: values.userPassword,
-            birthday: values.birthday,
-            // 如果有timeRange，从中提取startDate和endDate
-            ...(values.timeRange && values.timeRange.length === 2 ? {
-                startDate: values.timeRange[0],
-                endDate: values.timeRange[1]
-            } : {}),
-            selectedRoles: values.selectedRoles || [],
-            // 保存联动选择器的值
-            layoutType: values.layoutType,
-            contentStyle: values.contentStyle
-        };
-
-
-        // 成功处理
-        messageApi.success('用户数据保存成功！');
-
-        // 检查 setLoading 是否为函数再调用，防止 CommonEditorForm 未传递该函数导致报错
-        if (typeof setLoading === 'function') {
-            setLoading(false);
-        }
-        setDirty(false);
-
-        // 保存成功后立即跳转回列表页
-        navigate('/profile/list');
-    };
     const saveBeforeTransform = (info) => {
         console.log(info.formValues)
     }

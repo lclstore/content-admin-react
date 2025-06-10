@@ -49,11 +49,13 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {Function} props.saveBeforeTransform 保存前回调函数
  * @param {boolean} props.confirmSucess 是否确认保存成功
  * @param {Function} props.onFormValuesChange 表单值变化回调函数
+ * @param {number} props.gutter 表单项之间的间距
  */
 export default function CommonEditor(props) {
     const {
         formType = 'basic', // 默认为基础表单
         config = {},
+        gutter = 30,
         operationName,
         isTabs = false,
         isBack = true,
@@ -239,6 +241,7 @@ export default function CommonEditor(props) {
         isBack,
         id: id || idFromUrl,
         moduleKey,
+        gutter,
         operationName,
         onSubmit: onSubmitCallback,
         fieldsToValidate,
@@ -1135,6 +1138,7 @@ export default function CommonEditor(props) {
                             form,
                             moduleKey,
                             operationName,
+                            gutter,
                             selectedItemFromList: selectedItemFromList,
                             onSelectedItemProcessed: handleSelectedItemProcessed,
                             onItemAdded: handleItemAdded,
@@ -1221,6 +1225,7 @@ export default function CommonEditor(props) {
                                         fields={internalFormFields}
                                         form={form}
                                         moduleKey={moduleKey}
+                                        gutter={gutter}
                                         operationName={operationName}
                                         renderItemMata={renderItemMata}
                                         commonListConfig={commonListConfig}

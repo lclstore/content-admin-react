@@ -252,23 +252,38 @@ export default function UserEditorWithCommon() {
                     required: false,
                 },
                 {
-                    type: 'displayText',
-                    // type: 'displayImage',
+                    type: 'input',
                     name: 'workoutDuration',
-                    label: 'Duration (Min):',
-                    displayFn: (form) => {
-                        return <div>{form.getFieldValue('workoutDuration') || 0}("Auto-updated based on selected exercise.")</div>
-                    },
+                    tooltip: 'Auto-updated based on selected exercise.',
+                    tooltipPlacement: 'right',
+                    label: 'Duration (Min)',
+                    disabled: true,
                 },
                 {
-                    type: 'displayText',
+                    type: 'input',
                     name: 'calorie',
-                    label: 'Calorie:',
-                    displayFn: (form) => {
-                        return <div>{form.getFieldValue('calorie') || 0} ("Auto-updated based on selected exercise.")</div>
-                    },
-
+                    tooltip: 'Auto-updated based on selected exercise.',
+                    label: 'Calorie (Kcal)',
+                    disabled: true,
                 },
+                // {
+                //     type: 'displayText',
+                //     // type: 'displayImage',
+                //     name: 'workoutDuration',
+                //     label: 'Duration (Min):',
+                //     // displayFn: (form) => {
+                //     //     return <input disabled value={form.getFieldValue('workoutDuration') || 0} />
+                //     // },
+                // },
+                // {
+                //     type: 'displayText',
+                //     name: 'calorie',
+                //     label: 'Calorie:',
+                //     displayFn: (form) => {
+                //         return <div>{form.getFieldValue('calorie') || 0}  </div>
+                //     },
+
+                // },
             ]
         },
         {

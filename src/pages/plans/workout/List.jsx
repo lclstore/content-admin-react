@@ -1,18 +1,18 @@
-import React, {useContext, useEffect, useState, useMemo, useCallback, useRef} from 'react';
+import React, { useContext, useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
-import {useLocation, useNavigate} from 'react-router';
-import {HeaderContext} from '@/contexts/HeaderContext';
+import { useLocation, useNavigate } from 'react-router';
+import { HeaderContext } from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import {router} from "@/utils/index.js";
+import { router } from "@/utils/index.js";
 import request from "@/request/index.js";
-import {App, Table, Modal, Button, Checkbox, Typography, Select} from "antd";
-import {useImmer} from "use-immer";
+import { App, Table, Modal, Button, Checkbox, Typography, Select } from "antd";
+import { useImmer } from "use-immer";
 
 export default function WorkoutsList() {
     const tableRef = useRef(null);
-    const {setButtons, setCustomPageTitle} = useContext(HeaderContext); // 更新为新的API
+    const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const location = useLocation()
     const [templateList, setTemplateList] = useState([])
@@ -48,19 +48,20 @@ export default function WorkoutsList() {
             type: 'multiple',
             options: "BizGenerateTaskStatusEnums",
         },
-    ],[templateList]);
+    ], [templateList]);
     let templateId = new URLSearchParams(location.search).get('id')
     templateId = templateId ? Number(templateId) : null
     // 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            {title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1},
-            { title: "Duration (Min)",dataIndex: "duration",render: (text, record) => record.duration / 60000, },
-            { title: "Calorie (Kcal)",dataIndex: "calorie" },
+            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
+            { title: "Duration (Min)", dataIndex: "duration", render: (text, record) => record.duration / 60000, },
+            { title: "Calorie (Kcal)", dataIndex: "calorie" },
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
                 sorter: true,
+                showSorterTooltip: false,
                 options: 'BizExerciseGenderEnums',
                 width: 120,
             },
@@ -68,6 +69,7 @@ export default function WorkoutsList() {
                 title: 'Injured (Query Param)',
                 dataIndex: 'injuredCodes',
                 sorter: true,
+                showSorterTooltip: false,
                 options: 'BizExerciseInjuredEnums',
                 width: 140,
             },
@@ -75,13 +77,15 @@ export default function WorkoutsList() {
                 title: 'Injured (Actual Result)',
                 dataIndex: 'injuredActualCodes',
                 sorter: true,
+                showSorterTooltip: false,
                 options: 'BizExerciseInjuredEnums',
                 width: 140,
             },
-            {title: "Create Time", dataIndex: "createTime",width: 180,},
+            { title: "Create Time", dataIndex: "createTime", width: 180, },
             {
                 title: 'Audio Lang',
                 sorter: true,
+                showSorterTooltip: false,
                 showSorterTooltip: false,
                 width: 150,
                 visibleColumn: 1,
@@ -91,6 +95,7 @@ export default function WorkoutsList() {
                 title: 'File Status',
                 dataIndex: 'fileStatus',
                 sorter: true,
+                showSorterTooltip: false,
                 options: 'displayStatus',
                 width: 120,
             },
@@ -124,7 +129,7 @@ export default function WorkoutsList() {
     const getTableList = useCallback(async (params) => {
         return new Promise(resolve => {
             request.get({
-                url: '/template/workout/page', data: {templateId,...params},
+                url: '/template/workout/page', data: { templateId, ...params },
                 callback: (res) => {
                     resolve(res.data)
                 }
@@ -136,7 +141,7 @@ export default function WorkoutsList() {
      *
      * 批量生成功能
      */
-        // 弹窗
+    // 弹窗
     const [createFileConfig, updateCreateFileConfig] = useImmer({
         visible: false,
         "videoFlag": false,
@@ -215,7 +220,7 @@ export default function WorkoutsList() {
             key: 'batchCreate',
             label: 'Batch Create File',
             onClick: () => updateCreateFileConfig(draft => void (draft.visible = true)),
-            icon: <PlusOutlined/>,
+            icon: <PlusOutlined />,
             // disabled: selectedRowKeys.length === 0
         }
     ], []);
@@ -226,7 +231,7 @@ export default function WorkoutsList() {
                 point: true,
                 data: {
                     // 获取 workoutIds
-                    workoutIds:tableRef.current.selectList.get(),
+                    workoutIds: tableRef.current.selectList.get(),
                     ...createFileConfig
                 },
                 callback() {
@@ -243,7 +248,7 @@ export default function WorkoutsList() {
             pageSize: 999999
         },
         success(res) {
-            setTemplateList(res.data.data.map(i => ({value: i.id, label: `(${i.id}) ${i.name}`, ...i})))
+            setTemplateList(res.data.data.map(i => ({ value: i.id, label: `(${i.id}) ${i.name}`, ...i })))
         }
     }))
     useEffect(() => {
@@ -255,7 +260,7 @@ export default function WorkoutsList() {
             {/* Batch Create File */}
             <Modal
                 title="Generate"
-                styles={{content: {width: '200px'}}}
+                styles={{ content: { width: '200px' } }}
                 open={createFileConfig.visible}
                 okText="OK"
                 onOk={() => {
@@ -273,12 +278,12 @@ export default function WorkoutsList() {
                 onCancel={() => updateCreateFileConfig(draft => void (draft.visible = false))}
                 okButtonProps={{
                     disabled: (
-                            !(createFileConfig.videoFlag || createFileConfig.audioFlag) ||
-                            !createFileConfig.templateId) ||
+                        !(createFileConfig.videoFlag || createFileConfig.audioFlag) ||
+                        !createFileConfig.templateId) ||
                         (createFileConfig.audioFlag && !createFileConfig.languages.length)
                 }}
             >
-                <Typography.Title level={5} style={{color: 'black'}}>File:</Typography.Title>
+                <Typography.Title level={5} style={{ color: 'black' }}>File:</Typography.Title>
                 <div>
                     <Checkbox checked={createFileConfig.videoFlag} onChange={
                         (e) =>
@@ -286,7 +291,7 @@ export default function WorkoutsList() {
                     }>Video-M3U8</Checkbox>
                     <Checkbox checked={createFileConfig.audioFlag} onChange={
                         (e) => {
-                            if(!e.target.checked){
+                            if (!e.target.checked) {
                                 updateCreateFileConfig(draft => void (draft.languages = []))
                             }
                             updateCreateFileConfig(draft => void (draft.audioFlag = e.target.checked))
@@ -294,15 +299,15 @@ export default function WorkoutsList() {
                 </div>
                 {
                     createFileConfig.audioFlag && <div>
-                        <Typography.Title level={5} style={{color: 'black'}}>Lang:</Typography.Title>
+                        <Typography.Title level={5} style={{ color: 'black' }}>Lang:</Typography.Title>
                         <Checkbox.Group options={languageOptions} value={createFileConfig.languages} onChange={
                             (val) =>
-                                updateCreateFileConfig(draft => void (draft.languages = val))}/>
+                                updateCreateFileConfig(draft => void (draft.languages = val))} />
                     </div>
                 }
-                <Typography.Title level={5} style={{color: 'black'}}>Template:</Typography.Title>
+                <Typography.Title level={5} style={{ color: 'black' }}>Template:</Typography.Title>
                 <Select
-                    style={{width: '100%'}}
+                    style={{ width: '100%' }}
                     value={createFileConfig.templateId}
                     onChange={
                         (val) =>
@@ -321,7 +326,7 @@ export default function WorkoutsList() {
                 operationName="page"
                 searchConfig={{
                     placeholder: "Search ID",
-                    fieldName:"id"
+                    fieldName: "id"
                 }}
                 showColumnSettings={false}
                 filterConfig={{

@@ -86,7 +86,6 @@ export default function WorkoutsList() {
                 title: 'Audio Lang',
                 sorter: true,
                 showSorterTooltip: false,
-                showSorterTooltip: false,
                 width: 150,
                 visibleColumn: 1,
                 render: (text, record) => record.audioJsonLanguages,

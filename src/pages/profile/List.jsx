@@ -143,7 +143,7 @@ export default function UserEditorWithCommon() {
                 confirmSucess={handleConfirmSuccess}
                 operationName="profileSave"
                 isBack={false}
-                config={{ formName: 'Profile', headerButtons }}
+                config={{ formName: 'Profile', headerButtons,hideTitleOperationName: true }}
                 fields={formFields}
                 initialValues={users}
                 setFormRef={setEditorRef}

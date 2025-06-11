@@ -113,7 +113,7 @@ export default function WorkoutsList() {
      * 显示弹窗
      */
     const handleBatchCreateFile = useCallback(() => {
-        debugger
+        
         setIsBatchCreateModalVisible(true);
     }, []);
 

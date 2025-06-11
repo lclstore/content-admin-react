@@ -146,34 +146,40 @@ const ConfigurableTable = forwardRef(({
         ...paginationConfig,
     })
     // 获取默认可见列
-    const getDefaultVisibleKeys = (columns) => {
+    const getVisibleKeys = (columns, visibleColumn) => {
         const defaultVisibleKeys = columns
             .filter(col => {
                 const key = col.key || col.dataIndex;
-                return key && col.visibleColumn === 2
+                return key && col.visibleColumn === visibleColumn
             })
             .map(col => col.key || col.dataIndex);
-        
+        debugger
         return defaultVisibleKeys
     }
     // filter data
     const filterDataHook = useImmer({});
+    // 默认的列设置
+    const [defaultFilters, setDefaultFilters] = useState({
+        visibleColumns: getVisibleKeys(columns, 2)
+    });
     // 内部维护一个列可见性状态，当外部没有传递时使用
     const [internalVisibleColumnKeys, setInternalVisibleColumnKeys] = useState(() => {
         // 尝试从localStorage读取
         const savedValue = localStorage.getItem(storageKey);
-        
         if (savedValue) {
-            return JSON.parse(savedValue);
+            return {
+                visibleColumns: JSON.parse(savedValue)
+            }
         }
-        // 无法从localStorage读取时，基于列的visibleColumn属性确定默认可见列
-        const defaultVisibleKeys = getDefaultVisibleKeys(columns)
-        return defaultVisibleKeys
+        return defaultFilters
     });
     // 实际使用的可见列键（优先使用外部传入的值）
     const effectiveVisibleColumnKeys = useMemo(() => {
-        
-        return visibleColumnKeys || internalVisibleColumnKeys;
+        const systemVisibleColumnKeys = getVisibleKeys(columns, 0);//强制显示的列
+        const newVisibleColumnKeys = Array.isArray(visibleColumnKeys) ? visibleColumnKeys :
+            (internalVisibleColumnKeys?.visibleColumns || []);
+        const result = Array.from(new Set([...systemVisibleColumnKeys, ...newVisibleColumnKeys]));
+        return result
     }, [visibleColumnKeys, internalVisibleColumnKeys]);
 
     // 计算可能的列分类：禁用列、可配置列和默认可见列
@@ -266,55 +272,20 @@ const ConfigurableTable = forwardRef(({
 
     // 处理列可见性 Popover 的更新
     const handleColumnVisibilityUpdate = useCallback((newSelections) => {
-        
         const selectedKeys = newSelections.visibleColumns || [];
-
-        // 获取所有强制显示的列（visibleColumn === 0）
-        const mandatoryKeys = columns
-            .filter(col => col.visibleColumn === 0)
-            .map(col => col.key || col.dataIndex);
-
-        // 合并选中的列和强制显示的列
-        const finalKeys = Array.from(new Set([...selectedKeys, ...mandatoryKeys]));
-
         // 如果外部提供了回调，则调用外部回调
         if (onVisibilityChange) {
             onVisibilityChange(finalKeys);
         } else {
-            // 否则由内部状态管理
-            // setInternalVisibleColumnKeys(finalKeys);
-            try {
-                localStorage.setItem(storageKey, JSON.stringify(finalKeys));
-            } catch (error) {
-                console.error("保存列配置到localStorage失败:", error);
-            }
+            // 合并选中的列和强制显示的列
+            localStorage.setItem(storageKey, JSON.stringify(selectedKeys));
+            setInternalVisibleColumnKeys({
+                visibleColumns: selectedKeys
+            })
         }
-    }, [columns, onVisibilityChange, storageKey]);
+    }, [onVisibilityChange, storageKey]);
 
     // 处理列可见性 Popover 的重置
-    const handleColumnVisibilityReset = useCallback((isClear) => {
-        // 获取所有强制显示的列（visibleColumn === 0）和默认可见的列（visibleColumn === 2）
-        const resetKeys = columns
-            .filter(col => {
-                const key = col.key || col.dataIndex;
-                return key && col.visibleColumn === 2
-            })
-            .map(col => col.key || col.dataIndex);
-
-        if (onVisibilityChange) {
-            onVisibilityChange(resetKeys);
-        } else {
-            // 由内部状态管理
-            // setInternalVisibleColumnKeys(resetKeys);
-            try {
-                
-                localStorage.setItem(storageKey, JSON.stringify(resetKeys));
-            } catch (error) {
-                console.error("保存列配置到localStorage失败:", error);
-            }
-        }
-        return resetKeys;
-    }, [columns, onVisibilityChange, storageKey]);
 
     // 检查列设置是否有非默认值
     const hasActiveColumnSettings = useMemo(() => {
@@ -383,7 +354,7 @@ const ConfigurableTable = forwardRef(({
         const visibleSet = new Set(effectiveVisibleColumnKeys || []);
         return columns.filter(col => {
             const key = col.key || col.dataIndex;
-            return visibleSet.has(key);
+            return visibleSet.has(key) || col.key === 'actions'; //
         });
     }, [columns, effectiveVisibleColumnKeys, showColumnSettings]);
 
@@ -614,11 +585,11 @@ const ConfigurableTable = forwardRef(({
             let processedCol = { ...col };
 
             // 添加默认排序配置
-            if (processedCol.sorter) {
-                processedCol.defaultSortOrder = processedCol.defaultSort === 'ascend' ? 'ascend' :
-                    processedCol.defaultSort === 'descend' ? 'descend' :
-                        'ascend';  // 未指定时默认升序
-            }
+            // if (processedCol.defaultSortOrder) {
+            //     processedCol.defaultSortOrder = processedCol.defaultSort === 'ascend' ? 'ascend' :
+            //         processedCol.defaultSort === 'descend' ? 'descend' :
+            //             'ascend';  // 未指定时默认升序
+            // }
 
             if (!col.render) {
                 // 创建cell容器
@@ -771,7 +742,12 @@ const ConfigurableTable = forwardRef(({
                         )
                     };
                     // 固定action宽度
-                    processedCol.width = 56
+                    processedCol.width = 70;
+                    processedCol.minWidth = 70;
+                    processedCol.maxWidth = 70;
+                    processedCol.fixed = 'right';
+                    processedCol.align = 'center';
+
                     // 为操作列添加action-cell类名
                     processedCol.onCell = () => ({
                         className: 'action-cell', // 为单元格添加action-cell类名
@@ -1096,8 +1072,9 @@ const ConfigurableTable = forwardRef(({
                         <FiltersPopover
                             filterSections={[columnSettingsSection]}
                             activeFilters={internalVisibleColumnKeys}
+                            defaultFilters={defaultFilters}
                             onUpdate={handleColumnVisibilityUpdate}
-                            onReset={handleColumnVisibilityReset}
+                            onReset={() => { }}
                             popoverPlacement="bottomRight"
                             applyImmediately={false}
                             clearButtonText="Reset"

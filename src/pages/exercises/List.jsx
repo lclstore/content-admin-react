@@ -108,7 +108,7 @@ export default () => {
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            
+
             {
                 title: 'Image',
                 width: 120,
@@ -128,9 +128,9 @@ export default () => {
                 title: 'Name',
                 dataIndex: 'name',
                 sorter: true,
-                width: 120,
+                width: 220,
                 visibleColumn: 0,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text) => <div style={{ fontWeight: 700 }}>{text}</div>,
                 key: 'name'
             },
             {

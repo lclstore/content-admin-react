@@ -172,6 +172,7 @@ const ConfigurableTable = forwardRef(({
     });
     // 实际使用的可见列键（优先使用外部传入的值）
     const effectiveVisibleColumnKeys = useMemo(() => {
+        debugger
         return visibleColumnKeys || internalVisibleColumnKeys;
     }, [visibleColumnKeys, internalVisibleColumnKeys]);
 
@@ -265,6 +266,7 @@ const ConfigurableTable = forwardRef(({
 
     // 处理列可见性 Popover 的更新
     const handleColumnVisibilityUpdate = useCallback((newSelections) => {
+        debugger
         const selectedKeys = newSelections.visibleColumns || [];
 
         // 获取所有强制显示的列（visibleColumn === 0）

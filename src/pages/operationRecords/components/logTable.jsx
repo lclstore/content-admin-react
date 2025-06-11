@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { Modal, message } from 'antd';
+import { Modal, message, Button } from 'antd';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
 import { statusOrder, filterSections, listData } from './Data';
 import request from "@/request";
@@ -48,6 +48,21 @@ export default ({ bizType }) => {
     const [currentRecord, setCurrentRecord] = useState(null); // 当前操作的记录
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
     const [messageApi, contextHolder] = message.useMessage();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [dataAfter, setDataAfter] = useState(null);
+
+    const showModal = (e) => {
+        console.log(1111111111)
+        console.log(JSON.parse(e))
+        setDataAfter(JSON.parse(e));
+        setIsModalOpen(true);
+    };
+    const handleOk = () => {
+        setIsModalOpen(false);
+    };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
     // 3. 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
@@ -62,20 +77,29 @@ export default ({ bizType }) => {
                 dataIndex: 'dataInfo',
                 width: 120,
                 visibleColumn: 0,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
             },
             {
                 title: 'Operation Type',
                 dataIndex: 'operationType',
                 options: [{ name: "Add", value: "ADD" }],
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 0,
+
             },
             {
                 title: 'After Data',
-                dataIndex: 'met',
+                dataIndex: 'dataAfter',
                 width: 120,
-                visibleColumn: 0
+                visibleColumn: 0,
+                render: (value, row) => {
+                    return (
+
+                        <Button style={{ height: '25px', padding: "0px 10px" }} onClick={() => {
+                            showModal(value)
+                        }} type="primary">View</Button>
+                    )
+                }
             },
             {
                 title: 'Operation Time',
@@ -177,9 +201,19 @@ export default ({ bizType }) => {
         return tempData;
     }, [dataSource]);
 
-    // 副作用 - 组件生命周期相关处理
+    // 副作用 - 组件生命周期相关处理getTableList
 
-
+    const getTableList = useCallback(async (params) => {
+        let value = num.filter(item => item.label == bizType)[0].value
+        return new Promise(resolve => {
+            request.get({
+                url: '/opLogs/page', data: { bizType:value, ...params },
+                callback: (res) => {
+                    resolve(res.data)
+                }
+            });
+        })
+    }, [])
     // 获取数据
     const getData = useCallback((value) => {
         return new Promise(resolve => {
@@ -193,7 +227,7 @@ export default ({ bizType }) => {
                 callback(res) {
                     // setDataSource(res.data.data)
                     console.log('res', res.data.data)
-                     setDataSource(res.data.data)
+                    setDataSource(res.data.data)
                     resolve()
                 }
             })
@@ -202,13 +236,6 @@ export default ({ bizType }) => {
     /**
      * 重置操作标志
      */
-    useEffect(() => {
-        console.log('1111')
-        console.log(bizType)
-        let value = num.filter(item => item.label == bizType)[0].value
-        getData(value).then()
-       
-    }, [bizType]);
 
     // 表格数据和配置
     // 渲染 - 组件UI呈现
@@ -221,6 +248,7 @@ export default ({ bizType }) => {
             <ConfigurableTable
                 uniqueId={'categoryList'}
                 columns={allColumnDefinitions}
+                getTableList={getTableList}
                 dataSource={filteredDataForTable}
                 rowKey="id"
                 loading={loading}
@@ -232,34 +260,28 @@ export default ({ bizType }) => {
                     onSearchChange: handleSearchInputChange,
                 }}
                 filterConfig={{
-                    filterSections: bizType=='Templates'|| bizType=='Workouts' ? filterSections :null,
+                    filterSections: bizType == 'Templates' || bizType == 'Workouts' ? filterSections : null,
                     activeFilters: selectedFilters,
                     onUpdate: handleFilterUpdate,
                     onReset: handleFilterReset,
                 }}
             />
 
-            {/* 删除确认弹窗 */}
+            {/* 展示JSON数据 */}
             <Modal
-                title="Confirm Delete"
-                open={isDeleteModalVisible}
-                onOk={() => {
-                    setActionInProgress(true);
-                    setDataSource(current => current.filter(item => item.id !== currentRecord.id));
-                    setActionInProgress(false);
-                    setIsDeleteModalVisible(false);
-                    messageApi.success(`Successfully deleted user "${currentRecord.name}"`);
-                }}
-                onCancel={() => setIsDeleteModalVisible(false)}
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{
-                    danger: true,
-                    loading: actionInProgress
-                }}
-                cancelButtonProps={{ disabled: actionInProgress }}
+                title="Basic Modal"
+                closable={{ 'aria-label': 'Custom Close Button' }}
+                open={isModalOpen}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="back" onClick={handleCancel}>
+                        close
+                    </Button>,
+                ]}
             >
-                <p>Are you sure you want to delete user "{currentRecord?.name}"? This action cannot be undone.</p>
+                <p>
+                    {{ dataAfter } && JSON.stringify(dataAfter, null, 2)}
+                </p>
             </Modal>
         </div>
     );

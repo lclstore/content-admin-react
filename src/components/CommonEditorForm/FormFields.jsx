@@ -56,7 +56,7 @@ export const processValidationRules = (rules = [], { required, label, type, requ
 
         finalRules.push({
             required: true,
-            message: requiredMessage || `Please ${action} ${label}`
+            message: requiredMessage == undefined ? `Please ${action} ${label}` : requiredMessage
         });
     }
 

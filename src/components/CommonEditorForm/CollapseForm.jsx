@@ -646,14 +646,17 @@ const CollapseForm = ({
         const newPanelName = `${currentFields.name}${newPanelIndex}`; // 生成唯一名称
         const newCustomPanel = {
             ...showAddPanels[0],
+            label: `${currentFields.label} ${newPanelIndex + 1}`,
             name: newPanelName,
             isShowAdd: true,
             // 确保fields中的每个字段name也是唯一的
-            fields: showAddPanels[0].fields?.map(field => ({
-                ...field,
-                dataList: field.dataList ? [] : null,
-                name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
-            })) || []
+            fields: showAddPanels[0].fields?.map(field => {
+                return {
+                    ...field,
+                    dataList: field.dataList ? [] : null,
+                    name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
+                }
+            }) || []
         };
         // 调用父组件传递的回调函数来添加新面板
         if (handleAddCustomPanel) {

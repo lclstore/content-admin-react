@@ -1,80 +1,77 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm/index.jsx';
-
+import { FormOutlined, ThunderboltOutlined } from '@ant-design/icons';
 export default function UserEditorWithCommon() {
 
     // 初始用户数据状态--可设默认值
-    const initialValues = {
+    const [initialValues, setInitialValues] = useState({
         layoutType: 1,
         days: 28,
-        durationCode: "TEN_FIFTEEN_MINUTES",
-        structureType1:1
-        // status2: [1, 2],
-        // status: 1, // 确保status有默认值1
-        // // 为联动选择器设置默认值 - 使用数字类型
-        // contentStyle: 'style1'
-    }
+        durationCode: "MIN_10_15",
+        structureType1: 1,
+    })
     // 表单字段配置
-    const formFields = useMemo(() => [
+    const initialFormFields = useMemo(() => [
         {
-            type: 'input',
-            name: 'name', // 遵循命名规范，使用驼峰命名
-            label: 'Name',
-            maxLength: 100,
-            required: true,
-            placeholder: 'Enter user name',
-            rules: [
-                { max: 100, message: 'Name cannot exceed 100 characters' }
+            label: 'Basic Information',
+            name: 'basicInfo',
+            icon: <FormOutlined />,
+            fields: [
+                {
+                    type: 'input',
+                    name: 'name', // 遵循命名规范，使用驼峰命名
+                    label: 'Name',
+                    maxLength: 100,
+                    required: true,
+                    placeholder: 'Enter user name',
+                    rules: [
+                        { max: 100, message: 'Name cannot exceed 100 characters' }
+                    ]
+                },
+                {
+                    type: 'textarea',
+                    name: 'description', // 遵循命名规范，使用驼峰命名
+                    label: 'Description',
+                    maxLength: 1000,
+                },
+                {
+                    type: 'numberStepper',
+                    name: 'days',
+                    label: 'Days',
+                    required: true,
+                    min: 1,
+                    max: 28,
+                    step: 1,
+                    formatter: (value) => `${value}`,
+                },
+                {
+                    type: 'select',
+                    mode: 'single',
+                    name: 'durationCode',
+                    label: 'Duration (Min)',
+                    options: "BizTemplateDurationEnums",
+                    required: true,
+                },
             ]
         },
         {
-            type: 'textarea',
-            name: 'description', // 遵循命名规范，使用驼峰命名
-            label: 'Description',
-            maxLength: 1000,
-        },
-        {
-            type: 'select',
-            mode: 'single',
-            name: 'durationCode',
-            label: 'Duration (Min)',
-            options: "BizTemplateDurationEnums",
-            required: true,
-        },
-        {
-            type: 'numberStepper',
-            name: 'days',
-            label: 'Days',
-            required: true,
-            min: 1,
-            max: 28,
-            step: 28,
-            formatter: (value) => `${value}`,
-        },
-        {
-            type: 'inputGroup',
-            name: 'warmUp',
-            label: '',
-            inputConfig: [
-                {
-                    type: 'select',
-                    name: 'structureType1',
-                    label: 'structureType',
-                    width: '300px',
-                    options: [
-                        {
-                            label: 'Warm Up',
-                            value: 0
-                        }, {
-                            label: "Main",
-                            value: 1
-                        },{
-                            label: "Cool Down",
-                            value: 2
-                        },
-                    ],
-                    required: true,
-                },
+            label: 'Structure1',
+            name: 'structure',
+            isGroup: true,
+            isShowAdd: true,
+            // dataList: [],
+            icon: <ThunderboltOutlined />,
+            fields: [
+                // {
+                //     type: 'inputGroup',
+                //     name: 'warmUp',
+                //     label: '',
+
+                //     // inputConfig: [
+
+
+                //     // ]
+                // },
                 {
                     type: 'input',
                     name: 'WARM_UP_name',
@@ -82,6 +79,7 @@ export default function UserEditorWithCommon() {
                     required: true,
                     maxLength: 100,
                     width: '240px',
+                    colSpan: 2,
                     showCount: true,
                 },
                 {
@@ -91,6 +89,7 @@ export default function UserEditorWithCommon() {
                     required: true,
                     min: 2,
                     max: 20,
+                    colSpan: 2,
                     step: 1,
                     formatter: (value) => `${value}`,
                 },
@@ -99,241 +98,16 @@ export default function UserEditorWithCommon() {
                     name: 'WARM_UP_round',
                     label: 'Warm Up',
                     required: true,
+                    colSpan: 2,
                     min: 1,
                     max: 5,
                     step: 1,
                     formatter: (value) => `${value}`,
                 },
-
             ]
-        },
-        {
-            type: 'inputGroup',
-            name: 'warmUp',
-            label: '',
-            inputConfig: [
-                {
-                    type: 'select',
-                    name: 'structureType1',
-                    label: '',
-                    width: '300px',
-                    options: [
-                        {
-                            label: 'Warm Up',
-                            value: 0
-                        }, {
-                            label: "Main",
-                            value: 1
-                        },{ 
-                            label: "Cool Down",
-                            value: 2
-                        },
-                    ],
-                    required: true,
-                },
-                {
-                    type: 'input',
-                    name: 'WARM_UP_name',
-                    label: '',
-                    required: true,
-                    maxLength: 100,
-                    width: '240px',
-                    showCount: true,
-                },
-                {
-                    type: 'numberStepper',
-                    name: 'WARM_UP_count',
-                    label: '',
-                    required: true,
-                    min: 2,
-                    max: 20,
-                    step: 1,
-                    formatter: (value) => `${value}`,
-                },
-                {
-                    type: 'numberStepper',
-                    name: 'WARM_UP_round',
-                    label: '',
-                    required: true,
-                    min: 1,
-                    max: 5,
-                    step: 1,
-                    formatter: (value) => `${value}`,
-                },
-
-            ]
-        },
-        {
-            type: 'inputGroup',
-            name: 'warmUp',
-            label: '',
-            inputConfig: [
-                {
-                    type: 'select',
-                    name: 'structureType1',
-                    label: '',
-                    width: '300px',
-                    options: [
-                        {
-                            label: 'Warm Up',
-                            value: 0
-                        }, {
-                            label: "Main",
-                            value: 1
-                        },{
-                            label: "Cool Down",
-                            value: 2
-                        },
-                    ],
-                    required: true,
-                },
-                {
-                    type: 'input',
-                    name: 'WARM_UP_name',
-                    label: '',
-                    required: true,
-                    maxLength: 100,
-                    width: '240px',
-                    showCount: true,
-                },
-                {
-                    type: 'numberStepper',
-                    name: 'WARM_UP_count',
-                    label: '',
-                    required: true,
-                    min: 2,
-                    max: 20,
-                    step: 1,
-                    formatter: (value) => `${value}`,
-                },
-                {
-                    type: 'numberStepper',
-                    name: 'WARM_UP_round',
-                    label: '',
-                    required: true,
-                    min: 1,
-                    max: 5,
-                    step: 1,
-                    formatter: (value) => `${value}`,
-                },
-
-            ]
-        },
-        // {
-        //     type: 'inputGroup',
-        //     name: 'warmUp',
-        //     label: 'Warm Up',
-        //     inputConfig: [
-        //         {
-        //             type: 'input',
-        //             name: 'WARM_UP_name',
-        //             label: 'Name',
-        //             required: true,
-        //             maxLength: 100,
-        //             width: '340px',
-        //             showCount: true,
-        //         },
-        //         {
-        //             type: 'numberStepper',
-        //             name: 'WARM_UP_count',
-        //             label: 'Count',
-        //             required: true,
-        //             min: 2,
-        //             max: 20,
-        //             step: 1,
-        //             formatter: (value) => `${value}`,
-        //         },
-        //         {
-        //             type: 'numberStepper',
-        //             name: 'WARM_UP_round',
-        //             label: 'Rounds',
-        //             required: true,
-        //             min: 1,
-        //             max: 5,
-        //             step: 1,
-        //             formatter: (value) => `${value}`,
-        //         },
-
-        //     ]
-        // },
-        // {
-        //     type: 'inputGroup',
-        //     name: 'main',
-        //     label: 'Main',
-        //     // required: true,
-        //     inputConfig: [
-        //         {
-        //             type: 'input',
-        //             name: 'MAIN_name',
-        //             label: 'Name',
-        //             required: true,
-        //             maxLength: 100,
-        //             width: '340px',
-        //             showCount: true,
-        //         },
-        //         {
-        //             type: 'numberStepper',
-        //             name: 'MAIN_count',
-        //             label: 'Count',
-        //             required: true,
-        //             min: 2,
-        //             max: 20,
-        //             step: 1,
-        //             formatter: (value) => `${value}`,
-        //         },
-        //         {
-        //             type: 'numberStepper',
-        //             name: 'MAIN_round',
-        //             label: 'Rounds',
-        //             required: true,
-        //             min: 1,
-        //             max: 5,
-        //             step: 1,
-        //             formatter: (value) => `${value}`,
-        //         },
-
-        //     ]
-        // },
-        // {
-        //     type: 'inputGroup',
-        //     name: 'coolDown',
-        //     label: 'Cool Down',
-        //     // required: true,
-        //     inputConfig: [
-        //         {
-        //             type: 'input',
-        //             name: 'COOL_DOWN_name',
-        //             label: 'Name',
-        //             required: true,
-        //             maxLength: 100,
-        //             width: '340px',
-        //             showCount: true,
-        //         },
-        //         {
-        //             type: 'numberStepper',
-        //             name: 'COOL_DOWN_count',
-        //             label: 'Count',
-        //             required: true,
-        //             min: 2,
-        //             max: 20,
-        //             step: 1,
-        //             formatter: (value) => `${value}`,
-        //         },
-        //         {
-        //             type: 'numberStepper',
-        //             name: 'COOL_DOWN_round',
-        //             label: 'Rounds',
-        //             required: true,
-        //             min: 1,
-        //             max: 5,
-        //             step: 1,
-        //             formatter: (value) => `${value}`,
-        //         },
-
-        //     ]
-        // }
+        }
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
-
+    const [formFields, setFormFields] = useState(initialFormFields);
     const saveBeforeTransform = useCallback(({ formValues: formData }) => {
         console.log("formDataStart", formData)
         const unitNameList = ["WARM_UP", "MAIN", "COOL_DOWN"]
@@ -360,9 +134,11 @@ export default function UserEditorWithCommon() {
         <CommonEditorForm
             saveBeforeTransform={saveBeforeTransform}
             getDataAfter={getDataAfter}
-            formType="basic"
+            formType="advanced"
             config={{ formName: 'Template', hideSaveButton: false, hideBackButton: false }}
             fields={formFields}
+            isCollapse={true}
+            enableDraft={true}
             initialValues={initialValues}
             moduleKey='template'
         />

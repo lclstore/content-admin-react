@@ -35,7 +35,7 @@ export default function WorkoutsList() {
         {
             title: 'Gender',
             key: 'genderCodeList',
-            options: 'BizExerciseGenderEnums'
+            options: 'BizSoundGenderEnums'
         },
     ];
 

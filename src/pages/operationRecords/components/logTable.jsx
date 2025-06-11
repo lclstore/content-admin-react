@@ -71,6 +71,7 @@ export default ({ bizType }) => {
                 title: 'ID',
                 dataIndex: 'dataId',
                 width: 50,
+                visibleColumn: 0,
             },
             {
                 title: 'Name',

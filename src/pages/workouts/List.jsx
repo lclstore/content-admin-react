@@ -246,14 +246,15 @@ export default function WorkoutsList() {
                 visibleColumn: 2
             },
             {
-                title: 'New Date',
-                key: 'newStartTime',
-                render: (text, record) => {
-                    return formatDateRange(record.newStartTime, record.newEndTime);
-                },
-                width: 220,
-                visibleColumn: 1
+                title: 'Difficulty',
+                dataIndex: 'difficultyCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 2,
+                options: 'BizExerciseDifficultyEnums',
+                key: 'difficultyCode'
             },
+
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
@@ -270,17 +271,6 @@ export default function WorkoutsList() {
                     }
                 ],
                 key: 'genderCode'
-            },
-
-
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficultyCode',
-                sorter: true,
-                width: 120,
-                visibleColumn: 2,
-                options: 'BizExerciseDifficultyEnums',
-                key: 'difficultyCode'
             },
 
             {
@@ -330,6 +320,15 @@ export default function WorkoutsList() {
                     },
                 ],
                 key: 'injuredCodes'
+            },
+            {
+                title: 'New Date',
+                key: 'newStartTime',
+                render: (text, record) => {
+                    return formatDateRange(record.newStartTime, record.newEndTime);
+                },
+                width: 220,
+                visibleColumn: 1
             },
             {
                 title: 'Audio Lang',

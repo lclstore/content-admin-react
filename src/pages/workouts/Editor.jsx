@@ -307,20 +307,20 @@ export default function UserEditorWithCommon() {
                     required: true,
                     onChange: imageUpload
                 },
-                {
-                    type: 'upload',
-                    name: 'thumbnailImgUrl',
-                    label: 'Thumbnail Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'completeImgUrl',
-                    label: 'Complete Image',
-                    required: true,
-                    onChange: imageUpload
-                },
+                // {
+                //     type: 'upload',
+                //     name: 'thumbnailImgUrl',
+                //     label: 'Thumbnail Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
+                // {
+                //     type: 'upload',
+                //     name: 'completeImgUrl',
+                //     label: 'Complete Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
 
             ]
         },

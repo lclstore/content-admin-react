@@ -397,14 +397,14 @@ const ConfigurableTable = forwardRef(({
                 }
 
                 // 检查是否点击了媒体单元格
-                const isMediaClick = event.target.closest('td.media-cell') ||
-                    (event.target.classList &&
-                        (event.target.classList.contains('media-cell') ||
-                            event.target.classList.contains('mediaCell')));
-                if (isMediaClick) {
-                    console.log('行点击被阻止：点击了媒体单元格');
-                    return;
-                }
+                // const isMediaClick = event.target.closest('td.media-cell') ||
+                //     (event.target.classList &&
+                //         (event.target.classList.contains('media-cell') ||
+                //             event.target.classList.contains('mediaCell')));
+                // if (isMediaClick) {
+                //     console.log('行点击被阻止：点击了媒体单元格');
+                //     return;
+                // }
 
                 // 检查是否点击了复选框单元格
                 const isCheckboxClick = event.target.closest('td.ant-table-cell.ant-table-selection-column') ||

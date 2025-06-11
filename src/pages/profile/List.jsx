@@ -151,7 +151,10 @@ export default function UserEditorWithCommon() {
             <div style={{ maxWidth: '1000px', margin: '-5px auto', paddingLeft: '20px' }}>
                 <Button
                     block
-                    onClick={() => navigate('/login')}
+                    onClick={() => {
+                        localStorage.clear()
+                        navigate('/login');
+                    }}
                 >
                     SIGN OUT
                 </Button>

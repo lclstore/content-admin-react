@@ -203,9 +203,9 @@ export default function Musics() {
                     placeholder: "Search name or ID...",
                 }}
                 showColumnSettings={false}
-                filterConfig={{
-                    filterSections: filterSections,
-                }}
+                // filterConfig={{
+                //     filterSections: filterSections,
+                // }}
             />
             {/* 编辑弹窗 */}
             <Modal

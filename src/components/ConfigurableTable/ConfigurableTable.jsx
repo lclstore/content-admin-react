@@ -153,7 +153,6 @@ const ConfigurableTable = forwardRef(({
                 return key && col.visibleColumn === visibleColumn
             })
             .map(col => col.key || col.dataIndex);
-        debugger
         return defaultVisibleKeys
     }
     // filter data

@@ -145,34 +145,34 @@ const ConfigurableTable = forwardRef(({
     const paginationParams = useRef(loadCache ? loadCache.paginationParams : {
         ...paginationConfig,
     })
+    // 获取默认可见列
+    const getDefaultVisibleKeys = (columns) => {
+        const defaultVisibleKeys = columns
+            .filter(col => {
+                const key = col.key || col.dataIndex;
+                return key && col.visibleColumn === 2
+            })
+            .map(col => col.key || col.dataIndex);
+        debugger
+        return defaultVisibleKeys
+    }
     // filter data
     const filterDataHook = useImmer({});
     // 内部维护一个列可见性状态，当外部没有传递时使用
     const [internalVisibleColumnKeys, setInternalVisibleColumnKeys] = useState(() => {
         // 尝试从localStorage读取
-        try {
-            const savedValue = localStorage.getItem(storageKey);
-            if (savedValue) {
-                return JSON.parse(savedValue);
-            }
-        } catch (error) {
-            console.error("读取localStorage中的列配置失败:", error);
+        const savedValue = localStorage.getItem(storageKey);
+        debugger
+        if (savedValue) {
+            return JSON.parse(savedValue);
         }
-
         // 无法从localStorage读取时，基于列的visibleColumn属性确定默认可见列
-        return columns
-            .filter(col => {
-                const key = col.key || col.dataIndex;
-                // 未设置visibleColumn或visibleColumn=0或2的列作为默认可见列
-                return key && (!col.visibleColumn || col.visibleColumn === 0 || col.visibleColumn === 2);
-            })
-            .map(col => col.key || col.dataIndex);
+        const defaultVisibleKeys = getDefaultVisibleKeys(columns)
+        return defaultVisibleKeys
     });
-
     // 实际使用的可见列键（优先使用外部传入的值）
     const effectiveVisibleColumnKeys = useMemo(() => {
         return visibleColumnKeys || internalVisibleColumnKeys;
-        debugger
     }, [visibleColumnKeys, internalVisibleColumnKeys]);
 
     // 计算可能的列分类：禁用列、可配置列和默认可见列
@@ -206,7 +206,6 @@ const ConfigurableTable = forwardRef(({
 
     // 基于列分类计算可选列和默认可见列
     const { disabledKeys, configurableOptionKeys, defaultVisibleKeys } = columnCategories;
-
     // 计算实际生效的默认可见列（当localStorage没有存储时使用）
     const effectiveDefaultVisibleKeys = useMemo(() => {
         // 合并强制显示列和默认可见列
@@ -240,7 +239,6 @@ const ConfigurableTable = forwardRef(({
                     disabled: col.visibleColumn === 0 || col.visibleColumn === undefined // 禁用强制显示的列
                 };
             });
-
         return {
             type: 'multiple',
             title: 'Visible Columns',
@@ -282,7 +280,7 @@ const ConfigurableTable = forwardRef(({
             onVisibilityChange(finalKeys);
         } else {
             // 否则由内部状态管理
-            setInternalVisibleColumnKeys(finalKeys);
+            // setInternalVisibleColumnKeys(finalKeys);
             try {
                 localStorage.setItem(storageKey, JSON.stringify(finalKeys));
             } catch (error) {
@@ -297,7 +295,7 @@ const ConfigurableTable = forwardRef(({
         const resetKeys = columns
             .filter(col => {
                 const key = col.key || col.dataIndex;
-                return key && (col.visibleColumn === 0 || col.visibleColumn === 2);
+                return key && col.visibleColumn === 2
             })
             .map(col => col.key || col.dataIndex);
 
@@ -305,8 +303,9 @@ const ConfigurableTable = forwardRef(({
             onVisibilityChange(resetKeys);
         } else {
             // 由内部状态管理
-            setInternalVisibleColumnKeys(resetKeys);
+            // setInternalVisibleColumnKeys(resetKeys);
             try {
+                debugger
                 localStorage.setItem(storageKey, JSON.stringify(resetKeys));
             } catch (error) {
                 console.error("保存列配置到localStorage失败:", error);
@@ -822,7 +821,7 @@ const ConfigurableTable = forwardRef(({
                 const savedValue = localStorage.getItem(storageKey);
                 if (savedValue) {
                     const parsedValue = JSON.parse(savedValue);
-                    setInternalVisibleColumnKeys(parsedValue);
+                    // setInternalVisibleColumnKeys(parsedValue);
                 }
             } catch (error) {
                 console.error("读取localStorage中的列配置失败:", error);

@@ -9,6 +9,7 @@ export default function UserEditorWithCommon() {
     const navigate = useNavigate();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
+    
     const id = params.get('id');
     // 创建音频播放器的引用
     let audioPlayer = null;
@@ -137,7 +138,7 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'switch',
-            name: 'status221',
+            name: 'status221', 
             label: 'Status1121',
         },
 

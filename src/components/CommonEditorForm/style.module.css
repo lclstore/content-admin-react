@@ -613,6 +613,11 @@
     background-color: #fff;
 }
 
+/*  */
+.ant-form-item-required {
+    font-size: 14px !important;
+}
+
 .emptyPanel {
     padding: 24px;
     text-align: center;

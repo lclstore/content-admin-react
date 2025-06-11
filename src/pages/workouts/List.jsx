@@ -133,12 +133,9 @@ export default function WorkoutsList() {
     const isButtonVisible = useCallback((record, btnName) => {
         const status = record.status;
         // 简单的状态-按钮映射关系
-        if (status === 0 && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
-        if (status === 2 && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
-        if (status === 1 && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
-        if (status === 3 && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
-        if (status === 4 && ['duplicate'].includes(btnName)) return true;
-
+        if (status === 'DRAFT' && ['edit', 'duplicate', 'delete'].includes(btnName)) return true;
+        if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+        if (status === 'ENABLED' && ['edit', 'duplicate', 'disable'].includes(btnName)) return true;
         return false;
     }, []);
 
@@ -239,15 +236,15 @@ export default function WorkoutsList() {
                     return Math.ceil(calorie);
                 }
             },
-            {
-                title: 'New Date',
-                key: 'newStartTime',
-                render: (text, record) => {
-                    return formatDateRange(record.newStartTime, record.newEndTime);
-                },
-                width: 220,
-                visibleColumn: 1
-            },
+            // {
+            //     title: 'New Date',
+            //     key: 'newStartTime',
+            //     render: (text, record) => {
+            //         return formatDateRange(record.newStartTime, record.newEndTime);
+            //     },
+            //     width: 220,
+            //     visibleColumn: 1
+            // },
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',

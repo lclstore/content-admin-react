@@ -583,6 +583,11 @@ const ConfigurableTable = forwardRef(({
         return currentlyVisibleColumns.map(col => {
             let processedCol = { ...col };
 
+            // 为align: 'center'的列添加类名
+            if (processedCol.align === 'center') {
+                processedCol.className = `td-center`
+            }
+
             // 添加默认排序配置
             // if (processedCol.defaultSortOrder) {
             //     processedCol.defaultSortOrder = processedCol.defaultSort === 'ascend' ? 'ascend' :
@@ -768,7 +773,7 @@ const ConfigurableTable = forwardRef(({
                 const C = childrenRender(text, record, index);
                 const key = `${record[rowKey] || index}-${processedCol.key || processedCol.dataIndex}-cell`;
                 return (
-                    <div key={key} className="td-cell" style={{ justifyContent: processedCol.align || 'left' }}>
+                    <div key={key} className="td-cell">
                         {C}
                     </div>
                 )

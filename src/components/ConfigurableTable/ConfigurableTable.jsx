@@ -741,7 +741,12 @@ const ConfigurableTable = forwardRef(({
                         )
                     };
                     // 固定action宽度
-                    processedCol.width = 56
+                    processedCol.width = 70;
+                    processedCol.minWidth = 70;
+                    processedCol.maxWidth = 70;
+                    processedCol.fixed = 'right';
+                    processedCol.align = 'center';
+
                     // 为操作列添加action-cell类名
                     processedCol.onCell = () => ({
                         className: 'action-cell', // 为单元格添加action-cell类名

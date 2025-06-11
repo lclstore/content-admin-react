@@ -38,6 +38,7 @@ const FiltersPopover = ({
     isSettingsType = false,
 }) => {
     const [tempSelectedValues, setTempSelectedValues] = useState({});
+
     const [isVisible, setIsVisible] = useState(false);
     const prevActiveFiltersRef = useRef(activeFilters);
     const prevIsVisibleRef = useRef(isVisible);
@@ -100,9 +101,9 @@ const FiltersPopover = ({
     // 重置
     const handleReset = (isClear = false) => {
         if (onReset) {
-            onReset();
+            onReset(isClear);
         }
-        setTempSelectedValues({});
+        // setTempSelectedValues({});
     };
 
     // 确认/更新
@@ -148,8 +149,8 @@ const FiltersPopover = ({
                                         if (section.type === 'single') {
                                             isSelected = tempSelectedValues[section.key] === optionValue;
                                         } else {
-                                            isSelected = Array.isArray(tempSelectedValues[section.key]) &&
-                                                tempSelectedValues[section.key]?.includes(optionValue);
+                                            isSelected = Array.isArray(tempSelectedValues) &&
+                                                tempSelectedValues?.includes(optionValue);
                                         }
 
                                         return (

@@ -55,6 +55,7 @@ export default function UserEditorWithCommon() {
     // 初始用户数据状态--可设默认值
     const initialValues = {
         layoutType: 1,
+        status221: 1
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
         // // 为联动选择器设置默认值 - 使用数字类型
@@ -65,7 +66,7 @@ export default function UserEditorWithCommon() {
         {
             type: 'antdSelect',
             name: 'customSelect',
-            label: 'customSelect',
+            label: 'customSelect111',
             // style: {
             //     width: '300px',
             // },
@@ -112,32 +113,27 @@ export default function UserEditorWithCommon() {
         },
         {
             type: 'input',
-            name: 'layoutTypeText',
-            label: '',
+            name: 'layoutTypeText11111',
+            label: '撒大大大撒',
             required: true,
             maxLength: 100,
             showCount: true,
-            style: {
-                width: '300px',
-            },
-            dependencies: ['layoutType'],           // 声明依赖
+            dependencies: ['status221'],           // 声明依赖
             content: ({ getFieldValue }) => {      // content 支持函数
-                const layoutType = getFieldValue('layoutType');
-                return layoutType === 2
+                const status221 = getFieldValue('status221');
+                return status221 === 1
                     ? true
                     : false;
             },
         },
         {
-            type: 'displayImage',
+            type: 'input',
             name: 'displayImage1',
-            label: '',
+            label: 'displayImage1',
             dependencies: ['layoutType'],           // 声明依赖
             content: ({ getFieldValue }) => {      // content 支持函数
                 const layoutType = getFieldValue('layoutType');
-                return layoutType === 1
-                    ? 'internal/test/268a8e7dd3ea45268a96588f0f07e4f8.png'
-                    : null;
+                return layoutType
             },
         },
         {

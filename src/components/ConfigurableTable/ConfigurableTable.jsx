@@ -768,7 +768,7 @@ const ConfigurableTable = forwardRef(({
                 const C = childrenRender(text, record, index);
                 const key = `${record[rowKey] || index}-${processedCol.key || processedCol.dataIndex}-cell`;
                 return (
-                    <div key={key} className="td-cell">
+                    <div key={key} className="td-cell" style={{ justifyContent: processedCol.align || 'left' }}>
                         {C}
                     </div>
                 )

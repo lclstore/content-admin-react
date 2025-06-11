@@ -25,10 +25,10 @@ const MediaTags = memo(({ showNewTag, showLockIcon }) => {
     return (
         <>
             {
-                showNewTag && <div className={styles['new-tag']}>New</div>
+                !!showNewTag && <div className={styles['new-tag']}>New</div>
             }
             {
-                showLockIcon && <div className={styles['lock-icon']}><LockFilled /></div>
+                !!showLockIcon && <div className={styles['lock-icon']}><LockFilled /></div>
             }
 
         </>
@@ -200,7 +200,7 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
 
 // 主组件
 const WorkoutMediaCell = memo(({ record, processedCol }) => {
-    const { image, duration, name, newStartTime, newEndTime, posterImage, Premium } = record;
+    const { image, duration, name, newStartTime, newEndTime, posterImage, premium } = record;
     const { mediaType, showNewBadge, showLock, dataIndex } = processedCol;
 
     // 图片相关状态
@@ -229,7 +229,7 @@ const WorkoutMediaCell = memo(({ record, processedCol }) => {
     }, [newStartTime, newEndTime, showNewBadge]);
 
     // 判断是否显示锁图标
-    const showLockIcon = Premium && showLock;
+    const showLockIcon = premium && showLock;
 
     // 图片加载错误处理
     const handleImageError = useCallback(() => {

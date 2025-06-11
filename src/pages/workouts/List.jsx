@@ -18,60 +18,47 @@ export default function WorkoutsList() {
             type: 'multiple', // 单选 //multiple 多选
             options: 'statusList',
         },
-        {
-            title: 'Structure Type',
-            key: 'structureTypeCodeList',
-            type: 'multiple', // 单选 //multiple 多选
-            options: 'BizExerciseStructureTypeEnums'
-        },
+        // {
+        //     title: 'Structure Type',
+        //     key: 'structureTypeCodeList',
+        //     type: 'multiple', // 单选 //multiple 多选
+        //     options: 'BizExerciseStructureTypeEnums'
+        // },
         {
             title: 'Gender',
-            key: 'genderCodeList',
+            key: 'genderCodes',
             type: 'multiple', // 单选 //multiple 多选
             options: 'BizExerciseGenderEnums'
         },
         {
             title: 'Difficulty',
-            key: 'difficultyCodeList',
+            key: 'difficultyCodes',
             type: 'multiple', // 单选 //multiple 多选
             options: 'BizExerciseDifficultyEnums'
         },
         {
             title: 'Position',
-            key: 'positionCodeList',
+            key: 'positionCodes',
             type: 'multiple', // 单选 //multiple 多选
             options: 'BizExercisePositionEnums',
         },
         {
             title: 'Injured',
-            key: 'injuredCodeList',
+            key: 'injuredCodes',
             type: 'multiple', // 单选 //multiple 多选
             options: 'BizExerciseInjuredEnums'
         },
-        {
-            title: 'Equipment',
-            key: 'equipmentCodeList',
-            type: 'multiple', // 单选 //multiple 多选
-            options: 'BizExerciseEquipmentEnums'
-        },
+        // {
+        //     title: 'Equipment',
+        //     key: 'equipmentCodeList',
+        //     type: 'multiple', // 单选 //multiple 多选
+        //     options: 'BizExerciseEquipmentEnums'
+        // },
         {
             title: 'File Status',
             key: 'fileStatusList',
             type: 'multiple', // 单选 //multiple 多选
-            options: [
-                {
-                    label: 'Succeeded',
-                    value: 'SUCCEEDED'
-                },
-                {
-                    label: 'Failed',
-                    value: 'FAILED'
-                },
-                {
-                    label: 'Processing',
-                    value: 'PROCESSING'
-                }
-            ]
+            options: 'BizGenerateTaskStatusEnums'
         }
 
 
@@ -162,6 +149,8 @@ export default function WorkoutsList() {
             {
                 title: 'Cover ImgUrl',
                 width: 120,
+                showNewBadge: true,
+                showLock: true,
                 mediaType: 'image',
                 dataIndex: 'coverImgUrl',
                 key: 'coverImgUrl',
@@ -230,12 +219,12 @@ export default function WorkoutsList() {
                 key: 'duration',
                 width: 150,
                 visibleColumn: 2,
-                // render: (duration) => {
-                //     if (!duration) return '-';
-                //     const minutes = Math.floor(duration / 60);
-                //     const seconds = duration % 60;
-                //     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                // }
+                render: (duration) => {
+                    if (!duration) return 0;
+                    //四舍五入单位毫秒转分
+                    duration = Math.round(duration / 1000 / 60);
+                    return duration;
+                }
             },
             {
                 title: 'Calorie (Kcal)',
@@ -243,7 +232,12 @@ export default function WorkoutsList() {
                 dataIndex: 'calorie',
                 key: 'calorie',
                 width: 150,
-                visibleColumn: 2
+                visibleColumn: 2,
+                // 向上取整
+                render: (calorie) => {
+                    if (!calorie) return 0;
+                    return Math.ceil(calorie);
+                }
             },
             {
                 title: 'New Date',
@@ -303,7 +297,7 @@ export default function WorkoutsList() {
             {
                 title: 'Injured',
                 dataIndex: 'injuredCodes',
-                width: 120,
+                width: 160,
                 visibleColumn: 1,
                 options: [
                     {

@@ -60,35 +60,9 @@ const Login = () => {
             // 清除错误提示
             setAccountError('');
             setPasswordError('');
-            setLoading(true);
         }
-        // 表单验证
-        let hasError = false;
-
-        if (!account) {
-            setAccountError("Email cannot be empty.");
-            hasError = true;
-        } else if (!validateEmail(account)) {
-            setAccountError("Email is not valid.");
-            hasError = true;
-        }
-
-        if (!password) {
-            setPasswordError("Password cannot be empty.");
-            hasError = true;
-        } else if (!validatePassword(password)) {
-            setPasswordError("The password must contain both letters and numbers and be 8 to 12 characters long.");
-            hasError = true;
-        }
-
-        if (hasError) {
-            return false;
-        }
-
-        // 清除错误提示
-        setAccountError('');
-        setPasswordError('');
         setLoading(true);
+
         // 使用API登录
         request.post({
             url: "/user/login",

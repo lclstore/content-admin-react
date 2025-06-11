@@ -362,7 +362,7 @@ const ConfigurableTable = forwardRef(({
         selectList:{
             get:() => selectList,
             set:setSelectList
-        }
+        },
     }))
 
 

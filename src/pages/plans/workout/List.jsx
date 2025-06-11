@@ -16,6 +16,7 @@ export default function WorkoutsList() {
     const navigate = useNavigate(); // 路由导航
     const location = useLocation()
     const [templateList, setTemplateList] = useState([])
+    const [languageOptions, setLanguageOptions] = useState([])
     //查询条件数组
     const filterSections = useMemo(() => [
         {
@@ -86,7 +87,6 @@ export default function WorkoutsList() {
                 title: 'Audio Lang',
                 sorter: true,
                 showSorterTooltip: false,
-                showSorterTooltip: false,
                 width: 150,
                 visibleColumn: 1,
                 render: (text, record) => record.audioJsonLanguages,
@@ -147,16 +147,10 @@ export default function WorkoutsList() {
         "videoFlag": false,
         "audioFlag": false,
         "languages": [],
-        "workoutIds": [],
         templateId,
         loading: false,
     })
-    const languageOptions = [
-        {
-            value: "en",
-            label: "English"
-        },
-    ]
+
     const expandedRowRender = useCallback((record) => {
 
         // 定义展开行表格的列配置
@@ -169,8 +163,10 @@ export default function WorkoutsList() {
             },
             {
                 title: 'Image',
-                dataIndex: 'id',
+                dataIndex: 'coverImgUrl',
                 key: 'id',
+                mediaType: 'image',
+                render: (text, record) => <img src={record.coverImgUrl} style={{ width: 80, height: 80 }} />,
                 width: 80
             },
             {
@@ -225,14 +221,15 @@ export default function WorkoutsList() {
         }
     ], []);
     const generate = useCallback(() => {
+        const workoutIds = tableRef.current.selectList.get().map(i => i.id)
         return new Promise(resolve => {
             request.post({
                 url: `/template/workout/generateFile`,
                 point: true,
                 data: {
+                    ...createFileConfig,
                     // 获取 workoutIds
-                    workoutIds: tableRef.current.selectList.get(),
-                    ...createFileConfig
+                    workoutIds,
                 },
                 callback() {
                     resolve()
@@ -251,8 +248,16 @@ export default function WorkoutsList() {
             setTemplateList(res.data.data.map(i => ({ value: i.id, label: `(${i.id}) ${i.name}`, ...i })))
         }
     }))
+    // 获取语言数据
+    const getLanguageList = useCallback(() => request.get({
+        url: '/common/language/list',
+        success(res) {
+            setLanguageOptions(res.data.data)
+        }
+    }))
     useEffect(() => {
         getTemplateList()
+        getLanguageList()
     }, [])
     //渲染表格组件
     return (

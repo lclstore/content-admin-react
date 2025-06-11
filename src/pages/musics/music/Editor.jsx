@@ -12,6 +12,13 @@ export default function UserEditorWithCommon({id, setFormRef}) {
             required: true,
             durationName: 'audioDuration',
             acceptedFileTypes: 'mp3',
+            //文件上传后修改name
+            onChange: (value, file, form) => {
+                form.setFieldsValue({
+                    displayName: file?.name || '',
+                    name: file?.name || '',
+                });
+            },
         },
         {
             type: 'input',

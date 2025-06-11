@@ -84,7 +84,7 @@ class Request {
             const resInit = config.resInit || settings.request.resInit;
             axios_default({
                 ...config,
-                [config.method === 'get' ? 'params' : 'data']: config.data,
+                [config.method === 'get' ? 'params' : 'data']: config.data ?  config.data : {},
             }).then((res) => {
                 if (config.load) {
                     loading(false)

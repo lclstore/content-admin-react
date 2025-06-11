@@ -29,7 +29,7 @@ export default function WorkoutsList() {
         },
         {
             title: 'Usage',
-            key: 'usage',
+            key: 'usageCodeList',
             options:"BizSoundUsageEnums"
         },
         {

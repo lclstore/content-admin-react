@@ -4,13 +4,12 @@ import { formFieldsReducer } from "@/reducer/tableReducer.jsx";
 
 export default function UserEditorWithCommon() {
 
-    const [editorRef, setEditorRef] = useState(null);
     // 初始用户数据状态--可设默认值
-    const initialValues = {
+    const [initialValues,  setInitialValues] = useState({
         translation: 1,
         usageCode:"FLOW",
         genderCode:"FEMALE_AND_MALE"
-    }
+    })
     function formFieldsManage(val,{ getFieldsValue }){
         const formData = getFieldsValue()
         console.log(formData)
@@ -21,15 +20,13 @@ export default function UserEditorWithCommon() {
         const maleScript = formFields.find(item => item.name === 'maleScript');
         const femaleAudio = formFields.find(item => item.name === 'femaleAudioUrl');
         const maleAudio = formFields.find(item => item.name === 'maleAudioUrl');
-        console.log(femaleScript.required)
         setFormFields(formFields.map(i => {
-            // if (i.name === 'femaleScript') {
-            //     femaleScript.required = formData.translation === 1 && formData.genderCode === "FEMALE"
-            //     return {
-            //         ...i,
-            //         required: formData.translation === 1 && formData.genderCode === "FEMALE"
-            //     }
-            // }
+            if (i.name === 'femaleScript') {
+                return {
+                    ...i,
+                    required: formData.translation === 1 && formData.genderCode === "FEMALE"
+                }
+            }
             return i
         }))
         // setFormFields({type: 'itemReplace',itemSearch:(i) => i.name === 'femaleScript',
@@ -76,28 +73,30 @@ export default function UserEditorWithCommon() {
                 },
             ],
             required: true,
-            onChange:formFieldsManage
         },
         {
             type: 'textarea',
             name: 'femaleScript',
             label: 'Female Script',
-            required: false,
+            required: true,
             maxLength: 1000,
             showCount: true,
-            // dependencies: ['translation'],           // 声明依赖
-            // content: ({ getFieldValue }) => {    // content 支持函数
-            //     const layoutType = getFieldValue('translation');
-            //     return !!layoutType
-            // },
+            dependencies: ['translation','genderCode'],           // 声明依赖
+            content: ({ getFieldValue }) => {    // content 支持函数
+                return getFieldValue("translation") === 1 && (getFieldValue("genderCode") === "FEMALE" || getFieldValue("genderCode") === "FEMALE_AND_MALE")
+            },
         },
         {
             type: 'textarea',
             name: 'maleScript',
             label: 'Male Script',
-            required: false,
+            required: true,
             maxLength: 1000,
-            showCount: true
+            showCount: true,
+            dependencies: ['translation','genderCode'],           // 声明依赖
+            content: ({ getFieldValue }) => {    // content 支持函数
+                return getFieldValue("translation") === 1 && (getFieldValue("genderCode") === "FEMALE" || getFieldValue("genderCode") === "FEMALE_AND_MALE")
+            },
         },
         {
             type: 'upload',
@@ -107,6 +106,10 @@ export default function UserEditorWithCommon() {
             required: true,
             maxFileSize: 1024 * 5,
             acceptedFileTypes: 'mp3',
+            dependencies: ['genderCode'],           // 声明依赖
+            content: ({ getFieldValue }) => {    // content 支持函数
+                return (getFieldValue("genderCode") === "FEMALE" || getFieldValue("genderCode") === "FEMALE_AND_MALE")
+            },
         },
         {
             type: 'upload',
@@ -116,6 +119,10 @@ export default function UserEditorWithCommon() {
             required: true,
             maxFileSize: 1024 * 5,
             acceptedFileTypes: 'mp3',
+            dependencies: ['genderCode'],           // 声明依赖
+            content: ({ getFieldValue }) => {    // content 支持函数
+                return (getFieldValue("genderCode") === "MALE" || getFieldValue("genderCode") === "FEMALE_AND_MALE")
+            },
         }
 
     ]); // 使用useMemo优化性能，避免每次渲染重新创建
@@ -131,7 +138,6 @@ export default function UserEditorWithCommon() {
                 moduleKey="sound"
                 config={{ formName: 'Sound' }}
                 fields={formFields}
-                setFormRef={setEditorRef}
                 initialValues={initialValues}
             />
         </>

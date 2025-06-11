@@ -22,10 +22,12 @@ import { useStore } from "@/store/index.js";
  * @param {React.ReactNode} children - 触发 Popover 的元素 (必需)
  * @param {boolean} [showClearIcon=false] - 是否在触发元素旁边显示清除图标 (设置类型按钮不会显示)
  * @param {boolean} [isSettingsType=false] - 标识 Popover 是否为设置类型 (用于区分样式和行为, 如是否显示清除按钮和小红点)
+ * @param {Object} [defaultFilters={}] - 默认选中的过滤器值 (用于重置)
  */
 const FiltersPopover = ({
     filterSections = [],
     activeFilters = {},
+    defaultFilters = {},
     onUpdate,
     onReset,
     popoverPlacement = 'bottomRight',
@@ -99,10 +101,10 @@ const FiltersPopover = ({
 
     // 重置
     const handleReset = (isClear = false) => {
-        if (onReset) {
+        if (onReset && !isClear) {
             onReset();
         }
-        setTempSelectedValues({});
+        setTempSelectedValues(defaultFilters);//重置为默认选中值
     };
 
     // 确认/更新
@@ -150,6 +152,7 @@ const FiltersPopover = ({
                                         } else {
                                             isSelected = Array.isArray(tempSelectedValues[section.key]) &&
                                                 tempSelectedValues[section.key]?.includes(optionValue);
+
                                         }
 
                                         return (
@@ -174,7 +177,7 @@ const FiltersPopover = ({
                 <div className={styles.filterFooter}>
                     <Space>
                         {onReset && (
-                            <Button onClick={() => handleReset()} className={styles.footerButton}>
+                            <Button onClick={() => handleReset(true)} className={styles.footerButton}>
                                 {clearButtonText}
                             </Button>
                         )}

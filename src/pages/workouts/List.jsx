@@ -210,8 +210,8 @@ export default function WorkoutsList() {
             {
                 title: 'Premium',
                 align: 'center',
-                dataIndex: 'Premium',
-                key: 'Premium',
+                dataIndex: 'premium',
+                key: 'premium',
                 width: 120,
                 options: 'defaultStatus',
                 sorter: true,

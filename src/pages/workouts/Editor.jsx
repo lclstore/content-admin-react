@@ -258,10 +258,12 @@ export default function UserEditorWithCommon() {
                     tooltip: 'Auto-updated based on selected exercise.',
                     tooltipPlacement: 'right',
                     label: 'Duration (Min)',
+                    placeholder: ' ',
                     disabled: true,
                 },
                 {
                     type: 'input',
+                    placeholder: ' ',
                     name: 'calorie',
                     tooltip: 'Auto-updated based on selected exercise.',
                     tooltipPlacement: 'right',

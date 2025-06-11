@@ -716,7 +716,7 @@ export default function CommonEditor(props) {
         }
     };
     const handleIconChange = (panelName, itemId, itemIndex, lockName, form) => {
-        debugger
+        // 
         internalFormFields.map(field => {
             if (field.name === panelName && Array.isArray(field.dataList)) {
                 field.dataList[itemIndex][lockName] = field.dataList[itemIndex][lockName] ? 0 : 1;
@@ -734,7 +734,7 @@ export default function CommonEditor(props) {
     //     // 手风琴模式下，key是单个字符串而不是数组
     //     const keysArray = key ? [key] : [];
     //     console.log(activeCollapseKeys);
-    //     debugger
+    //     
     //     setActiveCollapseKeys(keysArray);
 
     //     // // 如果父组件提供了onCollapseChange，优先调用它
@@ -987,7 +987,8 @@ export default function CommonEditor(props) {
     useEffect(() => {
         if (headerContext.setCustomPageTitle) {
             // 设置自定义页面标题
-            const pageTitle = config.title ?? `${id ? 'Edit' : 'Add'} ${config.formName}`;
+            const titleOperationName = config.hideTitleOperationName ?'':id ? 'Edit' : 'Add'
+            const pageTitle = config.title ?? `${titleOperationName} ${config.formName}`;
             headerContext.setCustomPageTitle(pageTitle);
         }
     }, [

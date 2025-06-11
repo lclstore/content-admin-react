@@ -153,6 +153,7 @@ const ConfigurableTable = forwardRef(({
                 return key && col.visibleColumn === visibleColumn
             })
             .map(col => col.key || col.dataIndex);
+        debugger
         return defaultVisibleKeys
     }
     // filter data
@@ -582,6 +583,11 @@ const ConfigurableTable = forwardRef(({
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
             let processedCol = { ...col };
+
+            // 为align: 'center'的列添加类名
+            if (processedCol.align === 'center') {
+                processedCol.className = `td-center`
+            }
 
             // 添加默认排序配置
             // if (processedCol.defaultSortOrder) {

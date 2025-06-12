@@ -1839,7 +1839,7 @@ export default function UserEditorWithCommon() {
                 onCollapseChange={handleCollapseChange}
                 // 其他基本配置
                 // renderItemMata={renderItemMata}
-                config={{ formName: 'workoutSettings', title: 'Workout Settings', headerButtons }}
+                config={{ formName: 'workoutSettings', headerButtons }}
                 isBack={false}
                 isCollapse={true}
                 formType="advanced"

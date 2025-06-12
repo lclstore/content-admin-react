@@ -65,10 +65,10 @@ export default function UserEditorWithCommon() {
             label: 'Has a Script',
             options: [
                 {
-                    label: 'YES',
+                    label: 'Yes',
                     value: 1
                 }, {
-                    label: "NO",
+                    label: "No",
                     value: 0
                 },
             ],

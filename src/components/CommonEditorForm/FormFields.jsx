@@ -345,7 +345,7 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 field.type == 'line' ? <div>{renderFormControl(field, options)}</div> :
                     <Form.Item className='inputGroup'>
-                        <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'auto' }}>
+                        <div style={{ display: 'flex', gap: '0 20px', maxWidth: '100%', overflowX: 'hidden' }}>
                             {inputConfig.map((config, index) => {
                                 const itemRules = processValidationRules(config.rules || [], {
                                     required: config.required,
@@ -355,7 +355,10 @@ export const renderFormControl = (field, options = {}) => {
                                 });
 
                                 return (
-                                    <div style={{ flex: 1, minWidth: config.width || '' }} key={index}>
+                                    <div style={{
+                                        ...(config.flex ? { flex: config.flex } : {}),
+                                        ...(config.width ? { minWidth: config.width } : {})
+                                    }} key={index}>
                                         <Form.Item
                                             className='editorform-item'
                                             name={config.name}

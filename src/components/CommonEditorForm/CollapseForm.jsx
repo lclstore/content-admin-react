@@ -589,8 +589,7 @@ const CollapseForm = ({
             return true;
         }
 
-        const formValues = form.getFieldsValue();
-
+        const formValues = form.getFieldsValue(true);
         const hasInvalidField = fieldGroup.fields.some(field => {
             // 如果字段类型是structureList，检查dataList是否为空
             if (field.type === 'structureList') {
@@ -603,10 +602,18 @@ const CollapseForm = ({
                 }
                 return field.required && (!field.dataList || field.dataList.length === 0);
             }
-            // 其他类型字段检查表单值是否为空
-            return field.required && !formValues[field.name];
-        });
+            if (field.type === 'inputGroup') {
+                field.inputConfig.forEach(item => {
+                    if (field.required && !formValues[item.name]) {
+                        return true
+                    }
+                })
+            } else {
+                // 其他类型字段检查表单值是否为空
+                return field.required && !formValues[field.name];
+            }
 
+        });
         if (hasInvalidField) {
             // 展开字段所在的面板
             onCollapseChange(fieldGroup.name);
@@ -646,16 +653,32 @@ const CollapseForm = ({
         const newPanelName = `${currentFields.name}${newPanelIndex}`; // 生成唯一名称
         const newCustomPanel = {
             ...showAddPanels[0],
-            label: `${currentFields.label} ${newPanelIndex + 1}`,
+            label: `${currentFields.label?.replace(/\d+$/, "")}`,
             name: newPanelName,
             isShowAdd: true,
             // 确保fields中的每个字段name也是唯一的
-            fields: showAddPanels[0].fields?.map(field => {
-                return {
+            fields: currentFields.fields?.map(field => {
+                // 创建新的field对象
+                let newField = {
                     ...field,
                     dataList: field.dataList ? [] : null,
                     name: `${field.name}${newPanelIndex}` // 为每个字段名称添加相同的后缀
+                };
+
+                // 如果是inputGroup类型，更新inputConfig中的name
+                if (field.type === 'inputGroup') {
+                    newField.inputConfig = field.inputConfig.map(item => {
+                        // 设置默认值
+                        form.setFieldValue(`${item.name}${newPanelIndex}`, item.initValue || '');
+                        // 返回新的配置项，包含更新后的name
+                        return {
+                            ...item,
+                            name: `${item.name}${newPanelIndex}`
+                        };
+                    });
                 }
+
+                return newField;
             }) || []
         };
         // 调用父组件传递的回调函数来添加新面板
@@ -673,14 +696,18 @@ const CollapseForm = ({
     // 准备Structure头部
     const structureHeader = hasCustomItems ? (
         <div className={styles.structureSectionHeader} key="structure-header-section">
-            <Typography.Title level={5} style={{ marginBottom: '0', fontWeight: '600', color: 'var(--primary-color)' }}>Structure</Typography.Title>
+            <Typography.Title level={5} style={{ marginBottom: '0', fontWeight: '600', color: 'var(--primary-color)' }}>
+                {/* Structure */}
+            </Typography.Title>
             <Button
-                type="text"
-                onClick={onAddCollapsePanel}
-                icon={<PlusOutlined />}
-                style={{ color: 'var(--primary-color)', padding: '0 4px', fontSize: '16px' }}
+                onClick={e => {
+                    // e.stopPropagation();
+                    onAddCollapsePanel();
+                }}
+
+                style={{ color: 'var(--primary-color)', fontSize: '16px' }}
             >
-                Add
+                <PlusOutlined style={{ fontSize: '12px' }} />Add a Structure
             </Button>
         </div>
     ) : null;
@@ -692,49 +719,62 @@ const CollapseForm = ({
             handleDeletePanel(panelName);
         }
     };
-
+    let groupCounter = 0;
     return (
         <div className={styles.collapseForm}>
-            {fields.map((item, index) => (
-                <Fragment key={`fragment-${item.name || index}`}>
-                    {/* 在第一个自定义项之前显示Structure标题 */}
-                    {index === firstCustomItemIndex && structureHeader}
+            {fields.map((item, index) => {
+                // 计算当前这个 item 是否应该显示删除按钮
+                let showDelete = false;
+                if (item.isGroup) {
+                    groupCounter++; // 遇到 isGroup 就计数
+                    showDelete = groupCounter > item.systemCount; // 大于 systemCount 时才可删除
+                }
 
-                    {/* 渲染折叠面板项 */}
-                    <Collapse
-                        expandIcon={({ isActive }) => isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />}
-                        destroyInactivePanel={false}
-                        accordion={true}
-                        // accordion={false}
-                        // defaultActiveKey={activeKeys}
-                        activeKey={activeKeys}
-                        onChange={onCollapseChange}
-                        ghost
-                        expandIconPosition="end"
-                        className={`${styles.workoutDetailsCollapse} ${item.isShowAdd ? styles.structureCollapse : ''}`}
-                        items={[{
-                            key: item.name || `panel-${index}`,
-                            label: (
-                                <div className={styles.collapseHeader}>
-                                    <span>{item.label || item.title}</span>
-                                    {fields.filter(item => item.dataList)?.length > 1 && item.isShowAdd && (
-                                        <DeleteOutlined
-                                            className={styles.deleteIcon}
-                                            onClick={(e) => onDeletePanel(e, item.name)}
-                                        />
-                                    )}
-                                </div>
-                            ),
-                            className: `${styles.collapsePanel} ${item.isShowAdd ? styles.structureItem : ''}`,
-                            children: (
-                                <div className={styles.collapsePanelContent}>
-                                    {renderFieldGroup(item.fields || [])}
-                                </div>
-                            )
-                        }]}
-                    />
-                </Fragment>
-            ))}
+                return (
+                    <Fragment key={`fragment-${item.name || index}`}>
+                        {/* 在第一个自定义项之前显示Structure标题 */}
+                        {index === firstCustomItemIndex && structureHeader}
+
+                        <Collapse
+                            expandIcon={({ isActive }) =>
+                                isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />
+                            }
+                            destroyInactivePanel={false}
+                            accordion={true}
+                            activeKey={activeKeys}
+                            onChange={onCollapseChange}
+                            ghost
+                            expandIconPosition="end"
+                            className={`${styles.workoutDetailsCollapse} ${item.isShowAdd ? styles.structureCollapse : ''}`}
+                            items={[
+                                {
+                                    key: item.name || `panel-${index}`,
+                                    label: (
+                                        <div className={styles.collapseHeader}>
+                                            <span>{item.label || item.title} {item.isGroup ? groupCounter : ''}</span>
+
+                                            {/* 仅在满足条件时渲染删除按钮 */}
+                                            {showDelete && (
+                                                <DeleteOutlined
+                                                    className={styles.deleteIcon}
+                                                    onClick={(e) => onDeletePanel(e, item.name)}
+                                                />
+                                            )}
+                                        </div>
+                                    ),
+                                    className: `${styles.collapsePanel} ${item.isShowAdd ? styles.structureItem : ''}`,
+                                    children: (
+                                        <div className={styles.collapsePanelContent}>
+                                            {renderFieldGroup(item.fields || [])}
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
+                    </Fragment>
+                );
+            })}
+
 
             {/* 替换弹框 */}
             <Modal

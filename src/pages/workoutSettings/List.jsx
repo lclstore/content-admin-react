@@ -195,10 +195,11 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'introAudioBizSoundId',
                             label: '',
+                            flex: 1,
                             placeholder: 'Intro Audio',
-                            style: {
-                                width: '300px',
-                            },
+                            // style: {
+                            //     width: '300px',
+                            // },
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -242,19 +243,21 @@ export default function UserEditorWithCommon() {
                                 pattern: /^\d+(\.\d+)?$/,
                                 message: 'Start Seconds'
                             }],
-                            width: '100px',
+                            flex: 1,
+                            // width: '100px',
                             showCount: true,
                         },
                         {
                             type: 'select',
                             name: 'introAudioClosed',
                             label: '',
+                            flex: 1,
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],

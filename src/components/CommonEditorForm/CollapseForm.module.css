@@ -4,7 +4,7 @@
     height: 100%;
     width: 100%;
     /* background-color: #fff; */
-    overflow: auto;
+    /* overflow: auto; */
 }
 
 /* 折叠面板整体样式 */
@@ -161,6 +161,7 @@
 .formItem :global(.ant-picker) {
     border-radius: 4px;
 }
+
 /* 必填项标记样式 */
 .formItem :global(.ant-form-item-required)::before {
     color: #ff4d4f;
@@ -177,7 +178,7 @@
 }
 
 .structureSectionHeader {
-    padding: 0 16px;
+    /* padding: 0 16px; */
     display: flex;
     justify-content: space-between;
     align-items: center;

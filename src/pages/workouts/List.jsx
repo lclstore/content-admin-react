@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback, useForm } from 'react';
-import { Modal, message, Form, Table, Switch } from 'antd';
+import { Modal, message, Form, Table, Switch, Select, Checkbox, Spin } from 'antd';
+import TagSelector from '@/components/TagSelector/TagSelector';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -7,11 +8,13 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
+import { useImmer } from "use-immer";
+import request from "@/request/index.js";
 
 export default function WorkoutsList() {
 
     // 定义筛选器配置
-    var filterSections = [
+    let filterSections = [
         {
             title: 'Status',
             key: 'statusList',
@@ -66,7 +69,6 @@ export default function WorkoutsList() {
     ];
 
 
-
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
@@ -79,20 +81,12 @@ export default function WorkoutsList() {
     const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行
     const [messageApi, contextHolder] = message.useMessage();
-
+    const [languageOptions, setLanguageOptions] = useState([]);
     // 批量创建文件 Modal 状态
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
     const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
     const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
-
-    // 在Modal打开时重置表单
-    useEffect(() => {
-        console.log('isBatchCreateModalVisible', isBatchCreateModalVisible, batchCreateForm.resetFields())
-        if (isBatchCreateModalVisible) {
-            batchCreateForm.resetFields();
-            batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
-        }
-    }, [isBatchCreateModalVisible, batchCreateForm]);
+    const [showLangField, setShowLangField] = useState(false); // 添加状态控制Lang字段显示
 
     // 2. 回调函数定义 - 用户交互和事件处理
     /**
@@ -100,11 +94,9 @@ export default function WorkoutsList() {
      * 显示弹窗
      */
     const handleBatchCreateFile = useCallback(() => {
-        
+
         setIsBatchCreateModalVisible(true);
     }, []);
-
-
 
     /**
      * 状态变更处理
@@ -144,7 +136,7 @@ export default function WorkoutsList() {
         return [
 
             {
-                title: 'Cover ImgUrl',
+                title: 'Cover Image',
                 width: 120,
                 showNewBadge: true,
                 showLock: true,
@@ -153,7 +145,6 @@ export default function WorkoutsList() {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
             // {
             //     title: 'Detail ImgUrl',
             //     width: 120,
@@ -181,7 +172,10 @@ export default function WorkoutsList() {
 
             {
                 title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
-                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
+                render: (text, row) => (<div>
+                    <div style={{ fontWeight: 600 }}>{text}</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "12px" }}>ID:{row.id}</div>
+                </div>),
             },
             {
                 title: 'Status',
@@ -236,15 +230,16 @@ export default function WorkoutsList() {
                     return Math.ceil(calorie);
                 }
             },
-            // {
-            //     title: 'New Date',
-            //     key: 'newStartTime',
-            //     render: (text, record) => {
-            //         return formatDateRange(record.newStartTime, record.newEndTime);
-            //     },
-            //     width: 220,
-            //     visibleColumn: 1
-            // },
+            {
+                title: 'Difficulty',
+                dataIndex: 'difficultyCode',
+                sorter: true,
+                width: 120,
+                visibleColumn: 2,
+                options: 'BizExerciseDifficultyEnums',
+                key: 'difficultyCode'
+            },
+
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
@@ -261,17 +256,6 @@ export default function WorkoutsList() {
                     }
                 ],
                 key: 'genderCode'
-            },
-
-
-            {
-                title: 'Difficulty',
-                dataIndex: 'difficultyCode',
-                sorter: true,
-                width: 120,
-                visibleColumn: 2,
-                options: 'BizExerciseDifficultyEnums',
-                key: 'difficultyCode'
             },
 
             {
@@ -323,6 +307,15 @@ export default function WorkoutsList() {
                 key: 'injuredCodes'
             },
             {
+                title: 'New Date',
+                key: 'newStartTime',
+                render: (text, record) => {
+                    return formatDateRange(record.newStartTime, record.newEndTime);
+                },
+                width: 220,
+                visibleColumn: 1
+            },
+            {
                 title: 'Audio Lang',
                 dataIndex: 'audioLang',
                 key: 'audioLang',
@@ -351,7 +344,7 @@ export default function WorkoutsList() {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
+                actionButtons: ['edit', 'duplicate', 'enable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
             },
@@ -363,7 +356,6 @@ export default function WorkoutsList() {
      * 用于批量操作功能
      */
     const onSelectChange = useCallback((newSelectedRowKeys) => {
-        console.log('11111111')
         setSelectedRowKeys(newSelectedRowKeys);
     }, []);
 
@@ -381,22 +373,56 @@ export default function WorkoutsList() {
      */
     const handleBatchCreateModalOk = useCallback(async () => {
         try {
-            setBatchCreateLoading(true);
             const values = await batchCreateForm.validateFields();
-            const { files, lang } = values;
-
-
-            setDataSource(updatedDataSource);
-
-            messageApi.success(`Task submitted, files will be generated for ${selectedRowKeys.length} workouts.`);
-            setIsBatchCreateModalVisible(false);
-
+            setBatchCreateLoading(true);
+            // 更新 videoFlag 和 audioFlag
+            values.videoFlag = values.files.includes('Video-M3U8');
+            values.audioFlag = values.files.includes('Audio-JSON');
+            values.workoutIdList = selectedRowKeys;
+            request.post({
+                url: '/workout/generateFile',
+                point: false,
+                data: values,
+                callback(res) {
+                    if (res.data.success) {
+                        setBatchCreateLoading(false);
+                        setIsBatchCreateModalVisible(false);
+                        messageApi.success('Task in progress...');
+                    } else {
+                        messageApi.error(res.data.message);
+                    }
+                }
+            })
         } catch (errorInfo) {
             console.log('表单验证失败:', errorInfo);
-        } finally {
-            setBatchCreateLoading(false);
         }
-    }, [batchCreateForm, selectedRowKeys, messageApi]);
+    }, [batchCreateForm, selectedRowKeys]);
+
+    // 监听files字段变化
+    const handleFilesChange = (checkedValues) => {
+        return
+        // 创建包含所有选项的状态对象
+        const fileStatus = {
+            'Video-M3U8': false,
+            'Audio-JSON': false
+        };
+
+        // 更新选中项的状态为true
+        checkedValues.forEach(value => {
+            fileStatus[value] = true;
+        });
+
+        // 检查是否包含 Audio-JSON
+        setShowLangField(fileStatus['Audio-JSON']);
+
+        // 如果移除了Audio-JSON，同时清空lang字段
+        if (!fileStatus['Audio-JSON']) {
+            batchCreateForm.setFieldValue('lang', undefined);
+        }
+
+        // 更新表单字段值
+        batchCreateForm.setFieldValue('files', checkedValues);
+    };
 
     // 7. 副作用 - 组件生命周期相关处理
     /**
@@ -425,16 +451,6 @@ export default function WorkoutsList() {
     }, [setButtons, setCustomPageTitle, navigate]);
 
     /**
-     * 重置操作标志
-     */
-    useEffect(() => {
-        const handleGlobalClick = () => setActionClicked(false);
-        document.addEventListener('click', handleGlobalClick);
-        return () => document.removeEventListener('click', handleGlobalClick);
-    }, []);
-
-
-    /**
      * 左侧工具栏按钮定义
      */
     const leftToolbarItems = useMemo(() => [
@@ -443,11 +459,17 @@ export default function WorkoutsList() {
             label: 'Batch Create File',
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
-
-            // disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
+    // 获取语言数据
+    const getLanguageOptions = useCallback(() => request.get({
+        url: '/common/language/list',
+        point: false,
+        callback(res) {
+            setLanguageOptions(res?.data?.data?.map(i => ({ label: i, value: i })) || [])
+        }
 
+    }))
     /**
      * 行选择配置
      */
@@ -457,17 +479,100 @@ export default function WorkoutsList() {
         columnWidth: 60,
     };
 
+    useEffect(() => {
+        getLanguageOptions(); // 获取语言列表数据
+        /**
+         * 重置操作标志
+         */
+        const handleGlobalClick = () => setActionClicked(false);
+        document.addEventListener('click', handleGlobalClick);
+        return () => document.removeEventListener('click', handleGlobalClick);
+    }, []);
 
-    // 9. 渲染 - 组件UI呈现
-    // 渲染 - 组件UI呈现
-    // 渲染 - 组件UI呈现
+    // 定义表单配置项
+    const formConfig = useMemo(() => [
+        {
+            label: 'File',
+            name: 'files',
+            rules: [{ required: true, message: 'Please Select File' }],
+            validateTrigger: ['onSubmit'],
+            type: 'tagSelector',
+            mode: 'multiple',
+            height: '80px',
+            props: {
+                options: [
+                    { label: 'Video-M3U8', value: 'Video-M3U8' },
+                    { label: 'Audio-JSON', value: 'Audio-JSON' }
+                ]
+            },
+            onChange: handleFilesChange
+        },
+        {
+            label: 'Lang',
+            name: 'languageList',
+            rules: [{ required: true, message: 'Please Select Lang' }],
+            validateTrigger: ['onSubmit'],
+            type: 'select',
+            visible: showLangField,
+            props: {
+                mode: 'multiple',
+                allowClear: true,
+                placeholder: 'Please Select Lang',
+                options: languageOptions
+            }
+        }
+    ], [showLangField, handleFilesChange]);
+
+    // 渲染表单项
+    const renderFormItem = (item) => {
+        if (item.visible === false) return null;
+        let childNode;
+        switch (item.type) {
+            case 'tagSelector':
+                childNode = <TagSelector backgroundColor="#f8f8f8" key={item.name} {...item.props} />;
+                // childNode = (
+                //     <Checkbox.Group onChange={item.onChange}>
+                //         {item.options.map(option => (
+                //             <Checkbox
+                //                 key={option.value}
+                //                 value={option.value}
+                //                 style={{ marginRight: '8px' }}
+                //             >
+                //                 {option.label}
+                //             </Checkbox>
+                //         ))}
+                //     </Checkbox.Group>
+                // );
+                break;
+            case 'select':
+                childNode = <Select {...item.props} />;
+                break;
+            default:
+                childNode = null;
+        }
+
+        return (
+            <Form.Item
+                key={item.name}
+                label={item.label}
+                name={item.name}
+                rules={item.rules}
+                style={{ height: item.height || '95px' }}
+                validateTrigger={item.validateTrigger}
+            >
+                {childNode}
+            </Form.Item>
+        );
+    };
+
+
     return (
         <div className="workoutsContainer page-list">
+            {contextHolder}
             <ConfigurableTable
                 open={isBatchCreateModalVisible}
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}
-
                 rowSelection={rowSelection}
                 columns={allColumnDefinitions}
                 leftToolbarItems={leftToolbarItems}
@@ -480,6 +585,26 @@ export default function WorkoutsList() {
                     filterSections: filterSections,
                 }}
             />
+
+            {/* 添加批量创建文件的 Modal */}
+            <Modal
+                title="Batch Create Files"
+                open={isBatchCreateModalVisible}
+                onOk={handleBatchCreateModalOk}
+                onCancel={handleBatchCreateModalCancel}
+                confirmLoading={batchCreateLoading}
+            >
+                <Spin spinning={batchCreateLoading} tip="Generating files...">
+                    <Form
+
+                        style={{ minHeight: '170px' }}
+                        form={batchCreateForm}
+                        layout="vertical"
+                    >
+                        {formConfig.map(renderFormItem)}
+                    </Form>
+                </Spin>
+            </Modal>
         </div>
     );
 }   

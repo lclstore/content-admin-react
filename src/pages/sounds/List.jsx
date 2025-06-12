@@ -35,7 +35,7 @@ export default function WorkoutsList() {
         {
             title: 'Gender',
             key: 'genderCodeList',
-            options: 'BizExerciseGenderEnums'
+            options: 'BizSoundGenderEnums'
         },
     ];
 
@@ -45,18 +45,17 @@ export default function WorkoutsList() {
 
             { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl',  visibleColumn: 0 },
             { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl',  visibleColumn: 0 },
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
             {
                 title: 'Name',
                 sorter: true,
                 showSorterTooltip: false,
                 dataIndex: 'name',
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text,row) => (<div>
+                    <div style={{ fontWeight:600 }}>{text}</div>
+                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
+                </div>),
                 key: 'name',
                 width: 250,
-                stye: {
-                    fontWeight: 'bold'
-                },
                 visibleColumn: 1
             },
             {

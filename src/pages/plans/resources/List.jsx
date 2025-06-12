@@ -38,8 +38,6 @@ export default function WorkoutsList() {
             {title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1},
             {title: "Cover Image", width: 100,dataIndex: "coverImgUrl",mediaType: 'image',},
             {title: "Detail Image",width: 100, dataIndex: "detailImgUrl",mediaType: 'image',},
-            {title: "Thumbnail Image",width: 100, dataIndex: "thumbnailImgUrl",mediaType: 'image',},
-            {title: "Complete Image", width: 100,dataIndex: "completeImgUrl",mediaType: 'image',},
             {
                 title: 'Name',
                 sorter: true,

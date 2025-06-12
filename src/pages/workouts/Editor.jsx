@@ -309,20 +309,20 @@ export default function UserEditorWithCommon() {
                     required: true,
                     onChange: imageUpload
                 },
-                {
-                    type: 'upload',
-                    name: 'thumbnailImgUrl',
-                    label: 'Thumbnail Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'completeImgUrl',
-                    label: 'Complete Image',
-                    required: true,
-                    onChange: imageUpload
-                },
+                // {
+                //     type: 'upload',
+                //     name: 'thumbnailImgUrl',
+                //     label: 'Thumbnail Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
+                // {
+                //     type: 'upload',
+                //     name: 'completeImgUrl',
+                //     label: 'Complete Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
 
             ]
         },
@@ -368,6 +368,7 @@ export default function UserEditorWithCommon() {
             label: 'Structure Settings',
             name: 'exerciseGroupList',
             isGroup: true,
+            systemCount: 1,
             isShowAdd: true,
             formterList: (dataList) => {
                 return dataList?.map(item => {

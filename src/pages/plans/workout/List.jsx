@@ -146,7 +146,7 @@ export default function WorkoutsList() {
         visible: false,
         "videoFlag": false,
         "audioFlag": false,
-        "languages": [],
+        "languageList": [],
         templateId,
         loading: false,
     })
@@ -221,7 +221,7 @@ export default function WorkoutsList() {
         }
     ], []);
     const generate = useCallback(() => {
-        const workoutIds = tableRef.current.selectList.get().map(i => i.id)
+        const workoutIdList = tableRef.current.selectList.get().map(i => i.id)
         return new Promise(resolve => {
             request.post({
                 url: `/template/workout/generateFile`,
@@ -229,7 +229,7 @@ export default function WorkoutsList() {
                 data: {
                     ...createFileConfig,
                     // 获取 workoutIds
-                    workoutIds,
+                    workoutIdList,
                 },
                 callback() {
                     resolve()

@@ -42,7 +42,7 @@ export default function UserEditorWithCommon() {
             label: 'Musics',
             dataList: [],
             lockName: 'premium',
-            defaultLockValue: 1,
+            defaultLockValue: 0,
             structureListFields: [
                 // {
                 //     type: 'icon',

@@ -378,7 +378,9 @@ export default function CommonEditor(props) {
         } else {
             // 如果有多个项目，只处理最后一个
             const lastItem = items[items.length - 1];
-            processItemAdd(lastItem.panelName, lastItem.fieldName, lastItem.itemData, lastItem.expandedItemIndex);
+            const firstItem = items[0]
+            debugger
+            processItemAdd(lastItem.panelName, lastItem.fieldName, lastItem.itemData, firstItem.expandedItemIndex);
         }
         // 清空待处理项
         setPendingItems([]);
@@ -439,7 +441,6 @@ export default function CommonEditor(props) {
         // 添加新的待处理项
         const newItem = { panelName, fieldName, itemData, expandedItemIndex };
         setPendingItems(prev => [...prev, newItem]);
-
         // 清除之前的定时器
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);

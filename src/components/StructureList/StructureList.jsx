@@ -602,16 +602,6 @@ const StructureList = ({
             const { dataListItem, parentItem } = result;
             const targetPanel = dataListItem;
 
-            // // 获取当前展开的面板
-            // const currentActiveKeys = typeof activeKeys === 'string' ? activeKeys : activeKeys[0];
-            // let parentName = parentItem?.name || targetPanel.name;
-            // const currentFieldsName = fields.find(item => item.isShowAdd);
-
-            // // 如果当前面板是添加数据的面板，则使用当前面板的name
-            // if (currentActiveKeys && currentFieldsName && currentActiveKeys.includes(currentFieldsName.name)) {
-            //     parentName = currentActiveKeys;
-            // }
-
             // 获取当前表单数据
             const currentFormValues = form.getFieldsValue();
 
@@ -671,8 +661,6 @@ const StructureList = ({
         if (selectedItemFromList && typeof onItemAdded === 'function') {
             // 如果折叠面板，则调用addCollapseItemData
             if (isCollapse) {
-                console.log('++++++++++++++++++++++++++++++++');
-
                 addCollapseItemData(selectedItemFromList, name, fields)
             }
             // 否则调用onItemAdded

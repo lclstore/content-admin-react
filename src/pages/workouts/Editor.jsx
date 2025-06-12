@@ -365,7 +365,7 @@ export default function UserEditorWithCommon() {
         {
 
             title: 'Structure',
-            label: 'Structure Settings1',
+            label: 'Structure Settings',
             name: 'exerciseGroupList',
             isGroup: true,
             systemCount: 1,

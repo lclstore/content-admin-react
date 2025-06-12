@@ -386,6 +386,9 @@ export default function CommonEditor(props) {
 
     // 实际处理添加项目的函数
     const processItemAdd = (panelName, fieldName, itemData, expandedItemIndex) => {
+        if (Array.isArray(panelName)) {
+            panelName = panelName[0]
+        }
         internalFormFields.map(field => {
             if (field.name === panelName) {
                 if (Array.isArray(field.dataList)) {

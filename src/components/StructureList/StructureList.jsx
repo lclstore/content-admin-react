@@ -671,6 +671,8 @@ const StructureList = ({
         if (selectedItemFromList && typeof onItemAdded === 'function') {
             // 如果折叠面板，则调用addCollapseItemData
             if (isCollapse) {
+                console.log('++++++++++++++++++++++++++++++++');
+
                 addCollapseItemData(selectedItemFromList, name, fields)
             }
             // 否则调用onItemAdded

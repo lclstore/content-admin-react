@@ -462,6 +462,9 @@ const CollapseForm = ({
     useEffect(() => {
         // 如果有从列表选择的数据，需要添加到相应的折叠面板中
         if (selectedItemFromList) {
+            console.log('-----------0000000');
+            console.log(selectedItemFromList);
+
             // 查找所有具有 dataList 属性的面板
             const result = findFirstDataListItemAndParent(fields);
             if (result) {

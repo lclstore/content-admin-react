@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo, useCallback, useForm } from 'react';
-import { Modal, message, Form, Table, Switch } from 'antd';
+import { Modal, message, Form, Table, Switch, Select } from 'antd';
 import {
     PlusOutlined,
 } from '@ant-design/icons';
@@ -84,15 +84,7 @@ export default function WorkoutsList() {
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
     const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
     const [batchCreateLoading, setBatchCreateLoading] = useState(false); // 批量创建提交加载状态
-
-    // 在Modal打开时重置表单
-    useEffect(() => {
-        console.log('isBatchCreateModalVisible', isBatchCreateModalVisible, batchCreateForm.resetFields())
-        if (isBatchCreateModalVisible) {
-            batchCreateForm.resetFields();
-            batchCreateForm.setFieldsValue({ files: ['Video-M3U8'], lang: ['EN'] }); // 设置默认值
-        }
-    }, [isBatchCreateModalVisible, batchCreateForm]);
+    const [showLangField, setShowLangField] = useState(false); // 添加状态控制Lang字段显示
 
     // 2. 回调函数定义 - 用户交互和事件处理
     /**
@@ -100,7 +92,7 @@ export default function WorkoutsList() {
      * 显示弹窗
      */
     const handleBatchCreateFile = useCallback(() => {
-        
+
         setIsBatchCreateModalVisible(true);
     }, []);
 
@@ -363,7 +355,6 @@ export default function WorkoutsList() {
      * 用于批量操作功能
      */
     const onSelectChange = useCallback((newSelectedRowKeys) => {
-        console.log('11111111')
         setSelectedRowKeys(newSelectedRowKeys);
     }, []);
 
@@ -397,6 +388,16 @@ export default function WorkoutsList() {
             setBatchCreateLoading(false);
         }
     }, [batchCreateForm, selectedRowKeys, messageApi]);
+
+    // 监听files字段变化
+    const handleFilesChange = (values) => {
+        // 检查是否包含 Audio-JSON
+        setShowLangField(values.includes('Audio-JSON'));
+        // 如果移除了Audio-JSON，同时清空lang字段
+        if (!values.includes('Audio-JSON')) {
+            batchCreateForm.setFieldValue('lang', undefined);
+        }
+    };
 
     // 7. 副作用 - 组件生命周期相关处理
     /**
@@ -443,8 +444,7 @@ export default function WorkoutsList() {
             label: 'Batch Create File',
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
-
-            // disabled: selectedRowKeys.length === 0
+            disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
 
@@ -467,7 +467,6 @@ export default function WorkoutsList() {
                 open={isBatchCreateModalVisible}
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}
-
                 rowSelection={rowSelection}
                 columns={allColumnDefinitions}
                 leftToolbarItems={leftToolbarItems}
@@ -480,6 +479,55 @@ export default function WorkoutsList() {
                     filterSections: filterSections,
                 }}
             />
+
+            {/* 添加批量创建文件的 Modal */}
+            <Modal
+                title="Batch Create Files"
+                open={isBatchCreateModalVisible}
+                onOk={handleBatchCreateModalOk}
+                onCancel={handleBatchCreateModalCancel}
+                confirmLoading={batchCreateLoading}
+            >
+                <Form
+                    form={batchCreateForm}
+                    layout="vertical"
+                >
+                    <Form.Item
+                        label="File"
+                        name="files"
+                        rules={[{ required: true, message: 'Please Select File' }]}
+                        style={{ minHeight: '100px' }}
+                    >
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            placeholder="Please Select File"
+                            options={[
+                                { label: 'Video-M3U8', value: 'Video-M3U8' },
+                                { label: 'Audio-JSON', value: 'Audio-JSON' },
+                            ]}
+                            onChange={handleFilesChange}  // 添加onChange事件处理
+                        />
+                    </Form.Item>
+                    {showLangField && (  // 条件渲染Lang字段
+                        <Form.Item
+                            style={{ minHeight: '100px' }}
+                            label="Lang"
+                            name="lang"
+                            rules={[{ required: true, message: 'Please Select Lang' }]}
+                        >
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                placeholder="Please Select Lang"
+                                options={[
+                                    { label: 'EN', value: 'EN' }
+                                ]}
+                            />
+                        </Form.Item>
+                    )}
+                </Form>
+            </Modal>
         </div>
     );
 }   

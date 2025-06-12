@@ -489,6 +489,7 @@ export default function WorkoutsList() {
                 confirmLoading={batchCreateLoading}
             >
                 <Form
+                    style={{ minHeight: '170px' }}
                     form={batchCreateForm}
                     layout="vertical"
                 >

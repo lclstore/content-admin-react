@@ -539,8 +539,10 @@ export const useHeaderConfig = (params) => {
             let filteredStatusList = [];
             switch (status) {
                 case 'DISABLED':
-                case 'ENABLED':
                     filteredStatusList = statusList.filter(status => status.value !== 'DRAFT');
+                    break;
+                case 'ENABLED':
+                    filteredStatusList = statusList.filter(status => status.value === 'ENABLED');
                     break;
                 default:
                     filteredStatusList = statusList;

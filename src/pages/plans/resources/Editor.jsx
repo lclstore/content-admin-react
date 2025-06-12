@@ -79,39 +79,6 @@ export default function UserEditorWithCommon() {
             maxFileSize: 2 * 1024,
             required: true
         },
-        {
-            type: 'upload',
-            name: 'thumbnailImgUrl', // 遵循命名规范，使用Url后缀
-            label: 'Thumbnail Image',
-            acceptedFileTypes: 'png,webp',
-            onChange: (value, file, form) => {
-                const formValus = form.getFieldsValue();
-                form.setFieldsValue({
-                    coverImage: formValus['coverImage'] || value,
-                    detailImage: formValus['detailImage'] || value,
-                    completeImage: formValus['completeImage'] || value,
-                });
-            },
-            maxFileSize: 2 * 1024,
-            required: true
-        },
-        {
-            type: 'upload',
-            name: 'completeImgUrl', // 遵循命名规范，使用Url后缀
-            label: 'Complete Image',
-            acceptedFileTypes: 'png,webp',
-            onChange: (value, file, form) => {
-                const formValus = form.getFieldsValue();
-                form.setFieldsValue({
-                    coverImage: formValus['coverImage'] || value,
-                    detailImage: formValus['detailImage'] || value,
-                    thumbnailImage: formValus['thumbnailImage'] || value,
-                });
-            },
-            //文件上传后修改name
-            maxFileSize: 2 * 1024,
-            required: true
-        },
 
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
     return (

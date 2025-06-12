@@ -286,6 +286,7 @@ export default function UserEditorWithCommon() {
             fields={formFields}
             isCollapse={true}
             enableDraft={true}
+            collapseFormConfig={{ defaultActiveKeys: 'all', isAccordion: false }}
             initialValues={initialValues}
             moduleKey='template'
         />

@@ -230,7 +230,9 @@ const SortableItemRenderer = React.memo(({
                             <Button
                                 style={{ fontSize: '15px', color: '#1c8' }}
                                 type="text"
-                                icon={item[lockName] ? <LockFilled /> : <UnlockFilled />}
+                                icon={item[lockName] ? <LockFilled style={{
+                                    color: 'var(--text-primary)'
+                                }} /> : <UnlockFilled />}
                                 onClick={e => { e.stopPropagation(); onIconChange(panelId, item.id, itemIndex, lockName, defaultLockValue); }}
                                 onPointerDown={e => e.stopPropagation()}
                                 title="Copy"

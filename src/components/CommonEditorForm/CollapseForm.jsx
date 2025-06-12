@@ -211,6 +211,7 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
  * @param {Function} props.onCopyItem 处理复制项的回调函数
  * @param {Function} props.onReplaceItem 处理替换项的回调函数
  * @param {Component} props.commonListConfig 替换弹框中显示的commonListConfig组件
+ * @param {Object} props.collapseFormConfig 折叠面板配置
  * @param {String} props.moduleKey 模块key
  */
 const CollapseForm = ({
@@ -222,6 +223,7 @@ const CollapseForm = ({
     selectedItemFromList = null,
     initialValues = {},
     activeKeys = [],
+    collapseFormConfig = {},
     onCollapseChange,
     setActiveKeys,
     isCollapse = true,
@@ -700,12 +702,13 @@ const CollapseForm = ({
                 {/* Structure */}
             </Typography.Title>
             <Button
+                type='primary'
                 onClick={e => {
                     // e.stopPropagation();
                     onAddCollapsePanel();
                 }}
 
-                style={{ color: 'var(--primary-color)', fontSize: '16px' }}
+
             >
                 <PlusOutlined style={{ fontSize: '12px' }} />Add a Structure
             </Button>
@@ -740,7 +743,7 @@ const CollapseForm = ({
                                 isActive ? <ShrinkOutlined /> : <ArrowsAltOutlined />
                             }
                             destroyInactivePanel={false}
-                            accordion={true}
+                            accordion={collapseFormConfig.isAccordion}
                             activeKey={activeKeys}
                             onChange={onCollapseChange}
                             ghost

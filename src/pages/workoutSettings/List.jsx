@@ -67,7 +67,6 @@ export default function UserEditorWithCommon() {
     }
     const [workoutSetting, setworkoutSettingsr] = useState(initialValues);
     const getData = async () => {
-        console.log('2222222')
         return new Promise(resolve => {
             request.get({
                 url: `/workoutSetttings/detail`,
@@ -87,40 +86,7 @@ export default function UserEditorWithCommon() {
             setworkoutSettingsr(res)
         })
     }, []);
-    const mockUsers = [{
-        id: 1,
-        name: 'John Doe',
-        description: 'asasdasa',
-        startTime: '2025-01-26',
-        endTime: '2025-07-26',
-        premium: 1,
-        coverImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        detailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        thumbnailImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        completeImage: 'https://pic.rmb.bdstatic.com/bjh/news/6792ab1e35c6a2a6cd10a5990bd033d0.png',
-        difficulty: 1,
-        equipment: 3,
-        position: 2,
-        target: [1, 5],
-        introDuration: 10,
-        exercisePreviewDuration: 20,
-        exerciseExecutionDuration: 30,
-        list: [{
-            reps: 1,
-            structureName: 'asd1',
-            list: [commonListData[0], commonListData[1]]
-        }, {
-            reps: 2,
-            structureName: 'asd2',
-            list: [commonListData[1]]
-        },
-        {
-            reps: 3,
-            structureName: 'asd3',
-            list: [commonListData[4]]
-        }
-        ]
-    }];
+
 
     // 创建音频播放器的引用
     let audioPlayer = null;
@@ -187,7 +153,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp1',
                     label: 'Intro Audio',
                     // required: true,
                     inputConfig: [
@@ -197,9 +163,6 @@ export default function UserEditorWithCommon() {
                             label: '',
                             flex: 1,
                             placeholder: 'Intro Audio',
-                            // style: {
-                            //     width: '300px',
-                            // },
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -235,16 +198,15 @@ export default function UserEditorWithCommon() {
                         {
                             type: 'input',
                             name: 'introAudioStartTime',
+                            placeholder: 'Countdown Seconds',
                             label: '',
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
                             rules: [{
                                 // required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Countdown Seconds'
                             }],
                             flex: 1,
-                            // width: '100px',
                             showCount: true,
                         },
                         {
@@ -295,99 +257,11 @@ export default function UserEditorWithCommon() {
                     options: "BizWorkoutSettingsVideoCycleEnums",
                     required: true,
                 },
-                // {
 
-                //     type: 'inputGroup',
-                //     name: 'warmUp',
-                //     label: 'Preview Audio ( Rest | First | Next | Last | Name | 321 )',
-                //     // required: true,
-                //     inputConfig: [
-                //         {
-                //             type: 'antdSelect',
-                //             name: 'previewRestAudioBizSoundId',
-                //             label: '',
-                //             style: {
-                //                 width: '300px',
-                //             },
-                //             placeholder: 'Preview Rest Audio',
-                //             rules: [{
-                //                 required: true,
-                //                 message: 'Preview Rest Audio'
-                //             }],
-                //             options: [
-                //                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                //                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                //                 { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                //             ],
-                //             renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                //                 return (
-                //                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                //                         {option.label}
-                //                         <span
-                //                             onClick={(e) => {
-                //                                 playAudio(option, e, isPlaying, setIsPlaying);
-                //                             }}
-                //                             onMouseDown={(e) => {
-                //                                 e.stopPropagation();
-                //                                 playAudio(option, e, isPlaying, setIsPlaying);
-
-                //                             }}>
-                //                             {isPlaying && isPlaying === option.value ? (
-                //                                 <PauseCircleOutlined
-                //                                     style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                //                                 />
-                //                             ) : (
-                //                                 <PlayCircleOutlined
-                //                                     style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                //                                 />
-                //                             )}
-                //                         </span>
-                //                     </span >
-                //                 );
-                //             },
-                //             required: true,
-                //         },
-                //         {
-                //             type: 'input',
-                //             name: 'previewRestAudioStartTime',
-                //             label: '',
-                //             required: true,
-                //             defaultValue: 0.1,
-                //             maxLength: 100,
-                //             placeholder: 'Start Seconds',
-                //             rules: [{
-                //                 required: true,
-                //                 pattern: /^\d+(\.\d+)?$/,
-                //                 message: 'Start Seconds'
-                //             }],
-
-                //             showCount: true,
-                //         },
-                //         {
-                //             type: 'select',
-                //             name: 'previewRestAudioClosed',
-                //             label: '',
-                //             options: [
-                //                 {
-                //                     label: 'Can Close',
-                //                     value: 1
-                //                 }, {
-                //                     label: "Can't Close",
-                //                     value: 0
-                //                 },
-                //             ],
-                //             required: true,
-                //         }
-
-
-
-                //     ],
-
-                // },
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp2',
                     label: 'Preview Audio ( First | Next | Last | Name | 3 | 2 | 1 )',
                     // required: true,
                     inputConfig: [
@@ -401,9 +275,7 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Preview First Audio'
                             }],
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -442,13 +314,13 @@ export default function UserEditorWithCommon() {
                             name: 'previewFirstAudioStartTime',
                             label: '',
                             required: true,
-                            defaultValue: 3.1,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            flex: 1,
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
 
                             showCount: true,
@@ -457,12 +329,13 @@ export default function UserEditorWithCommon() {
                             type: 'select',
                             name: 'previewFirstAudioClosed',
                             label: '',
+                            flex: 1,
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -476,7 +349,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp3',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -484,9 +357,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'previewNextAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             placeholder: 'Preview Next Audio',
                             rules: [{
                                 required: true,
@@ -529,14 +400,14 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'previewNextAudioStartTime',
                             label: '',
-                            defaultValue: 3.1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            flex: 1,
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
 
                             showCount: true,
@@ -545,12 +416,13 @@ export default function UserEditorWithCommon() {
                             type: 'select',
                             name: 'previewNextAudioClosed',
                             label: '',
+                            flex: 1,
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -564,7 +436,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp4',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -572,9 +444,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'previewLastAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             placeholder: 'Preview Last Audio',
                             rules: [{
                                 required: true,
@@ -617,14 +487,14 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'previewLastAudioStartTime',
                             label: '',
-                            defaultValue: 3.1,
+                            flex: 1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
                             showCount: true,
                         },
@@ -632,12 +502,13 @@ export default function UserEditorWithCommon() {
                             type: 'select',
                             name: 'previewLastAudioClosed',
                             label: '',
+                            flex: 1,
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -651,7 +522,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp5',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -661,9 +532,7 @@ export default function UserEditorWithCommon() {
                             label: '',
                             placeholder: 'Preview Name Audio',
                             disabled: true,
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -700,14 +569,14 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'previewNameAudioStartTime',
                             label: '',
-                            defaultValue: 6.1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            flex: 1,
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
 
                             showCount: true,
@@ -715,13 +584,14 @@ export default function UserEditorWithCommon() {
                         {
                             type: 'select',
                             name: 'previewNameAudioClosed',
+                            flex: 1,
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -735,7 +605,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp6',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -743,9 +613,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'previewThreeAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             placeholder: 'Preview 3 Audio',
                             rules: [{
                                 required: true,
@@ -790,12 +658,12 @@ export default function UserEditorWithCommon() {
                             label: '',
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
-                            defaultValue: 3,
+                            flex: 1,
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -804,14 +672,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'previewThreeAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -824,7 +693,7 @@ export default function UserEditorWithCommon() {
                 }, {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp7',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -832,9 +701,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'previewTwoAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             placeholder: 'Preview 2 Audio',
                             rules: [{
                                 required: true,
@@ -879,12 +746,12 @@ export default function UserEditorWithCommon() {
                             label: '',
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
-                            defaultValue: 3,
+                            flex: 1,
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -893,14 +760,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'previewTwoAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -913,7 +781,7 @@ export default function UserEditorWithCommon() {
                 }, {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp8',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -921,9 +789,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'previewOneAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             placeholder: 'Preview 1 Audio',
                             rules: [{
                                 required: true,
@@ -966,14 +832,14 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'previewOneAudioEndTime',
                             label: '',
+                            flex: 1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
-                            defaultValue: 3,
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -982,14 +848,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'previewOneAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1016,7 +883,7 @@ export default function UserEditorWithCommon() {
                     max: 5,
                     step: 3,
                     formatter: (value) => value, // 格式化显示为 0:XX
-                    name: 'executionVideoReps', // 修改字段名避免重复
+                    name: 'executionVideoReps1', // 修改字段名避免重复
                     label: 'Execution Video Reps',
                     required: true,
                 },
@@ -1030,7 +897,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'executionVideoReps',
+                    name: 'executionVideoReps2',
                     label: 'Execution Audio ( Go | Guidance | Halfway | 3 | 2 | 1 | Rest | Beep )',
                     // required: true,
                     inputConfig: [
@@ -1043,9 +910,7 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution Go Audio'
                             }],
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -1083,14 +948,14 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'executionGoAudioStartTime',
                             label: '',
-                            defaultValue: 3,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            flex: 1,
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
 
                             showCount: true,
@@ -1099,12 +964,13 @@ export default function UserEditorWithCommon() {
                             type: 'select',
                             name: 'executionGoAudioClosed',
                             label: '',
+                            flex: 1,
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1126,15 +992,9 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'executionGuidanceAudioId',
                             label: '',
-                            style: {
-                                width: '300px',
-                            },
+                            flex: 1,
                             disabled: true,
                             placeholder: 'Execution Guidance Audio',
-                            rules: [{
-                                required: true,
-                                message: 'Execution Guidance Audio'
-                            }],
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -1166,33 +1026,33 @@ export default function UserEditorWithCommon() {
                                     </span >
                                 );
                             },
-                            required: true,
                         },
                         {
                             type: 'input',
+                            flex: 1,
                             name: 'executionGuidanceAudioStartTime',
                             label: '',
-                            defaultValue: 0.1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
                             showCount: true,
                         },
                         {
                             type: 'select',
                             name: 'executionGuidanceAudioClosed',
+                            flex: 1,
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1206,7 +1066,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp9',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -1226,9 +1086,7 @@ export default function UserEditorWithCommon() {
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
                                 { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
                             ],
-                            style: {
-                                width: '300px'
-                            },
+                            flex: 1,
                             renderLabel: (option, isPlaying, setIsPlaying, form) => {
                                 return (
                                     <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
@@ -1259,16 +1117,16 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
+                            flex: 1,
                             name: 'executionHalfwayAudioStartTime',
                             label: '',
-                            defaultValue: 2.1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Start Seconds',
+                            placeholder: 'Count-Up Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Start Seconds'
+                                message: 'Count-Up Seconds'
                             }],
                             showCount: true,
                         },
@@ -1276,12 +1134,13 @@ export default function UserEditorWithCommon() {
                             type: 'select',
                             name: 'executionHalfwayAudioClosed',
                             label: '',
+                            flex: 1,
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1295,7 +1154,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp10',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -1303,9 +1162,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'executionThreeAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px'
-                            },
+                            flex: 1,
                             placeholder: 'Execution 3 Audio',
                             rules: [{
                                 required: true,
@@ -1346,10 +1203,10 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
+                            flex: 1,
                             name: 'executionThreeAudioEndTime',
                             label: '',
                             required: true,
-                            defaultValue: 30.1,
                             maxLength: 100,
                             placeholder: 'Countdown Seconds',
                             rules: [{
@@ -1364,14 +1221,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'executionThreeAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1385,7 +1243,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp11',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -1393,9 +1251,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'executionTwoAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px'
-                            },
+                            flex: 1,
                             placeholder: 'Execution 2 Audio',
                             rules: [{
                                 required: true,
@@ -1436,10 +1292,10 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
+                            flex: 1,
                             name: 'executionTwoAudioEndTime',
                             label: '',
                             required: true,
-                            defaultValue: 30.1,
                             maxLength: 100,
                             placeholder: 'Countdown Seconds',
                             rules: [{
@@ -1454,14 +1310,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'executionTwoAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1475,7 +1332,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp12',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -1483,9 +1340,7 @@ export default function UserEditorWithCommon() {
                             type: 'antdSelect',
                             name: 'executionOneAudioBizSoundId',
                             label: '',
-                            style: {
-                                width: '300px'
-                            },
+                            flex: 1,
                             placeholder: 'Execution 1 Audio',
                             rules: [{
                                 required: true,
@@ -1528,8 +1383,8 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'executionOneAudioEndTime',
                             label: '',
+                            flex: 1,
                             required: true,
-                            defaultValue: 30.1,
                             maxLength: 100,
                             placeholder: 'Countdown Seconds',
                             rules: [{
@@ -1544,14 +1399,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'executionOneAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1565,7 +1421,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp14',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -1578,9 +1434,7 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution Rest Audio'
                             }],
-                            style: {
-                                width: '300px'
-                            },
+                            flex: 1,
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -1618,8 +1472,8 @@ export default function UserEditorWithCommon() {
                             type: 'input',
                             name: 'executionRestAudioEndTime',
                             label: '',
+                            flex: 1,
                             required: true,
-                            defaultValue: 4,
                             maxLength: 100,
                             placeholder: 'Countdown Seconds',
                             rules: [{
@@ -1634,14 +1488,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'executionRestAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1655,7 +1510,7 @@ export default function UserEditorWithCommon() {
                 {
 
                     type: 'inputGroup',
-                    name: 'warmUp',
+                    name: 'warmUp13',
                     label: '',
                     // required: true,
                     inputConfig: [
@@ -1668,9 +1523,7 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution Beep Audio'
                             }],
-                            style: {
-                                width: '300px'
-                            },
+                            flex: 1,
                             options: [
                                 { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
                                 { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
@@ -1706,12 +1559,12 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'input',
+                            flex: 1,
                             name: 'executionBeepAudioEndTime',
                             label: '',
                             required: true,
                             maxLength: 100,
                             placeholder: 'Countdown Seconds',
-                            defaultValue: 1,
                             style: {
                                 border: '1px solid #d5c031'
                             },
@@ -1724,14 +1577,15 @@ export default function UserEditorWithCommon() {
                         },
                         {
                             type: 'select',
+                            flex: 1,
                             name: 'executionBeepAudioClosed',
                             label: '',
                             options: [
                                 {
-                                    label: 'Can Close',
+                                    label: 'Can be Closed',
                                     value: 1
                                 }, {
-                                    label: "Can't Close",
+                                    label: "Can't be closed",
                                     value: 0
                                 },
                             ],
@@ -1844,10 +1698,11 @@ export default function UserEditorWithCommon() {
                 // renderItemMata={renderItemMata}
                 config={{ formName: 'workoutSettings', title: 'Workout Settings', headerButtons }}
                 isBack={false}
+
                 isCollapse={true}
                 formType="advanced"
 
-                collapseFormConfig={{ defaultActiveKeys: 'all' }}
+                collapseFormConfig={{ defaultActiveKeys: 'all', isAccordion: false }}
                 initialValues={workoutSetting}
             />
         </div>

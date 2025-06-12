@@ -73,7 +73,10 @@ export default function WorkoutsList() {
     const allColumnDefinitions = useMemo(() => {
         return [
             { title: 'Version', dataIndex: 'version', key: 'version', width: 80, visibleColumn: 0 },
-            { title: 'Comment', dataIndex: 'remark', key: 'remark', visibleColumn: 1 },
+            { title: 'Comment', dataIndex: 'remark', key: 'remark', visibleColumn: 1,
+                render: (text) =>
+                    <div style={{ fontWeight:600 }}>{text}</div>
+                },
             {
                 title: 'Publish Type',
                 dataIndex: 'env',

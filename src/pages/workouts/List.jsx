@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import { formatDateRange } from '@/utils';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
+import {useImmer} from "use-immer";
+import request from "@/request/index.js";
 
 export default function WorkoutsList() {
 
@@ -144,7 +146,7 @@ export default function WorkoutsList() {
         return [
 
             {
-                title: 'Cover ImgUrl',
+                title: 'Cover Image',
                 width: 120,
                 showNewBadge: true,
                 showLock: true,
@@ -153,7 +155,6 @@ export default function WorkoutsList() {
                 key: 'coverImgUrl',
                 visibleColumn: 0
             },
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 80, visibleColumn: 0 },
             // {
             //     title: 'Detail ImgUrl',
             //     width: 120,
@@ -181,7 +182,10 @@ export default function WorkoutsList() {
 
             {
                 title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
-                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
+                render: (text,row) => (<div>
+                    <div style={{ fontWeight:600 }}>{text}</div>
+                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
+                </div>),
             },
             {
                 title: 'Status',
@@ -350,7 +354,7 @@ export default function WorkoutsList() {
                 width: 70,
                 align: 'center',
                 // 定义所有可能的按钮
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
+                actionButtons: ['edit', 'duplicate', 'enable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
             },
@@ -424,16 +428,6 @@ export default function WorkoutsList() {
     }, [setButtons, setCustomPageTitle, navigate]);
 
     /**
-     * 重置操作标志
-     */
-    useEffect(() => {
-        const handleGlobalClick = () => setActionClicked(false);
-        document.addEventListener('click', handleGlobalClick);
-        return () => document.removeEventListener('click', handleGlobalClick);
-    }, []);
-
-
-    /**
      * 左侧工具栏按钮定义
      */
     const leftToolbarItems = useMemo(() => [
@@ -446,7 +440,38 @@ export default function WorkoutsList() {
             // disabled: selectedRowKeys.length === 0
         }
     ], [handleBatchCreateFile, selectedRowKeys]);
-
+    const generate = useCallback(() => {
+        const workoutIdList = tableRef.current.selectList.get().map(i => i.id)
+        return new Promise(resolve => {
+            request.post({
+                url: `/template/workout/generateFile`,
+                point: true,
+                data: {
+                    ...createFileConfig,
+                    // 获取 workoutIds
+                    workoutIdList,
+                },
+                callback() {
+                    resolve()
+                }
+            })
+        })
+    })
+    // 弹窗数据
+    const [createFileConfig, updateCreateFileConfig] = useImmer({
+        visible: false,
+        "videoFlag": false,
+        "audioFlag": false,
+        "languageList": [],
+        loading: false,
+    })
+    // 获取语言数据
+    const getLanguageList = useCallback(() => request.get({
+        url: '/common/language/list',
+        success(res) {
+            setLanguageOptions(res.data.data)
+        }
+    }))
     /**
      * 行选择配置
      */
@@ -456,6 +481,15 @@ export default function WorkoutsList() {
         columnWidth: 60,
     };
 
+    useEffect(() => {
+        getLanguageList()
+        /**
+         * 重置操作标志
+         */
+        const handleGlobalClick = () => setActionClicked(false);
+        document.addEventListener('click', handleGlobalClick);
+        return () => document.removeEventListener('click', handleGlobalClick);
+    }, []);
 
     // 9. 渲染 - 组件UI呈现
     // 渲染 - 组件UI呈现

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, {useState, useEffect, useContext, useMemo, useRef} from 'react';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
@@ -13,6 +13,7 @@ export default function UserEditorWithCommon() {
     const [refreshKey, setRefreshKey] = useState(0);
     const [editorRef, setEditorRef] = useState(null);
     const [loading, setLoading] = useState(true);
+    const saveDom = useRef(null)
     // 初始用户数据状态--可设默认值
     const initialValues = {
 
@@ -122,18 +123,42 @@ export default function UserEditorWithCommon() {
         console.log(info.formValues)
     }
     const headerButtons = [
+        // 第一个保证是save按钮，会被隐藏
         {
             key: 'save',
             text: 'Save',
             icon: <SaveOutlined />,
             type: 'primary',
-        }
+            style:{ display:"none" },
+            onClick(){
+                localStorage.clear()
+                navigate('/login');
+            }
+        },
+        {
+            key: 'signout',
+            text: <div style={{ color:"red" }}>SIGN OUT</div>,
+            icon: <LogoutOutlined />,
+            type: 'primary',
+            onClick(){
+                localStorage.clear()
+                navigate('/login');
+            }
+        },
     ]
     const handleConfirmSuccess = (ret) => {
         if (ret?.success) {
             getUser()
         }
     }
+    useEffect(() => {
+        setTimeout(() => {
+            console.log(document.querySelector('.header-actions').querySelector("button"))
+            saveDom.current = document.querySelector('.header-actions').querySelector("button")
+            saveDom.current.style.display = "none";
+        },100)
+
+    }, []);
     return (
         <div >
             <CommonEditorForm
@@ -152,11 +177,11 @@ export default function UserEditorWithCommon() {
                 <Button
                     block
                     onClick={() => {
-                        localStorage.clear()
-                        navigate('/login');
+                        console.log('saveDom', saveDom)
+                        saveDom.current.click()
                     }}
                 >
-                    SIGN OUT
+                    SAVE
                 </Button>
             </div >
         </div >

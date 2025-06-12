@@ -12,20 +12,19 @@ export default function UserEditorWithCommon() {
     })
     function formFieldsManage(val,{ getFieldsValue }){
         const formData = getFieldsValue()
-        console.log(formData)
         // 必填 变化
-        const gender = formFields.find(item => item.name === 'genderCode');
-        const hasAScript = formFields.find(item => item.name === 'translation');
-        const femaleScript = formFields.find(item => item.name === 'femaleScript');
-        const maleScript = formFields.find(item => item.name === 'maleScript');
-        const femaleAudio = formFields.find(item => item.name === 'femaleAudioUrl');
-        const maleAudio = formFields.find(item => item.name === 'maleAudioUrl');
         setFormFields(formFields.map(i => {
             if (i.name === 'femaleScript') {
-                return {
-                    ...i,
-                    required: formData.translation === 1 && formData.genderCode === "FEMALE"
-                }
+                return {...i, required: formData.translation === 1 && formData.genderCode === "FEMALE"}
+            }
+            if (i.name === 'maleScript') {
+                return {...i, required: formData.translation === 1 && formData.genderCode === "MALE"}
+            }
+            if (i.name === 'femaleAudioUrl') {
+                return {...i, required: formData.genderCode === "FEMALE" || formData.genderCode === "FEMALE_AND_MALE"}
+            }
+            if (i.name === 'maleAudioUrl') {
+                return {...i, required: formData.genderCode === "MALE" || formData.genderCode === "FEMALE_AND_MALE"}
             }
             return i
         }))
@@ -95,7 +94,7 @@ export default function UserEditorWithCommon() {
             showCount: true,
             dependencies: ['translation','genderCode'],           // 声明依赖
             content: ({ getFieldValue }) => {    // content 支持函数
-                return getFieldValue("translation") === 1 && (getFieldValue("genderCode") === "FEMALE" || getFieldValue("genderCode") === "FEMALE_AND_MALE")
+                return getFieldValue("translation") === 1 && (getFieldValue("genderCode") === "MALE" || getFieldValue("genderCode") === "FEMALE_AND_MALE")
             },
         },
         {
@@ -128,10 +127,8 @@ export default function UserEditorWithCommon() {
     ]); // 使用useMemo优化性能，避免每次渲染重新创建
 
 
-
     return (
         <>
-            <div>{ formFields.find(i => i.name === 'translation').required.toString() }</div>
             <CommonEditorForm
                 enableDraft={true}
                 formType="basic"

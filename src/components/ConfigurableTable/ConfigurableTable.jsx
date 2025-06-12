@@ -153,7 +153,6 @@ const ConfigurableTable = forwardRef(({
                 return key && col.visibleColumn === visibleColumn
             })
             .map(col => col.key || col.dataIndex);
-        debugger
         return defaultVisibleKeys
     }
     // filter data
@@ -903,17 +902,11 @@ const ConfigurableTable = forwardRef(({
             }
         };
     }, [expandedRowRender]);
-    // table sroll 监听事件
-    const tableSroll = useCallback((e) => {
-        setTopping(e.target.scrollTop > 50)
-    }, [topping]);
+
     useEffect(() => {
         searchTableData(true)//初始化数据
-        // tableRef.current 获取的dom有问题，只能用原生直接拿了
-        document.querySelector('.ant-table-wrapper').addEventListener('scroll', tableSroll)
         // setTableHeight(window.innerHeight - tableRef.current.nativeElement.getBoundingClientRect().top)
         return () => {
-            document.querySelector('.ant-table-wrapper')?.removeEventListener('scroll', tableSroll)
             // 组件卸载时取消所有未完成的请求
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
@@ -1021,6 +1014,7 @@ const ConfigurableTable = forwardRef(({
         <div className={styles.configurableTableContainer} style={{ paddingTop: paddingTop }}>
             {/* 工具栏 */}
             {contextHolder}
+            <FloatButton.BackTop target={() => document.querySelector('.ant-table-wrapper')} visibilityHeight={50} />
             <div className="configurable-table-toolbar"
                 style={leftToolbarItems.length === 0 ? { justifyContent: "flex-end" } : {}}>
                 {/* 左侧按钮区域 */}

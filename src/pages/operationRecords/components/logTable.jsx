@@ -68,17 +68,14 @@ export default ({ bizType }) => {
     const allColumnDefinitions = useMemo(() => {
         return [
             {
-                title: 'ID',
-                dataIndex: 'dataId',
-                width: 50,
-                visibleColumn: 0,
-            },
-            {
                 title: 'Name',
                 dataIndex: 'dataInfo',
                 width: 120,
                 visibleColumn: 0,
-                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
+                render: (text,row) => (<div style={{ fontSize:"12px" }}>
+                    <div style={{ fontWeight:600 }}>{text}</div>
+                    <div style={{ color:"var(--text-secondary)" }}>ID:{row.dataId}</div>
+                </div>),
             },
             {
                 title: 'Operation Type',

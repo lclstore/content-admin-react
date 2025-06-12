@@ -9,7 +9,7 @@ export const filterSections = [
     {
         title: 'Operation Type',
         key: 'functionType',
-        options: ['CRUD', 'Generate Workout', 'Generate File']
+        options: ['CRUD', {label:'Generate Workout',value:"GENERATE_WORKOUT"}, {label:'Generate File',value:'GENERATE_FILE'}]
     }
 ];
 

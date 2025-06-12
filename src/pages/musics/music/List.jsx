@@ -108,12 +108,6 @@ export default function Musics() {
                 visibleColumn: 1
             },
             {
-                title: 'ID', dataIndex: 'id',
-                key: 'id',
-                // width: 60,
-                visibleColumn: 1,
-            },
-            {
                 title: 'Name',
                 sorter: true,
                 // width: 350,
@@ -121,7 +115,10 @@ export default function Musics() {
                 dataIndex: 'name',
                 key: 'name',
                 visibleColumn: 1,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text,row) => (<div>
+                    <div style={{ fontWeight:600 }}>{text}</div>
+                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
+                </div>),
             },
             {
                 title: 'Display Name',

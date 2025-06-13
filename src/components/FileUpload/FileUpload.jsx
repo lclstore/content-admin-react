@@ -9,6 +9,7 @@ import {
     CaretRightOutlined,
     ReloadOutlined,
     PauseOutlined,
+    CloseCircleOutlined
 } from '@ant-design/icons';
 import { getFullUrl } from '@/utils';
 import settings from '@/config/settings';
@@ -61,7 +62,7 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
             width={800}
             maskClosable={true}
             closeIcon={
-                <CloseOutlined style={{ fontSize: '30px', color: '#fff' }} />
+                <CloseCircleOutlined style={{ fontSize: '30px', color: '#fff' }} />
             }
             wrapClassName="media-preview-modal-wrap prevent-row-click"
             styles={{
@@ -97,20 +98,19 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
                 }
             }}
         >
-            <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
                 {isVideo ? (
-                    <div className={styles.videoPlayer}>
+                    <>
                         <video
                             src={fullUrl}
                             controls
-                            style={{ width: '100%', display: 'block', height: '100%', minWidth: '720px' }}
+                            style={{ width: '576px', display: 'block', height: '576px',}}
                             onClick={(e) => e.stopPropagation()}
                         >
                             Your browser does not support the video tag.
                         </video>
-                    </div>
+                    </>
                 ) : (
-                    <div className={styles.audioPlayer}>
                         <audio
                             src={fullUrl}
                             controls
@@ -118,7 +118,6 @@ const MediaPreviewModal = memo(({ type, url, visible, onCancel }) => {
                             className={styles.audio}
                         >
                         </audio>
-                    </div>
                 )}
             </div>
         </Modal>

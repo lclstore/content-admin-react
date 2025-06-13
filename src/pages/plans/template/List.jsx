@@ -3,6 +3,7 @@ import {message, Form, Switch, Space, Checkbox, Modal, Button} from 'antd';
 import {
     CopyOutlined,
     PlusOutlined,
+    VideoCameraAddOutlined
 } from '@ant-design/icons';
 import {useNavigate} from 'react-router';
 import {HeaderContext} from '@/contexts/HeaderContext';
@@ -33,8 +34,8 @@ export default function WorkoutsList() {
         },
         {
             title: 'Duration (Min)',
-            key: 'durationCode',
-            type: 'single',
+            key: 'durationCodeList',
+            type: 'multiple',
             options: "BizTemplateDurationEnums",
         }
     ];
@@ -63,11 +64,8 @@ export default function WorkoutsList() {
                 options: 'displayStatus',
                 width: 120,
             },
+            {title: "Workout Num", dataIndex: "workoutCount"},
             {title: "Generate Status", dataIndex: "generateStatus", options: 'publishStatus',},
-            {title: "Workout Num", dataIndex: "workoutCount",render: (text,record) => <div onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/plans/workout/list?id=${record.id}`)
-                }}>{text}</div>},
             {
                 title: 'Actions',
                 key: 'actions',
@@ -78,7 +76,7 @@ export default function WorkoutsList() {
                 customButtons: [
                     {
                         key: "generate",
-                        icon: CopyOutlined,
+                        icon: VideoCameraAddOutlined,
                         click: ({selectList}) => {
                             updateGenerateModal(draft => {
                                 draft.id = selectList[0].id

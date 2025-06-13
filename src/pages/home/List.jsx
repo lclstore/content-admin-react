@@ -189,12 +189,14 @@ export default function Home() {
             label: 'App Icon',
             maxFileSize: 1024 * 1,
             acceptedFileTypes: 'png,webp',
+            required: true,
             maxCount: 1,
         },
         {
             type: 'input',
             name: 'appStoreName',
             label: 'Apple Store Name',
+            required: true,
             maxLength: 100,
         },
         {

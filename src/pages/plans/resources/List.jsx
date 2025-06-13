@@ -78,13 +78,13 @@ export default function WorkoutsList() {
                 fixed: 'right',
                 width: 70,
                 align: 'center',
-                actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'delete'],
+                actionButtons: ['edit', 'duplicate', 'enable', 'delete'],
                 isShow(record, btnName){
                     const status = record.status;
                     // 简单的状态-按钮映射关系
-                    if (status === 'DRAFT' && ['edit', 'duplicate'].includes(btnName)) return true;
+                    if (status === 'DRAFT' && ['edit', 'duplicate',  'delete'].includes(btnName)) return true;
                     if (status === 'DISABLED' && ['edit', 'duplicate', 'enable'].includes(btnName)) return true;
-                    if (status === 'ENABLED' && ['edit','duplicate', 'disable'].includes(btnName)) return true;
+                    if (status === 'ENABLED' && ['edit','duplicate', 'disable', 'delete'].includes(btnName)) return true;
                     return false;
                 }
             },
@@ -96,7 +96,7 @@ export default function WorkoutsList() {
      */
     useEffect(() => {
         // 设置自定义页面标题
-        setCustomPageTitle('Resource');
+        setCustomPageTitle('Resources');
 
         // 设置头部按钮
         setButtons([

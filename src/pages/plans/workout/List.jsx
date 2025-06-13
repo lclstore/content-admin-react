@@ -16,6 +16,8 @@ export default function WorkoutsList() {
     const location = useLocation()
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行
     const currentSelectedRowKeys = useRef([])
+    // 暂存的listData用于判断 按钮展示
+    const [listData, setListData] = useState([]);
     const [templateList, setTemplateList] = useState([])
     const [languageOptions, setLanguageOptions] = useState([])
     const [generateForm] = Form.useForm(); // 生成文件表单实例
@@ -47,8 +49,8 @@ export default function WorkoutsList() {
         },
         {
             title: 'Template ID',
-            key: 'templateId',
-            type: 'single',
+            key: 'templateIdList',
+            type: 'multiple',
             options: templateList,
         },
         {
@@ -58,8 +60,8 @@ export default function WorkoutsList() {
             options: "BizGenerateTaskStatusEnums",
         },
     ], [templateList]);
-    let templateId = new URLSearchParams(location.search).get('id')
-    templateId = templateId ? Number(templateId) : null
+    // let templateId = new URLSearchParams(location.search).get('id')
+    // templateId = templateId ? templateId : null
     // 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
@@ -70,31 +72,23 @@ export default function WorkoutsList() {
             {
                 title: 'Gender',
                 dataIndex: 'genderCode',
-                sorter: true,
-                showSorterTooltip: false,
                 options: 'BizExerciseGenderEnums',
                 width: 120,
             },
             {
                 title: 'Injured (Query Param)',
                 dataIndex: 'injuredCodes',
-                sorter: true,
-                showSorterTooltip: false,
                 options: 'BizExerciseInjuredEnums',
                 width: 140,
             },
             {
                 title: 'Injured (Actual Result)',
                 dataIndex: 'injuredActualCodes',
-                sorter: true,
-                showSorterTooltip: false,
                 options: 'BizExerciseInjuredEnums',
                 width: 140,
             },
             {
                 title: 'Audio Lang',
-                sorter: true,
-                showSorterTooltip: false,
                 width: 150,
                 visibleColumn: 1,
                 render: (text, record) => record.audioJsonLanguages,
@@ -102,8 +96,6 @@ export default function WorkoutsList() {
             {
                 title: 'File Status',
                 dataIndex: 'fileStatus',
-                sorter: true,
-                showSorterTooltip: false,
                 options: 'displayStatus',
                 width: 120,
             },
@@ -137,7 +129,7 @@ export default function WorkoutsList() {
     const getTableList = useCallback(async (params) => {
         return new Promise(resolve => {
             request.get({
-                url: '/template/workout/page', data: { templateId, ...params },
+                url: '/template/workout/page', data: { ...params },
                 callback: (res) => {
                     resolve(res.data)
                 }
@@ -337,21 +329,21 @@ export default function WorkoutsList() {
     });
 
 
-    const leftToolbarItems = useMemo(() => [
+    const leftToolbarItems = useMemo(() => (listData.length > 0) ? [
         {
             key: 'batchCreate',
             label: 'Batch Create File',
             onClick: () => {
                 setGenerateModalVisible(true);
                 // 设置表单初始值
-                generateForm.setFieldsValue({
-                    templateId
-                });
+                // generateForm.setFieldsValue({
+                //     templateId
+                // });
             },
             icon: <PlusOutlined />,
             // disabled: selectedRowKeys.length === 0
         }
-    ], [templateId]);
+    ]:[], [listData]);
     const generate = useCallback((params) => {
         return new Promise(resolve => {
             request.post({
@@ -417,7 +409,7 @@ export default function WorkoutsList() {
                         layout="vertical"
                         style={{ minHeight: '300px' }}
                         initialValues={{
-                            templateId
+                            templateId:""
                         }}
                     >
                         {generateFormConfig.map(renderFormItem)}
@@ -426,15 +418,15 @@ export default function WorkoutsList() {
             </Modal>
             {contextHolder}
             <ConfigurableTable
+                getListAfer={(val) => setListData(val.data)}
                 columns={allColumnDefinitions}
                 expandedRowRender={expandedRowRender}
-                rowSelection={rowSelection}
                 leftToolbarItems={leftToolbarItems}
                 getTableList={getTableList}
                 moduleKey="workout"
                 operationName="page"
                 searchConfig={{
-                    placeholder: "Search ID",
+                    placeholder: "Search workout ID...",
                     fieldName: "id"
                 }}
                 showColumnSettings={false}

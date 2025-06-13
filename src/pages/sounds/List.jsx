@@ -82,7 +82,7 @@ export default function WorkoutsList() {
                 dataIndex: 'genderCode',
                 sorter: true,
                 showSorterTooltip: false,
-                options: 'BizExerciseGenderEnums',
+                options: 'BizSoundGenderEnums',
                 width: 120,
                 visibleColumn: 0
             },

@@ -74,6 +74,7 @@ import { deepClone } from "@/utils/index.js";
  * @param {boolean} [props.draggable=false] - 添加拖拽功能的开关
  * @param {function} [props.onDragEnd] - 添加拖拽结束的回调函数
  * @param {function} [props.expandedRowRender] - 展开行的渲染函数
+ * @param {function} [props.getListAfer] - 获取列表数据后的回调函数
  */
 const ConfigurableTable = forwardRef(({
     columns, // 所有列的定义
@@ -103,6 +104,7 @@ const ConfigurableTable = forwardRef(({
     draggable = false, // 添加拖拽功能的开关
     onDragEnd, // 添加拖拽结束的回调函数
     expandedRowRender, // 修改为直接接收展开行渲染函数
+    getListAfer,
 }, ref) => {
     const optionsBase = useStore(i => i.optionsBase)
     const navigate = useNavigate(); // 路由导航
@@ -337,6 +339,9 @@ const ConfigurableTable = forwardRef(({
         selectList: {
             get: () => selectList,
             set: setSelectList
+        },
+        listData:{
+            get:() => tableData
         }
     }))
 
@@ -501,9 +506,9 @@ const ConfigurableTable = forwardRef(({
         })
         // 对searchData进行缓存
         sessionStorage.setItem(location.pathname, JSON.stringify({ paginationParams: paginationParams.current, activeFilters: activeFilters.current }))
+        let res;
         try {
             setLoadingLocal(true);
-            let res;
             // 修改数据获取逻辑
             if (dataSource && dataSource.length > 0) {
                 res = {
@@ -544,6 +549,7 @@ const ConfigurableTable = forwardRef(({
             setTableData([]);
             setItems([]);
         } finally {
+            getListAfer && getListAfer(res)
             if (abortControllerRef.current === null) {
                 setLoadingLocal(false);
             }

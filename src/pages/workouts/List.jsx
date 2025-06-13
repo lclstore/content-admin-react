@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback, useForm } from 'react';
+import React, {useContext, useEffect, useState, useMemo, useCallback, useForm, useRef} from 'react';
 import { Modal, message, Form, Table, Switch, Select, Checkbox, Spin } from 'antd';
 import TagSelector from '@/components/TagSelector/TagSelector';
 import {
@@ -72,16 +72,15 @@ export default function WorkoutsList() {
     // 1. 状态定义 - 组件内部状态管理
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
-    const [loading, setLoading] = useState(false); // 加载状态
-    const [searchValue, setSearchValue] = useState(''); // 搜索关键词
-    const [selectedFilters, setSelectedFilters] = useState({ status: [], functionType: [], difficulty: [], position: [], target: [] }); // 筛选条件
-    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // 删除确认弹窗
-    const [currentRecord, setCurrentRecord] = useState(null); // 当前操作的记录
+
     const [actionInProgress, setActionInProgress] = useState(false); // 操作进行中状态
     const [actionClicked, setActionClicked] = useState(false); // 操作按钮点击状态，用于阻止行点击事件
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行
     const [messageApi, contextHolder] = message.useMessage();
     const [languageOptions, setLanguageOptions] = useState([]);
+    const tableRef = useRef(null);
+    // 暂存的listData用于判断 按钮展示
+    const [listData, setListData] = useState([]);
     // 批量创建文件 Modal 状态
     const [isBatchCreateModalVisible, setIsBatchCreateModalVisible] = useState(false); // 批量创建弹窗可见性
     const [batchCreateForm] = Form.useForm(); // 批量创建表单实例
@@ -456,14 +455,14 @@ export default function WorkoutsList() {
     /**
      * 左侧工具栏按钮定义
      */
-    const leftToolbarItems = useMemo(() => [
+    const leftToolbarItems = useMemo(() => (listData.length > 0) ? [
         {
             key: 'batchCreate',
             label: 'Batch Create File',
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
         }
-    ], [handleBatchCreateFile, selectedRowKeys]);
+    ]:[], [handleBatchCreateFile, selectedRowKeys,listData]);
     // 获取语言数据
     const getLanguageOptions = useCallback(() => request.get({
         url: '/common/language/list',
@@ -556,6 +555,8 @@ export default function WorkoutsList() {
         <div className="workoutsContainer page-list">
             {contextHolder}
             <ConfigurableTable
+                ref={tableRef}
+                getListAfer={(val) => setListData(val.data)}
                 open={isBatchCreateModalVisible}
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}

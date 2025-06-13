@@ -1206,7 +1206,7 @@ export default function UserEditorWithCommon() {
                     onCollapseChange={handleCollapseChange}
                     // 其他基本配置
                     // renderItemMata={renderItemMata}
-                    config={{ formName: 'workoutSettings', hideTitleOperationName: true, headerButtons }}
+                    config={{ formName: 'workout Settings', hideTitleOperationName: true, headerButtons }}
                     isBack={false}
 
                     isCollapse={true}

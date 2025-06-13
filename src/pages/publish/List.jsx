@@ -101,7 +101,7 @@ export default function WorkoutsList() {
                 width: 150,
                 visibleColumn: 1
             },
-            
+
             {
                 title: 'Time',
                 dataIndex: 'createTime',
@@ -164,6 +164,7 @@ export default function WorkoutsList() {
                 columns={allColumnDefinitions}
                 moduleKey="publish"
                 noDataTip="You don't have any publish records yet"
+
                 showColumnSettings={false}
                 onRowClick={(record) => { }}
                 rowKey={(record) => `${record.version}-${record.createTime}`}
@@ -193,7 +194,8 @@ export default function WorkoutsList() {
                             formName: 'publish',
                             hideSaveButton: true,
                             hideBackButton: true,
-                            layout: 'vertical' 
+                            layout: 'vertical',
+                            hideTitleOperationName: true
                         }}
                         fields={formFields}
                         initialValues={initialValues}

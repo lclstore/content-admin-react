@@ -230,7 +230,9 @@ const SortableItemRenderer = React.memo(({
                             <Button
                                 style={{ fontSize: '15px', color: '#1c8' }}
                                 type="text"
-                                icon={item[lockName] ? <LockFilled /> : <UnlockFilled />}
+                                icon={item[lockName] ? <LockFilled style={{
+                                    color: 'var(--text-primary)'
+                                }} /> : <UnlockFilled />}
                                 onClick={e => { e.stopPropagation(); onIconChange(panelId, item.id, itemIndex, lockName, defaultLockValue); }}
                                 onPointerDown={e => e.stopPropagation()}
                                 title="Copy"
@@ -599,16 +601,6 @@ const StructureList = ({
         if (result) {
             const { dataListItem, parentItem } = result;
             const targetPanel = dataListItem;
-
-            // // 获取当前展开的面板
-            // const currentActiveKeys = typeof activeKeys === 'string' ? activeKeys : activeKeys[0];
-            // let parentName = parentItem?.name || targetPanel.name;
-            // const currentFieldsName = fields.find(item => item.isShowAdd);
-
-            // // 如果当前面板是添加数据的面板，则使用当前面板的name
-            // if (currentActiveKeys && currentFieldsName && currentActiveKeys.includes(currentFieldsName.name)) {
-            //     parentName = currentActiveKeys;
-            // }
 
             // 获取当前表单数据
             const currentFormValues = form.getFieldsValue();

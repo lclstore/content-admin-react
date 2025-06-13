@@ -217,9 +217,9 @@ export default function Home() {
             operationName: 'addHelps'
         },
         log: {
-            title: 'Add Log',
+            title: 'Add Changelog',
             width: 600,
-            formName: 'Log',
+            formName: 'Add Changelog',
             fields: formFields,
             successMessage: 'Log Added',
             operationName: 'addChangeLogs'
@@ -466,10 +466,11 @@ export default function Home() {
                             formType="basic"
                             isBack={false}
                             config={{
-                                formName: modalConfigs[activeModalType].formName,
+                                formName: "Home",
                                 hideSaveButton: true,
                                 hideBackButton: true,
-                                layout: 'vertical'
+                                layout: 'vertical',
+                                hideTitleOperationName: true
                             }}
                             fields={modalConfigs[activeModalType].fields}
                             initialValues={{}}

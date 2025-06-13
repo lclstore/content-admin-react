@@ -16,7 +16,7 @@ export default function UserEditorWithCommon() {
         difficultyCode: 'BEGINNER',
         equipmentCode: 'CHAIR',
         positionCode: 'SEATED',
-        injuredCodes:"NONE",
+        injuredCodes:["NONE"],
     }
     // 表单字段配置
     const formFields = useMemo(() => [

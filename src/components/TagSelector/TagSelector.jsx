@@ -15,6 +15,7 @@ const TagSelector = ({
     options,
     value,
     defaultValue,
+    backgroundColor,
     onChange,
     mode = 'single',
     disabled = false,
@@ -87,9 +88,9 @@ const TagSelector = ({
     // 获取当前选中的选项对象(s)
     const selectedOptions = useMemo(() => {
         if (mode === 'single') {
-            return options.find(opt => isSelected(opt));
+            return options?.find(opt => isSelected(opt));
         } else if (mode === 'multiple') {
-            return options.filter(opt => isSelected(opt));
+            return options?.filter(opt => isSelected(opt));
         }
         return null;
     }, [options, normalizedValue, mode]);
@@ -173,11 +174,12 @@ const TagSelector = ({
     return (
         <div className="tag-selector-container">
             <div className={`tag-selector-options tag-selector-container-${mode} ${disabled ? 'tag-selector-disabled' : ''}`}>
-                {options.map(option => {
+                {options?.map(option => {
                     const selected = isSelected(option);
 
                     return (
                         <div
+                            style={{ backgroundColor: backgroundColor ? backgroundColor : '' }}
                             key={typeof option === 'object' ? option.value : option}
                             className={`tag-option ${selected ? 'selected' : ''}`}
                             onClick={() => handleTagClick(option)}

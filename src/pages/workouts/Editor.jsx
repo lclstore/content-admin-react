@@ -368,6 +368,7 @@ export default function UserEditorWithCommon() {
             label: 'Structure Settings',
             name: 'exerciseGroupList',
             isGroup: true,
+            systemCount: 1,
             isShowAdd: true,
             formterList: (dataList) => {
                 return dataList?.map(item => {

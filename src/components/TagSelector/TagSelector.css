@@ -24,7 +24,7 @@
     /* transition: all 0.3s; */
     user-select: none;
     text-align: center;
-    flex: 1;
+    /* flex: 1; */
 }
 
 
@@ -58,7 +58,7 @@
 }
 
 .tag-option.selected {
-    background-color: var(--actives-color);
+    background-color: var(--actives-color) !important;
     color: rgb(36, 54, 54);
     ;
     border-color: var(--active-color);

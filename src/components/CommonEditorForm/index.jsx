@@ -74,7 +74,9 @@ export default function CommonEditor(props) {
         validate,
         commonListConfig = null,
         complexConfig = {}, // 高级表单特定配置
-        collapseFormConfig = {},  // 折叠表单配置
+        collapseFormConfig = {
+            isAccordion: true, // 是否为手风琴
+        },  // 折叠表单配置
         formFields, // 向后兼容：支持旧的formFields属性
         onFormFieldsChange = null, // 字段变更回调
         onCollapseChange = null, // 折叠面板变化回调
@@ -92,6 +94,7 @@ export default function CommonEditor(props) {
     const [internalFormFields, setInternalFormFields] = useState(
         collapseFormConfig.fields || formFields || fields || []
     );
+
     // scroll ref
     const scrollableContainerRef = useRef(null);
     // 每当外部formFields/fields变化时，更新内部状态
@@ -104,6 +107,11 @@ export default function CommonEditor(props) {
         } else if (collapseFormConfig.fields && collapseFormConfig.fields.length > 0) {
             setInternalFormFields(collapseFormConfig.fields);
         }
+        //   获取当前激活的折叠面板
+        setTimeout(() => {
+            getActiveCollapseKeys()
+        }, 500);
+
     }, [fields, formFields, collapseFormConfig.fields]);
 
     // 找到第一个有isShowAdd属性的面板（用于生成新面板）
@@ -153,19 +161,25 @@ export default function CommonEditor(props) {
     const [structurePanels, setStructurePanels] = useState(
         complexConfig.structurePanels || []
     );
-    const [activeCollapseKeys, setActiveCollapseKeys] = useState(() => {
+    // 设置activeCollapseKeys
 
+    const [activeCollapseKeys, setActiveCollapseKeys] = useState([]);
+    const getActiveCollapseKeys = () => {
+        // 如果activeCollapseKeys已经存在，则不进行更新
+        if (activeCollapseKeys && activeCollapseKeys.length > 0) return;
+
+        let collapseKeys = []
         if (!collapseFormConfig || !internalFormFields || internalFormFields.length === 0) {
-            return [];
+            collapseKeys = []
         }
         if (collapseFormConfig.defaultActiveKeys === 'all') {
-            return internalFormFields.map(field => field.name);
+            collapseKeys = internalFormFields.map(field => field.name);
         }
         if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
-            return collapseFormConfig.defaultActiveKeys;
+            collapseKeys = collapseFormConfig.defaultActiveKeys;
         }
-        return [internalFormFields[0].name]; // 默认使用第一个面板
-    });
+        setActiveCollapseKeys(collapseKeys)
+    }
     const [expandedItems, setExpandedItems] = useState({});
 
     // 获取HeaderContext
@@ -364,7 +378,9 @@ export default function CommonEditor(props) {
         } else {
             // 如果有多个项目，只处理最后一个
             const lastItem = items[items.length - 1];
-            processItemAdd(lastItem.panelName, lastItem.fieldName, lastItem.itemData, lastItem.expandedItemIndex);
+            const firstItem = items[0]
+            debugger
+            processItemAdd(lastItem.panelName, lastItem.fieldName, lastItem.itemData, firstItem.expandedItemIndex);
         }
         // 清空待处理项
         setPendingItems([]);
@@ -372,6 +388,9 @@ export default function CommonEditor(props) {
 
     // 实际处理添加项目的函数
     const processItemAdd = (panelName, fieldName, itemData, expandedItemIndex) => {
+        if (Array.isArray(panelName)) {
+            panelName = panelName[0]
+        }
         internalFormFields.map(field => {
             if (field.name === panelName) {
                 if (Array.isArray(field.dataList)) {
@@ -422,7 +441,6 @@ export default function CommonEditor(props) {
         // 添加新的待处理项
         const newItem = { panelName, fieldName, itemData, expandedItemIndex };
         setPendingItems(prev => [...prev, newItem]);
-
         // 清除之前的定时器
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -987,7 +1005,7 @@ export default function CommonEditor(props) {
     useEffect(() => {
         if (headerContext.setCustomPageTitle) {
             // 设置自定义页面标题
-            const titleOperationName = config.hideTitleOperationName ?'':id ? 'Edit' : 'Add'
+            const titleOperationName = config.hideTitleOperationName ? '' : id ? 'Edit' : 'Add'
             const pageTitle = config.title ?? `${titleOperationName} ${config.formName}`;
             headerContext.setCustomPageTitle(pageTitle);
         }
@@ -1227,6 +1245,7 @@ export default function CommonEditor(props) {
                                         form={form}
                                         moduleKey={moduleKey}
                                         gutter={gutter}
+                                        collapseFormConfig={collapseFormConfig}
                                         operationName={operationName}
                                         renderItemMata={renderItemMata}
                                         commonListConfig={commonListConfig}

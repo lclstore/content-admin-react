@@ -19,7 +19,7 @@ export const tabLabels = [
         value: "biz-sound"
     },
     {
-        label: "Images",
+        label: "Resources",
         value: "biz-music"
     },
     {
@@ -47,7 +47,7 @@ export const tabLabels = [
         value: "biz-program"
     },
     {
-        label: "Audio & Video default settings",
+        label: "Workout Settings",
         value: "biz-workout-settings"
     }
 ];

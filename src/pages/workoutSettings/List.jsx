@@ -758,7 +758,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'executionHalfwayAudioBizSoundId',
+                            name: 'executionHalfwayAudioBizSoundIds',
                             label: '',
                             placeholder: 'Execution Halfway Audio',
                             rules: [{

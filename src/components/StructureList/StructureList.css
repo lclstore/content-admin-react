@@ -131,3 +131,32 @@
 
 
 }
+
+
+.audioPreview_box {
+    margin-right: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    color: #11cc88;
+    border: 2px solid #11cc88;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* 头像和播放图标样式 */
+.itemAvatar {
+    margin-right: 16px;
+    position: relative;
+}
+
+.playIcon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
+    color: #fff;
+}

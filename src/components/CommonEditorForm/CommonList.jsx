@@ -24,6 +24,7 @@ import { getFileCategoryFromUrl } from '@/utils';
 import Empty from '@/components/Empty';
 
 import styles from './CommonList.module.css';
+import { render } from 'less';
 // 创建防抖hook
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -59,25 +60,40 @@ const getStatusColor = (status) => {
     }
 };
 
-/**
- * 处理可能为数组的字段展示
- * @param {string|array} value - 需要处理的值
- * @param {string} type - 字段类型
- * @returns {array} - 返回处理后的数组
- */
-const handleArrayDisplay = (value, type) => {
+//渲染字段
+const renderDisplayName = (value, name, showLine = false) => {
+
     if (!value) return [];
     const optionsBase = useStore.getState().optionsBase;
-    const valueArray = Array.isArray(value) ? value : [value];
+    let valueArray = Array.isArray(value) ? value : [value];
 
-    // 如果是difficultyCode，需要从optionsConstants.BizExerciseInjuredEnums中匹配displayName
-    if (type === 'difficultyCode') {
-        return valueArray.map(code => {
-            const matchedItem = optionsBase["BizExerciseInjuredEnums"].find(item => item.value === code);
-            return matchedItem ? matchedItem.displayName : code;
+    const matchedItem = optionsBase["BizExerciseInjuredEnums"]
+    if (matchedItem && matchedItem.length > 0) {
+        valueArray = valueArray.map(code => {
+            const displayItem = matchedItem.find(item => item.value === code);
+            return displayItem ? displayItem.displayName : code;
         });
     }
-
+    return (
+        <>
+            {
+                valueArray.map((code, index) => {
+                    return <>
+                        <span key={index}>
+                            {name === 'id' ? `ID:${code}` : code}
+                        </span>
+                        {
+                            (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && (
+                                <span>
+                                    |
+                                </span>
+                            )
+                        }
+                    </>
+                })
+            }
+        </>
+    )
     return valueArray;
 };
 
@@ -344,12 +360,11 @@ const CommonList = ({
             setIsPlaying(false);
         };
     }, [handleAudioEnded]);
-
     // 修改默认的列表项渲染函数中的音频预览部分
     const defaultRenderItemMeta = useCallback((item) => {
         return <List.Item.Meta style={{ alignItems: 'center' }}
             avatar={
-                getFileCategoryFromUrl(item.coverImage || item.audioUrl || item.animationPhoneUrl) === 'audio' ?
+                getFileCategoryFromUrl(item.coverImgUrl || item.audioUrl || item.animationPhoneUrl) == 'audio' ?
                     <div className={styles.audioPreview}>
                         <div
                             className={styles.audioPreview_box}
@@ -364,7 +379,7 @@ const CommonList = ({
                     </div>
                     :
                     <div className={styles.itemAvatar}>
-                        <Avatar shape="square" size={64} src={item.coverImage || item.imageUrl || item.animationPhoneUrl} />
+                        <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
                         <CaretRightOutlined
                             className={styles.playIcon}
                         />
@@ -386,25 +401,26 @@ const CommonList = ({
                         </Text>
                     </div>
                     {
-                        (item.functionType || item.type || item.difficultyCode) && <div>
-                            {handleArrayDisplay(
-                                item.difficultyCode || item.functionType || item.type,
-                                item.difficultyCode ? 'difficultyCode' : 'other'
-                            ).map((value, index, array) => (
-                                <Text
-                                    key={index}
-                                    type="secondary"
-                                    style={{
-                                        fontSize: '12px',
-                                        marginRight: index !== array.length - 1 ? '8px' : '0',
-                                        display: 'inline-block'
-                                    }}
-                                    ellipsis={{ tooltip: value }}
-                                >
-                                    {value}
-                                </Text>
-                            ))}
+                        <div style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '0 8px' }}>
+                            {
+                                renderDisplayName(
+                                    item.id,
+                                    'id',
+                                    true
+                                )
+                            }
+                            {
+                                renderDisplayName(
+                                    item.structureTypeCode,
+                                    'structureTypeCode',
+                                    true
+                                )
+                            }
+                            {renderDisplayName(
+                                item.difficultyCode || item.functionType || item.type
+                            )}
                         </div>
+
                     }
                 </div>
             }

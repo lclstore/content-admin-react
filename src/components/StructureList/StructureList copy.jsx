@@ -56,7 +56,7 @@ const SortableItemRenderer = React.memo(({
         id: `${panelId}-item-${itemIndex}`,
         data: { type: 'item', item, panelId, itemIndex },
     });
-    const audioRef = useRef(null);
+
     // 添加鼠标事件相关状态
     const [mouseDownPos, setMouseDownPos] = useState(null);
     const [currentPlayingItem, setCurrentPlayingItem] = useState(null);
@@ -236,8 +236,7 @@ const SortableItemRenderer = React.memo(({
                         <div className='audioPreview'>
                             <div
                                 className={'audioPreview_box'}
-                                onPointerDown={e => e.stopPropagation()}
-                                onClick={(e) => { e.stopPropagation(); handleAudioClick(e, item) }}
+                                onClick={(e) => handleAudioClick(e, item)}
                             >
                                 {(currentPlayingItem?.id === item.id && isPlaying) ? (
                                     <PauseOutlined style={{ fontSize: '20px' }} />
@@ -247,7 +246,7 @@ const SortableItemRenderer = React.memo(({
                             </div>
                         </div>
                         :
-                        <div className='itemAvatar'>
+                        <div className={'itemAvatar'}>
                             <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
                             <CaretRightOutlined
                                 className={'playIcon'}

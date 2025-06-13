@@ -559,7 +559,13 @@ const CollapseForm = ({
     // 渲染表单字段组
     const renderFieldGroup = (fieldGroup) => {
         return fieldGroup.map((field, index) => (
-            <React.Fragment key={field.name || `field-${index}`}>
+            // <React.Fragment key={field.name || `field-${index}`}>
+
+            // </React.Fragment>
+            <div className={styles.collapsePanelContentItem} style={{
+                width: field.width || '100%',
+                flex: field.flex || '',
+            }} key={field.name || `field-${index}`}>
                 {renderFormItem(field, {
                     form,
                     fields,
@@ -580,7 +586,7 @@ const CollapseForm = ({
                     selectedItemFromList,
                     onSelectedItemProcessed,
                 })}
-            </React.Fragment>
+            </div>
         ));
     };
 
@@ -771,7 +777,10 @@ const CollapseForm = ({
                                     className: `${styles.collapsePanel} ${item.isShowAdd ? styles.structureItem : ''}`,
                                     children: (
                                         <div className={styles.collapsePanelContent}>
-                                            {renderFieldGroup(item.fields || [])}
+                                            {/* {renderFieldGroup(item.fields || [])} */}
+                                            <div className={styles.collapsePanelContentRow}>
+                                                {renderFieldGroup(item.fields || [])}
+                                            </div>
                                         </div>
                                     )
                                 }

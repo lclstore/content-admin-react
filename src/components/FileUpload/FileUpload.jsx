@@ -1,6 +1,6 @@
-import React, {useCallback, useRef, useState, useMemo, useEffect, memo} from 'react';
+import React, { useCallback, useRef, useState, useMemo, useEffect, memo } from 'react';
 import PropTypes from 'prop-types';
-import {Upload, Button, Image, Spin, Typography, message, Modal} from 'antd';
+import { Upload, Button, Image, Spin, Typography, message, Modal } from 'antd';
 import {
     PlusOutlined,
     DownloadOutlined,
@@ -314,11 +314,12 @@ const FileUpload = ({
 
         // 文件类型描述
         if (acceptedFileTypes) {
-            const typesText = (typeof acceptedFileTypes === 'string' ? acceptedFileTypes.split(',') : acceptedFileTypes)
-                .map(t => t.trim().toUpperCase().replace(/^\./, '')) // 提取并大写类型/扩展名
+            const types = (typeof acceptedFileTypes === 'string' ? acceptedFileTypes.split(',') : acceptedFileTypes);
+            const isPlural = types.length > 1;//是否是复数
+            const typesText = types.map(t => t.trim().toUpperCase().replace(/^\./, '')) // 提取并大写类型/扩展名
                 .filter(Boolean)
                 .join('/');
-            if (typesText) parts.push(`Only .${typesText} file are accepted.`);
+            if (typesText) parts.push(`Only ${typesText} file${isPlural ? 's' : ''} ${isPlural ? 'are' : 'is'} accepted.`);
         } else {
             parts.push("Supports common formats");
         }
@@ -1120,7 +1121,7 @@ const FileUpload = ({
     }, [previewState.type]);
 
     // 媒体预览模态框状态控制
-    const handleMediaPreview = useCallback(( url, type) => {
+    const handleMediaPreview = useCallback((url, type) => {
         // 设置全局预览状态
         if (type === 'video') {
             window.MEDIA_PREVIEW.VIDEO = true;
@@ -1150,7 +1151,7 @@ const FileUpload = ({
                     <div className={styles.uploadLeftSection}>
                         <div className={styles.uploadArea} style={{ ...style }}>
                             {hasFile ? (
-                                <div className={styles.previewContainer}  onClick={() => getFileType === "video" && setPreviewState({ visible: true })}>
+                                <div className={styles.previewContainer} onClick={() => getFileType === "video" && setPreviewState({ visible: true })}>
                                     <RenderFilePreview></RenderFilePreview>
                                     <MediaPreviewModal
                                         type="video"

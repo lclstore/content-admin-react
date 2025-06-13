@@ -171,14 +171,13 @@ export default function CommonEditor(props) {
         let collapseKeys = []
         if (!collapseFormConfig || !internalFormFields || internalFormFields.length === 0) {
             collapseKeys = []
-        }
-        if (collapseFormConfig.defaultActiveKeys === 'all') {
+        } else if (collapseFormConfig.defaultActiveKeys === 'all') {
             collapseKeys = internalFormFields.map(field => field.name);
         }
-        if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
+        else if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
             collapseKeys = collapseFormConfig.defaultActiveKeys;
         } else {
-            collapseKeys = [internalFormFields[0].name]
+            collapseKeys = [internalFormFields[0]?.name]
         }
         setActiveCollapseKeys(collapseKeys)
     }

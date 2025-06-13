@@ -35,7 +35,6 @@ export default function WorkoutsList() {
     // 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            {title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1},
             {title: "Cover Image", width: 100,dataIndex: "coverImgUrl",mediaType: 'image',},
             {title: "Detail Image",width: 100, dataIndex: "detailImgUrl",mediaType: 'image',},
             {
@@ -46,7 +45,10 @@ export default function WorkoutsList() {
                 key: 'name',
                 // width: 350,
                 visibleColumn: 1,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text,row) => (<div>
+                    <div style={{ fontWeight:600 }}>{text}</div>
+                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
+                </div>),
             },
             {
                 title: 'Status',
@@ -100,7 +102,7 @@ export default function WorkoutsList() {
         setButtons([
             {
                 key: 'create',
-                text: 'Add Image',
+                text: 'Add Resource',
                 icon: <PlusOutlined/>,
                 type: 'primary',
                 onClick: () => router().push('editor'),

@@ -7,6 +7,8 @@ export default function UserEditorWithCommon() {
     // 初始用户数据状态--可设默认值
     const initialValues = {
         layoutType: 1,
+        applicationCode:"WORKOUT",
+        genderCode:"MALE",
         // status2: [1, 2],
         // status: 1, // 确保status有默认值1
         // // 为联动选择器设置默认值 - 使用数字类型
@@ -55,7 +57,7 @@ export default function UserEditorWithCommon() {
             onChange: (value, file, form) => {
                 const formValus = form.getFieldsValue();
                 form.setFieldsValue({
-                    detailImage: formValus['detailImage'] || value,
+                    detailImgUrl: formValus['detailImgUrl'] || value,
                     thumbnailImage: formValus['thumbnailImage'] || value,
                     completeImage: formValus['completeImage'] || value,
                 });
@@ -71,7 +73,7 @@ export default function UserEditorWithCommon() {
             onChange: (value, file, form) => {
                 const formValus = form.getFieldsValue();
                 form.setFieldsValue({
-                    coverImage: formValus['coverImage'] || value,
+                    coverImgUrl: formValus['coverImgUrl'] || value,
                     thumbnailImage: formValus['thumbnailImage'] || value,
                     completeImage: formValus['completeImage'] || value,
                 });
@@ -83,6 +85,7 @@ export default function UserEditorWithCommon() {
     ], []); // 使用useMemo优化性能，避免每次渲染重新创建
     return (
         <CommonEditorForm
+            enableDraft={true}
             formType="basic"
             moduleKey="resource"
             config={{ formName: 'Resource', hideSaveButton: false, hideBackButton: false }}

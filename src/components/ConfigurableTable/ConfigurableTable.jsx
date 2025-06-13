@@ -23,7 +23,7 @@ import MediaCell from '@/components/MediaCell/MediaCell';
 import { defaultPagination, actionIconMap, optionsConstants } from '@/constants';
 import { getPublicTableList, publicUpdateStatus, publicDeleteData, publicGenerate, sortPublicTableList } from "@/config/api.js";
 import settings from "@/config/settings.js"
-import noDataImg from '@/assets/images/no-data.png';
+import Empty from '@/components/Empty';
 import { debounce, times } from 'lodash';
 import { useStore } from "@/store/index.js";
 import {
@@ -1001,15 +1001,8 @@ const ConfigurableTable = forwardRef(({
 
     return (
         // isEmptyTableData ?
-        //     <div className={styles.customEmptyWrapper}>
-        //         <div className={styles.customEmptyImageWrapper}>
-        //             <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
-        //         </div>
-        //         <div className={styles.customEmptyTitle}>{
-        //             noDataTip || `You don't have any ${pathname} yet`
-        //         } </div>
-        //         {/* <div className={styles.customEmptyDescription}>Create your first program.</div> */}
-        //     </div>
+
+        //     // <Empty title={noDataTip || `You don't have any ${pathname} yet`} />
         //     :
         <div className={styles.configurableTableContainer} style={{ paddingTop: paddingTop }}>
             {/* 工具栏 */}

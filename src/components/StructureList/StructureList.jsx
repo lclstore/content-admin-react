@@ -17,7 +17,7 @@ import './StructureList.css';
 import CommonList from '../CommonEditorForm/CommonList';
 import { getFileCategoryFromUrl } from '../../utils';
 import audioManager from '../../utils/audioManager';
-import noDataImg from '@/assets/images/no-data.png';
+import Empty from '@/components/Empty';
 const { Text } = Typography;
 
 const SortableItemRenderer = React.memo(({
@@ -183,7 +183,6 @@ const SortableItemRenderer = React.memo(({
 
     // 创建表单实例
     const [itemForm] = Form.useForm();
-
     // 当item变化时，更新表单的值
     useEffect(() => {
         if (item && structureListFields) {
@@ -745,14 +744,7 @@ const StructureList = ({
                         </DndContext>
                     )}
                     {dataList.length === 0 && field.emptyPlaceholder && (
-                        <div className="customEmptyWrapper">
-                            <div className="customEmptyImageWrapper">
-                                <img src={noDataImg} alt="No Data" className="customEmptyImage" />
-                            </div>
-                            <div className="customEmptyTitle">{
-                                field.emptyPlaceholder || 'No data'
-                            } </div>
-                        </div>
+                        <Empty title={field.emptyPlaceholder || 'No data'} />
                     )}
                 </>
             )}

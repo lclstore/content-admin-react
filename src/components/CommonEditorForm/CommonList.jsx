@@ -21,7 +21,8 @@ import {
 import FiltersPopover from '@/components/FiltersPopover/FiltersPopover';
 import { optionsConstants } from '@/constants/options';
 import { getFileCategoryFromUrl } from '@/utils';
-import noDataImg from '@/assets/images/no-data.png';
+import Empty from '@/components/Empty';
+
 import styles from './CommonList.module.css';
 // 创建防抖hook
 const useDebounce = (value, delay) => {
@@ -539,14 +540,7 @@ const CommonList = ({
                             renderItem={renderListItem}
                             locale={{
                                 emptyText: (
-                                    <div className={styles.customEmptyWrapper}>
-                                        <div className={styles.customEmptyImageWrapper}>
-                                            <img src={noDataImg} alt="No Data" className={styles.customEmptyImage} />
-                                        </div>
-                                        <div className={styles.customEmptyTitle}>{
-                                            `You don't have any ${title} yet`
-                                        } </div>
-                                    </div>
+                                    <Empty title={`You don't have any ${title} yet`} />
                                 )
                             }}
                         />

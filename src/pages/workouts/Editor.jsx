@@ -78,8 +78,7 @@ export default function UserEditorWithCommon() {
             callback: res => {
                 // setWorkoutSettingInfo(res?.data?.data || {});
                 workoutSettingInfo.current = res?.data?.data;
-                console.log('0000001111');
-                window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data));
+                window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data || {}));
             }
         });
     }, []);
@@ -291,42 +290,6 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            label: 'Image',
-            name: 'image',
-            icon: <PictureOutlined />,
-            fields: [
-                {
-                    type: 'upload',
-                    name: 'coverImgUrl',
-                    label: 'Cover Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'detailImgUrl',
-                    label: 'Detail Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                // {
-                //     type: 'upload',
-                //     name: 'thumbnailImgUrl',
-                //     label: 'Thumbnail Image',
-                //     required: true,
-                //     onChange: imageUpload
-                // },
-                // {
-                //     type: 'upload',
-                //     name: 'completeImgUrl',
-                //     label: 'Complete Image',
-                //     required: true,
-                //     onChange: imageUpload
-                // },
-
-            ]
-        },
-        {
             label: 'Labels',
             name: 'labels',
             icon: <TagsOutlined />,
@@ -363,6 +326,43 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
+            label: 'Image',
+            name: 'image',
+            icon: <PictureOutlined />,
+            fields: [
+                {
+                    type: 'upload',
+                    name: 'coverImgUrl',
+                    label: 'Cover Image',
+                    required: true,
+                    onChange: imageUpload
+                },
+                {
+                    type: 'upload',
+                    name: 'detailImgUrl',
+                    label: 'Detail Image',
+                    required: true,
+                    onChange: imageUpload
+                },
+                // {
+                //     type: 'upload',
+                //     name: 'thumbnailImgUrl',
+                //     label: 'Thumbnail Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
+                // {
+                //     type: 'upload',
+                //     name: 'completeImgUrl',
+                //     label: 'Complete Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
+
+            ]
+        },
+
+        {
 
             title: 'Structure',
             label: 'Structure Settings',
@@ -395,7 +395,7 @@ export default function UserEditorWithCommon() {
                     step: 1,
                     formatter: (value) => value, // 格式化显示为 0:XX
                     name: 'structureRound', // 修改字段名避免重复
-                    label: 'Reps',
+                    label: 'Rounds',
                     required: true,
                 },
                 {

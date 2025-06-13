@@ -56,7 +56,7 @@ const SortableItemRenderer = React.memo(({
         id: `${panelId}-item-${itemIndex}`,
         data: { type: 'item', item, panelId, itemIndex },
     });
-    const audioRef = useRef(null);
+
     // 添加鼠标事件相关状态
     const [mouseDownPos, setMouseDownPos] = useState(null);
     const [currentPlayingItem, setCurrentPlayingItem] = useState(null);
@@ -120,7 +120,8 @@ const SortableItemRenderer = React.memo(({
         }
     };
     //渲染字段
-    const renderDisplayName = (value, name, showLine = false, isNext) => {
+    const renderDisplayName = (value, name, showLine = false) => {
+
         if (!value) return [];
         const optionsBase = useStore.getState().optionsBase;
         let valueArray = Array.isArray(value) ? value : [value];
@@ -141,7 +142,7 @@ const SortableItemRenderer = React.memo(({
                                 {name === 'id' ? `ID:${code}` : code}
                             </span>
                             {
-                                (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && isNext && (
+                                (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && (
                                     <span>
                                         |
                                     </span>
@@ -235,8 +236,7 @@ const SortableItemRenderer = React.memo(({
                         <div className='audioPreview'>
                             <div
                                 className={'audioPreview_box'}
-                                onPointerDown={e => e.stopPropagation()}
-                                onClick={(e) => { e.stopPropagation(); handleAudioClick(e, item) }}
+                                onClick={(e) => handleAudioClick(e, item)}
                             >
                                 {(currentPlayingItem?.id === item.id && isPlaying) ? (
                                     <PauseOutlined style={{ fontSize: '20px' }} />
@@ -246,7 +246,7 @@ const SortableItemRenderer = React.memo(({
                             </div>
                         </div>
                         :
-                        <div className='itemAvatar'>
+                        <div className={'itemAvatar'}>
                             <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
                             <CaretRightOutlined
                                 className={'playIcon'}
@@ -274,16 +274,14 @@ const SortableItemRenderer = React.memo(({
                                     renderDisplayName(
                                         item.id,
                                         'id',
-                                        true,
-                                        item.structureTypeCode
+                                        true
                                     )
                                 }
                                 {
                                     renderDisplayName(
                                         item.structureTypeCode,
                                         'structureTypeCode',
-                                        true,
-                                        item.difficultyCode || item.functionType || item.type
+                                        true
                                     )
                                 }
                                 {renderDisplayName(

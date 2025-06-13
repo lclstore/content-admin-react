@@ -62,6 +62,7 @@ export default function UserEditorWithCommon() {
     const defaultInitialValues = {
         premium: 0,
         genderCode: 'MALE',
+        injuredCodes: ['NONE'],
         difficultyCode: 'BEGINNER',
         positionCode: 'SEATED',
         newStartTime: formatDate(new Date(), 'YYYY-MM-DDTHH:mm:ss'),
@@ -78,8 +79,7 @@ export default function UserEditorWithCommon() {
             callback: res => {
                 // setWorkoutSettingInfo(res?.data?.data || {});
                 workoutSettingInfo.current = res?.data?.data;
-                console.log('0000001111');
-                window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data));
+                window.sessionStorage.setItem('workoutSettingInfo', JSON.stringify(res?.data?.data || {}));
             }
         });
     }, []);
@@ -255,15 +255,15 @@ export default function UserEditorWithCommon() {
                 {
                     type: 'input',
                     name: 'workoutDuration',
+                    placeholder: 'Auto-updated based on selected exercise.',
                     tooltip: 'Auto-updated based on selected exercise.',
                     tooltipPlacement: 'right',
                     label: 'Duration (Min)',
-                    placeholder: ' ',
                     disabled: true,
                 },
                 {
                     type: 'input',
-                    placeholder: ' ',
+                    placeholder: 'Auto-updated based on selected exercise.',
                     name: 'calorie',
                     tooltip: 'Auto-updated based on selected exercise.',
                     tooltipPlacement: 'right',
@@ -288,42 +288,6 @@ export default function UserEditorWithCommon() {
                 //     },
 
                 // },
-            ]
-        },
-        {
-            label: 'Image',
-            name: 'image',
-            icon: <PictureOutlined />,
-            fields: [
-                {
-                    type: 'upload',
-                    name: 'coverImgUrl',
-                    label: 'Cover Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                {
-                    type: 'upload',
-                    name: 'detailImgUrl',
-                    label: 'Detail Image',
-                    required: true,
-                    onChange: imageUpload
-                },
-                // {
-                //     type: 'upload',
-                //     name: 'thumbnailImgUrl',
-                //     label: 'Thumbnail Image',
-                //     required: true,
-                //     onChange: imageUpload
-                // },
-                // {
-                //     type: 'upload',
-                //     name: 'completeImgUrl',
-                //     label: 'Complete Image',
-                //     required: true,
-                //     onChange: imageUpload
-                // },
-
             ]
         },
         {
@@ -358,14 +322,64 @@ export default function UserEditorWithCommon() {
                     label: 'Injured',
                     mode: 'multiple',
                     required: true,
-                    options: 'BizExerciseInjuredEnums'
+                    options: 'BizExerciseInjuredEnums',
+                    onChange: (value, form) => {
+                        if (value.length === 2 && value[0] === 'NONE') {
+                            form.setFieldValue('injuredCodes', value.filter(item => item !== 'NONE'));
+                            return;
+                        }
+                        if (value.includes('NONE') && value.length > 1) {
+                            form.setFieldValue('injuredCodes', ['NONE']);
+                            return;
+                        }
+                        form.setFieldValue('injuredCodes', value);
+                    },
                 },
             ]
         },
         {
+            label: 'Image',
+            name: 'image',
+            icon: <PictureOutlined />,
+            fields: [
+                {
+                    type: 'upload',
+                    name: 'coverImgUrl',
+                    label: 'Cover Image',
+                    acceptedFileTypes: 'png,webp',
+                    required: true,
+                    onChange: imageUpload
+                },
+                {
+                    type: 'upload',
+                    name: 'detailImgUrl',
+                    label: 'Detail Image',
+                    acceptedFileTypes: 'png,webp',
+                    required: true,
+                    onChange: imageUpload
+                },
+                // {
+                //     type: 'upload',
+                //     name: 'thumbnailImgUrl',
+                //     label: 'Thumbnail Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
+                // {
+                //     type: 'upload',
+                //     name: 'completeImgUrl',
+                //     label: 'Complete Image',
+                //     required: true,
+                //     onChange: imageUpload
+                // },
+
+            ]
+        },
+
+        {
 
             title: 'Structure',
-            label: 'Structure Settings',
+            label: 'Structure',
             name: 'exerciseGroupList',
             isGroup: true,
             systemCount: 1,
@@ -386,6 +400,7 @@ export default function UserEditorWithCommon() {
                     type: 'input',
                     name: 'structureName',
                     label: 'Structure Name',
+                    flex: 1,
                     required: true,
                 },
                 {
@@ -393,15 +408,17 @@ export default function UserEditorWithCommon() {
                     min: 1,
                     max: 5,
                     step: 1,
+                    width: '180px',
                     formatter: (value) => value, // 格式化显示为 0:XX
                     name: 'structureRound', // 修改字段名避免重复
-                    label: 'Reps',
+                    label: 'Rounds',
                     required: true,
                 },
                 {
                     type: 'structureList',
                     name: 'exerciseIdList',
                     dataList: [],
+                    emptyPlaceholder: 'Please add exercises',
                     label: 'Exercises',
                     // placeholder: 'Please add exercises...',
                     required: true,
@@ -659,8 +676,11 @@ export default function UserEditorWithCommon() {
                 // 其他基本配置
                 // renderItemMata={renderItemMata}
                 commonListConfig={{
+                    renderKey: {
+                        imgKey: 'coverImgUrl',
+                    },
                     initCommonListData: initCommonListData,
-                    placeholder: 'Search your content name...',
+                    placeholder: 'Search name or ID...',
                     filterSections: filterSections,
                     title: 'Exercises',
                 }}

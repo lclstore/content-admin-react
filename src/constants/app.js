@@ -23,7 +23,7 @@ export const themeModes = {
 // 默认分页配置
 export const defaultPagination = {
     pageSize: 10,
-    page: 1,
+    pageIndex: 1,
     totalCount: 0
 };
 

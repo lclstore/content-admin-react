@@ -255,7 +255,7 @@ export const renderFormControl = (field, options = {}) => {
                     allowClear
                 >
                     {field.options.map((option) => (
-                        <Option key={option.value} value={option.value}>
+                        <Option key={option.value} value={option.value}  >
                             {field.renderLabel ? field.renderLabel(option, isPlaying, setIsPlaying, form) : option.label}
                         </Option>
                     ))}
@@ -415,10 +415,11 @@ export const renderFormControl = (field, options = {}) => {
             return (
                 <div>
                     {
-                        field.type === 'structureList' && field.dataList && <div className='structureList-title'>{`${field.dataList?.length || 0} ${field.label}`}</div>
+                        field.type === 'structureList' && field.dataList && field.dataList.length > 0 && <div className='structureList-title'>{`${field.dataList?.length || 0} ${field.label}`}</div>
                     }
                     <StructureList
                         form={form}
+                        field={field}
                         onCollapseChange={options.onCollapseChange}
                         isCollapse={options.isCollapse}
                         fields={options.fields}

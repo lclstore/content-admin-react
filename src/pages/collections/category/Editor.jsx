@@ -115,14 +115,14 @@ export default function UserEditorWithCommon() {
             ]
         },
         {
-            label: 'Workouts',
+            label: 'Workout',
             name: 'Workout',
             fields: [
                 {
                     type: 'structureList',
                     name: 'workoutList',
                     // renderItemMata: renderItemMata,
-                    label: 'Musics',
+                    label: 'Workout',
                     isCollapse: true,
                     formterList: (dataList, formValues) => {
                         return dataList?.map(item => {
@@ -134,6 +134,7 @@ export default function UserEditorWithCommon() {
                         });
                     },
                     dataList: [],
+                    emptyPlaceholder: 'Please add workouts',
                     rules: [
                         { required: true, message: 'Please add at least one music' },
                     ]

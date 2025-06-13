@@ -1,12 +1,10 @@
-import React, {useState, useEffect, useContext, useMemo, useRef} from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router';
 import CommonEditorForm from '@/components/CommonEditorForm';
-import { mockUsers } from './Data';
 import { validateEmail, validatePassword } from '@/utils';
 import { SaveOutlined, LogoutOutlined, LockOutlined, EyeOutlined, UnlockOutlined } from '@ant-design/icons';
 import request from "@/request";
-import Password from 'antd/es/input/Password';
 
 export default function UserEditorWithCommon() {
     const navigate = useNavigate();
@@ -43,7 +41,7 @@ export default function UserEditorWithCommon() {
 
         {
             type: 'upload',
-            name: 'profilePicture', // 遵循命名规范，使用Url后缀
+            name: 'avatar', // 遵循命名规范，使用Url后缀
             label: 'Profile Picture',
             uploadButtonText: "Change",
             acceptedFileTypes: 'jpg,png,jpeg',
@@ -129,18 +127,18 @@ export default function UserEditorWithCommon() {
             text: 'Save',
             icon: <SaveOutlined />,
             type: 'primary',
-            style:{ display:"none" },
-            onClick(){
+            style: { display: "none" },
+            onClick() {
                 localStorage.clear()
                 navigate('/login');
             }
         },
         {
             key: 'signout',
-            text: <div style={{ color:"red" }}>SIGN OUT</div>,
+            text: <div style={{ color: "rgb(255, 82, 82)" }}>SIGN OUT</div>,
             icon: <LogoutOutlined />,
-            type: 'primary',
-            onClick(){
+            type: 'default',
+            onClick() {
                 localStorage.clear()
                 navigate('/login');
             }
@@ -156,7 +154,7 @@ export default function UserEditorWithCommon() {
             console.log(document.querySelector('.header-actions').querySelector("button"))
             saveDom.current = document.querySelector('.header-actions').querySelector("button")
             saveDom.current.style.display = "none";
-        },100)
+        }, 100)
 
     }, []);
     return (
@@ -168,16 +166,17 @@ export default function UserEditorWithCommon() {
                 confirmSucess={handleConfirmSuccess}
                 operationName="profileSave"
                 isBack={false}
-                config={{ formName: 'Profile', headerButtons,hideTitleOperationName: true }}
+                config={{ formName: 'Profile', headerButtons, hideTitleOperationName: true }}
                 fields={formFields}
                 initialValues={users}
                 setFormRef={setEditorRef}
             />
-            <div style={{ maxWidth: '1000px', margin: '-5px auto', paddingLeft: '20px' }}>
+            <div style={{ maxWidth: '1000px', margin: '-10px auto', display: 'flex', justifyContent: 'flex-end' }}>
                 <Button
+                    style={{ marginLeft: '20px' }}
                     block
+                    type='primary'
                     onClick={() => {
-                        console.log('saveDom', saveDom)
                         saveDom.current.click()
                     }}
                 >

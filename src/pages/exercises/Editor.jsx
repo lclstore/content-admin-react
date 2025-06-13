@@ -16,7 +16,7 @@ export default function UserEditorWithCommon() {
         difficultyCode: 'BEGINNER',
         equipmentCode: 'CHAIR',
         positionCode: 'SEATED',
-        injuredCodes:["NONE"],
+        injuredCodes: ["NONE"],
     }
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -147,6 +147,7 @@ export default function UserEditorWithCommon() {
 
             //文件上传后修改name
             onChange: (value, file, form) => {
+                console.log('file',file)
             },
 
             acceptedFileTypes: 'mp3',

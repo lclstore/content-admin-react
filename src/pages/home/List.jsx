@@ -68,7 +68,7 @@ export default function Home() {
                 url: `/home/helps/page`,
                 load: true,
                 data: {
-                    page: 1,
+                    pageIndex: 1,
                     pageSize: 99999
                 },
                 callback: res => {

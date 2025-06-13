@@ -19,7 +19,7 @@ export const tabLabels = [
         value: "biz-sound"
     },
     {
-        label: "Images",
+        label: "Resources",
         value: "biz-music"
     },
     {

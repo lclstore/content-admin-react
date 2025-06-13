@@ -110,7 +110,7 @@ export default function CommonEditor(props) {
         //   获取当前激活的折叠面板
         setTimeout(() => {
             getActiveCollapseKeys()
-        }, 500);
+        }, 200);
 
     }, [fields, formFields, collapseFormConfig.fields]);
 
@@ -171,12 +171,13 @@ export default function CommonEditor(props) {
         let collapseKeys = []
         if (!collapseFormConfig || !internalFormFields || internalFormFields.length === 0) {
             collapseKeys = []
-        }
-        if (collapseFormConfig.defaultActiveKeys === 'all') {
+        } else if (collapseFormConfig.defaultActiveKeys === 'all') {
             collapseKeys = internalFormFields.map(field => field.name);
         }
-        if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
+        else if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
             collapseKeys = collapseFormConfig.defaultActiveKeys;
+        } else {
+            collapseKeys = [internalFormFields[0]?.name]
         }
         setActiveCollapseKeys(collapseKeys)
     }

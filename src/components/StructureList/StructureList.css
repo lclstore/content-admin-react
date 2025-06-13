@@ -1,5 +1,6 @@
 .structure-item .ant-list-item-meta {
     align-items: center;
+    max-width: 100%;
 }
 
 
@@ -122,10 +123,40 @@
     padding: 0 10px;
     border: 1px solid #fff;
     border-radius: 10px;
+    margin-bottom: 10px;
 }
 
 .structure-list-item.item-wrapper.expanded {
     border: 1px solid #1c8;
-    margin-bottom: 10px;
 
+
+}
+
+
+.audioPreview_box {
+    margin-right: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    color: #11cc88;
+    border: 2px solid #11cc88;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* 头像和播放图标样式 */
+.itemAvatar {
+    margin-right: 16px;
+    position: relative;
+}
+
+.playIcon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 18px;
+    color: #fff;
 }

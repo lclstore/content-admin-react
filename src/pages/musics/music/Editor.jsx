@@ -15,8 +15,8 @@ export default function UserEditorWithCommon({id, setFormRef}) {
             //文件上传后修改name
             onChange: (value, file, form) => {
                 form.setFieldsValue({
-                    displayName: file?.name || '',
-                    name: file?.name || '',
+                    displayName: file?.name.replace('.mp3','').replace('.MP3','') || '',
+                    name: file?.name.replace('.mp3','').replace('.MP3','') || '',
                 });
             },
         },

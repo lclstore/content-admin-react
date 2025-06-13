@@ -1,17 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-
+import { renderSelectAudioLabel } from '@/common';
 import CommonEditorForm from '@/components/CommonEditorForm';
-import { commonListData, filterSections } from '@/pages/Data';
 import {
     ThunderboltOutlined,
-    TagsOutlined,
     PictureOutlined,
-    VideoCameraOutlined,
-    SettingOutlined,
     SaveOutlined,
-    PlayCircleOutlined,
-    PauseCircleOutlined
+
 } from '@ant-design/icons';
 import request from "@/request";
 export default function UserEditorWithCommon() {
@@ -65,68 +60,49 @@ export default function UserEditorWithCommon() {
 
 
     }
-    const [workoutSetting, setworkoutSettingsr] = useState(initialValues);
+    const [audioOptions, setAudioOptions] = useState([]);
+    const [workoutSetting, setWorkoutSetting] = useState(initialValues);
     const getData = async () => {
         return new Promise(resolve => {
             request.get({
                 url: `/workoutSetttings/detail`,
                 load: true,
                 callback: res => {
-                    console.log('res11111', res)
-                    // initialValues = res.data.data
                     resolve(res.data.data)
                 }
             });
         })
     }
-    useEffect(() => {
-        console.log('1111111111111')
-        getData().then(res => {
-            console.log(res)
-            setworkoutSettingsr(res)
+    const getAudioOptions = async () => {
+        return new Promise(resolve => {
+            request.get({
+                url: `/sound/page`,
+                load: false,
+                data: {
+                    pageIndex: 1,
+                    pageSize: 10000,
+                    orderBy: 'id',
+                    orderDirection: 'DESC',
+                    usageCodeList: ['FLOW'],
+                    statusList: ['ENABLED']
+                },
+                callback: res => {
+                    if (res.data.success) {
+                        const audioOptionList = res?.data?.data.map(item => { return { label: item.name, value: item.id } })
+                        setAudioOptions(audioOptionList)
+                    }
+                    resolve();
+                }
+            })
         })
+    }
+    useEffect(() => {
+        getData().then(res => {
+            setWorkoutSetting(res || initialValues)
+        })
+        getAudioOptions()//获取音频列表
     }, []);
 
-
-    // 创建音频播放器的引用
-    let audioPlayer = null;
-    // 当前播放的音频URL
-    let playingUrl = null;
-
-    // 播放或暂停音频的函数
-    const playAudio = (option, e, isPlaying, setIsPlaying) => {
-        // 阻止事件冒泡和默认行为
-        e.preventDefault();
-        e.stopPropagation();
-        setIsPlaying(isPlaying === option.value ? null : option.value);
-        // 如果点击的是当前正在播放的音频，则暂停
-        if (playingUrl === option.url && audioPlayer) {
-            audioPlayer.pause();
-
-
-            audioPlayer.src = '';
-            playingUrl = null;
-            return;
-        }
-
-        // 如果有正在播放的音频，先停止它
-        if (audioPlayer) {
-            audioPlayer.pause();
-            audioPlayer.src = '';
-        }
-
-        // 创建新的音频对象并播放
-        const audio = new Audio(option.url);
-        audio.play();
-        audioPlayer = audio;
-
-        playingUrl = option.url;
-
-        // 监听音频播放结束事件
-        audio.onended = () => {
-            playingUrl = null;
-        };
-    };
 
     const initialFormFields = useMemo(() => [
         {
@@ -163,37 +139,8 @@ export default function UserEditorWithCommon() {
                             label: '',
                             flex: 1,
                             placeholder: 'Intro Audio',
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                         },
                         {
                             type: 'input',
@@ -276,37 +223,8 @@ export default function UserEditorWithCommon() {
                                 message: 'Preview First Audio'
                             }],
                             flex: 1,
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -363,37 +281,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Preview Next Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -450,37 +339,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Preview Last Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -533,37 +393,8 @@ export default function UserEditorWithCommon() {
                             placeholder: 'Preview Name Audio',
                             disabled: true,
                             flex: 1,
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                         },
                         {
                             type: 'input',
@@ -619,37 +450,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Preview 3 Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -707,37 +509,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Preview 2 Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -795,37 +568,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Preview 1 Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -911,37 +655,8 @@ export default function UserEditorWithCommon() {
                                 message: 'Execution Go Audio'
                             }],
                             flex: 1,
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -995,37 +710,8 @@ export default function UserEditorWithCommon() {
                             flex: 1,
                             disabled: true,
                             placeholder: 'Execution Guidance Audio',
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                         },
                         {
                             type: 'input',
@@ -1072,7 +758,7 @@ export default function UserEditorWithCommon() {
                     inputConfig: [
                         {
                             type: 'antdSelect',
-                            name: 'executionHalfwayAudioBizSoundId',
+                            name: 'executionHalfwayAudioBizSoundIds',
                             label: '',
                             placeholder: 'Execution Halfway Audio',
                             rules: [{
@@ -1081,38 +767,9 @@ export default function UserEditorWithCommon() {
                             }],
                             mode: 'multiple',
                             maxTagCount: 1,
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
+                            options: audioOptions,
                             flex: 1,
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -1168,37 +825,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution 3 Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -1257,37 +885,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution 2 Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -1346,37 +945,8 @@ export default function UserEditorWithCommon() {
                                 required: true,
                                 message: 'Execution 1 Audio'
                             }],
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -1435,37 +1005,8 @@ export default function UserEditorWithCommon() {
                                 message: 'Execution Rest Audio'
                             }],
                             flex: 1,
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -1524,37 +1065,8 @@ export default function UserEditorWithCommon() {
                                 message: 'Execution Beep Audio'
                             }],
                             flex: 1,
-                            options: [
-                                { value: 1, label: 'option1', url: 'https://amber.7mfitness.com/cms/music/audio/5f67cb64f5f5448a8f6a1a0a322dd2bd.mp3' },
-                                { value: 2, label: 'option2', url: 'https://amber.7mfitness.com/cms/music/audio/46c966674c9d43b391c4b835eaa829ea.mp3' },
-                                { value: 3, label: 'option3', url: 'https://amber.7mfitness.com/cms/music/audio/90735f772cfd4888a813390fec672d26.mp3' }
-                            ],
-                            renderLabel: (option, isPlaying, setIsPlaying, form) => {
-                                return (
-                                    <span style={{ display: 'flex', alignItems: 'center', fontWeight: 600, justifyContent: 'space-between', padding: '0 20px' }}>
-                                        {option.label}
-                                        <span
-                                            onClick={(e) => {
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-                                            }}
-                                            onMouseDown={(e) => {
-                                                e.stopPropagation();
-                                                playAudio(option, e, isPlaying, setIsPlaying);
-
-                                            }}>
-                                            {isPlaying && isPlaying === option.value ? (
-                                                <PauseCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            ) : (
-                                                <PlayCircleOutlined
-                                                    style={{ marginLeft: 16, color: '#1c8', fontSize: 20 }}
-                                                />
-                                            )}
-                                        </span>
-                                    </span >
-                                );
-                            },
+                            options: audioOptions,
+                            renderLabel: renderSelectAudioLabel,
                             required: true,
                         },
                         {
@@ -1600,25 +1112,22 @@ export default function UserEditorWithCommon() {
 
             ]
         },
-    ], []); // 使用useMemo优化性能，避免每次渲染重新创建
+    ], [audioOptions]); // 使用useMemo优化性能，避免每次渲染重新创建
 
     // 使用新设计：只维护一个formFields状态，并提供更新回调
-    const [formFields, setFormFields] = useState(initialFormFields);
+    const [formFields, setFormFields] = useState([]);
 
+    useEffect(() => {
+        // 当 initialFormFields (因为 audioOptions 变化而重新计算) 改变时，
+        // 更新 formFields 状态。
+        setFormFields(initialFormFields);
+    }, [initialFormFields]);
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields) => {
         setFormFields(updatedFields);
     };
 
-    //请求列表数据方法
-    const initCommonListData = (params) => {
-        return new Promise((resolve) => {
-            // 模拟延迟 1 秒
-            setTimeout(() => {
-                resolve(commonListData.filter(item => item.status === "ENABLE"));
-            }, 1000);
-        });
-    }
+
 
     // 自定义渲染列表项展示
     const renderItemMata = (item) => {
@@ -1686,25 +1195,27 @@ export default function UserEditorWithCommon() {
     return (
         <div
         >
-            <CommonEditorForm
-                moduleKey='workoutSetttings'
-                // 传递当前formFields状态
-                fields={formFields}
-                // 提供更新配置项回调
-                onFormFieldsChange={handleFormFieldsChange}
-                // 提供折叠面板展开回调
-                onCollapseChange={handleCollapseChange}
-                // 其他基本配置
-                // renderItemMata={renderItemMata}
-                config={{ formName: 'workoutSettings',hideTitleOperationName: true, headerButtons }}
-                isBack={false}
+            {
+                <CommonEditorForm
+                    moduleKey='workoutSetttings'
+                    // 传递当前formFields状态
+                    fields={formFields}
+                    // 提供更新配置项回调
+                    onFormFieldsChange={handleFormFieldsChange}
+                    // 提供折叠面板展开回调
+                    onCollapseChange={handleCollapseChange}
+                    // 其他基本配置
+                    // renderItemMata={renderItemMata}
+                    config={{ formName: 'workout Settings', hideTitleOperationName: true, headerButtons }}
+                    isBack={false}
 
-                isCollapse={true}
-                formType="advanced"
+                    isCollapse={true}
+                    formType="advanced"
 
-                collapseFormConfig={{ defaultActiveKeys: 'all', isAccordion: false }}
-                initialValues={workoutSetting}
-            />
+                    collapseFormConfig={{ defaultActiveKeys: 'all', isAccordion: false }}
+                    initialValues={workoutSetting}
+                />
+            }
         </div>
     );
 } 

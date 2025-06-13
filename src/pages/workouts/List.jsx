@@ -366,6 +366,10 @@ export default function WorkoutsList() {
      */
     const handleBatchCreateModalCancel = useCallback(() => {
         setIsBatchCreateModalVisible(false);
+        // 清空表单值
+        batchCreateForm.resetFields();
+        // 重置 Lang 字段显示状态
+        setShowLangField(false);
     }, []);
 
     /**
@@ -373,7 +377,7 @@ export default function WorkoutsList() {
      */
     const handleBatchCreateModalOk = useCallback(async () => {
         try {
-            const values = await batchCreateForm.validateFields();
+            const values = await batchCreateForm.validateFields(true);
             setBatchCreateLoading(true);
             // 更新 videoFlag 和 audioFlag
             values.videoFlag = values.files.includes('Video-M3U8');
@@ -388,6 +392,9 @@ export default function WorkoutsList() {
                         setBatchCreateLoading(false);
                         setIsBatchCreateModalVisible(false);
                         messageApi.success('Task in progress...');
+                        // 成功后清空表单
+                        batchCreateForm.resetFields();
+                        setShowLangField(false);
                     } else {
                         messageApi.error(res.data.message);
                     }
@@ -399,29 +406,25 @@ export default function WorkoutsList() {
     }, [batchCreateForm, selectedRowKeys]);
 
     // 监听files字段变化
-    const handleFilesChange = (checkedValues) => {
-        return
-        // 创建包含所有选项的状态对象
-        const fileStatus = {
-            'Video-M3U8': false,
-            'Audio-JSON': false
-        };
-
-        // 更新选中项的状态为true
-        checkedValues.forEach(value => {
-            fileStatus[value] = true;
-        });
-
-        // 检查是否包含 Audio-JSON
-        setShowLangField(fileStatus['Audio-JSON']);
-
-        // 如果移除了Audio-JSON，同时清空lang字段
-        if (!fileStatus['Audio-JSON']) {
-            batchCreateForm.setFieldValue('lang', undefined);
+    const handleFilesChange = (checkedValues = []) => {
+        // 确保 checkedValues 是数组
+        const values = Array.isArray(checkedValues) ? checkedValues : [];
+        const videoFlag = values.includes('Video-M3U8');
+        const audioFlag = values.includes('Audio-JSON');
+        // 如果选择了 Audio-JSON，显示 Lang 字段
+        setShowLangField(audioFlag);
+        batchCreateForm.setFieldsValue({ videoFlag, audioFlag });
+        // 如果取消选择 Audio-JSON，清空 Lang 字段的值
+        if (!audioFlag) {
+            batchCreateForm.setFieldsValue({ languageList: [] });
         }
-
-        // 更新表单字段值
-        batchCreateForm.setFieldValue('files', checkedValues);
+        // 触发表单验证
+        batchCreateForm.validateFields(['files', 'languageList'])
+    };
+    const handleLanguageChange = (checkedValues = []) => {
+        // 确保 checkedValues 是数组
+        const values = Array.isArray(checkedValues) ? checkedValues : [];
+        batchCreateForm.setFieldsValue({ languageList: values });
     };
 
     // 7. 副作用 - 组件生命周期相关处理
@@ -466,7 +469,7 @@ export default function WorkoutsList() {
         url: '/common/language/list',
         point: false,
         callback(res) {
-            setLanguageOptions(res?.data?.data?.map(i => ({ label: i, value: i })) || [])
+            setLanguageOptions(res?.data?.data?.map(i => ({ label: i.toLocaleUpperCase(), value: i })) || [])
         }
 
     }))
@@ -498,28 +501,24 @@ export default function WorkoutsList() {
             validateTrigger: ['onSubmit'],
             type: 'tagSelector',
             mode: 'multiple',
-            height: '80px',
-            props: {
-                options: [
-                    { label: 'Video-M3U8', value: 'Video-M3U8' },
-                    { label: 'Audio-JSON', value: 'Audio-JSON' }
-                ]
-            },
+            options: [
+                { label: 'Video-M3U8', value: 'Video-M3U8' },
+                { label: 'Audio-JSON', value: 'Audio-JSON' }
+            ],
             onChange: handleFilesChange
+
         },
         {
             label: 'Lang',
             name: 'languageList',
             rules: [{ required: true, message: 'Please Select Lang' }],
-            validateTrigger: ['onSubmit'],
-            type: 'select',
+            validateTrigger: ['onChange'],
+            type: 'tagSelector',
             visible: showLangField,
-            props: {
-                mode: 'multiple',
-                allowClear: true,
-                placeholder: 'Please Select Lang',
-                options: languageOptions
-            }
+            mode: 'multiple',
+            placeholder: 'Please Select Lang',
+            options: languageOptions,
+            onChange: handleLanguageChange
         }
     ], [showLangField, handleFilesChange]);
 
@@ -529,20 +528,7 @@ export default function WorkoutsList() {
         let childNode;
         switch (item.type) {
             case 'tagSelector':
-                childNode = <TagSelector backgroundColor="#f8f8f8" key={item.name} {...item.props} />;
-                // childNode = (
-                //     <Checkbox.Group onChange={item.onChange}>
-                //         {item.options.map(option => (
-                //             <Checkbox
-                //                 key={option.value}
-                //                 value={option.value}
-                //                 style={{ marginRight: '8px' }}
-                //             >
-                //                 {option.label}
-                //             </Checkbox>
-                //         ))}
-                //     </Checkbox.Group>
-                // );
+                childNode = <TagSelector backgroundColor="#f8f8f8" key={item.name}  {...item} />;
                 break;
             case 'select':
                 childNode = <Select {...item.props} />;
@@ -557,7 +543,7 @@ export default function WorkoutsList() {
                 label={item.label}
                 name={item.name}
                 rules={item.rules}
-                style={{ height: item.height || '95px' }}
+                style={{ height: item.height || '96px' }}
                 validateTrigger={item.validateTrigger}
             >
                 {childNode}
@@ -588,7 +574,7 @@ export default function WorkoutsList() {
 
             {/* 添加批量创建文件的 Modal */}
             <Modal
-                title="Batch Create Files"
+                title="Batch Create File"
                 open={isBatchCreateModalVisible}
                 onOk={handleBatchCreateModalOk}
                 onCancel={handleBatchCreateModalCancel}
@@ -597,7 +583,7 @@ export default function WorkoutsList() {
                 <Spin spinning={batchCreateLoading} tip="Generating files...">
                     <Form
 
-                        style={{ minHeight: '170px' }}
+                        style={{ minHeight: '200px' }}
                         form={batchCreateForm}
                         layout="vertical"
                     >

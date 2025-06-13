@@ -582,7 +582,7 @@ const ConfigurableTable = forwardRef(({
         const mediaTypes = ['image', 'video', 'audio']; // 定义合法的媒体类型
         return currentlyVisibleColumns.map(col => {
             let processedCol = { ...col };
-
+            processedCol.showSorterTooltip = processedCol.showSorterTooltip ?? false;
             // 为align: 'center'的列添加类名
             if (processedCol.align === 'center') {
                 processedCol.className = `td-center`

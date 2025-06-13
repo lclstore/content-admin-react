@@ -5,18 +5,26 @@ import {
 import { useLocation, useNavigate } from 'react-router';
 import { HeaderContext } from '@/contexts/HeaderContext';
 import ConfigurableTable from '@/components/ConfigurableTable/ConfigurableTable';
-import { router } from "@/utils/index.js";
 import request from "@/request/index.js";
-import { App, Table, Modal, Button, Checkbox, Typography, Select } from "antd";
-import { useImmer } from "use-immer";
+import TagSelector from '@/components/TagSelector/TagSelector';
+import { Table, Modal, Select, Form, Spin, message } from "antd";
+
 
 export default function WorkoutsList() {
-    const tableRef = useRef(null);
     const { setButtons, setCustomPageTitle } = useContext(HeaderContext); // 更新为新的API
     const navigate = useNavigate(); // 路由导航
     const location = useLocation()
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 选中的行
+    const currentSelectedRowKeys = useRef([])
     const [templateList, setTemplateList] = useState([])
     const [languageOptions, setLanguageOptions] = useState([])
+    const [generateForm] = Form.useForm(); // 生成文件表单实例
+    const [messageApi, contextHolder] = message.useMessage();
+    const [generateModalVisible, setGenerateModalVisible] = useState(false);
+    const [generateLoading, setGenerateLoading] = useState(false);
+    const [showLangField, setShowLangField] = useState(false); // 添加状态控制Lang字段显示
+
+
     //查询条件数组
     const filterSections = useMemo(() => [
         {
@@ -141,15 +149,131 @@ export default function WorkoutsList() {
      *
      * 批量生成功能
      */
-    // 弹窗
-    const [createFileConfig, updateCreateFileConfig] = useImmer({
-        visible: false,
-        "videoFlag": false,
-        "audioFlag": false,
-        "languageList": [],
-        templateId,
-        loading: false,
-    })
+    // 监听files字段变化
+    const handleFilesChange = useCallback((checkedValues = []) => {
+        // 确保 checkedValues 是数组
+        const values = Array.isArray(checkedValues) ? checkedValues : [];
+        const videoFlag = values.includes('Video-M3U8');
+        const audioFlag = values.includes('Audio-JSON');
+        // 如果选择了 Audio-JSON，显示 Lang 字段
+        setShowLangField(audioFlag);
+        generateForm.setFieldsValue({ videoFlag, audioFlag });
+        // 如果取消选择 Audio-JSON，清空 Lang 字段的值
+        if (!audioFlag) {
+            generateForm.setFieldsValue({ languageList: [] });
+        }
+        // 触发表单验证
+        generateForm.validateFields(['files', 'languageList']).catch(() => { });
+    }, [generateForm]);
+
+    // 监听language字段变化
+    const handleLanguageChange = useCallback((checkedValues = []) => {
+        // 确保 checkedValues 是数组
+        const values = Array.isArray(checkedValues) ? checkedValues : [];
+        generateForm.setFieldsValue({ languageList: values });
+    }, [generateForm]);
+
+    // 生成文件的表单配置
+    const generateFormConfig = useMemo(() => [
+        {
+            label: 'File',
+            name: 'files',
+            rules: [{ required: true, message: 'Please Select File' }],
+            validateTrigger: ['onChange', 'onSubmit'],
+            type: 'tagSelector',
+            mode: 'multiple',
+            options: [
+                { label: 'Video-M3U8', value: 'Video-M3U8' },
+                { label: 'Audio-JSON', value: 'Audio-JSON' }
+            ],
+            onChange: handleFilesChange
+        },
+        {
+            label: 'Lang',
+            name: 'languageList',
+            rules: [{ required: true, message: 'Please Select Lang' }],
+            validateTrigger: ['onChange'],
+            type: 'tagSelector',
+            mode: 'multiple',
+            placeholder: 'Please Select Lang',
+            options: languageOptions,
+            visible: showLangField,
+            onChange: handleLanguageChange
+        },
+        {
+            label: 'Template',
+            name: 'templateId',
+            rules: [{ required: true, message: 'Please Select Template' }],
+            type: 'tagSelector',
+            options: templateList
+        }
+    ], [languageOptions, templateList, showLangField, handleFilesChange, handleLanguageChange]);
+    const onSelectChange = useCallback((newSelectedRowKeys) => {
+        currentSelectedRowKeys.current = newSelectedRowKeys
+        setSelectedRowKeys(newSelectedRowKeys)
+
+    }, []);
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+        columnWidth: 60,
+    };
+    // 渲染表单项
+    const renderFormItem = (item) => {
+        if (item.visible === false) {
+            // 对于隐藏字段，渲染Form.Item但不显示
+            return (
+                <Form.Item
+                    key={item.name}
+                    name={item.name}
+                    hidden
+                >
+                    <input type="hidden" />
+                </Form.Item>
+            );
+        }
+        if (item.name === 'languageList' && !showLangField) return null;
+
+        let childNode;
+        switch (item.type) {
+            case 'tagSelector':
+                childNode = <TagSelector backgroundColor="#f8f8f8" key={item.name} {...item} />;
+                break;
+            case 'select':
+                childNode = <Select {...item.props} />;
+                break;
+            default:
+                childNode = null;
+        }
+
+        return (
+            <Form.Item
+                key={item.name}
+                label={item.label}
+                name={item.name}
+                rules={item.rules}
+                style={{ height: item.height || '96px' }}
+                validateTrigger={item.validateTrigger}
+            >
+                {childNode}
+            </Form.Item>
+        );
+    };
+
+    // 处理生成文件
+    const handleGenerate = useCallback(async () => {
+        try {
+            const formValues = await generateForm.validateFields(true);
+            formValues.videoFlag = formValues.files.includes('Video-M3U8');
+            formValues.audioFlag = formValues.files.includes('Audio-JSON');
+            formValues.workoutIdList = currentSelectedRowKeys.current;
+
+            setGenerateLoading(true);
+            generate(formValues);
+        } catch (error) {
+            console.error('表单验证失败:', error);
+        }
+    }, [generateForm]);
 
     const expandedRowRender = useCallback((record) => {
 
@@ -211,28 +335,40 @@ export default function WorkoutsList() {
             />
         );
     });
+
+
     const leftToolbarItems = useMemo(() => [
         {
             key: 'batchCreate',
             label: 'Batch Create File',
-            onClick: () => updateCreateFileConfig(draft => void (draft.visible = true)),
+            onClick: () => {
+                setGenerateModalVisible(true);
+                // 设置表单初始值
+                generateForm.setFieldsValue({
+                    templateId
+                });
+            },
             icon: <PlusOutlined />,
             // disabled: selectedRowKeys.length === 0
         }
-    ], []);
-    const generate = useCallback(() => {
-        const workoutIdList = tableRef.current.selectList.get().map(i => i.id)
+    ], [templateId]);
+    const generate = useCallback((params) => {
         return new Promise(resolve => {
             request.post({
                 url: `/template/workout/generateFile`,
-                point: true,
-                data: {
-                    ...createFileConfig,
-                    // 获取 workoutIds
-                    workoutIdList,
-                },
-                callback() {
-                    resolve()
+                point: false,
+                data: params,
+                callback(res) {
+                    if (res?.data?.success) {
+                        setGenerateLoading(false);
+                        setGenerateModalVisible(false);
+                        messageApi.success('Task in progress...');
+                        // 成功后清空表单
+                        generateForm.resetFields();
+                        setShowLangField(false);
+                    } else {
+                        messageApi.error(res.message);
+                    }
                 }
             })
         })
@@ -245,14 +381,15 @@ export default function WorkoutsList() {
             pageSize: 999999
         },
         success(res) {
-            setTemplateList(res.data.data.map(i => ({ value: i.id, label: `(${i.id}) ${i.name}`, ...i })))
+            const options = res?.data?.data?.map(i => ({ label: `${i.name} (ID:${i.id})`, value: i.id })) || [];
+            setTemplateList(options)
         }
     }))
     // 获取语言数据
     const getLanguageList = useCallback(() => request.get({
         url: '/common/language/list',
         success(res) {
-            setLanguageOptions(res.data.data)
+            setLanguageOptions(res?.data?.data?.map(i => ({ label: i.toLocaleUpperCase(), value: i })) || [])
         }
     }))
     useEffect(() => {
@@ -262,69 +399,36 @@ export default function WorkoutsList() {
     //渲染表格组件
     return (
         <>
-            {/* Batch Create File */}
+            {/* Generate Files Modal */}
             <Modal
-                title="Generate"
-                styles={{ content: { width: '200px' } }}
-                open={createFileConfig.visible}
-                okText="OK"
-                onOk={() => {
-                    updateCreateFileConfig(draft => {
-                        draft.loading = true
-                    })
-                    generate().then(() => {
-                        updateCreateFileConfig(draft => {
-                            draft.visible = false
-                            draft.loading = false
-                        })
-                    })
+                title="Batch Create File"
+                open={generateModalVisible}
+                onOk={handleGenerate}
+                onCancel={() => {
+                    setGenerateModalVisible(false);
+                    generateForm.resetFields();
+                    setShowLangField(false);
                 }}
-                confirmLoading={createFileConfig.loading}
-                onCancel={() => updateCreateFileConfig(draft => void (draft.visible = false))}
-                okButtonProps={{
-                    disabled: (
-                        !(createFileConfig.videoFlag || createFileConfig.audioFlag) ||
-                        !createFileConfig.templateId) ||
-                        (createFileConfig.audioFlag && !createFileConfig.languages.length)
-                }}
+                confirmLoading={generateLoading}
             >
-                <Typography.Title level={5} style={{ color: 'black' }}>File:</Typography.Title>
-                <div>
-                    <Checkbox checked={createFileConfig.videoFlag} onChange={
-                        (e) =>
-                            updateCreateFileConfig(draft => void (draft.videoFlag = e.target.checked))
-                    }>Video-M3U8</Checkbox>
-                    <Checkbox checked={createFileConfig.audioFlag} onChange={
-                        (e) => {
-                            if (!e.target.checked) {
-                                updateCreateFileConfig(draft => void (draft.languages = []))
-                            }
-                            updateCreateFileConfig(draft => void (draft.audioFlag = e.target.checked))
-                        }}>Audio-JSON</Checkbox>
-                </div>
-                {
-                    createFileConfig.audioFlag && <div>
-                        <Typography.Title level={5} style={{ color: 'black' }}>Lang:</Typography.Title>
-                        <Checkbox.Group options={languageOptions} value={createFileConfig.languages} onChange={
-                            (val) =>
-                                updateCreateFileConfig(draft => void (draft.languages = val))} />
-                    </div>
-                }
-                <Typography.Title level={5} style={{ color: 'black' }}>Template:</Typography.Title>
-                <Select
-                    style={{ width: '100%' }}
-                    value={createFileConfig.templateId}
-                    onChange={
-                        (val) =>
-                            updateCreateFileConfig(draft => void (draft.templateId = val))}
-                    options={templateList}
-                />
+                <Spin spinning={generateLoading} tip="Generating files...">
+                    <Form
+                        form={generateForm}
+                        layout="vertical"
+                        style={{ minHeight: '300px' }}
+                        initialValues={{
+                            templateId
+                        }}
+                    >
+                        {generateFormConfig.map(renderFormItem)}
+                    </Form>
+                </Spin>
             </Modal>
+            {contextHolder}
             <ConfigurableTable
-                ref={tableRef}
                 columns={allColumnDefinitions}
                 expandedRowRender={expandedRowRender}
-                rowSelection={true}
+                rowSelection={rowSelection}
                 leftToolbarItems={leftToolbarItems}
                 getTableList={getTableList}
                 moduleKey="workout"

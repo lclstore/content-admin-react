@@ -61,7 +61,7 @@ const getStatusColor = (status) => {
 };
 
 //渲染字段
-const renderDisplayName = (value, name, showLine = false) => {
+const renderDisplayName = (value, name, showLine = false, isNext) => {
 
     if (!value) return [];
     const optionsBase = useStore.getState().optionsBase;
@@ -83,7 +83,7 @@ const renderDisplayName = (value, name, showLine = false) => {
                             {name === 'id' ? `ID:${code}` : code}
                         </span>
                         {
-                            (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && (
+                            (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && isNext && (
                                 <span>
                                     |
                                 </span>
@@ -406,14 +406,16 @@ const CommonList = ({
                                 renderDisplayName(
                                     item.id,
                                     'id',
-                                    true
+                                    true,
+                                    item.structureTypeCode
                                 )
                             }
                             {
                                 renderDisplayName(
                                     item.structureTypeCode,
                                     'structureTypeCode',
-                                    true
+                                    true,
+                                    item.difficultyCode || item.functionType || item.type
                                 )
                             }
                             {renderDisplayName(

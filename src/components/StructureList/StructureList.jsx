@@ -120,8 +120,7 @@ const SortableItemRenderer = React.memo(({
         }
     };
     //渲染字段
-    const renderDisplayName = (value, name, showLine = false) => {
-
+    const renderDisplayName = (value, name, showLine = false, isNext) => {
         if (!value) return [];
         const optionsBase = useStore.getState().optionsBase;
         let valueArray = Array.isArray(value) ? value : [value];
@@ -142,7 +141,7 @@ const SortableItemRenderer = React.memo(({
                                 {name === 'id' ? `ID:${code}` : code}
                             </span>
                             {
-                                (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && (
+                                (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && isNext && (
                                     <span>
                                         |
                                     </span>
@@ -275,14 +274,16 @@ const SortableItemRenderer = React.memo(({
                                     renderDisplayName(
                                         item.id,
                                         'id',
-                                        true
+                                        true,
+                                        item.structureTypeCode
                                     )
                                 }
                                 {
                                     renderDisplayName(
                                         item.structureTypeCode,
                                         'structureTypeCode',
-                                        true
+                                        true,
+                                        item.difficultyCode || item.functionType || item.type
                                     )
                                 }
                                 {renderDisplayName(

@@ -41,6 +41,7 @@ export default function UserEditorWithCommon() {
             // renderItemMata: renderItemMata,
             label: 'Musics',
             dataList: [],
+            emptyPlaceholder: 'Please add music',
             lockName: 'premium',
             defaultLockValue: 0,
             structureListFields: [

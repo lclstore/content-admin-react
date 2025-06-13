@@ -17,8 +17,7 @@ import './StructureList.css';
 import CommonList from '../CommonEditorForm/CommonList';
 import { getFileCategoryFromUrl } from '../../utils';
 import audioManager from '../../utils/audioManager';
-import { add } from 'lodash';
-
+import noDataImg from '@/assets/images/no-data.png';
 const { Text } = Typography;
 
 const SortableItemRenderer = React.memo(({
@@ -45,6 +44,7 @@ const SortableItemRenderer = React.memo(({
     parentForm,
     dataList,
     lockName,
+    field,
     defaultLockValue
 }) => {
     const {
@@ -353,6 +353,7 @@ const StructureList = ({
     structureListFields,
     onUpdateItem,
     lockName,
+    field,
     defaultLockValue
 }) => {
     console.log('parentForm:', form.getFieldsValue());
@@ -741,6 +742,16 @@ const StructureList = ({
                                 </div>
                             </SortableContext>
                         </DndContext>
+                    )}
+                    {dataList.length === 0 && field.emptyPlaceholder && (
+                        <div className="customEmptyWrapper">
+                            <div className="customEmptyImageWrapper">
+                                <img src={noDataImg} alt="No Data" className="customEmptyImage" />
+                            </div>
+                            <div className="customEmptyTitle">{
+                                field.emptyPlaceholder || 'No data'
+                            } </div>
+                        </div>
                     )}
                 </>
             )}

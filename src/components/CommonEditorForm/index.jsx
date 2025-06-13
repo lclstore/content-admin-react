@@ -110,7 +110,7 @@ export default function CommonEditor(props) {
         //   获取当前激活的折叠面板
         setTimeout(() => {
             getActiveCollapseKeys()
-        }, 500);
+        }, 200);
 
     }, [fields, formFields, collapseFormConfig.fields]);
 

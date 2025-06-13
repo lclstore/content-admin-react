@@ -11,13 +11,13 @@ const tabItems = [
         label: 'Templates',
     },
     {
+        key: 'workout/list',
+        label: 'Template-Workouts',
+    },
+    {
         key: 'resources/list',
         label: 'Resources',
     },
-    {
-        key: 'workout/list',
-        label: 'Workout',
-    }
 ];
 export default () => {
     const path = "/plans"

@@ -28,6 +28,10 @@ export default function CollectionsList() {
     }
     useEffect(() => {
         console.log(location.pathname);
+        if (location.pathname.includes("editor")) {
+            navigate(location.pathname, { replace: true })
+            return
+        }
         const currentTab = tabItems.find(item => location.pathname.includes(item.key)) || tabItems[0];
         setDefaultTabItem(currentTab);
         // 初始加载自动跳转到默认的tab

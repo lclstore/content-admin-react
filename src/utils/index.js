@@ -260,20 +260,29 @@ export function getFileCategoryFromUrl(url = '') {
   const videoTypes = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv']
   const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
 
-  // 无效 URL 直接返回 audio
   if (!url || !/^https?:\/\//.test(url)) return 'image'
 
+
   const urlObj = new URL(url)
-  const nameMatch = urlObj.search.match(/name=([^&]+)/)
-  let filename = nameMatch ? nameMatch[1] : urlObj.pathname.split("/").pop()
 
-  const ext = filename.split('.').pop().toLowerCase()
-  console.log(audioTypes.includes(ext));
-  console.log(videoTypes.includes(ext));
-  console.log(imageTypes.includes(ext));
-  if (audioTypes.includes(ext)) return 'audio'
-  if (videoTypes.includes(ext)) return 'video'
-  if (imageTypes.includes(ext)) return 'image'
+  // 优先从 pathname 中提取
+  let pathnameFilename = urlObj.pathname.split('/').pop() || ''
+  let pathnameExt = pathnameFilename.split('.').pop().toLowerCase()
 
-  return 'image' // 默认归类为 audio
+  // 如果 pathname 有扩展名，优先用它
+  if (pathnameExt && pathnameExt !== pathnameFilename) {
+    if (audioTypes.includes(pathnameExt)) return 'audio'
+    if (videoTypes.includes(pathnameExt)) return 'video'
+    if (imageTypes.includes(pathnameExt)) return 'image'
+  }
+
+  // 否则尝试从 name 参数中提取
+  const nameMatch = urlObj.searchParams.get('name') || ''
+  const nameExt = nameMatch.split('.').pop().toLowerCase()
+
+  if (audioTypes.includes(nameExt)) return 'audio'
+  if (videoTypes.includes(nameExt)) return 'video'
+  if (imageTypes.includes(nameExt)) return 'image'
+
+
 }

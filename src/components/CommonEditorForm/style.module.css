@@ -1,6 +1,6 @@
 /* 容器样式 */
 .commonEditorContainer {
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     height: 100%;

@@ -63,7 +63,8 @@ export default function WorkoutsList() {
     // 表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
+            { title: "Template ID", dataIndex: "templateId", width: 90, },
+            { title: 'Workout ID', dataIndex: 'id', key: 'id', width: 90 },
             { title: "Duration (Min)", dataIndex: "duration", render: (text, record) => record.duration / 60000, },
             { title: "Calorie (Kcal)", dataIndex: "calorie" },
             {
@@ -90,7 +91,6 @@ export default function WorkoutsList() {
                 options: 'BizExerciseInjuredEnums',
                 width: 140,
             },
-            { title: "Create Time", dataIndex: "createTime", width: 180, },
             {
                 title: 'Audio Lang',
                 sorter: true,

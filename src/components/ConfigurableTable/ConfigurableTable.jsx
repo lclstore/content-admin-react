@@ -119,7 +119,7 @@ const ConfigurableTable = forwardRef(({
     const storageKey = `table_visible_columns_${moduleKey}`;
     const [messageApi, contextHolder] = message.useMessage();
     // paginationConfig load cache
-    paginationConfig = localStorage.getItem(location.pathname) || paginationConfig
+    paginationConfig = sessionStorage.getItem(location.pathname) || paginationConfig
     // 添加上一次排序状态的引用
     const prevSorterRef = useRef(null);
     const [isEmptyTableData, setIsEmptyTableData] = useState(false);//判断是否没有创建数据
@@ -135,7 +135,7 @@ const ConfigurableTable = forwardRef(({
     // 是否展示置顶按钮
     const [topping, setTopping] = useState(false);
     // load cache
-    const searchData = localStorage.getItem(location.pathname)
+    const searchData = sessionStorage.getItem(location.pathname)
     let loadCache = searchData ? JSON.parse(searchData) : null
     // select list
     const [selectList, setSelectList] = useState([]);
@@ -500,7 +500,7 @@ const ConfigurableTable = forwardRef(({
             orderDirection: paginationParams.current.orderDirection || 'DESC',
         })
         // 对searchData进行缓存
-        localStorage.setItem(location.pathname, JSON.stringify({ paginationParams: paginationParams.current, activeFilters: activeFilters.current }))
+        sessionStorage.setItem(location.pathname, JSON.stringify({ paginationParams: paginationParams.current, activeFilters: activeFilters.current }))
         try {
             setLoadingLocal(true);
             let res;

@@ -198,13 +198,13 @@ export default function UserEditorWithCommon() {
                         {
                             type: 'input',
                             name: 'introAudioStartTime',
-                            placeholder: 'Countdown Seconds',
+                            placeholder: 'Count-Up Seconds',
                             label: '',
                             maxLength: 100,
                             rules: [{
                                 // required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Up Seconds'
                             }],
                             flex: 1,
                             showCount: true,
@@ -262,7 +262,7 @@ export default function UserEditorWithCommon() {
 
                     type: 'inputGroup',
                     name: 'warmUp2',
-                    label: 'Preview Audio ( First | Next | Last | Name | 3 | 2 | 1 )',
+                    label: 'Preview Audio & Count Node ( First | Next | Last | Name | 3 | 2 | 1 )',
                     // required: true,
                     inputConfig: [
                         {
@@ -898,7 +898,7 @@ export default function UserEditorWithCommon() {
 
                     type: 'inputGroup',
                     name: 'executionVideoReps2',
-                    label: 'Execution Audio ( Go | Guidance | Halfway | 3 | 2 | 1 | Rest | Beep )',
+                    label: 'Execution Audio & Count Node ( Go | Guidance | Halfway | 3 | 2 | 1 | Rest | Beep )',
                     // required: true,
                     inputConfig: [
                         {
@@ -1208,11 +1208,11 @@ export default function UserEditorWithCommon() {
                             label: '',
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -1297,11 +1297,11 @@ export default function UserEditorWithCommon() {
                             label: '',
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -1386,11 +1386,11 @@ export default function UserEditorWithCommon() {
                             flex: 1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -1475,11 +1475,11 @@ export default function UserEditorWithCommon() {
                             flex: 1,
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
+                            placeholder: 'Count-Down Seconds',
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             style: {
                                 border: '1px solid #d5c031'
@@ -1564,14 +1564,14 @@ export default function UserEditorWithCommon() {
                             label: '',
                             required: true,
                             maxLength: 100,
-                            placeholder: 'Countdown Seconds',
+                            placeholder: 'Count-Down Seconds',
                             style: {
                                 border: '1px solid #d5c031'
                             },
                             rules: [{
                                 required: true,
                                 pattern: /^\d+(\.\d+)?$/,
-                                message: 'Countdown Seconds'
+                                message: 'Count-Down Seconds'
                             }],
                             showCount: true,
                         },
@@ -1696,7 +1696,7 @@ export default function UserEditorWithCommon() {
                 onCollapseChange={handleCollapseChange}
                 // 其他基本配置
                 // renderItemMata={renderItemMata}
-                config={{ formName: 'workoutSettings', title: '', headerButtons }}
+                config={{ formName: 'workoutSettings',hideTitleOperationName: true, headerButtons }}
                 isBack={false}
 
                 isCollapse={true}

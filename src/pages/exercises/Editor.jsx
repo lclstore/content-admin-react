@@ -147,6 +147,7 @@ export default function UserEditorWithCommon() {
 
             //文件上传后修改name
             onChange: (value, file, form) => {
+                console.log('file',file)
             },
 
             acceptedFileTypes: 'mp3',

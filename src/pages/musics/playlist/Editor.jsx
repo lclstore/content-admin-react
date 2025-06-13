@@ -4,7 +4,10 @@ import request from '@/request';
 import { validateEmail, validatePassword } from '@/utils';
 import { LockFilled, UnlockFilled } from '@ant-design/icons';
 export default function UserEditorWithCommon() {
-
+    const [initialValues, setInitialValues] = useState({
+        type: 'REGULAR',
+        premium: 0,
+    })
     // 表单字段配置
     const initialFormFields = useMemo(() => [
         {
@@ -101,18 +104,9 @@ export default function UserEditorWithCommon() {
 
     // 处理formFields变更的回调
     const handleFormFieldsChange = (updatedFields) => {
-        // console.log('updatedFields', updatedFields);
 
         setFormFields(updatedFields);
     };
-    // const filterSections = [
-    //     {
-    //         title: 'Status',
-    //         key: 'statusList',
-    //         type: 'multiple', // 单选 //multiple 多选
-    //         options: 'statusList'
-    //     }
-    // ];
     const saveBeforeTransform = (info) => {
         const { formFields, formValues } = info;
         const musicListField = formFields.find(field => field.type === 'structureList');
@@ -138,10 +132,7 @@ export default function UserEditorWithCommon() {
                 // filterSections: filterSections,
                 title: 'Musics',
             }}
-            initialValues={{
-                type: 'REGULAR',
-                premium: 0,
-            }}
+            initialValues={initialValues}
             saveBeforeTransform={saveBeforeTransform}
             formType="advanced"
             enableDraft={true}

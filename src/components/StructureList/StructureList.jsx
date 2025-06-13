@@ -130,6 +130,7 @@ const SortableItemRenderer = React.memo(({
                     display: 'flex',
                     alignItems: 'center',
                     cursor: 'pointer',
+                    marginRight: '20px'
                 }}
                 avatar={
                     itemCategory === 'audio' ? (
@@ -155,7 +156,7 @@ const SortableItemRenderer = React.memo(({
                         </div>
                     )
                 }
-                title={<Text ellipsis={{ tooltip: currentItem.name || currentItem.title }}>{currentItem.name || currentItem.title}</Text>}
+                title={<Text ellipsis={{ tooltip: currentItem.name || currentItem.title }} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{currentItem.name || currentItem.title}</Text>}
                 description={
                     <div>
                         <div>

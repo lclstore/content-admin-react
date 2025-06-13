@@ -177,6 +177,8 @@ export default function CommonEditor(props) {
         }
         if (Array.isArray(collapseFormConfig.defaultActiveKeys)) {
             collapseKeys = collapseFormConfig.defaultActiveKeys;
+        } else {
+            collapseKeys = [internalFormFields[0].name]
         }
         setActiveCollapseKeys(collapseKeys)
     }

@@ -36,13 +36,13 @@ export default function Sider() {
             {/* <div className="createWorkoutBtn" onClick={handleCreateWorkout}>CREATE WORKOUT</div> */}
             <div className='createWorkoutBtn1_box'>
                 <img className='createWorkoutBtn1_img' src={CMS} alt="" />
-            <div className='createWorkoutBtn1'>Content System</div>
+                <div className='createWorkoutBtn1'>Content System</div>
             </div>
             <SideMenu />
             <div className='Profile' onClick={goProfile} >
                 <div className='Profile-avatar'></div>
                 <div className='mask'>
-                    <img src={users?.avatar} alt="" />
+                    <img className='Profile-avatar-img' src={users?.avatar} alt="" />
                 </div>
                 <div style={{ 'margin': '16px 0' }}>
                     <div className='Profile-usename'>{users?.name}</div>

@@ -55,7 +55,7 @@ export const menuIconMap = {
     profile: EditOutlined,
     publish: SendOutlined,
     sounds: AudioOutlined,
-    workoutSettings:SettingOutlined
+    workoutSettings: SettingOutlined
 
 };
 

@@ -1,10 +1,10 @@
-import { EditFilled, CheckCircleFilled, CloseCircleFilled, LoadingOutlined, CheckOutlined, CloseOutlined, SyncOutlined } from '@ant-design/icons';
+import { EditFilled, CheckCircleFilled, CloseCircleFilled, LoadingOutlined, CheckOutlined, CloseOutlined, SyncOutlined, StopOutlined } from '@ant-design/icons';
 
 export const optionsConstants = {
     displayStatus: [
         { label: <div><EditFilled style={{ marginRight: '5px', color: "#889e9e" }} />Draft</div>, value: 'DRAFT' },
         { label: <div> <CheckCircleFilled style={{ marginRight: '5px', color: "#52c41a" }} />Enabled</div>, value: 'ENABLED' },
-        { label: <div> <CloseCircleFilled style={{ marginRight: '5px', color: "#ff4d4f" }} />Disabled</div>, value: 'DISABLED' },
+        { label: <div> <StopOutlined style={{ marginRight: '5px', color: "#ff4d4f" }} />Disabled</div>, value: 'DISABLED' },
     ],
     userStatus: [
         { label: <div>Enabled <CheckCircleFilled style={{ marginLeft: '5px', color: "#52c41a" }} /></div>, value: 1 },

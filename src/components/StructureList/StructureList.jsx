@@ -272,22 +272,22 @@ const SortableItemRenderer = React.memo(({
                             <div style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '0 8px', color: '#00000073' }}>
                                 {
                                     renderDisplayName(
-                                        item.id,
+                                        currentItem.id,
                                         'id',
                                         true,
-                                        item.structureTypeCode
+                                        currentItem.structureTypeCode
                                     )
                                 }
                                 {
                                     renderDisplayName(
-                                        item.structureTypeCode,
+                                        currentItem.structureTypeCode,
                                         'structureTypeCode',
                                         true,
-                                        item.difficultyCode || item.functionType || item.type
+                                        currentItem.difficultyCode || currentItem.functionType || currentItem.type
                                     )
                                 }
                                 {renderDisplayName(
-                                    item.difficultyCode || item.functionType || item.type
+                                    currentItem.difficultyCode || currentItem.functionType || currentItem.type
                                 )}
                             </div>
 

@@ -2,3 +2,4 @@ node_modules
 .idea
 .cursor
 .DS_Store
+src/pages/.DS_Store

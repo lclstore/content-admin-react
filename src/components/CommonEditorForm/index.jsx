@@ -728,6 +728,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
+
             onFormFieldsChange(updatedFields, form);
         }
 

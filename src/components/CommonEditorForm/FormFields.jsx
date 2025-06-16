@@ -321,6 +321,7 @@ export const renderFormControl = (field, options = {}) => {
                         if (field.durationName) {
                             const duration = value ? await getMediaDurationByUrl(value) : null;//获取远程音频或视频 URL 的时长（单位：秒）
                             options.form.setFieldValue(field.durationName, duration * 1000); // 转换为毫秒
+                            console.log(options.form)
                         }
                         if (field.onChange) {
                             field.onChange(value, file, form);

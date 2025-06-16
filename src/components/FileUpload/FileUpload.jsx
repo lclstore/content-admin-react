@@ -865,15 +865,17 @@ const FileUpload = ({
     // 添加获取时长的函数
     const getDuration = useCallback(async (url) => {
         return new Promise((resolve) => {
-            const audio = new Audio(url);
-            audio.addEventListener('loadedmetadata', () => {
-                const duration = formatTime(audio.duration);
+            const media = document.createElement('video');
+            media.src = url;
+            media.addEventListener('loadedmetadata', () => {
+                const duration = formatTime(media.duration);
+                field.durationName && form.setFieldValue(field.durationName,parseInt(media.duration * 1000))
                 resolve(duration);
-                audio.remove(); // 清理临时音频元素
+                media.remove(); // 清理临时音频元素
             });
-            audio.addEventListener('error', () => {
+            media.addEventListener('error', () => {
                 resolve('00:00:00,000'); // 加载失败时返回默认值
-                audio.remove(); // 清理临时音频元素
+                media.remove(); // 清理临时音频元素
             });
         });
     }, [formatTime]);

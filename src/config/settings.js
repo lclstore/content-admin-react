@@ -110,6 +110,8 @@ const settings = {
       'users': 11,
       'profile': 12,
     },
+    // 隐藏菜单配置
+    menuHidden: ['profile']
   },
 
   // 自定义主题配置

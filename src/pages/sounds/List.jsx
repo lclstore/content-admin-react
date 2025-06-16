@@ -43,8 +43,8 @@ export default function WorkoutsList() {
     const allColumnDefinitions = useMemo(() => {
         return [
 
-            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', visibleColumn: 0 },
-            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', visibleColumn: 0 },
+            { title: 'Female Audio', mediaType: 'audio', dataIndex: 'femaleAudioUrl', key: 'femaleAudioUrl', visibleColumn: 0, align: 'center' },
+            { title: 'Male Audio', mediaType: 'audio', dataIndex: 'maleAudioUrl', key: 'maleAudioUrl', visibleColumn: 0, align: 'center' },
             {
                 title: 'Name',
                 sorter: true,
@@ -55,7 +55,7 @@ export default function WorkoutsList() {
                     <div style={{ color: "var(--text-secondary)", fontSize: "12px" }}>ID:{row.id}</div>
                 </div>),
                 key: 'name',
-                width: 300,
+                // width: 300,
                 visibleColumn: 1
             },
             {
@@ -65,7 +65,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'displayStatus',
-                width: 150,
+                // width: 150,
                 visibleColumn: 0
             },
             {
@@ -74,7 +74,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'BizSoundUsageEnums',
-                width: 150,
+                // width: 150,
                 visibleColumn: 0
             },
             {
@@ -83,7 +83,7 @@ export default function WorkoutsList() {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'BizSoundGenderEnums',
-                width: 120,
+                // width: 120,
                 visibleColumn: 0
             },
             {

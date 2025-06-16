@@ -78,18 +78,20 @@ const renderDisplayName = (value, name, showLine = false, isNext) => {
         <>
             {
                 valueArray.map((code, index) => {
-                    return <>
-                        <span key={index}>
-                            {name === 'id' ? `ID:${code}` : code}
-                        </span>
-                        {
-                            (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && isNext && (
-                                <span>
-                                    |
-                                </span>
-                            )
-                        }
-                    </>
+                    return (
+                        <React.Fragment key={`${code}-${index}`}>
+                            <span>
+                                {name === 'id' ? `ID:${code}` : code}
+                            </span>
+                            {
+                                (showLine || (valueArray.length > 1 && index < valueArray.length - 1)) && isNext && (
+                                    <span>
+                                        |
+                                    </span>
+                                )
+                            }
+                        </React.Fragment>
+                    )
                 })
             }
         </>
@@ -380,9 +382,9 @@ const CommonList = ({
                     :
                     <div className={styles.itemAvatar}>
                         <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
-                        <CaretRightOutlined
+                        {/* <CaretRightOutlined
                             className={styles.playIcon}
-                        />
+                        /> */}
                     </div>
             }
             title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.name || item.displayName || item.title}</Text>}

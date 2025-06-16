@@ -248,9 +248,9 @@ const SortableItemRenderer = React.memo(({
                         :
                         <div className={'itemAvatar'}>
                             <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
-                            <CaretRightOutlined
+                            {/* <CaretRightOutlined
                                 className={'playIcon'}
-                            />
+                            /> */}
                         </div>
                 }
                 title={<Text ellipsis={{ tooltip: currentItem.name || currentItem.title }} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{currentItem.name || currentItem.title}</Text>}

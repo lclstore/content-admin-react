@@ -71,9 +71,9 @@ const SortableItemRenderer = React.memo(({ panelId, item, itemIndex, isExpanded,
             avatar={
                 <div className={styles.itemAvatar}>
                     <Avatar shape="square" size={64} src={item.imageUrl || item.animationPhoneUrl} />
-                    <CaretRightOutlined
+                    {/* <CaretRightOutlined
                         className={styles.playIcon}
-                    />
+                    /> */}
                 </div>
             }
             title={<Text ellipsis={{ tooltip: item.displayName || item.title }}>{item.displayName || item.title || '未命名项目'}</Text>}

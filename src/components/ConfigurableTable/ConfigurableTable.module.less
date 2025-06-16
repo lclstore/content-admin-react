@@ -111,6 +111,7 @@
           }
         }
 
+
         &>tr>th.td-center .ant-table-column-sorters {
           justify-content: center;
         }
@@ -130,6 +131,10 @@
 
         &>tr>th.ant-table-column-sort:hover {
           background: #f5f5f5 !important;
+        }
+
+        &>tr>th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
+          display: none;
         }
       }
 
@@ -279,7 +284,7 @@
     // 添加拖拽相关样式
     .drag-visible {
       text-align: center !important;
-      cursor: move;
+      cursor: grab;
       width: 50px;
 
       .anticon {

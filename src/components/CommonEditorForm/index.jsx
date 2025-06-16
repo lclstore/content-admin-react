@@ -738,18 +738,23 @@ export default function CommonEditor(props) {
         }
     };
     const handleIconChange = (panelName, itemId, itemIndex, lockName, form) => {
-        // 
-        internalFormFields.map(field => {
+        const newFields = internalFormFields.map(field => {
             if (field.name === panelName && Array.isArray(field.dataList)) {
-                field.dataList[itemIndex][lockName] = field.dataList[itemIndex][lockName] ? 0 : 1;
-            }
-        });
+                const newDataList = [...field.dataList];
+                const targetItem = { ...newDataList[itemIndex] };
+                targetItem[lockName] = targetItem[lockName] ? 0 : 1;
+                newDataList[itemIndex] = targetItem;
 
-        setInternalFormFields([...internalFormFields]);
+                return { ...field, dataList: newDataList };
+            }
+            return field;
+        });
+        setInternalFormFields([...newFields]);
+
         if (onFormFieldsChange) {
-            onFormFieldsChange(internalFormFields, form);
+            onFormFieldsChange(newFields, form);
         }
-    }
+    };
 
     // 处理折叠面板展开的回调函数
     // const handleCollapseChange = useCallback((key) => {

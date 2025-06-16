@@ -27,7 +27,7 @@ export default function Header() {
     ), [currentPath]);
 
     // 获取页面标题，优先使用自定义标题
-    const pageTitle = customPageTitle || currentMenu?.title || 'Content Management System';
+    const pageTitle = customPageTitle || currentMenu?.title;
 
     // 处理Dropdown可见性变化
     const handleDropdownOpenChange = (visible, button) => {

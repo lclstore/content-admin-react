@@ -28,7 +28,7 @@ export default () => {
     // 路由监听
     useEffect(() => {
         // 初始加载自动跳转到默认的tab
-        location.pathname === path && navigate(tabItems[0].key)
+        location.pathname === path && navigate(tabItems[0].key,{ replace: true })
         // 初始加载的时候如果已有路由就重置 defaultTabItem
         tabItems.forEach(i => location.pathname.includes(i.key) && setDefaultTabItem(i))
         setShowTab(!location.pathname.includes("editor"))

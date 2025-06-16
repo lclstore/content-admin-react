@@ -51,8 +51,8 @@ export default function WorkoutsList() {
                 showSorterTooltip: false,
                 dataIndex: 'name',
                 render: (text, row) => (<div>
-                    <div style={{ fontWeight: 600 }}>{text}</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "12px" }}>ID:{row.id}</div>
+                    <div className='cell-name'>{text}</div>
+                    <div className='cell-id'>ID:{row.id}</div>
                 </div>),
                 key: 'name',
                 // width: 300,

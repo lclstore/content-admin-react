@@ -51,28 +51,34 @@ export default function Playlists() {
     //   表格渲染配置项
     const allColumnDefinitions = useMemo(() => {
         return [
-            { title: 'ID', dataIndex: 'id', key: 'id', width: 60, visibleColumn: 1 },
-            { title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1,render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,},
+            {
+                title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 1,
+                render: (text, row) => (<div>
+                    <div className='cell-name'>{text}</div>
+                    <div className='cell-id'>ID:{row.id}</div>
+                </div>)
+            },
             {
                 title: 'Status',
                 dataIndex: 'status',
                 key: 'statusList',
                 options: 'displayStatus',
-                width: 120,
                 visibleColumn: 0
             },
             {
-                title: 'Premium', dataIndex: 'premium', key: 'premium', width: 120, visibleColumn: 2, render: (text, record) => {
+                title: 'Premium', dataIndex: 'premium', key: 'premium', visibleColumn: 2, render: (text, record) => {
                     return (
                         <Switch disabled={true} checked={text} />
                     );
                 }
             },
-            { title: 'Type', dataIndex: 'type',
-                options:"BizPlaylistTypeEnums",
-                key: 'type', width: 120, visibleColumn: 1 },
+            {
+                title: 'Type', dataIndex: 'type',
+                options: "BizPlaylistTypeEnums",
+                key: 'type', visibleColumn: 1
+            },
 
-            { title: 'music Count', dataIndex: 'musicCount', key: 'musicCount', width: 120, visibleColumn: 1 },
+            { title: 'Music Num', dataIndex: 'musicCount', key: 'musicCount', visibleColumn: 1, align: 'center' },
 
 
             {

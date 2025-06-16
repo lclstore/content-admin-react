@@ -23,6 +23,7 @@ export default function Musics() {
     const navigate = useNavigate(); // 路由导航
     const [dataSource, setDataSource] = useState([]);
     const [editingMusicId, setEditingMusicId] = useState(null);
+    const [isDuplicate, setIsDuplicate] = useState(false);
     const [actionClicked, setActionClicked] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
     const [editorActionsRef, setEditorActionsRef] = useState(null);
@@ -30,9 +31,10 @@ export default function Musics() {
     const [refreshKey, setRefreshKey] = useState(0); // 0 表示不刷新 1. 表示当前页面刷新 2. 表示全局刷新
 
     // 编辑处理
-    const handleEdit = useCallback((record) => {
+    const handleEdit = useCallback((record, isDuplicate = false) => {
         setEditingMusicId(record?.id || null);
         setIsEditorModalVisible(true);
+        setIsDuplicate(isDuplicate);
         setRefreshKey(null);// 清空刷新
     }, []);
 
@@ -115,10 +117,10 @@ export default function Musics() {
                 dataIndex: 'name',
                 key: 'name',
                 visibleColumn: 1,
-                render: (text,row) => (<div>
-                    <div style={{ fontWeight:600 }}>{text}</div>
-                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
-                </div>),
+                render: (text, row) => (<div>
+                    <div className='cell-name'>{text}</div>
+                    <div className='cell-id'>ID:{row.id}</div>
+                </div>)
             },
             {
                 title: 'Display Name',
@@ -127,7 +129,7 @@ export default function Musics() {
                 showSorterTooltip: false,
                 dataIndex: 'displayName',
                 visibleColumn: 1,
-                render: (text) => <span style={{ fontWeight:700 }}>{text}</span>,
+                render: (text) => <span style={{ fontWeight: 700 }}>{text}</span>,
             },
             {
                 title: 'Status',
@@ -147,6 +149,15 @@ export default function Musics() {
                 actionButtons: ['edit', 'duplicate', 'enable', 'disable', 'deprecate', 'delete'],
                 // 控制按钮显示规则
                 isShow: isButtonVisible,
+                edit: (rowData, e, click) => {
+                    handleEdit(rowData)
+                },
+                duplicate: (rowData, e, click) => {
+                    handleEdit(rowData, true)
+                },
+
+
+
             },
         ];
     }, [isButtonVisible]);
@@ -222,6 +233,7 @@ export default function Musics() {
             >
                 <UserEditorWithCommon
                     id={editingMusicId}
+                    isDuplicate={isDuplicate}
                     setFormRef={setEditorActionsRef}
                 />
             </Modal>

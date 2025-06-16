@@ -670,10 +670,18 @@ const ConfigurableTable = forwardRef(({
                             case 'edit':
                                 // 获取当前路径并分割成数组
                                 // 判断路由层级
+                                if (processedCol.edit) {
+                                    processedCol.edit(rowData, e, click);
+                                    return
+                                }
                                 navigate(`/${pathUrl}/editor?id=${rowData.id}`);
                                 break;
                             // 复制
                             case 'duplicate':
+                                if (processedCol.duplicate) {
+                                    processedCol.duplicate(rowData, e, click);
+                                    return
+                                }
                                 navigate(`/${pathUrl}/editor?id=${rowData.id}&isDuplicate=true`);
                                 break;
                             // 删除

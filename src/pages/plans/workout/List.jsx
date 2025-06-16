@@ -429,6 +429,7 @@ export default function WorkoutsList() {
                     placeholder: "Search workout ID...",
                     fieldName: "id"
                 }}
+                onRowClick={() => {}}
                 showColumnSettings={false}
                 filterConfig={{
                     filterSections: filterSections,

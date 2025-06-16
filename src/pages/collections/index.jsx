@@ -27,15 +27,16 @@ export default function CollectionsList() {
         navigate("/collections/" + key, { replace: true })
     }
     useEffect(() => {
+        const path = "/collections"
         console.log(location.pathname);
-        if (location.pathname.includes("editor")) {
-            navigate(location.pathname, { replace: true })
-            return
-        }
+        // if (location.pathname.includes("editor")) {
+        //     navigate(location.pathname, { replace: true })
+        //     return
+        // }
         const currentTab = tabItems.find(item => location.pathname.includes(item.key)) || tabItems[0];
         setDefaultTabItem(currentTab);
         // 初始加载自动跳转到默认的tab
-        navigate(currentTab.key)
+        location.pathname === path && navigate(currentTab.key,{ replace: true })
     }, [location.pathname]);
     const renderTabBar = (props, DefaultTabBar) => (
         <StickyBox offsetTop={0} style={{ zIndex: 1 }}>

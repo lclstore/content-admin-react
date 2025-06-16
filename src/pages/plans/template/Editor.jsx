@@ -7,6 +7,9 @@ export default function UserEditorWithCommon() {
     const [initialValues, setInitialValues] = useState({
         days: 28,
         durationCode: "MIN_10_15",
+        structureName:"",
+        structureName1:"",
+        structureName2:"",
     })
     // 表单字段配置
     const initialFormFields = useMemo(() => [
@@ -82,7 +85,6 @@ export default function UserEditorWithCommon() {
                             type: 'numberStepper',
                             name: 'count',
                             label: 'Count',
-                            initValue: 2,
                             required: true,
                             min: 2,
                             max: 20,
@@ -93,7 +95,6 @@ export default function UserEditorWithCommon() {
                             name: 'round',
                             label: 'Rounds',
                             required: true,
-                            initValue: 1,
                             min: 1,
                             max: 5,
                             step: 1,
@@ -133,7 +134,6 @@ export default function UserEditorWithCommon() {
                             type: 'numberStepper',
                             name: 'count1',
                             label: 'Count',
-                            initValue: 2,
                             required: true,
                             min: 2,
                             max: 20,
@@ -144,7 +144,6 @@ export default function UserEditorWithCommon() {
                             name: 'round1',
                             label: 'Rounds',
                             required: true,
-                            initValue: 1,
                             min: 1,
                             max: 5,
                             step: 1,
@@ -177,6 +176,7 @@ export default function UserEditorWithCommon() {
                             flex: 1,
                             label: 'Name',
                             required: true,
+                            initValue:"1",
                             maxLength: 100,
                             showCount: true,
                         },
@@ -224,7 +224,6 @@ export default function UserEditorWithCommon() {
                 : isLast
                     ? 'COOL_DOWN'
                     : 'MAIN';
-
             return {
                 structureTypeCode,
                 structureName: formData[`structureName${index ? index : ''}`],

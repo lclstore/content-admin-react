@@ -83,8 +83,8 @@ export default function WorkoutsList() {
                     const status = record.status;
                     // 简单的状态-按钮映射关系
                     if (status === 'DRAFT' && ['edit', 'duplicate',  'delete'].includes(btnName)) return true;
-                    if (status === 'DISABLED' && ['edit', 'duplicate', 'enable'].includes(btnName)) return true;
-                    if (status === 'ENABLED' && ['edit','duplicate', 'disable', 'delete'].includes(btnName)) return true;
+                    if (status === 'DISABLED' && ['edit', 'duplicate', 'enable', 'delete'].includes(btnName)) return true;
+                    if (status === 'ENABLED' && ['edit','duplicate', 'disable'].includes(btnName)) return true;
                     return false;
                 }
             },

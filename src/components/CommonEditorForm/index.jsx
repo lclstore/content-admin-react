@@ -51,9 +51,11 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {Function} props.onFormValuesChange 表单值变化回调函数
  * @param {number} props.gutter 表单项之间的间距
  * @param {boolean} props.isDuplicate 是否是复制
+ * @param {Function} props.formValidate 表单验证函数
  */
 export default function CommonEditor(props) {
     const {
+        formValidate,
         formType = 'basic', // 默认为基础表单
         config = {},
         isDuplicate = false,
@@ -281,6 +283,7 @@ export default function CommonEditor(props) {
         commonListConfig,
         structurePanels,
         headerContext,
+        formValidate,
         setIsFormDirty,
         getLatestValues,
         setLoading,

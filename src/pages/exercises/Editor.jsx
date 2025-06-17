@@ -144,7 +144,7 @@ export default function UserEditorWithCommon() {
             name: 'nameAudioUrl', // 视频文件
             label: 'Name Audio',
             // maxFileSize: 1024 * 1024 * 10,
-
+            durationName: 'nameAudioUrlDuration',
             //文件上传后修改name
             onChange: (value, file, form) => {
                 console.log('file',file)
@@ -158,7 +158,7 @@ export default function UserEditorWithCommon() {
             name: 'guidanceAudioUrl', // 视频文件
             label: 'Guidance Audio',
             // maxFileSize: 1024 * 1024 * 10,
-
+            durationName: 'guidanceAudioUrlDuration',
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
@@ -172,7 +172,7 @@ export default function UserEditorWithCommon() {
             name: 'howtodoAudioUrl', // 视频文件
             label: 'Howtodo Audio',
             // maxFileSize: 1024 * 1024 * 10,
-
+            durationName: 'howtodoAudioUrlDuration',
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
@@ -185,7 +185,7 @@ export default function UserEditorWithCommon() {
             name: 'frontVideoUrl', // 视频文件
             label: 'Front Video',
             // maxFileSize: 1024 * 1024 * 10,
-
+            durationName: 'frontVideoUrlDuration',
             //文件上传后修改name
             onChange: (value, file, form) => {
             },
@@ -198,7 +198,7 @@ export default function UserEditorWithCommon() {
             name: 'sideVideoUrl', // 视频文件
             label: 'Side Video',
             // maxFileSize: 1024 * 1024 * 10,
-
+            durationName: 'sideVideoUrlDuration',
             //文件上传后修改name
             onChange: (value, file, form) => {
             },

@@ -3,3 +3,4 @@ node_modules
 .cursor
 .DS_Store
 src/pages/.DS_Store
+dist

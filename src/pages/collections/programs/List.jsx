@@ -70,6 +70,11 @@ export default () => {
                 visibleColumn: 0
             },
             {
+                title: 'Duration(Week)',
+                dataIndex: 'durationWeek',
+                visibleColumn: 0,
+            },
+            {
                 title: 'Actions',
                 key: 'actions',
                 fixed: 'right',

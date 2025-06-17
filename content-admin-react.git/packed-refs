@@ -1,0 +1,5 @@
+# pack-refs with: peeled fully-peeled sorted 
+33fee9b842ad109c2630c56b09505bf2f7c3e1ad refs/heads/cms-react-ly
+77fe446194f65ca2abeb685de7f6f3f3ebdd3519 refs/heads/main
+28602bd2f12ca71971de07d0374f4bdaf3d8c984 refs/heads/template
+5a5f1589b59192c0b7cd6b264a4b8a6285e1f436 refs/heads/workout-dev

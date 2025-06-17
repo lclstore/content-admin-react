@@ -1,4 +1,4 @@
-import { Form, message, notification, Modal, Select } from 'antd';
+import { Form, message, notification } from 'antd';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { savePublicFormData } from '@/config/api.js'; //公共方法
@@ -156,14 +156,22 @@ export const useHeaderConfig = (params) => {
                 (isStructureList && field.dataList.length === 0) ||
                 (!isStructureList && (value === undefined || value === null || value === ''))
             );
+            debugger
             // 校验必填项
             if (isInvalid) {
                 if (setActiveCollapseKeys && parent.name) {
                     setActiveCollapseKeys(parent.name);
+                    const ruleMessage = field.rules?.find(rule => !!rule?.required)?.message;
+                    const fallbackMessage = `Please add at least one ${field.label || 'item'}`;
 
-                    requestAnimationFrame(() => {
-                        form.validateFields();
-                    });
+                    JSON.stringify({
+                        errorFields: [{
+                            type: 'notification',
+                            message: `Cannot Add New【${field.label || 'Unnamed'}】`,
+                            description: ruleMessage || fallbackMessage,
+                        }]
+                    })
+                    return
                 }
 
                 // 抛出标准表单校验错误
@@ -414,9 +422,17 @@ export const useHeaderConfig = (params) => {
 
                 // 确保状态值正确
                 dataToSave.status = statusValue;
+                let validateResult = true;
                 // 执行外部自定义表单验证
                 if (formValidate) {
-                    formValidate(dataToSave);
+                    validateResult = formValidate({
+                        formValues: dataToSave,
+                        setActiveCollapseKeys,
+                        formFields: collapseFormConfigRef.current,
+                    });
+                }
+                if (!validateResult) {
+                    return;
                 }
                 const saveResult = await executeSave(dataToSave);//执行保存
 
@@ -469,18 +485,16 @@ export const useHeaderConfig = (params) => {
                 });
                 throw error; // 重新抛出错误
             }
-
             // 如果启用了折叠功能且提供了 setActiveCollapseKeys 方法
             if (isCollapse && setActiveCollapseKeys) {
                 const errorFieldName = errorData.errorFields[0].name?.[0];
 
                 // 使用当前的formFields查找面板
-                const currentFormFields = fields;
+                const currentFormFields = collapseFormConfigRef.current;
                 const matchedPanel = currentFormFields.find(panel =>
                     Array.isArray(panel.fields) &&
                     panel.fields.some(field => field.name === errorFieldName)
                 );
-
                 if (matchedPanel) {
                     setActiveCollapseKeys(matchedPanel.name);
                 }

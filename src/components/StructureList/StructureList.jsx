@@ -247,7 +247,7 @@ const SortableItemRenderer = React.memo(({
                         </div>
                         :
                         <div className='itemAvatar'>
-                            <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
+                            <Avatar shape="square" size={64} src={currentItem.coverImgUrl || currentItem.imageUrl || currentItem.animationPhoneUrl} />
                             {/* <CaretRightOutlined
                                 className={'playIcon'}
                             /> */}

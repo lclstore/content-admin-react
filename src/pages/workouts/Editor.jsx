@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { formatDate } from '@/utils/index';
+import { message } from 'antd';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import request from "@/request";
 import {
@@ -10,7 +11,7 @@ import {
 } from '@ant-design/icons';
 
 export default function UserEditorWithCommon() {
-
+    const [messageApi, contextHolder] = message.useMessage();
     const filterSections = [
         {
             title: 'Status',
@@ -606,26 +607,77 @@ export default function UserEditorWithCommon() {
             })
         };
     };
+    /**
+     * 验证表单数据
+     * @param {Object} form - 表单数据对象
+     * @returns {boolean} - 验证结果
+     */
+    const formValidate = ({ formValues, formFields, setActiveCollapseKeys }) => {
+        const structureNameSet = new Set(); // 结构名唯一性验证
+        const currentGenderCode = formValues.genderCode; // 当前性别
+        const exerciseGroupList = formFields.filter(item => item.isGroup); // 运动组列表
 
-    const formValidate = (form) => {
-        console.log('formValidate', form);
+        for (let index = 0; index < exerciseGroupList.length; index++) {
+            const suffix = index === 0 ? '' : index;
+            const groupKey = `exerciseGroupList${suffix}`;
+            const exerciseList = formValues[`exerciseIdList${suffix}`] || [];
+            const structureName = formValues[`structureName${suffix}`];
+
+            // ✅ 结构名唯一性验证
+            if (structureNameSet.has(structureName)) {
+                messageApi.error(`Structure names cannot be repeated.`);
+                setActiveCollapseKeys(groupKey);
+                return false;
+            }
+            structureNameSet.add(structureName);
+
+            // ✅ 性别一致性验证
+            const hasGenderMismatch = exerciseList.some(ex => ex.genderCode !== currentGenderCode);
+            if (hasGenderMismatch) {
+                messageApi.error(`Can only include exercises for one gender.`);
+                setActiveCollapseKeys(groupKey);
+                return false;
+            }
+
+            // ✅ 左右配对验证
+            const pairMap = new Map();
+
+            for (const ex of exerciseList) {
+                const match = ex.name.match(/\((Left|Right)\)/);
+                if (!match) continue;
+
+                const side = match[1];
+                const baseName = ex.name.replace(/\s*\((Left|Right)\)/, '');
+
+                if (!pairMap.has(baseName)) {
+                    pairMap.set(baseName, { Left: false, Right: false });
+                }
+                pairMap.get(baseName)[side] = true;
+            }
+
+            const unpaired = Array.from(pairMap.entries())
+                .filter(([, sides]) => sides.Left !== sides.Right)
+                .map(([name]) => name);
+
+            if (unpaired.length > 0) {
+                messageApi.error(`You need to choose left and right exercises in pairs:【${unpaired.join(', ')}】`);
+                setActiveCollapseKeys(groupKey);
+                return false;
+            }
+        }
+
         return true;
-    }
+    };
 
     return (
-        <>{
+        <>
+            {contextHolder}
             <CommonEditorForm
                 formValidate={formValidate}
-                // 传递当前formFields状态
                 fields={formFields}
-                // 提供更新配置项回调
                 onFormFieldsChange={handleFormFieldsChange}
                 saveBeforeTransform={saveBeforeTransform}
                 getDataAfter={getDataAfter}
-                // 提供折叠面板展开回调
-                // onCollapseChange={handleCollapseChange}
-                // 其他基本配置
-                // renderItemMata={renderItemMata}
                 commonListConfig={{
                     renderKey: {
                         imgKey: 'coverImgUrl',
@@ -642,9 +694,7 @@ export default function UserEditorWithCommon() {
                 fieldsToValidate={['name', 'birthday']}
                 config={{ formName: 'Workout', title: 'Workout details' }}
                 initialValues={initialValues}
-
             />
-        }
         </>
     );
 } 

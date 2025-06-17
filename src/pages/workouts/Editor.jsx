@@ -2,18 +2,16 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { formatDate } from '@/utils/index';
 import CommonEditorForm from '@/components/CommonEditorForm';
 import request from "@/request";
-import { sleep } from '@/utils/index';
 import {
     ThunderboltOutlined,
     TagsOutlined,
     PictureOutlined,
-    VideoCameraOutlined,
-    SettingOutlined
+    VideoCameraOutlined
 } from '@ant-design/icons';
 
 export default function UserEditorWithCommon() {
 
-    var filterSections = [
+    const filterSections = [
         {
             title: 'Status',
             key: 'statusList',
@@ -506,59 +504,6 @@ export default function UserEditorWithCommon() {
 
     };
 
-
-
-    // 自定义渲染列表项展示
-    const renderItemMata = (item) => {
-        return <div>{item.displayName}</div>
-    }
-    //折叠面板展开
-    const handleCollapseChange = (activeKeys, form) => {
-        // 如果在此函数内更新了 formFields，可以在更新回调中获取最新值
-        if (activeKeys[0] == 'workoutData') {
-            setFormFields(prevFields => {
-                const newFields = [...prevFields]; // 进行某些更新操作、
-                const formValues = form.getFieldsValue(true);//表单数据
-                const preview = formValues.exercisePreviewDuration || 0;
-                const execution = formValues.exerciseExecutionDuration || 0;
-                const introDuration = formValues.introDuration || 0;
-
-                let loopCount = 0;
-                let workoutCalorie = 0;
-                const MET = 1
-
-                const structureList = newFields.filter(item => Array.isArray(item.dataList) && item.dataList.length > 0);
-                if (structureList.length > 0) {
-                    structureList.forEach((item, index) => {
-                        const structureRound = formValues[`structureRound${index == 0 ? '' : index}`] | 0;
-                        loopCount = structureRound * item.dataList.length;
-                        const calories = MET * 75 / 3600 * execution * structureRound * item.dataList.length;
-                        workoutCalorie += calories
-                    })
-                    const workOutTime = (preview + execution) * loopCount;
-                    const workoutDurationRaw = introDuration + workOutTime;
-                    // 如果时长小于30，则向下取整，否则向上取整
-                    const workoutDuration = workoutDurationRaw < 30
-                        ? Math.floor(workoutDurationRaw)
-                        : Math.ceil(workoutDurationRaw);
-                    form.setFieldsValue({
-                        duration: workoutDuration,
-                        calorie: Math.ceil(workoutCalorie)//向上取整
-                    });
-                } else {
-                    form.setFieldsValue({
-                        duration: 0,
-                        calorie: 0
-                    });
-                }
-                console.log(newFields);
-
-                return newFields;
-            });
-        }
-
-
-    };
     const initCommonListData = (params) => {
         console.log('initCommonListData', params);
 
@@ -662,9 +607,15 @@ export default function UserEditorWithCommon() {
         };
     };
 
+    const formValidate = (form) => {
+        console.log('formValidate', form);
+        return true;
+    }
+
     return (
         <>{
             <CommonEditorForm
+                formValidate={formValidate}
                 // 传递当前formFields状态
                 fields={formFields}
                 // 提供更新配置项回调

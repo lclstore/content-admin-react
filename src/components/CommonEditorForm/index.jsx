@@ -50,11 +50,15 @@ import { getformDataById } from '@/config/api.js'; //公共方法--根据id获�
  * @param {boolean} props.confirmSucess 是否确认保存成功
  * @param {Function} props.onFormValuesChange 表单值变化回调函数
  * @param {number} props.gutter 表单项之间的间距
+ * @param {boolean} props.isDuplicate 是否是复制
+ * @param {Function} props.formValidate 表单验证函数
  */
 export default function CommonEditor(props) {
     const {
+        formValidate,
         formType = 'basic', // 默认为基础表单
         config = {},
+        isDuplicate = false,
         gutter = 30,
         operationName,
         isTabs = false,
@@ -139,7 +143,7 @@ export default function CommonEditor(props) {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const idFromUrl = params.get('id'); // 从url获取id
-    const isDuplicate = params.get('isDuplicate'); // 是否是复制
+    const duplicate = params.get('isDuplicate') || isDuplicate; // 是否是复制
     const id = propId !== undefined ? propId : idFromUrl; // 优先使用propId
     const [loading, setLoading] = useState(true);
     // 使用自定义钩子管理表单状态
@@ -279,6 +283,7 @@ export default function CommonEditor(props) {
         commonListConfig,
         structurePanels,
         headerContext,
+        formValidate,
         setIsFormDirty,
         getLatestValues,
         setLoading,
@@ -726,6 +731,7 @@ export default function CommonEditor(props) {
 
         // 通知父组件
         if (onFormFieldsChange) {
+
             onFormFieldsChange(updatedFields, form);
         }
 
@@ -735,18 +741,23 @@ export default function CommonEditor(props) {
         }
     };
     const handleIconChange = (panelName, itemId, itemIndex, lockName, form) => {
-        // 
-        internalFormFields.map(field => {
+        const newFields = internalFormFields.map(field => {
             if (field.name === panelName && Array.isArray(field.dataList)) {
-                field.dataList[itemIndex][lockName] = field.dataList[itemIndex][lockName] ? 0 : 1;
-            }
-        });
+                const newDataList = [...field.dataList];
+                const targetItem = { ...newDataList[itemIndex] };
+                targetItem[lockName] = targetItem[lockName] ? 0 : 1;
+                newDataList[itemIndex] = targetItem;
 
-        setInternalFormFields([...internalFormFields]);
+                return { ...field, dataList: newDataList };
+            }
+            return field;
+        });
+        setInternalFormFields([...newFields]);
+
         if (onFormFieldsChange) {
-            onFormFieldsChange(internalFormFields, form);
+            onFormFieldsChange(newFields, form);
         }
-    }
+    };
 
     // 处理折叠面板展开的回调函数
     // const handleCollapseChange = useCallback((key) => {
@@ -941,7 +952,7 @@ export default function CommonEditor(props) {
             response = await fetchFormData(url) || {};
 
             if (response.data) {
-                if (isDuplicate) {
+                if (duplicate) {
                     // 如果是复制，则将数据中的id设置为null
                     response.data.id = null;//重制id
                     response.data.status = null;//重制状态

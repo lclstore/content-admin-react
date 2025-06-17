@@ -57,7 +57,7 @@ try {
                 routerConfig.Component,
             ] = [
                     routerConfig.meta,
-                    routerConfig.noShow,
+                    routerConfig.noShow || (settings.menu?.menuHidden || []).includes(routerConfig.meta),
                     (() => {
                         const IconComponent = menuIconMap[routerConfig.meta];
                         return IconComponent ? <IconComponent /> : null;
@@ -65,16 +65,16 @@ try {
                     routerConfig.path,
                     settings.menu?.menuOrder?.[routerConfig.meta] || 999,
                     routerConfig.showName,
-                    (routerConfig.isFatherDom) ? {default:() => <Outlet/>} : pageFiles['../pages/' + routerConfig.component]
+                    (routerConfig.isFatherDom) ? { default: () => <Outlet /> } : pageFiles['../pages/' + routerConfig.component]
                 ]
-            if(routerConfig.Component){ routerConfig.Component = routerConfig.Component.default }
+            if (routerConfig.Component) { routerConfig.Component = routerConfig.Component.default }
         },
-        indexCreateRule(routerConfig){
+        indexCreateRule(routerConfig) {
             routerConfig.Component = pageFiles['../pages/' + routerConfig.component]
-            if(routerConfig.Component){ routerConfig.Component = routerConfig.Component.default }
+            if (routerConfig.Component) { routerConfig.Component = routerConfig.Component.default }
         }
     })
-    dynamicMenus = registerList
+    dynamicMenus = registerList;
     // 按照order字段排序菜单
     dynamicMenus.sort((a, b) => a.order - b.order);
 

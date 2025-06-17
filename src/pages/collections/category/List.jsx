@@ -46,9 +46,9 @@ export default () => {
                 title: 'Name',
                 dataIndex: 'name',
                 visibleColumn: 0,
-                render: (text,row) => (<div>
-                    <div style={{ fontWeight:600 }}>{text}</div>
-                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
+                render: (text, row) => (<div>
+                    <div style={{ fontWeight: 600 }}>{text}</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "12px" }}>ID:{row.id}</div>
                 </div>),
             },
             {

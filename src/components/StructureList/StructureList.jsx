@@ -248,9 +248,9 @@ const SortableItemRenderer = React.memo(({
                         :
                         <div className='itemAvatar'>
                             <Avatar shape="square" size={64} src={item.coverImgUrl || item.imageUrl || item.animationPhoneUrl} />
-                            <CaretRightOutlined
+                            {/* <CaretRightOutlined
                                 className={'playIcon'}
-                            />
+                            /> */}
                         </div>
                 }
                 title={<Text ellipsis={{ tooltip: currentItem.name || currentItem.title }} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{currentItem.name || currentItem.title}</Text>}
@@ -272,22 +272,22 @@ const SortableItemRenderer = React.memo(({
                             <div style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '0 8px', color: '#00000073' }}>
                                 {
                                     renderDisplayName(
-                                        item.id,
+                                        currentItem.id,
                                         'id',
                                         true,
-                                        item.structureTypeCode
+                                        currentItem.structureTypeCode
                                     )
                                 }
                                 {
                                     renderDisplayName(
-                                        item.structureTypeCode,
+                                        currentItem.structureTypeCode,
                                         'structureTypeCode',
                                         true,
-                                        item.difficultyCode || item.functionType || item.type
+                                        currentItem.difficultyCode || currentItem.functionType || currentItem.type
                                     )
                                 }
                                 {renderDisplayName(
-                                    item.difficultyCode || item.functionType || item.type
+                                    currentItem.difficultyCode || currentItem.functionType || currentItem.type
                                 )}
                             </div>
 

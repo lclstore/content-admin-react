@@ -340,8 +340,8 @@ const ConfigurableTable = forwardRef(({
             get: () => selectList,
             set: setSelectList
         },
-        listData:{
-            get:() => tableData
+        listData: {
+            get: () => tableData
         }
     }))
 
@@ -670,10 +670,18 @@ const ConfigurableTable = forwardRef(({
                             case 'edit':
                                 // 获取当前路径并分割成数组
                                 // 判断路由层级
+                                if (processedCol.edit) {
+                                    processedCol.edit(rowData, e, click);
+                                    return
+                                }
                                 navigate(`/${pathUrl}/editor?id=${rowData.id}`);
                                 break;
                             // 复制
                             case 'duplicate':
+                                if (processedCol.duplicate) {
+                                    processedCol.duplicate(rowData, e, click);
+                                    return
+                                }
                                 navigate(`/${pathUrl}/editor?id=${rowData.id}&isDuplicate=true`);
                                 break;
                             // 删除
@@ -821,35 +829,36 @@ const ConfigurableTable = forwardRef(({
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8,
+                distance: 0.5,
+                delay: 0,
+                tolerance: 1
             },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 
     // 处理拖拽结束
     const handleDragEnd = useCallback((event) => {
         const { active, over } = event;
-        if (active.id !== over.id) {
-            setItems((prevItems) => {
-                const oldIndex = prevItems.findIndex(item => item[rowKey] === active.id);
-                const newIndex = prevItems.findIndex(item => item[rowKey] === over.id);
+        if (!active || !over || active.id === over.id) return;
 
-                const newItems = arrayMove(prevItems, oldIndex, newIndex);
-                // 排序公共table列表
-                sortPublicTableList(moduleKey, { idList: newItems.map(item => item[rowKey]) }).then(res => {
-                    if (res.success) {
-                        setTableData(newItems); // 同步更新 tableData
-                        if (onDragEnd) {
-                            onDragEnd(newItems);
-                        }
+        setItems((prevItems) => {
+            const oldIndex = prevItems.findIndex(item => item[rowKey] === active.id);
+            const newIndex = prevItems.findIndex(item => item[rowKey] === over.id);
+
+            if (oldIndex === -1 || newIndex === -1) return prevItems;
+
+            const newItems = arrayMove(prevItems, oldIndex, newIndex);
+            // 排序公共table列表
+            sortPublicTableList(moduleKey, { idList: newItems.map(item => item[rowKey]) }).then(res => {
+                if (res.success) {
+                    setTableData(newItems); // 同步更新 tableData
+                    if (onDragEnd) {
+                        onDragEnd(newItems);
                     }
-                });
-                return newItems;
+                }
             });
-        }
+            return newItems;
+        });
     }, [onDragEnd, rowKey]);
 
     // 定义内部expandable配置
@@ -927,9 +936,9 @@ const ConfigurableTable = forwardRef(({
                 {
                     title: 'Sort',
                     dataIndex: 'sort',
-                    width: 50,
+                    width: 60,
                     className: 'drag-visible',
-                    render: () => <MenuOutlined style={{ cursor: 'move', color: '#999' }} />,
+                    align: 'center',
                 },
                 ...processedColumns,
             ] : processedColumns}
@@ -1173,13 +1182,29 @@ const SortableRow = ({ children, ...props }) => {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        cursor: 'move',
-        touchAction: 'none'
     };
 
     return (
-        <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            {children}
+        <tr {...props} ref={setNodeRef} style={style}>
+            {React.Children.map(children, (child, index) => {
+                if (index === 0) {
+                    return React.cloneElement(child, {
+                        children: (
+                            <div {...attributes} {...listeners}  >
+                                <MenuOutlined
+                                    style={{
+                                        cursor: 'grab',
+                                        fontSize: '16px',
+                                        color: isDragging ? '#1890ff' : '#999',
+                                        transition: 'all 0.3s'
+                                    }}
+                                />
+                            </div>
+                        )
+                    });
+                }
+                return child;
+            })}
         </tr>
     );
 };

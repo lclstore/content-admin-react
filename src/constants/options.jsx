@@ -1,4 +1,4 @@
-import { EditFilled, CheckCircleFilled, CloseCircleFilled, LoadingOutlined, CheckOutlined, CloseOutlined, SyncOutlined } from '@ant-design/icons';
+import { EditFilled, CheckCircleFilled, CloseCircleFilled, LoadingOutlined, CheckOutlined, CloseOutlined, SyncOutlined, StopOutlined } from '@ant-design/icons';
 
 export const optionsConstants = {
     displayStatus: [

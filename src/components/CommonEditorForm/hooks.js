@@ -122,6 +122,7 @@ export const useHeaderConfig = (params) => {
         complexConfig,
         structurePanels,
         headerContext,
+        formValidate,
         setIsFormDirty,
         fieldsToValidate,
         getLatestValues,
@@ -413,6 +414,10 @@ export const useHeaderConfig = (params) => {
 
                 // 确保状态值正确
                 dataToSave.status = statusValue;
+                // 执行外部自定义表单验证
+                if (formValidate) {
+                    formValidate(dataToSave);
+                }
                 const saveResult = await executeSave(dataToSave);//执行保存
 
                 if (saveResult.success) {

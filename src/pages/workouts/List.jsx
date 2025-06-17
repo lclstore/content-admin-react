@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useMemo, useCallback, useForm, useRef} from 'react';
+import React, { useContext, useEffect, useState, useMemo, useCallback, useForm, useRef } from 'react';
 import { Modal, message, Form, Table, Switch, Select, Checkbox, Spin } from 'antd';
 import TagSelector from '@/components/TagSelector/TagSelector';
 import {
@@ -172,9 +172,9 @@ export default function WorkoutsList() {
             {
                 title: 'Name', dataIndex: 'name', key: 'name', width: 350, visibleColumn: 0, sorter: true,
                 render: (text, row) => (<div>
-                    <div style={{ fontWeight: 600 }}>{text}</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "12px" }}>ID:{row.id}</div>
-                </div>),
+                    <div className='cell-name'>{text}</div>
+                    <div className='cell-id'>ID:{row.id}</div>
+                </div>)
             },
             {
                 title: 'Status',
@@ -462,7 +462,7 @@ export default function WorkoutsList() {
             onClick: handleBatchCreateFile,
             icon: <PlusOutlined />,
         }
-    ]:[], [handleBatchCreateFile, selectedRowKeys,listData]);
+    ] : [], [handleBatchCreateFile, selectedRowKeys, listData]);
     // 获取语言数据
     const getLanguageOptions = useCallback(() => request.get({
         url: '/common/language/list',

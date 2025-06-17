@@ -151,6 +151,21 @@ export const formatDuration = (seconds = 0) => {
   const formattedSeconds = String(remainingSeconds).padStart(2, '0');
   return `${formattedMinutes}:${formattedSeconds}`;
 };
+
+export function TimeShow(second, isMilliseconds = false) {
+  let Time = new Date('2023-1-1 00:00:00')
+  Time = new Date(isMilliseconds ? Time.setMilliseconds(second) : Time.setSeconds(second))
+  let Hours = Time.getHours()
+  Hours = Hours >= 10 ? Hours.toString() : `0${Hours}`
+  let Min = Time.getMinutes()
+  Min = Min >= 10 ? Min.toString() : `0${Min}`
+  let Second = Time.getSeconds()
+  Second = Second >= 10 ? Second.toString() : `0${Second}`
+  let Milliseconds = Time.getMilliseconds()
+  Milliseconds = Milliseconds >= 100 ? Milliseconds.toString() : (Milliseconds >= 10 ? `0${Milliseconds}` : `00${Milliseconds}`)
+  Time = `${Hours}:${Min}:${Second}${isMilliseconds ? ',' + Milliseconds : ''}`
+  return Time
+}
 /**
  * 获取完整URL的辅助函数
  * @param {string} url 需要处理的URL
@@ -242,6 +257,7 @@ export function getMediaDurationByUrl(url) {
 
     media.onloadedmetadata = () => {
       resolve(Number(media.duration.toFixed(3))); // 保留最多3位小数
+      media.remove();
     };
 
     media.onerror = () => {

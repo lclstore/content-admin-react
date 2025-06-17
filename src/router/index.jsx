@@ -3,7 +3,7 @@
  * 实现两种布局：登录页独立布局和其他页面共用Layout布局
  */
 import React, { lazy, Suspense } from 'react';
-import { createHashRouter,Navigate,useLocation } from "react-router"
+import { createHashRouter, Navigate, useLocation } from "react-router"
 import menus from '@/config/menu';
 import settings from '@/config/settings';
 import AppLayout from '@/layout';
@@ -62,7 +62,7 @@ const generateRoutes = () => {
         // 动态引入组件
         return {
           path: menu.path,
-          element: <SuspenseWrapper component={<menu.Component/>} />,
+          element: <SuspenseWrapper component={<menu.Component />} />,
           hideInMenu: menu.hideInMenu,
           children: menu.children
         };
@@ -122,10 +122,10 @@ const generateRoutes = () => {
 
 // 创建路由配置
 const routes = generateRoutes();
-console.log("挂载的路由",routes)
+console.log("挂载的路由", routes)
 
 // 创建Router实例
 const router = createHashRouter(routes);
-console.log("实例化的的路由",router)
+console.log("实例化的的路由", router)
 // 仅使用命名导出
 export { router }; 

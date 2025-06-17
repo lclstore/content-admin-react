@@ -111,7 +111,7 @@ export default () => {
 
             {
                 title: 'Image',
-                width: 120,
+                // width: 120,
                 mediaType: 'image',
                 dataIndex: 'coverImgUrl',
                 key: 'coverImgUrl',
@@ -120,12 +120,13 @@ export default () => {
             {
                 title: 'Name',
                 dataIndex: 'name',
+
                 sorter: true,
-                width: 220,
+                width: 350,
                 visibleColumn: 0,
-                render: (text,row) => (<div>
-                    <div style={{ fontWeight:600 }}>{text}</div>
-                    <div style={{ color:"var(--text-secondary)",fontSize:"12px" }}>ID:{row.id}</div>
+                render: (text, row) => (<div>
+                    <div className='cell-name'>{text}</div>
+                    <div className='cell-id'>ID:{row.id}</div>
                 </div>),
                 key: 'name'
             },
@@ -136,14 +137,15 @@ export default () => {
                 sorter: true,
                 showSorterTooltip: false,
                 options: 'displayStatus',
-                width: 120,
+                // width: 120,
                 visibleColumn: 0
             },
             {
                 title: 'MET',
                 dataIndex: 'met',
                 sorter: true,
-                width: 120,
+                // width: 120,
+                align: 'center',
                 visibleColumn: 2,
                 key: 'met'
             },
@@ -151,7 +153,7 @@ export default () => {
                 title: 'Structure Type',
                 dataIndex: 'structureTypeCode',
                 sorter: true,
-                width: 120,
+                // width: 120,
                 visibleColumn: 2,
                 options: "BizExerciseStructureTypeEnums",
                 key: 'structureTypeCode'
@@ -160,7 +162,7 @@ export default () => {
                 title: 'Difficulty',
                 dataIndex: 'difficultyCode',
                 sorter: true,
-                width: 120,
+                // width: 120,
                 visibleColumn: 2,
                 options: "BizExerciseDifficultyEnums",
                 key: 'difficultyCode'
@@ -169,7 +171,7 @@ export default () => {
                 title: 'Gender',
                 dataIndex: 'genderCode',
                 sorter: true,
-                width: 120,
+                // width: 120,
                 visibleColumn: 1,
                 options: "BizExerciseGenderEnums",
                 key: 'genderCode'
@@ -178,7 +180,7 @@ export default () => {
             {
                 title: 'Equipment',
                 dataIndex: 'equipmentCode',
-                width: 120,
+                // width: 120,
                 visibleColumn: 1,
                 options: "BizProgramEquipmentEnums",
                 key: 'equipmentCode'
@@ -187,7 +189,7 @@ export default () => {
                 title: 'Position',
                 dataIndex: 'positionCode',
                 sorter: true,
-                width: 120,
+                // width: 120,
                 visibleColumn: 1,
                 options: "BizExercisePositionEnums",
                 key: 'positionCode'
@@ -195,7 +197,7 @@ export default () => {
             {
                 title: 'Injured',
                 dataIndex: 'injuredCodes',
-                width: 120,
+                // width: 120,
                 visibleColumn: 1,
                 options: "BizExerciseInjuredEnums",
                 key: 'injuredCodes'
@@ -203,14 +205,14 @@ export default () => {
             {
                 title: 'Front Video Status',
                 dataIndex: 'frontVideoStatus',
-                width: 140,
+                // width: 140,
                 visibleColumn: 1,
                 key: 'frontVideoStatus'
             },
             {
                 title: 'Side Video Status',
                 dataIndex: 'sideVideoStatus',
-                width: 140,
+                // width: 140,
                 visibleColumn: 1,
                 key: 'sideVideoStatus'
             },
@@ -311,8 +313,8 @@ export default () => {
             />
             <Modal
                 title="Feishu Import"
-                style={{top: 20}}
-                styles={{content: {width: '500px'}}}
+                style={{ top: 20 }}
+                styles={{ content: { width: '500px' } }}
                 open={feishuImportModal.modalShow}
                 footer={[
                     <Button key="submit" type="primary" loading={feishuImportModal.loading} disabled={!feishuImportModal.bitableUrl} onClick={
@@ -333,16 +335,16 @@ export default () => {
                 ]}
                 onCancel={() => updateFeishuImportModal(draft => void (draft.modalShow = false))}
             >
-                <div style={{padding: "20px"}}>
-                    <Typography.Title level={5} style={{color: 'black'}}><span style={{ color: 'red' }}>*</span> Import Link:</Typography.Title>
-                    <Input.TextArea style={{margin:"0 12px"}} value={feishuImportModal.bitableUrl}
-                                    onChange={e => updateFeishuImportModal(draft => void (draft.bitableUrl = e.target.value))}/>
-                    <Typography.Title level={5} style={{color: 'black', marginTop: "24px"}}>
+                <div style={{ padding: "20px" }}>
+                    <Typography.Title level={5} style={{ color: 'black' }}><span style={{ color: 'red' }}>*</span> Import Link:</Typography.Title>
+                    <Input.TextArea style={{ margin: "0 12px" }} value={feishuImportModal.bitableUrl}
+                        onChange={e => updateFeishuImportModal(draft => void (draft.bitableUrl = e.target.value))} />
+                    <Typography.Title level={5} style={{ color: 'black', marginTop: "24px" }}>
                         <span style={{ color: 'red' }}>*</span> Import
                         Fields:</Typography.Title>
-                    <Checkbox.Group style={{display: "grid",padding:"0 12px"}} options={fieldOptions} disabled={true}
-                                    value={feishuImportModal.propertyList}
-                                    onChange={(list) => updateFeishuImportModal(draft => void (draft.propertyList = list))}/>
+                    <Checkbox.Group style={{ display: "grid", padding: "0 12px" }} options={fieldOptions} disabled={true}
+                        value={feishuImportModal.propertyList}
+                        onChange={(list) => updateFeishuImportModal(draft => void (draft.propertyList = list))} />
                 </div>
             </Modal>
             {/* Export */}
@@ -382,22 +384,22 @@ export default () => {
                 ]}
                 onCancel={() => updateFeishuExportModal(draft => void (draft.modalShow = false))}
             >
-                <div style={{ padding:"20px" }}>
+                <div style={{ padding: "20px" }}>
                     <Typography.Title level={5} style={{ color: 'black' }}><span style={{ color: 'red' }}>*</span> Export
                         Link:</Typography.Title>
-                    <Input.TextArea value={feishuExportModal.bitableUrl} style={{margin:"0 12px"}}
-                                    onChange={e => updateFeishuExportModal(draft => void (draft.bitableUrl = e.target.value))} />
-                    <Typography.Title level={5} style={{ color: 'black',marginTop:"24px" }}><span style={{ color: 'red' }}>*</span> Export Data Range:</Typography.Title>
-                    <Radio.Group value={feishuExportModal.exportBy} style={{padding:"0 12px"}}
-                                 onChange={(e) => updateFeishuExportModal(draft => void (draft.exportBy = e.target.value))}>
+                    <Input.TextArea value={feishuExportModal.bitableUrl} style={{ margin: "0 12px" }}
+                        onChange={e => updateFeishuExportModal(draft => void (draft.bitableUrl = e.target.value))} />
+                    <Typography.Title level={5} style={{ color: 'black', marginTop: "24px" }}><span style={{ color: 'red' }}>*</span> Export Data Range:</Typography.Title>
+                    <Radio.Group value={feishuExportModal.exportBy} style={{ padding: "0 12px" }}
+                        onChange={(e) => updateFeishuExportModal(draft => void (draft.exportBy = e.target.value))}>
                         <Radio value={1}>All</Radio>
                         <Radio value={2}>filter Data</Radio>
                     </Radio.Group>
-                    <Typography.Title level={5} style={{ color: 'black',marginTop:"24px" }}><span style={{ color: 'red' }}>*</span> Export
+                    <Typography.Title level={5} style={{ color: 'black', marginTop: "24px" }}><span style={{ color: 'red' }}>*</span> Export
                         Fields:</Typography.Title>
-                    <Checkbox.Group style={{ display: "grid",padding:"0 12px" }} options={fieldOptions} disabled={true}
-                                    value={feishuExportModal.propertyList}
-                                    onChange={(list) => updateFeishuExportModal(draft => void (draft.propertyList = list))} />
+                    <Checkbox.Group style={{ display: "grid", padding: "0 12px" }} options={fieldOptions} disabled={true}
+                        value={feishuExportModal.propertyList}
+                        onChange={(list) => updateFeishuExportModal(draft => void (draft.propertyList = list))} />
                 </div>
             </Modal>
         </div>

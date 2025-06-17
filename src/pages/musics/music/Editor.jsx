@@ -1,6 +1,6 @@
 import React, { useMemo, } from 'react';
 import CommonEditorForm from '@/components/CommonEditorForm';
-export default function UserEditorWithCommon({id, setFormRef}) {
+export default function UserEditorWithCommon({ id, setFormRef, isDuplicate }) {
 
     // 表单字段配置
     const formFields = useMemo(() => [
@@ -15,8 +15,8 @@ export default function UserEditorWithCommon({id, setFormRef}) {
             //文件上传后修改name
             onChange: (value, file, form) => {
                 form.setFieldsValue({
-                    displayName: file?.name.replace('.mp3','').replace('.MP3','') || '',
-                    name: file?.name.replace('.mp3','').replace('.MP3','') || '',
+                    displayName: file?.name.replace('.mp3', '').replace('.MP3', '') || '',
+                    name: file?.name.replace('.mp3', '').replace('.MP3', '') || '',
                 });
             },
         },
@@ -49,16 +49,19 @@ export default function UserEditorWithCommon({id, setFormRef}) {
 
     return (
         <CommonEditorForm
-            
+
             changeHeader={false}
             formType="basic"
             moduleKey="music"
             isBack={false}
             enableDraft={true}
-            config={{ formName: 'Music', hideSaveButton
-                : false, hideBackButton: true }}
+            config={{
+                formName: 'Music', hideSaveButton
+                    : false, hideBackButton: true
+            }}
             fields={formFields}
             id={id}
+            isDuplicate={isDuplicate}
             initialValues={{}}
             setFormRef={setFormRef}
         />
